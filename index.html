@@ -1,236 +1,428 @@
-/**
- * 수술실 소모품 재고관리 - Google Apps Script
- * 
- * 사용법:
- * 1. 이 코드를 Apps Script 편집기에 전체 붙여넣기
- * 2. 저장 (Ctrl+S)
- * 3. 배포 → 새 배포 → 웹 앱 → 액세스 권한: 모든 사용자 → 배포
- * 4. 생성된 URL을 앱 코드의 SCRIPT_URL에 붙여넣기
- */
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수술실 소모품 재고관리</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f4f8;color:#1a202c}
+.app{max-width:680px;margin:0 auto;display:flex;flex-direction:column;min-height:100vh}
+.header{background:#fff;border-bottom:1px solid #e2e8f0;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.header-title{font-size:15px;font-weight:600}
+.header-sub{font-size:12px;color:#718096;margin-top:1px}
+.nav{display:flex;background:#fff;border-bottom:1px solid #e2e8f0;position:sticky;top:57px;z-index:40}
+.nav-btn{flex:1;padding:10px 4px;font-size:11px;font-weight:600;color:#718096;background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.nav-btn i{font-size:18px}
+.nav-btn.active{color:#185FA5;border-bottom-color:#185FA5}
+.page{display:none;flex:1;padding:12px}
+.page.active{display:block}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.s-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px;text-align:center}
+.s-num{font-size:28px;font-weight:700;line-height:1}
+.s-label{font-size:11px;color:#718096;margin-top:4px}
+.s-num.danger{color:#A32D2D}
+.s-num.ok{color:#3B6D11}
+.s-num.total{color:#185FA5}
+.search-wrap{position:relative;margin-bottom:10px}
+.search-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#718096;font-size:16px}
+.search-input{width:100%;padding:9px 12px 9px 34px;border:1px solid #e2e8f0;border-radius:8px;background:#fff;font-size:13px;color:#1a202c}
+.filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.filter-btn{padding:5px 12px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;font-size:12px;font-weight:600;color:#718096;cursor:pointer}
+.filter-btn.active{background:#E6F1FB;color:#185FA5;border-color:#378ADD}
+.item-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.item-card.danger{border-left:3px solid #E24B4A}
+.item-card.ok{border-left:3px solid #639922}
+.item-info{flex:1;min-width:0}
+.item-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-meta{font-size:11px;color:#718096;margin-top:2px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge.danger{background:#FCEBEB;color:#A32D2D}
+.badge.ok{background:#EAF3DE;color:#3B6D11}
+.stock-edit-box{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.stock-inp{width:44px;height:32px;text-align:center;font-size:14px;font-weight:600;border:1px solid #cbd5e0;border-radius:6px;background:#fff;color:#1a202c}
+.save-btn{width:32px;height:32px;border-radius:6px;border:none;background:#185FA5;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.save-btn:disabled{background:#cbd5e0;color:#718096}
+.req-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:12px}
+.req-header{background:#E6F1FB;padding:10px 14px;font-size:13px;font-weight:600;color:#185FA5;display:flex;justify-content:space-between;align-items:center}
+.req-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #e2e8f0}
+.req-name{flex:1;min-width:0}
+.req-name p{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.req-name span{font-size:11px;color:#718096}
+.qty-ctrl{display:flex;align-items:center;gap:4px}
+.qty-btn{width:28px;height:28px;border-radius:6px;border:1px solid #cbd5e0;background:#f7fafc;color:#185FA5;font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty-inp{width:40px;height:28px;text-align:center;font-size:14px;font-weight:600;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#1a202c}
+.chk-btn{width:28px;height:28px;border-radius:6px;border:none;font-size:14px;cursor:pointer}
+.chk-btn.on{background:#185FA5;color:#fff}
+.chk-btn.off{background:#f7fafc;color:#718096}
+.submit-btn{width:100%;padding:14px;background:#185FA5;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px}
+.submit-btn:disabled{background:#cbd5e0;color:#718096;cursor:default}
+.gen-btn{width:100%;padding:12px;background:#fff;border:1px solid #cbd5e0;color:#185FA5;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+.area-section{margin-bottom:16px}
+.area-header{font-size:13px;font-weight:700;color:#185FA5;padding:8px 12px;background:#E6F1FB;border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between}
+.weekly-row{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid #e2e8f0}
+.weekly-row.done{border-left:3px solid #639922}
+.weekly-row.pending{border-left:3px solid #BA7517}
+.weekly-info{flex:1;min-width:0}
+.weekly-info p{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.weekly-info span{font-size:11px;color:#718096}
+.history-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px 14px;margin-bottom:8px}
+.history-date{font-size:11px;color:#718096;margin-bottom:8px}
+.history-row{display:flex;justify-content:space-between;font-size:12px;padding:3px 0;border-bottom:1px solid #e2e8f0}
+.history-row:last-child{border-bottom:none}
+.history-qty{font-weight:700;color:#185FA5}
+.empty{text-align:center;padding:40px 20px;color:#718096;font-size:13px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a202c;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:100;transition:transform .25s;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.loading{text-align:center;padding:40px;color:#718096;font-size:13px}
+.conn-status{font-size:11px;padding:2px 8px;border-radius:10px;display:inline-flex;align-items:center;gap:4px}
+.conn-status.live{background:#EAF3DE;color:#3B6D11}
+.conn-status.error{background:#FCEBEB;color:#A32D2D}
+.refresh-btn{margin-left:auto;background:none;border:1px solid #e2e8f0;border-radius:8px;padding:5px 10px;font-size:12px;color:#718096;cursor:pointer;display:flex;align-items:center;gap:4px}
+</style>
+</head>
+<body>
 
-const SHEET_NAMES = {
-  MASTER: '품목 마스터',
-  WEEKLY: '주간 재고 파악',
-  REALTIME: '실시간 재고 대장',
-  REQUEST: '물품 청구서'
-};
+<div class="app">
+  <div class="header">
+    <i class="ti ti-building-hospital" style="font-size:22px;color:#185FA5"></i>
+    <div>
+      <div class="header-title">수술실 소모품 관리</div>
+      <div class="header-sub" id="connStatus"><span class="conn-status live"><i class="ti ti-circle-filled" style="font-size:8px"></i>연결 확인 중...</span></div>
+    </div>
+    <button class="refresh-btn" onclick="loadData()"><i class="ti ti-refresh" style="font-size:14px"></i>새로고침</button>
+  </div>
 
-// ====================================================
-// GET: 데이터 조회 (현황, 청구서, 주간실사 불러오기)
-// ====================================================
-function doGet(e) {
-  const action = e.parameter.action || 'getAll';
-  let result = {};
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showTab('dashboard',this)"><i class="ti ti-chart-bar"></i>현황</button>
+    <button class="nav-btn" onclick="showTab('request',this)"><i class="ti ti-clipboard-list"></i>청구</button>
+    <button class="nav-btn" onclick="showTab('weekly',this)"><i class="ti ti-calendar-check"></i>주간실사</button>
+    <button class="nav-btn" onclick="showTab('history',this)"><i class="ti ti-clock"></i>이력</button>
+  </nav>
+
+  <div class="page active" id="page-dashboard">
+    <div id="dash-content"><div class="loading"><i class="ti ti-loader" style="font-size:24px"></i><br>데이터 불러오는 중...</div></div>
+  </div>
+
+  <div class="page" id="page-request">
+    <div id="req-content"><div class="loading">데이터 불러오는 중...</div></div>
+  </div>
+
+  <div class="page" id="page-weekly">
+    <div id="weekly-content"><div class="loading">데이터 불러오는 중...</div></div>
+  </div>
+
+  <div class="page" id="page-history">
+    <div id="history-content"><div class="empty"><i class="ti ti-inbox" style="font-size:32px;display:block;margin-bottom:8px"></i>청구 이력이 없습니다</div></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzVCIWsXMh3ipmYA-4agloVDDZxzQ-bTqMWqOljLFaKW6aGkhKjaAUxRoG0aDWO-nKk/exec';
+
+let items = [];
+let weeklyData = [];
+let history = JSON.parse(localStorage.getItem('or_history_v3') || '[]');
+let dashFilter = 'all';
+let dashSearch = '';
+
+async function callScript(params, body) {
+  let url = SCRIPT_URL;
+  if (params) {
+    const qs = new URLSearchParams(params).toString();
+    url += '?' + qs;
+  }
+  const opts = { method: 'GET' };
+  if (body) {
+    opts.method = 'POST';
+    opts.headers = { 'Content-Type': 'text/plain;charset=utf-8' };
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(url, opts);
+  const json = await res.json();
+  if (json.status === 'error') throw new Error(json.message);
+  return json;
+}
+
+async function loadData() {
+  showToast('데이터 불러오는 중...');
+  try {
+    const res = await callScript({ action: 'getAll' });
+    items = res.data.master || [];
+    weeklyData = res.data.weekly || [];
+    document.getElementById('connStatus').innerHTML = '<span class="conn-status live"><i class="ti ti-circle-filled" style="font-size:8px"></i>실시간 연결됨</span>';
+    renderAll();
+    showToast('✓ 최신 데이터 로드 완료');
+  } catch(e) {
+    document.getElementById('connStatus').innerHTML = '<span class="conn-status error"><i class="ti ti-alert-circle" style="font-size:11px"></i>연결 실패</span>';
+    document.getElementById('dash-content').innerHTML = `<div class="empty"><i class="ti ti-plug-connected-x" style="font-size:32px;display:block;margin-bottom:8px"></i>구글 시트 연결에 실패했습니다<br><span style="font-size:11px">${e.message}</span><br><br>잠시 후 새로고침을 눌러주세요</div>`;
+    showToast('연결 실패: ' + e.message);
+  }
+}
+
+function getStatus(item) {
+  if (!item.minStock) return 'ok';
+  return item.curStock < item.minStock ? 'danger' : 'ok';
+}
+
+function renderAll() {
+  renderDashboard();
+  renderRequest();
+  renderWeekly();
+}
+
+function renderDashboard() {
+  const valid = items.filter(i => i.name);
+  const shortage = valid.filter(i => getStatus(i)==='danger');
+  const stable = valid.filter(i => getStatus(i)==='ok');
+
+  let filtered = valid;
+  if (dashFilter === 'danger') filtered = shortage;
+  if (dashFilter === 'ok') filtered = stable;
+  if (dashSearch) filtered = filtered.filter(i => i.name.toLowerCase().includes(dashSearch.toLowerCase()) || (i.loc||'').includes(dashSearch));
+
+  const byArea = {};
+  filtered.forEach(i => {
+    const a = i.loc || '기타';
+    if (!byArea[a]) byArea[a] = [];
+    byArea[a].push(i);
+  });
+
+  let html = `
+  <div class="summary-grid">
+    <div class="s-card"><div class="s-num danger">${shortage.length}</div><div class="s-label">재고부족</div></div>
+    <div class="s-card"><div class="s-num ok">${stable.length}</div><div class="s-label">정상</div></div>
+    <div class="s-card"><div class="s-num total">${valid.length}</div><div class="s-label">전체 품목</div></div>
+  </div>
+  <div class="search-wrap"><i class="ti ti-search"></i><input class="search-input" placeholder="품목명, 구역 검색..." oninput="dashSearch=this.value;renderDashboard()" value="${dashSearch}"></div>
+  <div class="filter-row">
+    <button class="filter-btn ${dashFilter==='all'?'active':''}" onclick="dashFilter='all';renderDashboard()">전체</button>
+    <button class="filter-btn ${dashFilter==='danger'?'active':''}" onclick="dashFilter='danger';renderDashboard()">부족만</button>
+    <button class="filter-btn ${dashFilter==='ok'?'active':''}" onclick="dashFilter='ok';renderDashboard()">정상만</button>
+  </div>`;
+
+  if (!filtered.length) {
+    html += '<div class="empty">검색 결과가 없습니다</div>';
+  } else {
+    Object.keys(byArea).sort().forEach(area => {
+      html += `<div class="area-section"><div class="area-header"><span><i class="ti ti-map-pin" style="font-size:14px;margin-right:4px"></i>${area}</span><span style="font-size:11px">${byArea[area].length}개</span></div>`;
+      byArea[area].forEach(item => {
+        const s = getStatus(item);
+        const safeId = btoa(unescape(encodeURIComponent(item.name))).replace(/[^a-zA-Z0-9]/g,'');
+        html += `<div class="item-card ${s}">
+          <div class="item-info">
+            <div class="item-name" title="${item.name}">${item.name}</div>
+            <div class="item-meta">${item.spec||''}${item.minStock?` · 적정 ${item.minStock}개`:''}</div>
+            <div style="margin-top:4px"><span class="badge ${s}">${s==='danger'?'재고부족':'정상'}</span></div>
+          </div>
+          <div class="stock-edit-box">
+            <input class="stock-inp" id="stock_${safeId}" type="number" value="${item.curStock}" min="0">
+            <button class="save-btn" onclick="saveStock('${item.name.replace(/'/g,"\\\\'")}', 'stock_${safeId}')"><i class="ti ti-device-floppy" style="font-size:16px"></i></button>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    });
+  }
+  document.getElementById('dash-content').innerHTML = html;
+}
+
+async function saveStock(itemName, inputId) {
+  const val = parseInt(document.getElementById(inputId).value) || 0;
+  showToast('저장 중...');
+  try {
+    await callScript(null, { action: 'updateMasterStock', itemName: itemName, stock: val });
+    const item = items.find(i => i.name === itemName);
+    if (item) item.curStock = val;
+    showToast('✓ 재고가 저장되었습니다');
+    renderDashboard();
+    renderRequest();
+  } catch(e) {
+    showToast('저장 실패: ' + e.message);
+  }
+}
+
+function renderRequest() {
+  const shortage = items.filter(i => getStatus(i)==='danger' && i.name && i.minStock > 0);
+  if (!shortage.length) {
+    document.getElementById('req-content').innerHTML = '<div class="empty"><i class="ti ti-circle-check" style="font-size:32px;display:block;margin-bottom:8px;color:#639922"></i>모든 재고가 정상입니다!</div>';
+    return;
+  }
+
+  let html = `<div class="req-card"><div class="req-header"><span><i class="ti ti-clipboard-list" style="font-size:14px;margin-right:4px"></i>물품 청구서 — 부족 ${shortage.length}개 품목</span><span style="font-size:11px">${new Date().toLocaleDateString('ko-KR')}</span></div>`;
+
+  shortage.forEach((item,idx) => {
+    const need = Math.max(0, item.minStock - item.curStock);
+    html += `<div class="req-row">
+      <div class="req-name"><p title="${item.name}">${item.name}</p><span>${item.loc} · ${item.spec}</span></div>
+      <div class="qty-ctrl">
+        <button class="qty-btn" onclick="adjQty('q${idx}',-1)">−</button>
+        <input class="qty-inp" id="q${idx}" type="number" value="${need}" min="0">
+        <button class="qty-btn" onclick="adjQty('q${idx}',1)">+</button>
+      </div>
+      <button class="chk-btn on" id="c${idx}" onclick="toggleChk(${idx})"><i class="ti ti-check"></i></button>
+    </div>`;
+  });
+
+  html += `</div><button class="submit-btn" id="submitBtn" onclick="submitReq(${shortage.length})"><i class="ti ti-send" style="font-size:16px"></i>청구서 제출 (구글시트 기록)</button>`;
+  document.getElementById('req-content').innerHTML = html;
+}
+
+function adjQty(id, d) {
+  const el = document.getElementById(id);
+  el.value = Math.max(0, (parseInt(el.value)||0) + d);
+}
+
+function toggleChk(idx) {
+  const btn = document.getElementById('c' + idx);
+  const isOn = btn.classList.contains('on');
+  btn.classList.toggle('on', !isOn);
+  btn.classList.toggle('off', isOn);
+  btn.innerHTML = isOn ? '<i class="ti ti-circle"></i>' : '<i class="ti ti-check"></i>';
+}
+
+async function submitReq(total) {
+  const shortage = items.filter(it => getStatus(it)==='danger' && it.name && it.minStock > 0);
+  const reqs = [];
+  for (let i = 0; i < total; i++) {
+    const chk = document.getElementById('c' + i);
+    if (chk && chk.classList.contains('on')) {
+      const qty = parseInt(document.getElementById('q' + i)?.value || 0);
+      if (qty > 0 && shortage[i]) {
+        reqs.push({
+          name: shortage[i].name, loc: shortage[i].loc, spec: shortage[i].spec,
+          curStock: shortage[i].curStock, minStock: shortage[i].minStock, qty
+        });
+      }
+    }
+  }
+  if (!reqs.length) { showToast('청구할 항목을 선택해주세요'); return; }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  showToast('구글 시트에 청구서 기록 중...');
 
   try {
-    if (action === 'getAll') {
-      result = {
-        master: getMasterData(),
-        weekly: getWeeklyData()
-      };
-    } else if (action === 'getMaster') {
-      result = { master: getMasterData() };
-    } else if (action === 'getWeekly') {
-      result = { weekly: getWeeklyData() };
-    }
-    return jsonResponse({ status: 'success', data: result });
-  } catch (err) {
-    return jsonResponse({ status: 'error', message: err.toString() });
+    await callScript(null, { action: 'submitRequest', items: reqs });
+    history.unshift({date: new Date().toLocaleString('ko-KR'), items: reqs});
+    if (history.length > 30) history.pop();
+    localStorage.setItem('or_history_v3', JSON.stringify(history));
+    renderHistory();
+    showToast(`✓ ${reqs.length}개 품목 청구서가 구글 시트에 기록되었습니다!`);
+  } catch(e) {
+    showToast('청구 제출 실패: ' + e.message);
+  } finally {
+    btn.disabled = false;
   }
 }
 
-// ====================================================
-// POST: 데이터 입력/수정 (주간실사 입력, 청구 제출)
-// ====================================================
-function doPost(e) {
+function renderWeekly() {
+  let html = `<button class="gen-btn" onclick="generateWeekly()"><i class="ti ti-refresh" style="font-size:16px"></i>오늘 날짜로 전체 품목 불러오기</button>`;
+
+  if (!weeklyData.length) {
+    html += '<div class="empty">주간 실사 데이터가 없습니다<br>위 버튼을 눌러 시작하세요</div>';
+    document.getElementById('weekly-content').innerHTML = html;
+    return;
+  }
+
+  const dateGroup = {};
+  weeklyData.forEach(w => {
+    if (!dateGroup[w.date]) dateGroup[w.date] = [];
+    dateGroup[w.date].push(w);
+  });
+
+  const sortedDates = Object.keys(dateGroup).sort().reverse();
+  const latestDate = sortedDates[0];
+  const rows = dateGroup[latestDate] || [];
+  const filled = rows.filter(r => r.stock !== '' && r.stock !== undefined && r.stock !== null);
+
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <span style="font-size:13px;font-weight:600">${latestDate}</span>
+    <span class="badge ok">${filled.length}/${rows.length} 입력완료</span>
+  </div>`;
+
+  rows.forEach((r, idx) => {
+    const done = r.stock !== '' && r.stock !== undefined && r.stock !== null;
+    const safeId = btoa(unescape(encodeURIComponent(r.name + r.date))).replace(/[^a-zA-Z0-9]/g,'');
+    html += `<div class="weekly-row ${done?'done':'pending'}">
+      <div class="weekly-info">
+        <p title="${r.name}">${r.name}</p>
+        <span>${r.spec} · ${r.loc}</span>
+      </div>
+      <input class="stock-inp" id="w_${safeId}" type="number" placeholder="수량" value="${done?r.stock:''}" min="0">
+      <button class="save-btn" onclick="saveWeeklyStock('${r.name.replace(/'/g,"\\\\'")}', '${r.date}', 'w_${safeId}')"><i class="ti ti-device-floppy" style="font-size:16px"></i></button>
+    </div>`;
+  });
+
+  document.getElementById('weekly-content').innerHTML = html;
+}
+
+async function generateWeekly() {
+  showToast('오늘 날짜로 품목 불러오는 중...');
   try {
-    const body = JSON.parse(e.postData.contents);
-    const action = body.action;
-    let result = {};
+    const res = await callScript(null, { action: 'generateWeeklyList' });
+    showToast(`✓ ${res.result.count}개 품목이 입력되었습니다`);
+    await loadData();
+    showTab('weekly', document.querySelectorAll('.nav-btn')[2]);
+  } catch(e) {
+    showToast('실패: ' + e.message);
+  }
+}
 
-    if (action === 'updateWeeklyStock') {
-      result = updateWeeklyStock(body.itemName, body.date, body.stock);
-    } else if (action === 'generateWeeklyList') {
-      result = generateWeeklyList();
-    } else if (action === 'submitRequest') {
-      result = submitRequest(body.items);
-    } else if (action === 'updateMasterStock') {
-      result = updateMasterStock(body.itemName, body.stock);
-    } else {
-      throw new Error('알 수 없는 action: ' + action);
+async function saveWeeklyStock(itemName, date, inputId) {
+  const val = parseInt(document.getElementById(inputId).value);
+  if (isNaN(val)) { showToast('수량을 입력해주세요'); return; }
+  showToast('저장 중...');
+  try {
+    await callScript(null, { action: 'updateWeeklyStock', itemName: itemName, date: date, stock: val });
+    const w = weeklyData.find(x => x.name === itemName && x.date === date);
+    if (w) w.stock = val;
+    const m = items.find(i => i.name === itemName);
+    if (m) {
+      m.curStock = val;
+      m.status = val < m.minStock ? '❌ 재고부족' : '✅ 안정';
     }
-
-    return jsonResponse({ status: 'success', result: result });
-  } catch (err) {
-    return jsonResponse({ status: 'error', message: err.toString() });
+    showToast('✓ 저장 완료 (품목 마스터에도 반영됨)');
+    renderWeekly();
+    renderDashboard();
+    renderRequest();
+  } catch(e) {
+    showToast('저장 실패: ' + e.message);
   }
 }
 
-// ====================================================
-// 품목 마스터 데이터 가져오기
-// ====================================================
-function getMasterData() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.MASTER);
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
-
-  const data = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
-  return data
-    .filter(row => row[1] !== '')
-    .map(row => ({
-      num: row[0],
-      name: row[1],
-      category: row[2],
-      loc: row[3],
-      spec: row[4],
-      minStock: Number(row[5]) || 0,
-      curStock: Number(row[6]) || 0,
-      status: row[7]
-    }));
-}
-
-// ====================================================
-// 주간 재고 파악 데이터 가져오기
-// ====================================================
-function getWeeklyData() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.WEEKLY);
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) return [];
-
-  const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
-  return data
-    .filter(row => row[2] !== '')
-    .map((row, idx) => ({
-      rowIndex: idx + 2,
-      date: formatDate(row[0]),
-      type: row[1],
-      name: row[2],
-      stock: row[3],
-      spec: row[4],
-      loc: row[5]
-    }));
-}
-
-// ====================================================
-// 주간실사: 오늘 날짜로 품목 마스터 전체 자동 입력
-// ====================================================
-function generateWeeklyList() {
-  const masterSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.MASTER);
-  const weeklySheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.WEEKLY);
-
-  const lastRow = masterSheet.getLastRow();
-  const masterData = masterSheet.getRange(2, 1, lastRow - 1, 8).getValues()
-    .filter(row => row[1] !== '');
-
-  const today = new Date();
-  const todayStr = formatDate(today);
-
-  // 기존 오늘 날짜 데이터 확인 및 삭제
-  const weeklyLastRow = weeklySheet.getLastRow();
-  if (weeklyLastRow >= 2) {
-    const weeklyData = weeklySheet.getRange(2, 1, weeklyLastRow - 1, 6).getValues();
-    const firstDate = weeklyData.length > 0 ? formatDate(weeklyData[0][0]) : '';
-    if (firstDate === todayStr) {
-      weeklySheet.deleteRows(2, weeklyLastRow - 1);
-    }
+function renderHistory() {
+  if (!history.length) {
+    document.getElementById('history-content').innerHTML = '<div class="empty"><i class="ti ti-inbox" style="font-size:32px;display:block;margin-bottom:8px"></i>청구 이력이 없습니다</div>';
+    return;
   }
-
-  // 새 데이터 작성
-  const newRows = masterData.map(row => [
-    today, '주간실사', row[1], '', row[4], row[3]
-  ]);
-
-  if (newRows.length > 0) {
-    weeklySheet.getRange(2, 1, newRows.length, 6).setValues(newRows);
-  }
-
-  return { count: newRows.length, date: todayStr };
+  let html = history.map(h => `
+    <div class="history-card">
+      <div class="history-date"><i class="ti ti-clock" style="font-size:12px;margin-right:4px"></i>${h.date}</div>
+      ${h.items.map(it => `<div class="history-row"><span style="color:#718096;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px">${it.name}</span><span class="history-qty">+${it.qty}개</span></div>`).join('')}
+    </div>`).join('');
+  document.getElementById('history-content').innerHTML = html;
 }
 
-// ====================================================
-// 주간실사: 개별 품목 재고량 입력/수정
-// ====================================================
-function updateWeeklyStock(itemName, date, stock) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.WEEKLY);
-  const lastRow = sheet.getLastRow();
-  if (lastRow < 2) throw new Error('주간 재고 파악 시트가 비어있습니다');
-
-  const data = sheet.getRange(2, 1, lastRow - 1, 6).getValues();
-  
-  for (let i = 0; i < data.length; i++) {
-    const rowDate = formatDate(data[i][0]);
-    if (data[i][2] === itemName && rowDate === date) {
-      sheet.getRange(i + 2, 4).setValue(stock);
-      // 품목 마스터의 현재재고도 함께 업데이트
-      updateMasterStock(itemName, stock);
-      return { updated: true, row: i + 2 };
-    }
-  }
-  throw new Error('해당 품목을 찾을 수 없습니다: ' + itemName);
+function showTab(tab, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+  el.classList.add('active');
+  if (tab === 'history') renderHistory();
 }
 
-// ====================================================
-// 품목 마스터: 현재재고 직접 수정
-// ====================================================
-function updateMasterStock(itemName, stock) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.MASTER);
-  const lastRow = sheet.getLastRow();
-  const data = sheet.getRange(2, 1, lastRow - 1, 8).getValues();
-
-  for (let i = 0; i < data.length; i++) {
-    if (data[i][1] === itemName) {
-      sheet.getRange(i + 2, 7).setValue(stock);
-      const minStock = Number(data[i][5]) || 0;
-      const newStatus = Number(stock) < minStock ? '❌ 재고부족' : '✅ 안정';
-      sheet.getRange(i + 2, 8).setValue(newStatus);
-      return { updated: true, row: i + 2, status: newStatus };
-    }
-  }
-  throw new Error('해당 품목을 찾을 수 없습니다: ' + itemName);
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ====================================================
-// 물품 청구서 제출: 청구서 시트에 기록
-// ====================================================
-function submitRequest(items) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAMES.REQUEST);
-  
-  // 기존 데이터 초기화 (6행부터)
-  const lastRow = sheet.getLastRow();
-  if (lastRow >= 6) {
-    sheet.getRange(6, 1, lastRow - 5, 5).clearContent();
-  }
-
-  // 청구일자 갱신
-  sheet.getRange('C2').setValue(new Date());
-
-  // 새 청구 항목 작성
-  const rows = items.map(item => [
-    item.name, item.spec, item.curStock, item.minStock, item.qty
-  ]);
-
-  if (rows.length > 0) {
-    sheet.getRange(6, 1, rows.length, 5).setValues(rows);
-  }
-
-  return { count: rows.length, date: formatDate(new Date()) };
-}
-
-// ====================================================
-// 유틸: 날짜 포맷 (YYYY-MM-DD)
-// ====================================================
-function formatDate(date) {
-  if (!date) return '';
-  if (typeof date === 'string') return date;
-  const tz = Session.getScriptTimeZone();
-  return Utilities.formatDate(new Date(date), tz, 'yyyy-MM-dd');
-}
-
-// ====================================================
-// 유틸: JSON 응답 + CORS 허용
-// ====================================================
-function jsonResponse(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
-}
+loadData();
+</script>
+</body>
+</html>
