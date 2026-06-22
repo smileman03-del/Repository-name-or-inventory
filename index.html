@@ -29,7 +29,7 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
 .search-input{width:100%;padding:11px 40px 11px 38px;border:1.5px solid #e2e8f0;border-radius:10px;background:#fff;font-size:15px;color:#1a202c;-webkit-appearance:none}
 .search-input:focus{outline:none;border-color:#185FA5}
 .search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#718096;font-size:18px;pointer-events:none}
-.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#718096;font-size:16px;cursor:pointer;background:none;border:none;padding:4px;display:none}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#718096;cursor:pointer;background:none;border:none;padding:4px;display:none;font-size:16px}
 .filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
 .filter-btn{padding:6px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;font-size:12px;font-weight:600;color:#718096;cursor:pointer}
 .filter-btn.active{background:#E6F1FB;color:#185FA5;border-color:#378ADD}
@@ -119,7 +119,7 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
     <button class="nav-btn" onclick="showTab('history',this)"><i class="ti ti-clock"></i>이력</button>
   </nav>
   <div class="page active" id="page-dashboard">
-    <div id="dash-content"><div class="loading"><i class="ti ti-loader" style="font-size:24px"></i><br>데이터 불러오는 중...</div></div>
+    <div id="dash-content"><div class="loading">데이터 불러오는 중...</div></div>
   </div>
   <div class="page" id="page-request">
     <div id="req-content"><div class="loading">데이터 불러오는 중...</div></div>
@@ -170,61 +170,64 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
 
 <div class="toast" id="toast"></div>
 
+<script id="app-data" type="application/json">
+[{"name": "BD angio catheter 18x30mm", "loc": "A구역", "spec": "18Gx30mm/1box", "minStock": 2, "curStock": 1}, {"name": "BD angio catheter 18x48mm", "loc": "A구역", "spec": "18Gx48mm/2box", "minStock": 1, "curStock": 1}, {"name": "BD angio catheter 22", "loc": "A구역", "spec": "22G ⓑ", "minStock": 2, "curStock": 1}, {"name": "BD angio catheter 24", "loc": "A구역", "spec": "24G ⓑ", "minStock": 2, "curStock": 2}, {"name": "18G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "23G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "25G needle", "loc": "A구역", "spec": "5/8 ⓑ", "minStock": 1, "curStock": 2}, {"name": "26G needle1/2", "loc": "A구역", "spec": "1/2 ⓑ", "minStock": 1, "curStock": 2}, {"name": "26G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 0}, {"name": "Endo pouch", "loc": "A구역", "spec": "TLB4040/1box/10개", "minStock": 10, "curStock": 1}, {"name": "Endoknot Coated Vicryl 0", "loc": "A구역", "spec": "straight 22mm", "minStock": 10, "curStock": 1}, {"name": "Soundreach(CS1405H)", "loc": "A구역", "spec": "5mmX14cm ⓑ", "minStock": 3, "curStock": 7}, {"name": "Soundreach", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Long Bovie tip(일회용손조절식전기수술기용전극)", "loc": "A구역", "spec": "BLM-40A ⓑ", "minStock": 1, "curStock": 1}, {"name": "AbsorbaTack(흡수성체내용스태플)", "loc": "A구역", "spec": "5mm ⓑ", "minStock": 1, "curStock": 1}, {"name": "Spacemaker Pro(SMBTTRNDX)", "loc": "A구역", "spec": "10mm-12mm ⓑ", "minStock": 1, "curStock": 3}, {"name": "HEALTHPORT Baxter (이식형의약품주입기)", "loc": "A구역", "spec": "SIN9027/1box", "minStock": 3, "curStock": 5}, {"name": "HEALTHPORT Baxter (카테터삽입기)", "loc": "A구역", "spec": "SIN9031/1box", "minStock": 3, "curStock": 4}, {"name": "chemoport needle (의약품직접주입기구)", "loc": "A구역", "spec": "ea (AH502015)", "minStock": 5, "curStock": 2}, {"name": "Ovum Aspiration Needle Single Lumen", "loc": "A구역", "spec": "K-OPS-1035-RWH-ET", "minStock": 5, "curStock": 7}, {"name": "Meta Clip-p PCLL03A", "loc": "A구역", "spec": "PCLL03A", "minStock": 1, "curStock": 1}, {"name": "Meta Clip-p PCXL04A", "loc": "A구역", "spec": "PCXL04A", "minStock": 1, "curStock": 1}, {"name": "메디커튼가이드", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Lap Loop Suture", "loc": "A구역", "spec": "1-0/Suture/1box20개", "minStock": 2, "curStock": 1}, {"name": "Lap Loop Tie", "loc": "A구역", "spec": "SutureTie", "minStock": 1, "curStock": 2}, {"name": "One pouch(Sunmedix) 500", "loc": "A구역", "spec": "500ml ⓑ", "minStock": 5, "curStock": 15}, {"name": "One pouch(Sunmedix) 700", "loc": "A구역", "spec": "700ml ⓑ", "minStock": 10, "curStock": 5}, {"name": "비아이펀넬", "loc": "A구역", "spec": "1box/5ea", "minStock": 1, "curStock": 1}, {"name": "1cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 0.5}, {"name": "3cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 4}, {"name": "5cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 1}, {"name": "10cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 1}, {"name": "20cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 5, "curStock": 2}, {"name": "50cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 3}, {"name": "60cc syringe", "loc": "A구역", "spec": "enema용 ⓑ", "minStock": 1, "curStock": 2}, {"name": "TOT mesh", "loc": "A구역", "spec": "ⓑ", "minStock": 5, "curStock": 6}, {"name": "One port 3.4구", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 7}, {"name": "Penco Bio-Port 12mm trocar", "loc": "A구역", "spec": "ea", "minStock": 3, "curStock": 1}, {"name": "Penco Bio-Port 10mm trocar", "loc": "A구역", "spec": "1box/6ea", "minStock": 2, "curStock": 4}, {"name": "Penco Bio-Port 5mm trocar", "loc": "A구역", "spec": "1box/6ea", "minStock": 2, "curStock": 3}, {"name": "POPUP mesh", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 13}, {"name": "Urine bag", "loc": "A구역", "spec": "묶음", "minStock": 20, "curStock": 40}, {"name": "8Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "14Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "16Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 6}, {"name": "24Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "BT Drainage Tube", "loc": "A구역", "spec": "BT Circle 6 ⓑ", "minStock": 5, "curStock": 7}, {"name": "소다라임", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 12}, {"name": "Sani Sleeve", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 3}, {"name": "Endo tracheal tube 6-1", "loc": "A구역", "spec": "6 ⓑ", "minStock": 1, "curStock": 4}, {"name": "Endo tracheal tube  6.5-1", "loc": "A구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 4}, {"name": "Endo tracheal tube 7-1", "loc": "A구역", "spec": "7.0 ⓑ", "minStock": 1, "curStock": 7}, {"name": "Endo tracheal tube(갑상선) 6", "loc": "A구역", "spec": "6.0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Endo tracheal tube(갑상선) 6.5", "loc": "A구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Endo tracheal tube(갑상선) 7-1", "loc": "A구역", "spec": "7.0 ⓑ", "minStock": 1, "curStock": 8}, {"name": "airway #5", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 20}, {"name": "Suction catheter", "loc": "A구역", "spec": "N110-02-12/ea", "minStock": 20, "curStock": 50}, {"name": "요관용스텐트", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "The RUMZ system(Disposable Ulterine Manipulator tip)", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 3}, {"name": "Hartz Raum", "loc": "A구역", "spec": "D-5Fr-S110-7/ea", "minStock": 2, "curStock": 3}, {"name": "혈관내 튜브카테터(picc)", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "혈관내 튜브카테터(c-line)", "loc": "A구역", "spec": "ea", "minStock": 3, "curStock": 3}, {"name": "VISISTAT(스킨 스테플러)", "loc": "A구역", "spec": "35W/box", "minStock": 5, "curStock": 15}, {"name": "일회용수술용스태플기구(remover)", "loc": "A구역", "spec": "ea", "minStock": 2, "curStock": 2}, {"name": "Kronnner Manipujector", "loc": "A구역", "spec": "6003/ea", "minStock": 5, "curStock": 13}, {"name": "Uni Circuit Ⅱ", "loc": "A구역", "spec": "성인 180cm/3L/ea", "minStock": 10, "curStock": 6}, {"name": "AirSoft Mask", "loc": "A구역", "spec": "#5 W/Valve/ea", "minStock": 10, "curStock": 9}, {"name": "Vido Laryngoscope Handle", "loc": "A구역", "spec": "1box", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade00", "loc": "A구역", "spec": "CR-D-MIL00", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade0", "loc": "A구역", "spec": "CR-D-MIL0", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade1", "loc": "A구역", "spec": "CR-D-MAC1", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade2", "loc": "A구역", "spec": "CR-D-MAC2", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade3", "loc": "A구역", "spec": "CR-D-MAC3", "minStock": 3, "curStock": 8}, {"name": "Sugisorb (sv113) 1", "loc": "B구역", "spec": "1/40mm/ⓑ", "minStock": 2, "curStock": 1}, {"name": "Sugisorb (sv213) 2-0", "loc": "B구역", "spec": "2-0/36mm/ⓑ", "minStock": 2, "curStock": 7}, {"name": "Sugisorb (sv211) 2-0 26mm", "loc": "B구역", "spec": "2-0/26mm/ⓑ", "minStock": 2, "curStock": 3}, {"name": "Sugisorb (sv317) 3-0", "loc": "B구역", "spec": "3-0/26mm/ⓑ", "minStock": 2, "curStock": 1.5}, {"name": "Sugisorb (sv432) 4-0 16mm", "loc": "B구역", "spec": "4-0/16mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "surgisorb(sv413) 4-0", "loc": "B구역", "spec": "4-0/ 17mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb (sv512) 5-0", "loc": "B구역", "spec": "5-0/13mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon (NB324) 3-0 ©", "loc": "B구역", "spec": "3-0©/25mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "Nylon (NB434) 4-0 ©", "loc": "B구역", "spec": "4-0©/18mm/ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Nylon (NB526) 5-0 ©", "loc": "B구역", "spec": "5-0©/15mm/ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Nylon (NB717)7-0 ©", "loc": "B구역", "spec": "7-0©/11mm/ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Polysorb (UL878)", "loc": "B구역", "spec": "2-0/27mm/ⓑ", "minStock": 1, "curStock": 2}, {"name": "Chromic (CO122)", "loc": "B구역", "spec": "1-0/37mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Monosyn (C2023624)", "loc": "B구역", "spec": "4-0/19mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "V-loc(180)", "loc": "B구역", "spec": "0/1box/5ea", "minStock": 2, "curStock": 5}, {"name": "V-loc(90)", "loc": "B구역", "spec": "2-0/1box/5ea", "minStock": 2, "curStock": 14}, {"name": "White Silk 5", "loc": "B구역", "spec": "No.5", "minStock": 5, "curStock": 24}, {"name": "White Silk 6", "loc": "B구역", "spec": "No.6", "minStock": 5, "curStock": 62}, {"name": "White Silk 7", "loc": "B구역", "spec": "No.7", "minStock": 5, "curStock": 12}, {"name": "White Silk 8", "loc": "B구역", "spec": "No.8", "minStock": 5, "curStock": 2}, {"name": "Mess 10-1", "loc": "B구역", "spec": "10# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 11-1", "loc": "B구역", "spec": "11# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 15-1", "loc": "B구역", "spec": "15# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 20", "loc": "B구역", "spec": "20# ⓑ", "minStock": 1, "curStock": 1}, {"name": "AIDerm 6x7cm", "loc": "B구역", "spec": "6x7cm/ⓑ", "minStock": 2, "curStock": 3}, {"name": "AIDerm 10x10cm", "loc": "B구역", "spec": "10x10cm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "금실 13mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 60, "curStock": 8}, {"name": "금실 25mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 15, "curStock": 15}, {"name": "금실 38mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 120, "curStock": 15}, {"name": "Surgicel Original", "loc": "B구역", "spec": "19535/5.1X7.6cm/1box", "minStock": 1, "curStock": 1}, {"name": "Tegaderm", "loc": "B구역", "spec": "1626W/10x12cm/1box", "minStock": 1, "curStock": 2}, {"name": "메디터치 Border", "loc": "B구역", "spec": "5.5mmx6.5mm/1box", "minStock": 1, "curStock": 1}, {"name": "Steri-Strip 6mm", "loc": "B구역", "spec": "6mm/ea", "minStock": 20, "curStock": 0.1}, {"name": "Steri-Strip 12mm", "loc": "B구역", "spec": "12mm/ea", "minStock": 1, "curStock": 1}, {"name": "Spinal Needle 18G", "loc": "B구역", "spec": "18Gx90mm/1box/50ea", "minStock": 1, "curStock": 1}, {"name": "박스테이프", "loc": "B구역", "spec": "롤", "minStock": 2, "curStock": 3}, {"name": "Rely + On Parasafe 100mg", "loc": "B구역", "spec": "100mg/통", "minStock": 2, "curStock": 2}, {"name": "Rely + On Parasafe", "loc": "B구역", "spec": "Test Tip", "minStock": 1, "curStock": 3}, {"name": "Bio Spike Guard", "loc": "B구역", "spec": "1box", "minStock": 1, "curStock": 0.2}, {"name": "고무장갑", "loc": "B구역", "spec": "S사이즈/ea", "minStock": 2, "curStock": 0}, {"name": "물티슈", "loc": "B구역", "spec": "ea", "minStock": 3, "curStock": 2}, {"name": "CUTAN PLAST", "loc": "B구역", "spec": "80x50x10mm/1box", "minStock": 1, "curStock": 1}, {"name": "Liqui Band Surgical", "loc": "B구역", "spec": "S/ea", "minStock": 1, "curStock": 1}, {"name": "N/S 1000", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 3, "curStock": 1}, {"name": "N/S 500", "loc": "C구역", "spec": "500ml ⓑ", "minStock": 1, "curStock": 0.3}, {"name": "N/S 100", "loc": "C구역", "spec": "100ml ⓑ", "minStock": 2, "curStock": 2}, {"name": "N/S 20", "loc": "C구역", "spec": "20ml ⓑ", "minStock": 1, "curStock": 4}, {"name": "H/S", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 2, "curStock": 1}, {"name": "D/W", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 1, "curStock": 0.2}, {"name": "D/S 1000", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 0, "curStock": 0.2}, {"name": "D/S 500", "loc": "C구역", "spec": "500ml ⓑ", "minStock": 0, "curStock": 0.2}, {"name": "생리식염키트주사", "loc": "C구역", "spec": "250ml", "minStock": 1, "curStock": 11}, {"name": "MarkingPen", "loc": "C구역", "spec": "PK-DSMP01", "minStock": 1, "curStock": 2}, {"name": "4*4 Gauze", "loc": "C구역", "spec": "10x10x8겹/1box/20매", "minStock": 10, "curStock": 11}, {"name": "수성 탈지면롤 에스 3호", "loc": "C구역", "spec": "3호 20mm/봉지", "minStock": 5, "curStock": 5}, {"name": "수성 탈지면롤 에스 5호", "loc": "C구역", "spec": "5호 32mm/봉지", "minStock": 5, "curStock": 4}, {"name": "대한위재 거즈-에스 (거즈볼형)", "loc": "C구역", "spec": "22x25cm/봉지/200매", "minStock": 3, "curStock": 2}, {"name": "Baro Vac(SS100M 3.2)", "loc": "C구역", "spec": "100ml/1box", "minStock": 2, "curStock": 2}, {"name": "Baro Vac(PP400M 3.2)", "loc": "C구역", "spec": "400ml/1box", "minStock": 1, "curStock": 3}, {"name": "Vabien(SL0837)", "loc": "C구역", "spec": "5mmX37cm (curved) ⓑ", "minStock": 10, "curStock": 13}, {"name": "일회용발조절식전기수술기용전극", "loc": "C구역", "spec": "5x330mm", "minStock": 10, "curStock": 43}, {"name": "멸균증류수", "loc": "C구역", "spec": "1L ⓑ", "minStock": 3, "curStock": 2}, {"name": "크린조", "loc": "C구역", "spec": "1L ⓑ", "minStock": 3, "curStock": 10}, {"name": "5.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "6.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 1}, {"name": "6.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 3}, {"name": "7.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 3, "curStock": 4}, {"name": "7.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 3}, {"name": "8.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 1}, {"name": "해피레이", "loc": "C구역", "spec": "봉지/10ea", "minStock": 30, "curStock": 31}, {"name": "안심포인트", "loc": "C구역", "spec": "L/60x75cm/1box/50ea", "minStock": 1, "curStock": 2}, {"name": "복대", "loc": "C구역", "spec": "ea", "minStock": 30, "curStock": 34}, {"name": "프로테스칼", "loc": "C구역", "spec": "1.5ml ⓑ", "minStock": 10, "curStock": 30}, {"name": "그린플라스트큐", "loc": "C구역", "spec": "ⓑ", "minStock": 10, "curStock": 10}, {"name": "타코실 2매", "loc": "C구역", "spec": "4.8x4.8cm/box", "minStock": 5, "curStock": 10}, {"name": "타코실 roll", "loc": "C구역", "spec": "4.8x4.8cm/box", "minStock": 10, "curStock": 13}, {"name": "Bovie (일반)", "loc": "C구역", "spec": "EP-3025M/1box/25ea", "minStock": 1, "curStock": 1.5}, {"name": "Bovie (뾰족)", "loc": "C구역", "spec": "EP-3027M-N/1box/25ea", "minStock": 1, "curStock": 2}, {"name": "G-Plate", "loc": "C구역", "spec": "GD7131C/1box", "minStock": 0.5, "curStock": 0.5}, {"name": "수액세트", "loc": "C구역", "spec": "M122/봉지", "minStock": 1, "curStock": 1}, {"name": "Extension Line", "loc": "C구역", "spec": "90mm/봉지", "minStock": 1, "curStock": 1}, {"name": "Accufuser Puls", "loc": "C구역", "spec": "P2015M/1box/10ea", "minStock": 2, "curStock": 2}, {"name": "Mommy Caty - Plus", "loc": "C구역", "spec": "MCPO2KR-S", "minStock": 10, "curStock": 18}, {"name": "포비돈소독용", "loc": "C구역", "spec": "소독용4L", "minStock": 5, "curStock": 5}, {"name": "포비돈세정용", "loc": "C구역", "spec": "세정용4L", "minStock": 2, "curStock": 2.5}, {"name": "ALCOHOL(알콜)70%", "loc": "C구역", "spec": "18L", "minStock": 1, "curStock": 0.2}, {"name": "그린소독용에탄올", "loc": "C구역", "spec": "1L", "minStock": 5, "curStock": 6}, {"name": "이아루릴 프리필 50ml", "loc": "C구역", "spec": "E03614 ⓑ", "minStock": 40, "curStock": 21}, {"name": "ARTISENTIAL", "loc": "C구역", "spec": "8mmx250mm/1box", "minStock": 3, "curStock": 4}, {"name": "E.O Gas Pouch 10cm", "loc": "C구역", "spec": "10cm", "minStock": 1, "curStock": 1.5}, {"name": "E.O Gas Pouch 20cm", "loc": "C구역", "spec": "20cm", "minStock": 1, "curStock": 0}, {"name": "E.O Gas Pouch 30cm", "loc": "C구역", "spec": "30cm", "minStock": 1, "curStock": 0.5}, {"name": "E.O Gas Pouch 40cm", "loc": "C구역", "spec": "40cm", "minStock": 1, "curStock": 1.5}, {"name": "집진매트", "loc": "C구역", "spec": "MAT/445mmx1155mm", "minStock": 2, "curStock": 1.5}, {"name": "3M E.O Gas Indicator", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "3M Steam Indicator", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "3M Steam Indicator Tape", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "Poly - Glove", "loc": "C구역", "spec": "1box/200장", "minStock": 3, "curStock": 2}, {"name": "Eol Swab (알콜솜)", "loc": "C구역", "spec": "", "minStock": 5, "curStock": 7}, {"name": "3M Micoropore Tape (White)", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 3}, {"name": "3M Duraproe", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 1}, {"name": "3M Transproe", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 1}, {"name": "Lidocaine Jelly", "loc": "C구역", "spec": "120g/ea", "minStock": 1, "curStock": 10}, {"name": "모아랩 일반형 밴드", "loc": "C구역", "spec": "20mm/100매", "minStock": 1, "curStock": 3}, {"name": "3M Monitoring Electrode", "loc": "C구역", "spec": "2223H/봉", "minStock": 3, "curStock": 1}, {"name": "Hand Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 3}, {"name": "Knee Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "Knee A/S Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 1}, {"name": "Shoulder A/S Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.5}, {"name": "Shoulder Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.2}, {"name": "Hip Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.2}, {"name": "Basic Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "TKRA Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "Breast Pack(1box=4개)(3시간이내) CB1700", "loc": "D구역", "spec": "1box/4pack", "minStock": 2, "curStock": 3}, {"name": "Breast Pack(1box=4개)(3시간이상) SJ-CBS-400-1", "loc": "D구역", "spec": "1box/4pack", "minStock": 2, "curStock": 5}, {"name": "Nomal DeliveryPack(Drape-7ea)1시간미만팩", "loc": "D구역", "spec": "1box/7pack", "minStock": 2, "curStock": 10}, {"name": "세보프란", "loc": "D구역", "spec": "1box", "minStock": 5, "curStock": 6}, {"name": "리알로 1cc", "loc": "D구역", "spec": "RIDM1020 ⓑ", "minStock": 5, "curStock": 8}, {"name": "라큐디 1.5ml", "loc": "D구역", "spec": "1.5ml ⓑ", "minStock": 5, "curStock": 6}, {"name": "라큐디 20ml", "loc": "D구역", "spec": "2.0ml ⓑ", "minStock": 5, "curStock": 4}, {"name": "MR tip 4번", "loc": "D구역", "spec": "4번", "minStock": 5, "curStock": 30}, {"name": "MR tip 5번", "loc": "D구역", "spec": "5번", "minStock": 5, "curStock": 8}, {"name": "MR tip 6번", "loc": "D구역", "spec": "6번", "minStock": 10, "curStock": 6}, {"name": "Endo suction", "loc": "D구역", "spec": "open end type", "minStock": 2, "curStock": 3}, {"name": "LC-20(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LC-25(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-10(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-20(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-25(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "BA-513(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 12}, {"name": "K03(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 7}, {"name": "E01(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "Condyloma Tip(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "알보칠", "loc": "D구역", "spec": "병", "minStock": 1, "curStock": 1}, {"name": "초음파 프푸브 커버", "loc": "D구역", "spec": "DFO-PCL-R/1box", "minStock": 1, "curStock": 0}, {"name": "라미나리아 1번", "loc": "D구역", "spec": "1번", "minStock": 5, "curStock": 7}, {"name": "라미나리아 3번", "loc": "D구역", "spec": "3번", "minStock": 5, "curStock": 4}, {"name": "라미나리아 5번", "loc": "D구역", "spec": "5번", "minStock": 5, "curStock": 2}, {"name": "Dual tulip", "loc": "D구역", "spec": "봉지", "minStock": 5, "curStock": 4}, {"name": "더모픽스", "loc": "D구역", "spec": "ea", "minStock": 5, "curStock": 3}, {"name": "지노브이", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "지노프로", "loc": "D구역", "spec": "ea", "minStock": 5, "curStock": 11}, {"name": "지노베타딘", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "지노콜라", "loc": "D구역", "spec": "ea", "minStock": 10, "curStock": 3}, {"name": "오베스틴", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "유트로게스탄", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "뮤라젠", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Catetere MMS U-71501직장용 튜브 • 카테터", "loc": "D구역", "spec": "7.5fr/묶음", "minStock": 10, "curStock": 64}, {"name": "Catetere MMS U-72603 요로내압 측정 • 카테터", "loc": "D구역", "spec": "6fr/묶음", "minStock": 10, "curStock": 65}, {"name": "Super UL STAR(초음파 프린트용지)", "loc": "D구역", "spec": "1100HG/1box/6ea", "minStock": 1, "curStock": 1.5}, {"name": "Pro Care (Latex Glove)", "loc": "D구역", "spec": "KL101512A/XS/box", "minStock": 1, "curStock": 2}, {"name": "SONO Jelly", "loc": "D구역", "spec": "통", "minStock": 1, "curStock": 0.1}, {"name": "일회용 면도기", "loc": "D구역", "spec": "box", "minStock": 20, "curStock": 1}, {"name": "KM SURGEON CAP", "loc": "D구역", "spec": "CA-101-1/100pcs/box", "minStock": 2, "curStock": 1}, {"name": "일회용 마스크", "loc": "D구역", "spec": "50ea/box", "minStock": 3, "curStock": 5}, {"name": "헥시딘 스크랍", "loc": "D구역", "spec": "15ml/1box/20개", "minStock": 2, "curStock": 1}, {"name": "DISPOSABLE CAP(KM) 수술용모자(청색-일회용)", "loc": "D구역", "spec": "NURS/BLUE/1BOX/100EA", "minStock": 2, "curStock": 5}, {"name": "Surgical Mask", "loc": "D구역", "spec": "50ea/box", "minStock": 2, "curStock": 2}, {"name": "Sugisorb 1", "loc": "E구역", "spec": "1 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb 2-0", "loc": "E구역", "spec": "2-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb 3-0", "loc": "E구역", "spec": "3-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Vicryl 4-0", "loc": "E구역", "spec": "4-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon 1-0", "loc": "E구역", "spec": "1-0© ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Nylon 2-0", "loc": "E구역", "spec": "2-0©", "minStock": 1, "curStock": 0.1}, {"name": "Nylon 4-0", "loc": "E구역", "spec": "4-0© ⓑ", "minStock": 1, "curStock": 2}, {"name": "Nylon 5-0", "loc": "E구역", "spec": "5-0© ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Nylon 6-0", "loc": "E구역", "spec": "6-0© ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon 3-0 ®", "loc": "E구역", "spec": "3-0® ⓑ", "minStock": 1, "curStock": 2}, {"name": "Nylon 4-0 ®", "loc": "E구역", "spec": "4-0® ⓑ", "minStock": 1, "curStock": 1}, {"name": "Ethibond 2", "loc": "E구역", "spec": "2/X4843G", "minStock": 1, "curStock": 0.5}, {"name": "Ethibond 5", "loc": "E구역", "spec": "5", "minStock": 1, "curStock": 1}, {"name": "프리베리3", "loc": "E구역", "spec": "3ml/box", "minStock": 5, "curStock": 10}, {"name": "수동식 일회용 천공기 SWVP-135", "loc": "E구역", "spec": "SWVP-135/box", "minStock": 2, "curStock": 2}, {"name": "수동식 일회용 천공기 SWVP-115", "loc": "E구역", "spec": "SWVP-115/box", "minStock": 2, "curStock": 2}, {"name": "Bone Cement(골시멘트)", "loc": "E구역", "spec": "SPINOFILL/box", "minStock": 2, "curStock": 2}, {"name": "Mess 10", "loc": "E구역", "spec": "10# ⓑ", "minStock": 1, "curStock": 1}, {"name": "Mess 11", "loc": "E구역", "spec": "11# ⓑ", "minStock": 1, "curStock": 1}, {"name": "Mess 15", "loc": "E구역", "spec": "15# ⓑ", "minStock": 1, "curStock": 1}, {"name": "하이겐트 5x5", "loc": "E구역", "spec": "5x5cm", "minStock": 3, "curStock": 9}, {"name": "하이겐트 10x10", "loc": "E구역", "spec": "10x10cm", "minStock": 3, "curStock": 3}, {"name": "AIDerm", "loc": "E구역", "spec": "6x7cm/box", "minStock": 1, "curStock": 1}, {"name": "Allevyn Life heel (25cm x 25.2cm)", "loc": "E구역", "spec": "66801304/1box", "minStock": 1, "curStock": 1}, {"name": "Bactigra", "loc": "E구역", "spec": "10x10", "minStock": 1, "curStock": 2}, {"name": "Bone Stat", "loc": "E구역", "spec": "25ml ⓑ", "minStock": 1, "curStock": 2}, {"name": "MarkingPen-1", "loc": "E구역", "spec": "ea", "minStock": 10, "curStock": 10}, {"name": "Fix Gard 2inch", "loc": "E구역", "spec": "2inch/1box", "minStock": 0.5, "curStock": 0.8}, {"name": "Fix Gard 3inch", "loc": "E구역", "spec": "3inch/1box", "minStock": 2, "curStock": 2}, {"name": "Fix Gard 4inch", "loc": "E구역", "spec": "4inch/1box", "minStock": 2, "curStock": 1}, {"name": "Fix Gard 6inch", "loc": "E구역", "spec": "6inch/1box", "minStock": 2, "curStock": 2}, {"name": "Barovac 400cc(k3002104세운)", "loc": "E구역", "spec": "PP400L(4.8)/1box/5개  ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Surgi Van", "loc": "E구역", "spec": "60x45 ⓑ", "minStock": 1, "curStock": 2}, {"name": "WellFlowBand", "loc": "E구역", "spec": "Line/1box/50개", "minStock": 10, "curStock": 10}, {"name": "의료용 세정기 TUR Y-Set", "loc": "E구역", "spec": "HS-E-100/ea", "minStock": 5, "curStock": 11}, {"name": "Sorbact 7x9", "loc": "E구역", "spec": "7x9", "minStock": 1, "curStock": 12}, {"name": "Sorbact 10x10", "loc": "E구역", "spec": "10x10", "minStock": 1, "curStock": 7}, {"name": "Sorbact 10x20", "loc": "E구역", "spec": "10x20", "minStock": 1, "curStock": 10}, {"name": "Roll Wire 0.18mm", "loc": "E구역", "spec": "0.18mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.32mm", "loc": "E구역", "spec": "0.32mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.38mm", "loc": "E구역", "spec": "0.38mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.46mm", "loc": "E구역", "spec": "0.46mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.56mm", "loc": "E구역", "spec": "0.56mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.76mm", "loc": "E구역", "spec": "0.76mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.86mm", "loc": "E구역", "spec": "0.86mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 1.0mm", "loc": "E구역", "spec": "1.0mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 1.2mm", "loc": "E구역", "spec": "1.2mm", "minStock": 1, "curStock": 1}, {"name": "K-Wire 0.8", "loc": "E구역", "spec": "0.8", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1", "loc": "E구역", "spec": "1", "minStock": 1, "curStock": 2}, {"name": "K-Wire 1.2", "loc": "E구역", "spec": "1.2", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1.4", "loc": "E구역", "spec": "1.4", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1.6", "loc": "E구역", "spec": "1.6", "minStock": 1, "curStock": 2}, {"name": "K-Wire1.8", "loc": "E구역", "spec": "1.8", "minStock": 1, "curStock": 2}, {"name": "Ball K-Wire 0.9", "loc": "E구역", "spec": "0.9", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1", "loc": "E구역", "spec": "1", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.2", "loc": "E구역", "spec": "1.2", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.4", "loc": "E구역", "spec": "1.4", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.6", "loc": "E구역", "spec": "1.6", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.8", "loc": "E구역", "spec": "1.8", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2", "loc": "E구역", "spec": "2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.2", "loc": "E구역", "spec": "2.2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.4", "loc": "E구역", "spec": "2.4", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.8", "loc": "E구역", "spec": "2.8", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 3.2", "loc": "E구역", "spec": "3.2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 3.6", "loc": "E구역", "spec": "3.6", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 4", "loc": "E구역", "spec": "4", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 4.8", "loc": "E구역", "spec": "4.8", "minStock": 1, "curStock": 1}, {"name": "TC-Band 4인치", "loc": "E구역", "spec": "4인치/1box/12개", "minStock": 1, "curStock": 12}, {"name": "TC-Band 6인치", "loc": "E구역", "spec": "6인치/1box/9개", "minStock": 1, "curStock": 7}, {"name": "Tap Seal 10x40", "loc": "E구역", "spec": "10x40/1box/10개", "minStock": 1, "curStock": 2}, {"name": "Tap Seal 20x40", "loc": "E구역", "spec": "20x40/1box/5개", "minStock": 1, "curStock": 1}, {"name": "Cotton 3인치", "loc": "E구역", "spec": "3인치/ea", "minStock": 5, "curStock": 5}, {"name": "Cotton 4인치", "loc": "E구역", "spec": "4인치/ea", "minStock": 10, "curStock": 10}, {"name": "Cotton 6인치", "loc": "E구역", "spec": "6인치/ea", "minStock": 10, "curStock": 10}, {"name": "All Silicone Penrose Drainage Tube", "loc": "E구역", "spec": "8mmx300mm(봉)", "minStock": 1, "curStock": 1}, {"name": "VISISTAT(스킨 스테플러)", "loc": "E구역", "spec": "35W", "minStock": 1, "curStock": 15}, {"name": "Stapler Remover", "loc": "E구역", "spec": "Remover", "minStock": 1, "curStock": 1}, {"name": "Glove 6", "loc": "E구역", "spec": "6 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 6.5", "loc": "E구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 7", "loc": "E구역", "spec": "7 ⓑ", "minStock": 1, "curStock": 2}, {"name": "Glove 7.5", "loc": "E구역", "spec": "7.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 8", "loc": "E구역", "spec": "8 ⓑ", "minStock": 1, "curStock": 1}, {"name": "GAMMEX 7.5", "loc": "E구역", "spec": "7.5 ⓑ", "minStock": 1, "curStock": 2}, {"name": "GAMMEX 8", "loc": "E구역", "spec": "8 ⓑ", "minStock": 1, "curStock": 3}, {"name": "Double Arm Needle", "loc": "E구역", "spec": "1box", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Rrsector 4.0", "loc": "E구역", "spec": "Rrsector 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Aggressive 4.0", "loc": "E구역", "spec": "Aggressive 4.0/ea", "minStock": 1, "curStock": 2}, {"name": "Shaver Tip Round Burs 4.0", "loc": "E구역", "spec": "Round Burs 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Barrel Burs 4.0", "loc": "E구역", "spec": "Barrel Burs 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip ⓢHood Bur 2.0", "loc": "E구역", "spec": "ⓢHood Bur 2.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip ⓢRadius 2.5", "loc": "E구역", "spec": "ⓢRadius 2.5/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Tomcat 4.0", "loc": "E구역", "spec": "Tomcat 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Zeus-X", "loc": "E구역", "spec": "box", "minStock": 1, "curStock": 1}, {"name": "ST,Reed", "loc": "E구역", "spec": "box", "minStock": 2, "curStock": 3}, {"name": "JointSeal", "loc": "E구역", "spec": "box", "minStock": 3, "curStock": 3}, {"name": "본칩", "loc": "E구역", "spec": "15cc", "minStock": 1, "curStock": 1}, {"name": "본칩", "loc": "E구역", "spec": "30cc", "minStock": 1, "curStock": 1}, {"name": "Rafugen DBM Gel Pro0.5", "loc": "E구역", "spec": "0.5cc", "minStock": 1, "curStock": 1}, {"name": "Rafugen DBM Gel Pro1", "loc": "E구역", "spec": "1cc", "minStock": 1, "curStock": 2}, {"name": "Fast Fix 360", "loc": "E구역", "spec": "box", "minStock": 5, "curStock": 5}, {"name": "Bovie Pro Pencil(EP-302M)", "loc": "E구역", "spec": "일반용/1box", "minStock": 10, "curStock": 10}, {"name": "G-PLATE1", "loc": "E구역", "spec": "GD7131C/1box", "minStock": 10, "curStock": 10}, {"name": "대한관류용 멸균생리식염수", "loc": "E구역", "spec": "1000ML/1box/10개", "minStock": 1, "curStock": 13}, {"name": "삼진 타우로린 주사2%", "loc": "E구역", "spec": "250ml/1box/10개", "minStock": 1, "curStock": 18}, {"name": "B-cover Band", "loc": "E구역", "spec": "1box/30개", "minStock": 15, "curStock": 33}, {"name": "생리식염수관주액 (세척용)", "loc": "E구역", "spec": "3000ml/1box/4개", "minStock": 2, "curStock": 3}, {"name": "WellFlowBand Bottle", "loc": "E구역", "spec": "Bottle/1box/50개", "minStock": 15, "curStock": 7}, {"name": "Tonic-band(토니켓 대)", "loc": "E구역", "spec": "대/ea", "minStock": 10, "curStock": 10}, {"name": "Tonic-band(토니켓 중)", "loc": "E구역", "spec": "중/ea", "minStock": 10, "curStock": 21}, {"name": "Tonic-band(토니켓 소)", "loc": "E구역", "spec": "소/ea", "minStock": 3, "curStock": 6}, {"name": "과산화수소수(H2O2)/그린", "loc": "E구역", "spec": "250ml/ea", "minStock": 10, "curStock": 10}, {"name": "그린에탄올 1L", "loc": "E구역", "spec": "1L/통", "minStock": 2, "curStock": 2}, {"name": "솜붕대 3inch", "loc": "E구역", "spec": "7.5cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 0}, {"name": "솜붕대 4inch", "loc": "E구역", "spec": "10cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 3}, {"name": "솜붕대 6inch", "loc": "E구역", "spec": "15cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 3}, {"name": "탄력붕대 두원 3inch", "loc": "E구역", "spec": "7.5cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 2}, {"name": "탄력붕대 두원 4inch", "loc": "E구역", "spec": "10cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 2}, {"name": "탄력붕대 두원 6inch", "loc": "E구역", "spec": "15cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 105}, {"name": "3M Coban Self Adherent Wrap 1inch", "loc": "E구역", "spec": "2.5cmx2m/1box/30rolls", "minStock": 1, "curStock": 1}, {"name": "4M Coban Self Adherent Wrap 2inch", "loc": "E구역", "spec": "5cmx2m/1box/36rolls", "minStock": 1, "curStock": 1}, {"name": "5M Coban Self Adherent Wrap 3inch", "loc": "E구역", "spec": "7.5cmx2m/1box/24rolls", "minStock": 1, "curStock": 1}, {"name": "BMAC-Kit", "loc": "E구역", "spec": "", "minStock": 2, "curStock": 2}, {"name": "노트롬홈", "loc": "E구역", "spec": "3ml", "minStock": 2, "curStock": 3}, {"name": "세포탁심", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 9}, {"name": "CS Heated Cricuite", "loc": "E구역", "spec": "", "minStock": 10, "curStock": 9}, {"name": "소다라임", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 12}, {"name": "세보프란", "loc": "E구역", "spec": "", "minStock": 3, "curStock": 6}, {"name": "BIS Quatro Sensor", "loc": "E구역", "spec": "186-0106/1box/25개", "minStock": 1, "curStock": 0.6}, {"name": "Endotracheal Tube 6", "loc": "E구역", "spec": "6#", "minStock": 2, "curStock": 3}, {"name": "Endotracheal Tube 6.5", "loc": "E구역", "spec": "6.5#", "minStock": 2, "curStock": 3}, {"name": "Endotracheal Tube 7", "loc": "E구역", "spec": "7#", "minStock": 2, "curStock": 3}, {"name": "ReinForced Endotracheal Tube", "loc": "E구역", "spec": "7#", "minStock": 2, "curStock": 4}, {"name": "I-Gel", "loc": "E구역", "spec": "3#", "minStock": 2, "curStock": 2}, {"name": "LMA", "loc": "E구역", "spec": "4#", "minStock": 2, "curStock": 2}, {"name": "Scution Catheter", "loc": "E구역", "spec": "", "minStock": 2, "curStock": 2}, {"name": "Airway", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 5}, {"name": "픽스롤10*10(bm5103bl)4=Super Fix", "loc": "E구역", "spec": "bm5103bl/1box/1개", "minStock": 1, "curStock": 2}, {"name": "Spinal Needle", "loc": "E구역", "spec": "16G/1봉/10개", "minStock": 1, "curStock": 1}, {"name": "Spinal Needle(척추 마취용침)", "loc": "E구역", "spec": "26Gx90mm/1box/50PCS", "minStock": 1, "curStock": 1}, {"name": "일회용 멸균주사침", "loc": "E구역", "spec": "24Gx60mm/1box/200PCS", "minStock": 1, "curStock": 1}, {"name": "3-Way Filter Tube", "loc": "E구역", "spec": "5MR090SD/1box", "minStock": 1, "curStock": 1}, {"name": "Micro DYN Prep", "loc": "E구역", "spec": "MCDPR-60-03-00/1box/15ea", "minStock": 1, "curStock": 2}, {"name": "의료용 헤드램프", "loc": "E구역", "spec": "0408-800-000/ea", "minStock": 10, "curStock": 20}]
+</script>
+
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzP5GPGaZ5-etMBwpWxUmY7kJA8VhWI0D8QV4ZqKWuGDvT2JoNq3HduwgykmPPknHmxzg/exec';
-const FALLBACK_ITEMS = [{"name": "BD angio catheter 18x30mm", "loc": "A구역", "spec": "18Gx30mm/1box", "minStock": 2, "curStock": 1}, {"name": "BD angio catheter 18x48mm", "loc": "A구역", "spec": "18Gx48mm/2box", "minStock": 1, "curStock": 1}, {"name": "BD angio catheter 22", "loc": "A구역", "spec": "22G ⓑ", "minStock": 2, "curStock": 1}, {"name": "BD angio catheter 24", "loc": "A구역", "spec": "24G ⓑ", "minStock": 2, "curStock": 2}, {"name": "18G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "23G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "25G needle", "loc": "A구역", "spec": "5/8 ⓑ", "minStock": 1, "curStock": 2}, {"name": "26G needle1/2", "loc": "A구역", "spec": "1/2 ⓑ", "minStock": 1, "curStock": 2}, {"name": "26G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 0}, {"name": "Endo pouch", "loc": "A구역", "spec": "TLB4040/1box/10개", "minStock": 10, "curStock": 1}, {"name": "Endoknot Coated Vicryl 0", "loc": "A구역", "spec": "straight 22mm", "minStock": 10, "curStock": 1}, {"name": "Soundreach(CS1405H)", "loc": "A구역", "spec": "5mmX14cm ⓑ", "minStock": 3, "curStock": 7}, {"name": "Soundreach", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Long Bovie tip(일회용손조절식전기수술기용전극)", "loc": "A구역", "spec": "BLM-40A ⓑ", "minStock": 1, "curStock": 1}, {"name": "AbsorbaTack(흡수성체내용스태플)", "loc": "A구역", "spec": "5mm ⓑ", "minStock": 1, "curStock": 1}, {"name": "Spacemaker Pro(SMBTTRNDX)", "loc": "A구역", "spec": "10mm-12mm ⓑ", "minStock": 1, "curStock": 3}, {"name": "HEALTHPORT Baxter (이식형의약품주입기)", "loc": "A구역", "spec": "SIN9027/1box", "minStock": 3, "curStock": 5}, {"name": "HEALTHPORT Baxter (카테터삽입기)", "loc": "A구역", "spec": "SIN9031/1box", "minStock": 3, "curStock": 4}, {"name": "chemoport needle (의약품직접주입기구)", "loc": "A구역", "spec": "ea (AH502015)", "minStock": 5, "curStock": 2}, {"name": "Ovum Aspiration Needle Single Lumen", "loc": "A구역", "spec": "K-OPS-1035-RWH-ET", "minStock": 5, "curStock": 7}, {"name": "Meta Clip-p PCLL03A", "loc": "A구역", "spec": "PCLL03A", "minStock": 1, "curStock": 1}, {"name": "Meta Clip-p PCXL04A", "loc": "A구역", "spec": "PCXL04A", "minStock": 1, "curStock": 1}, {"name": "메디커튼가이드", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Lap Loop Suture", "loc": "A구역", "spec": "1-0/Suture/1box20개", "minStock": 2, "curStock": 1}, {"name": "Lap Loop Tie", "loc": "A구역", "spec": "SutureTie", "minStock": 1, "curStock": 2}, {"name": "One pouch(Sunmedix) 500", "loc": "A구역", "spec": "500ml ⓑ", "minStock": 5, "curStock": 15}, {"name": "One pouch(Sunmedix) 700", "loc": "A구역", "spec": "700ml ⓑ", "minStock": 10, "curStock": 5}, {"name": "비아이펀넬", "loc": "A구역", "spec": "1box/5ea", "minStock": 1, "curStock": 1}, {"name": "1cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 0.5}, {"name": "3cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 4}, {"name": "5cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 1}, {"name": "10cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 1}, {"name": "20cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 5, "curStock": 2}, {"name": "50cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 3}, {"name": "60cc syringe", "loc": "A구역", "spec": "enema용 ⓑ", "minStock": 1, "curStock": 2}, {"name": "TOT mesh", "loc": "A구역", "spec": "ⓑ", "minStock": 5, "curStock": 6}, {"name": "One port 3.4구", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 7}, {"name": "Penco Bio-Port 12mm trocar", "loc": "A구역", "spec": "ea", "minStock": 3, "curStock": 1}, {"name": "Penco Bio-Port 10mm trocar", "loc": "A구역", "spec": "1box/6ea", "minStock": 2, "curStock": 4}, {"name": "Penco Bio-Port 5mm trocar", "loc": "A구역", "spec": "1box/6ea", "minStock": 2, "curStock": 3}, {"name": "POPUP mesh", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 13}, {"name": "Urine bag", "loc": "A구역", "spec": "묶음", "minStock": 20, "curStock": 40}, {"name": "8Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "14Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "16Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 6}, {"name": "24Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "BT Drainage Tube", "loc": "A구역", "spec": "BT Circle 6 ⓑ", "minStock": 5, "curStock": 7}, {"name": "소다라임", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 12}, {"name": "Sani Sleeve", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 3}, {"name": "Endo tracheal tube 6-1", "loc": "A구역", "spec": "6 ⓑ", "minStock": 1, "curStock": 4}, {"name": "Endo tracheal tube  6.5-1", "loc": "A구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 4}, {"name": "Endo tracheal tube 7-1", "loc": "A구역", "spec": "7.0 ⓑ", "minStock": 1, "curStock": 7}, {"name": "Endo tracheal tube(갑상선) 6", "loc": "A구역", "spec": "6.0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Endo tracheal tube(갑상선) 6.5", "loc": "A구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Endo tracheal tube(갑상선) 7-1", "loc": "A구역", "spec": "7.0 ⓑ", "minStock": 1, "curStock": 8}, {"name": "airway #5", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 20}, {"name": "Suction catheter", "loc": "A구역", "spec": "N110-02-12/ea", "minStock": 20, "curStock": 50}, {"name": "요관용스텐트", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "The RUMZ system(Disposable Ulterine Manipulator tip)", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 3}, {"name": "Hartz Raum", "loc": "A구역", "spec": "D-5Fr-S110-7/ea", "minStock": 2, "curStock": 3}, {"name": "혈관내 튜브카테터(picc)", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "혈관내 튜브카테터(c-line)", "loc": "A구역", "spec": "ea", "minStock": 3, "curStock": 3}, {"name": "VISISTAT(스킨 스테플러)", "loc": "A구역", "spec": "35W/box", "minStock": 5, "curStock": 15}, {"name": "일회용수술용스태플기구(remover)", "loc": "A구역", "spec": "ea", "minStock": 2, "curStock": 2}, {"name": "Kronnner Manipujector", "loc": "A구역", "spec": "6003/ea", "minStock": 5, "curStock": 13}, {"name": "Uni Circuit Ⅱ", "loc": "A구역", "spec": "성인 180cm/3L/ea", "minStock": 10, "curStock": 6}, {"name": "AirSoft Mask", "loc": "A구역", "spec": "#5 W/Valve/ea", "minStock": 10, "curStock": 9}, {"name": "Vido Laryngoscope Handle", "loc": "A구역", "spec": "1box", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade00", "loc": "A구역", "spec": "CR-D-MIL00", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade0", "loc": "A구역", "spec": "CR-D-MIL0", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade1", "loc": "A구역", "spec": "CR-D-MAC1", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade2", "loc": "A구역", "spec": "CR-D-MAC2", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade3", "loc": "A구역", "spec": "CR-D-MAC3", "minStock": 3, "curStock": 8}, {"name": "Sugisorb (sv113) 1", "loc": "B구역", "spec": "1/40mm/ⓑ", "minStock": 2, "curStock": 1}, {"name": "Sugisorb (sv213) 2-0", "loc": "B구역", "spec": "2-0/36mm/ⓑ", "minStock": 2, "curStock": 7}, {"name": "Sugisorb (sv211) 2-0 26mm", "loc": "B구역", "spec": "2-0/26mm/ⓑ", "minStock": 2, "curStock": 3}, {"name": "Sugisorb (sv317) 3-0", "loc": "B구역", "spec": "3-0/26mm/ⓑ", "minStock": 2, "curStock": 1.5}, {"name": "Sugisorb (sv432) 4-0 16mm", "loc": "B구역", "spec": "4-0/16mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "surgisorb(sv413) 4-0", "loc": "B구역", "spec": "4-0/ 17mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb (sv512) 5-0", "loc": "B구역", "spec": "5-0/13mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon (NB324) 3-0 ©", "loc": "B구역", "spec": "3-0©/25mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "Nylon (NB434) 4-0 ©", "loc": "B구역", "spec": "4-0©/18mm/ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Nylon (NB526) 5-0 ©", "loc": "B구역", "spec": "5-0©/15mm/ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Nylon (NB717)7-0 ©", "loc": "B구역", "spec": "7-0©/11mm/ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Polysorb (UL878)", "loc": "B구역", "spec": "2-0/27mm/ⓑ", "minStock": 1, "curStock": 2}, {"name": "Chromic (CO122)", "loc": "B구역", "spec": "1-0/37mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Monosyn (C2023624)", "loc": "B구역", "spec": "4-0/19mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "V-loc(180)", "loc": "B구역", "spec": "0/1box/5ea", "minStock": 2, "curStock": 5}, {"name": "V-loc(90)", "loc": "B구역", "spec": "2-0/1box/5ea", "minStock": 2, "curStock": 14}, {"name": "White Silk 5", "loc": "B구역", "spec": "No.5", "minStock": 5, "curStock": 24}, {"name": "White Silk 6", "loc": "B구역", "spec": "No.6", "minStock": 5, "curStock": 62}, {"name": "White Silk 7", "loc": "B구역", "spec": "No.7", "minStock": 5, "curStock": 12}, {"name": "White Silk 8", "loc": "B구역", "spec": "No.8", "minStock": 5, "curStock": 2}, {"name": "Mess 10-1", "loc": "B구역", "spec": "10# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 11-1", "loc": "B구역", "spec": "11# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 15-1", "loc": "B구역", "spec": "15# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 20", "loc": "B구역", "spec": "20# ⓑ", "minStock": 1, "curStock": 1}, {"name": "AIDerm 6x7cm", "loc": "B구역", "spec": "6x7cm/ⓑ", "minStock": 2, "curStock": 3}, {"name": "AIDerm 10x10cm", "loc": "B구역", "spec": "10x10cm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "금실 13mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 60, "curStock": 8}, {"name": "금실 25mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 15, "curStock": 15}, {"name": "금실 38mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 120, "curStock": 15}, {"name": "Surgicel Original", "loc": "B구역", "spec": "19535/5.1X7.6cm/1box", "minStock": 1, "curStock": 1}, {"name": "Tegaderm", "loc": "B구역", "spec": "1626W/10x12cm/1box", "minStock": 1, "curStock": 2}, {"name": "메디터치 Border", "loc": "B구역", "spec": "5.5mmx6.5mm/1box", "minStock": 1, "curStock": 1}, {"name": "Steri-Strip 6mm", "loc": "B구역", "spec": "6mm/ea", "minStock": 20, "curStock": 0.1}, {"name": "Steri-Strip 12mm", "loc": "B구역", "spec": "12mm/ea", "minStock": 1, "curStock": 1}, {"name": "Spinal Needle 18G", "loc": "B구역", "spec": "18Gx90mm/1box/50ea", "minStock": 1, "curStock": 1}, {"name": "박스테이프", "loc": "B구역", "spec": "롤", "minStock": 2, "curStock": 3}, {"name": "Rely + On Parasafe 100mg", "loc": "B구역", "spec": "100mg/통", "minStock": 2, "curStock": 2}, {"name": "Rely + On Parasafe", "loc": "B구역", "spec": "Test Tip", "minStock": 1, "curStock": 3}, {"name": "Bio Spike Guard", "loc": "B구역", "spec": "1box", "minStock": 1, "curStock": 0.2}, {"name": "고무장갑", "loc": "B구역", "spec": "S사이즈/ea", "minStock": 2, "curStock": 0}, {"name": "물티슈", "loc": "B구역", "spec": "ea", "minStock": 3, "curStock": 2}, {"name": "CUTAN PLAST", "loc": "B구역", "spec": "80x50x10mm/1box", "minStock": 1, "curStock": 1}, {"name": "Liqui Band Surgical", "loc": "B구역", "spec": "S/ea", "minStock": 1, "curStock": 1}, {"name": "N/S 1000", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 3, "curStock": 1}, {"name": "N/S 500", "loc": "C구역", "spec": "500ml ⓑ", "minStock": 1, "curStock": 0.3}, {"name": "N/S 100", "loc": "C구역", "spec": "100ml ⓑ", "minStock": 2, "curStock": 2}, {"name": "N/S 20", "loc": "C구역", "spec": "20ml ⓑ", "minStock": 1, "curStock": 4}, {"name": "H/S", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 2, "curStock": 1}, {"name": "D/W", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 1, "curStock": 0.2}, {"name": "D/S 1000", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 0, "curStock": 0.2}, {"name": "D/S 500", "loc": "C구역", "spec": "500ml ⓑ", "minStock": 0, "curStock": 0.2}, {"name": "생리식염키트주사", "loc": "C구역", "spec": "250ml", "minStock": 1, "curStock": 11}, {"name": "MarkingPen", "loc": "C구역", "spec": "PK-DSMP01", "minStock": 1, "curStock": 2}, {"name": "4*4 Gauze", "loc": "C구역", "spec": "10x10x8겹/1box/20매", "minStock": 10, "curStock": 11}, {"name": "수성 탈지면롤 에스 3호", "loc": "C구역", "spec": "3호 20mm/봉지", "minStock": 5, "curStock": 5}, {"name": "수성 탈지면롤 에스 5호", "loc": "C구역", "spec": "5호 32mm/봉지", "minStock": 5, "curStock": 4}, {"name": "대한위재 거즈-에스 (거즈볼형)", "loc": "C구역", "spec": "22x25cm/봉지/200매", "minStock": 3, "curStock": 2}, {"name": "Baro Vac(SS100M 3.2)", "loc": "C구역", "spec": "100ml/1box", "minStock": 2, "curStock": 2}, {"name": "Baro Vac(PP400M 3.2)", "loc": "C구역", "spec": "400ml/1box", "minStock": 1, "curStock": 3}, {"name": "Vabien(SL0837)", "loc": "C구역", "spec": "5mmX37cm (curved) ⓑ", "minStock": 10, "curStock": 13}, {"name": "일회용발조절식전기수술기용전극", "loc": "C구역", "spec": "5x330mm", "minStock": 10, "curStock": 43}, {"name": "멸균증류수", "loc": "C구역", "spec": "1L ⓑ", "minStock": 3, "curStock": 2}, {"name": "크린조", "loc": "C구역", "spec": "1L ⓑ", "minStock": 3, "curStock": 10}, {"name": "5.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "6.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 1}, {"name": "6.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 3}, {"name": "7.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 3, "curStock": 4}, {"name": "7.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 3}, {"name": "8.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 1}, {"name": "해피레이", "loc": "C구역", "spec": "봉지/10ea", "minStock": 30, "curStock": 31}, {"name": "안심포인트", "loc": "C구역", "spec": "L/60x75cm/1box/50ea", "minStock": 1, "curStock": 2}, {"name": "복대", "loc": "C구역", "spec": "ea", "minStock": 30, "curStock": 34}, {"name": "프로테스칼", "loc": "C구역", "spec": "1.5ml ⓑ", "minStock": 10, "curStock": 30}, {"name": "그린플라스트큐", "loc": "C구역", "spec": "ⓑ", "minStock": 10, "curStock": 10}, {"name": "타코실 2매", "loc": "C구역", "spec": "4.8x4.8cm/box", "minStock": 5, "curStock": 10}, {"name": "타코실 roll", "loc": "C구역", "spec": "4.8x4.8cm/box", "minStock": 10, "curStock": 13}, {"name": "Bovie (일반)", "loc": "C구역", "spec": "EP-3025M/1box/25ea", "minStock": 1, "curStock": 1.5}, {"name": "Bovie (뾰족)", "loc": "C구역", "spec": "EP-3027M-N/1box/25ea", "minStock": 1, "curStock": 2}, {"name": "G-Plate", "loc": "C구역", "spec": "GD7131C/1box", "minStock": 0.5, "curStock": 0.5}, {"name": "수액세트", "loc": "C구역", "spec": "M122/봉지", "minStock": 1, "curStock": 1}, {"name": "Extension Line", "loc": "C구역", "spec": "90mm/봉지", "minStock": 1, "curStock": 1}, {"name": "Accufuser Puls", "loc": "C구역", "spec": "P2015M/1box/10ea", "minStock": 2, "curStock": 2}, {"name": "Mommy Caty - Plus", "loc": "C구역", "spec": "MCPO2KR-S", "minStock": 10, "curStock": 18}, {"name": "포비돈소독용", "loc": "C구역", "spec": "소독용4L", "minStock": 5, "curStock": 5}, {"name": "포비돈세정용", "loc": "C구역", "spec": "세정용4L", "minStock": 2, "curStock": 2.5}, {"name": "ALCOHOL(알콜)70%", "loc": "C구역", "spec": "18L", "minStock": 1, "curStock": 0.2}, {"name": "그린소독용에탄올", "loc": "C구역", "spec": "1L", "minStock": 5, "curStock": 6}, {"name": "이아루릴 프리필 50ml", "loc": "C구역", "spec": "E03614 ⓑ", "minStock": 40, "curStock": 21}, {"name": "ARTISENTIAL", "loc": "C구역", "spec": "8mmx250mm/1box", "minStock": 3, "curStock": 4}, {"name": "E.O Gas Pouch 10cm", "loc": "C구역", "spec": "10cm", "minStock": 1, "curStock": 1.5}, {"name": "E.O Gas Pouch 20cm", "loc": "C구역", "spec": "20cm", "minStock": 1, "curStock": 0}, {"name": "E.O Gas Pouch 30cm", "loc": "C구역", "spec": "30cm", "minStock": 1, "curStock": 0.5}, {"name": "E.O Gas Pouch 40cm", "loc": "C구역", "spec": "40cm", "minStock": 1, "curStock": 1.5}, {"name": "집진매트", "loc": "C구역", "spec": "MAT/445mmx1155mm", "minStock": 2, "curStock": 1.5}, {"name": "3M E.O Gas Indicator", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "3M Steam Indicator", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "3M Steam Indicator Tape", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "Poly - Glove", "loc": "C구역", "spec": "1box/200장", "minStock": 3, "curStock": 2}, {"name": "Eol Swab (알콜솜)", "loc": "C구역", "spec": "", "minStock": 5, "curStock": 7}, {"name": "3M Micoropore Tape (White)", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 3}, {"name": "3M Duraproe", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 1}, {"name": "3M Transproe", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 1}, {"name": "Lidocaine Jelly", "loc": "C구역", "spec": "120g/ea", "minStock": 1, "curStock": 10}, {"name": "모아랩 일반형 밴드", "loc": "C구역", "spec": "20mm/100매", "minStock": 1, "curStock": 3}, {"name": "3M Monitoring Electrode", "loc": "C구역", "spec": "2223H/봉", "minStock": 3, "curStock": 1}, {"name": "Hand Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 3}, {"name": "Knee Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "Knee A/S Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 1}, {"name": "Shoulder A/S Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.5}, {"name": "Shoulder Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.2}, {"name": "Hip Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.2}, {"name": "Basic Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "TKRA Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "Breast Pack(1box=4개)(3시간이내) CB1700", "loc": "D구역", "spec": "1box/4pack", "minStock": 2, "curStock": 3}, {"name": "Breast Pack(1box=4개)(3시간이상) SJ-CBS-400-1", "loc": "D구역", "spec": "1box/4pack", "minStock": 2, "curStock": 5}, {"name": "Nomal DeliveryPack(Drape-7ea)1시간미만팩", "loc": "D구역", "spec": "1box/7pack", "minStock": 2, "curStock": 10}, {"name": "세보프란", "loc": "D구역", "spec": "1box", "minStock": 5, "curStock": 6}, {"name": "리알로 1cc", "loc": "D구역", "spec": "RIDM1020 ⓑ", "minStock": 5, "curStock": 8}, {"name": "라큐디 1.5ml", "loc": "D구역", "spec": "1.5ml ⓑ", "minStock": 5, "curStock": 6}, {"name": "라큐디 20ml", "loc": "D구역", "spec": "2.0ml ⓑ", "minStock": 5, "curStock": 4}, {"name": "MR tip 4번", "loc": "D구역", "spec": "4번", "minStock": 5, "curStock": 30}, {"name": "MR tip 5번", "loc": "D구역", "spec": "5번", "minStock": 5, "curStock": 8}, {"name": "MR tip 6번", "loc": "D구역", "spec": "6번", "minStock": 10, "curStock": 6}, {"name": "Endo suction", "loc": "D구역", "spec": "open end type", "minStock": 2, "curStock": 3}, {"name": "LC-20(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LC-25(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-10(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-20(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-25(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "BA-513(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 12}, {"name": "K03(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 7}, {"name": "E01(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "Condyloma Tip(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "알보칠", "loc": "D구역", "spec": "병", "minStock": 1, "curStock": 1}, {"name": "초음파 프푸브 커버", "loc": "D구역", "spec": "DFO-PCL-R/1box", "minStock": 1, "curStock": 0}, {"name": "라미나리아 1번", "loc": "D구역", "spec": "1번", "minStock": 5, "curStock": 7}, {"name": "라미나리아 3번", "loc": "D구역", "spec": "3번", "minStock": 5, "curStock": 4}, {"name": "라미나리아 5번", "loc": "D구역", "spec": "5번", "minStock": 5, "curStock": 2}, {"name": "Dual tulip", "loc": "D구역", "spec": "봉지", "minStock": 5, "curStock": 4}, {"name": "더모픽스", "loc": "D구역", "spec": "ea", "minStock": 5, "curStock": 3}, {"name": "지노브이", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "지노프로", "loc": "D구역", "spec": "ea", "minStock": 5, "curStock": 11}, {"name": "지노베타딘", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "지노콜라", "loc": "D구역", "spec": "ea", "minStock": 10, "curStock": 3}, {"name": "오베스틴", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "유트로게스탄", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "뮤라젠", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Catetere MMS U-71501직장용 튜브 • 카테터", "loc": "D구역", "spec": "7.5fr/묶음", "minStock": 10, "curStock": 64}, {"name": "Catetere MMS U-72603 요로내압 측정 • 카테터", "loc": "D구역", "spec": "6fr/묶음", "minStock": 10, "curStock": 65}, {"name": "Super UL STAR(초음파 프린트용지)", "loc": "D구역", "spec": "1100HG/1box/6ea", "minStock": 1, "curStock": 1.5}, {"name": "Pro Care (Latex Glove)", "loc": "D구역", "spec": "KL101512A/XS/box", "minStock": 1, "curStock": 2}, {"name": "SONO Jelly", "loc": "D구역", "spec": "통", "minStock": 1, "curStock": 0.1}, {"name": "일회용 면도기", "loc": "D구역", "spec": "box", "minStock": 20, "curStock": 1}, {"name": "KM SURGEON CAP", "loc": "D구역", "spec": "CA-101-1/100pcs/box", "minStock": 2, "curStock": 1}, {"name": "일회용 마스크", "loc": "D구역", "spec": "50ea/box", "minStock": 3, "curStock": 5}, {"name": "헥시딘 스크랍", "loc": "D구역", "spec": "15ml/1box/20개", "minStock": 2, "curStock": 1}, {"name": "DISPOSABLE CAP(KM) 수술용모자(청색-일회용)", "loc": "D구역", "spec": "NURS/BLUE/1BOX/100EA", "minStock": 2, "curStock": 5}, {"name": "Surgical Mask", "loc": "D구역", "spec": "50ea/box", "minStock": 2, "curStock": 2}, {"name": "Sugisorb 1", "loc": "E구역", "spec": "1 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb 2-0", "loc": "E구역", "spec": "2-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb 3-0", "loc": "E구역", "spec": "3-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Vicryl 4-0", "loc": "E구역", "spec": "4-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon 1-0", "loc": "E구역", "spec": "1-0© ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Nylon 2-0", "loc": "E구역", "spec": "2-0©", "minStock": 1, "curStock": 0.1}, {"name": "Nylon 4-0", "loc": "E구역", "spec": "4-0© ⓑ", "minStock": 1, "curStock": 2}, {"name": "Nylon 5-0", "loc": "E구역", "spec": "5-0© ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Nylon 6-0", "loc": "E구역", "spec": "6-0© ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon 3-0 ®", "loc": "E구역", "spec": "3-0® ⓑ", "minStock": 1, "curStock": 2}, {"name": "Nylon 4-0 ®", "loc": "E구역", "spec": "4-0® ⓑ", "minStock": 1, "curStock": 1}, {"name": "Ethibond 2", "loc": "E구역", "spec": "2/X4843G", "minStock": 1, "curStock": 0.5}, {"name": "Ethibond 5", "loc": "E구역", "spec": "5", "minStock": 1, "curStock": 1}, {"name": "프리베리3", "loc": "E구역", "spec": "3ml/box", "minStock": 5, "curStock": 10}, {"name": "수동식 일회용 천공기 SWVP-135", "loc": "E구역", "spec": "SWVP-135/box", "minStock": 2, "curStock": 2}, {"name": "수동식 일회용 천공기 SWVP-115", "loc": "E구역", "spec": "SWVP-115/box", "minStock": 2, "curStock": 2}, {"name": "Bone Cement(골시멘트)", "loc": "E구역", "spec": "SPINOFILL/box", "minStock": 2, "curStock": 2}, {"name": "Mess 10", "loc": "E구역", "spec": "10# ⓑ", "minStock": 1, "curStock": 1}, {"name": "Mess 11", "loc": "E구역", "spec": "11# ⓑ", "minStock": 1, "curStock": 1}, {"name": "Mess 15", "loc": "E구역", "spec": "15# ⓑ", "minStock": 1, "curStock": 1}, {"name": "하이겐트 5x5", "loc": "E구역", "spec": "5x5cm", "minStock": 3, "curStock": 9}, {"name": "하이겐트 10x10", "loc": "E구역", "spec": "10x10cm", "minStock": 3, "curStock": 3}, {"name": "AIDerm", "loc": "E구역", "spec": "6x7cm/box", "minStock": 1, "curStock": 1}, {"name": "Allevyn Life heel (25cm x 25.2cm)", "loc": "E구역", "spec": "66801304/1box", "minStock": 1, "curStock": 1}, {"name": "Bactigra", "loc": "E구역", "spec": "10x10", "minStock": 1, "curStock": 2}, {"name": "Bone Stat", "loc": "E구역", "spec": "25ml ⓑ", "minStock": 1, "curStock": 2}, {"name": "MarkingPen-1", "loc": "E구역", "spec": "ea", "minStock": 10, "curStock": 10}, {"name": "Fix Gard 2inch", "loc": "E구역", "spec": "2inch/1box", "minStock": 0.5, "curStock": 0.8}, {"name": "Fix Gard 3inch", "loc": "E구역", "spec": "3inch/1box", "minStock": 2, "curStock": 2}, {"name": "Fix Gard 4inch", "loc": "E구역", "spec": "4inch/1box", "minStock": 2, "curStock": 1}, {"name": "Fix Gard 6inch", "loc": "E구역", "spec": "6inch/1box", "minStock": 2, "curStock": 2}, {"name": "Barovac 400cc(k3002104세운)", "loc": "E구역", "spec": "PP400L(4.8)/1box/5개  ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Surgi Van", "loc": "E구역", "spec": "60x45 ⓑ", "minStock": 1, "curStock": 2}, {"name": "WellFlowBand", "loc": "E구역", "spec": "Line/1box/50개", "minStock": 10, "curStock": 10}, {"name": "의료용 세정기 TUR Y-Set", "loc": "E구역", "spec": "HS-E-100/ea", "minStock": 5, "curStock": 11}, {"name": "Sorbact 7x9", "loc": "E구역", "spec": "7x9", "minStock": 1, "curStock": 12}, {"name": "Sorbact 10x10", "loc": "E구역", "spec": "10x10", "minStock": 1, "curStock": 7}, {"name": "Sorbact 10x20", "loc": "E구역", "spec": "10x20", "minStock": 1, "curStock": 10}, {"name": "Roll Wire 0.18mm", "loc": "E구역", "spec": "0.18mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.32mm", "loc": "E구역", "spec": "0.32mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.38mm", "loc": "E구역", "spec": "0.38mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.46mm", "loc": "E구역", "spec": "0.46mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.56mm", "loc": "E구역", "spec": "0.56mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.76mm", "loc": "E구역", "spec": "0.76mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.86mm", "loc": "E구역", "spec": "0.86mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 1.0mm", "loc": "E구역", "spec": "1.0mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 1.2mm", "loc": "E구역", "spec": "1.2mm", "minStock": 1, "curStock": 1}, {"name": "K-Wire 0.8", "loc": "E구역", "spec": "0.8", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1", "loc": "E구역", "spec": "1", "minStock": 1, "curStock": 2}, {"name": "K-Wire 1.2", "loc": "E구역", "spec": "1.2", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1.4", "loc": "E구역", "spec": "1.4", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1.6", "loc": "E구역", "spec": "1.6", "minStock": 1, "curStock": 2}, {"name": "K-Wire1.8", "loc": "E구역", "spec": "1.8", "minStock": 1, "curStock": 2}, {"name": "Ball K-Wire 0.9", "loc": "E구역", "spec": "0.9", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1", "loc": "E구역", "spec": "1", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.2", "loc": "E구역", "spec": "1.2", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.4", "loc": "E구역", "spec": "1.4", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.6", "loc": "E구역", "spec": "1.6", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.8", "loc": "E구역", "spec": "1.8", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2", "loc": "E구역", "spec": "2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.2", "loc": "E구역", "spec": "2.2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.4", "loc": "E구역", "spec": "2.4", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.8", "loc": "E구역", "spec": "2.8", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 3.2", "loc": "E구역", "spec": "3.2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 3.6", "loc": "E구역", "spec": "3.6", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 4", "loc": "E구역", "spec": "4", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 4.8", "loc": "E구역", "spec": "4.8", "minStock": 1, "curStock": 1}, {"name": "TC-Band 4인치", "loc": "E구역", "spec": "4인치/1box/12개", "minStock": 1, "curStock": 12}, {"name": "TC-Band 6인치", "loc": "E구역", "spec": "6인치/1box/9개", "minStock": 1, "curStock": 7}, {"name": "Tap Seal 10x40", "loc": "E구역", "spec": "10x40/1box/10개", "minStock": 1, "curStock": 2}, {"name": "Tap Seal 20x40", "loc": "E구역", "spec": "20x40/1box/5개", "minStock": 1, "curStock": 1}, {"name": "Cotton 3인치", "loc": "E구역", "spec": "3인치/ea", "minStock": 5, "curStock": 5}, {"name": "Cotton 4인치", "loc": "E구역", "spec": "4인치/ea", "minStock": 10, "curStock": 10}, {"name": "Cotton 6인치", "loc": "E구역", "spec": "6인치/ea", "minStock": 10, "curStock": 10}, {"name": "All Silicone Penrose Drainage Tube", "loc": "E구역", "spec": "8mmx300mm(봉)", "minStock": 1, "curStock": 1}, {"name": "VISISTAT(스킨 스테플러)", "loc": "E구역", "spec": "35W", "minStock": 1, "curStock": 15}, {"name": "Stapler Remover", "loc": "E구역", "spec": "Remover", "minStock": 1, "curStock": 1}, {"name": "Glove 6", "loc": "E구역", "spec": "6 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 6.5", "loc": "E구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 7", "loc": "E구역", "spec": "7 ⓑ", "minStock": 1, "curStock": 2}, {"name": "Glove 7.5", "loc": "E구역", "spec": "7.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 8", "loc": "E구역", "spec": "8 ⓑ", "minStock": 1, "curStock": 1}, {"name": "GAMMEX 7.5", "loc": "E구역", "spec": "7.5 ⓑ", "minStock": 1, "curStock": 2}, {"name": "GAMMEX 8", "loc": "E구역", "spec": "8 ⓑ", "minStock": 1, "curStock": 3}, {"name": "Double Arm Needle", "loc": "E구역", "spec": "1box", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Rrsector 4.0", "loc": "E구역", "spec": "Rrsector 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Aggressive 4.0", "loc": "E구역", "spec": "Aggressive 4.0/ea", "minStock": 1, "curStock": 2}, {"name": "Shaver Tip Round Burs 4.0", "loc": "E구역", "spec": "Round Burs 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Barrel Burs 4.0", "loc": "E구역", "spec": "Barrel Burs 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip ⓢHood Bur 2.0", "loc": "E구역", "spec": "ⓢHood Bur 2.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip ⓢRadius 2.5", "loc": "E구역", "spec": "ⓢRadius 2.5/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Tomcat 4.0", "loc": "E구역", "spec": "Tomcat 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Zeus-X", "loc": "E구역", "spec": "box", "minStock": 1, "curStock": 1}, {"name": "ST,Reed", "loc": "E구역", "spec": "box", "minStock": 2, "curStock": 3}, {"name": "JointSeal", "loc": "E구역", "spec": "box", "minStock": 3, "curStock": 3}, {"name": "본칩", "loc": "E구역", "spec": "15cc", "minStock": 1, "curStock": 1}, {"name": "본칩", "loc": "E구역", "spec": "30cc", "minStock": 1, "curStock": 1}, {"name": "Rafugen DBM Gel Pro0.5", "loc": "E구역", "spec": "0.5cc", "minStock": 1, "curStock": 1}, {"name": "Rafugen DBM Gel Pro1", "loc": "E구역", "spec": "1cc", "minStock": 1, "curStock": 2}, {"name": "Fast Fix 360", "loc": "E구역", "spec": "box", "minStock": 5, "curStock": 5}, {"name": "Bovie Pro Pencil(EP-302M)", "loc": "E구역", "spec": "일반용/1box", "minStock": 10, "curStock": 10}, {"name": "G-PLATE1", "loc": "E구역", "spec": "GD7131C/1box", "minStock": 10, "curStock": 10}, {"name": "대한관류용 멸균생리식염수", "loc": "E구역", "spec": "1000ML/1box/10개", "minStock": 1, "curStock": 13}, {"name": "삼진 타우로린 주사2%", "loc": "E구역", "spec": "250ml/1box/10개", "minStock": 1, "curStock": 18}, {"name": "B-cover Band", "loc": "E구역", "spec": "1box/30개", "minStock": 15, "curStock": 33}, {"name": "생리식염수관주액 (세척용)", "loc": "E구역", "spec": "3000ml/1box/4개", "minStock": 2, "curStock": 3}, {"name": "WellFlowBand Bottle", "loc": "E구역", "spec": "Bottle/1box/50개", "minStock": 15, "curStock": 7}, {"name": "Tonic-band(토니켓 대)", "loc": "E구역", "spec": "대/ea", "minStock": 10, "curStock": 10}, {"name": "Tonic-band(토니켓 중)", "loc": "E구역", "spec": "중/ea", "minStock": 10, "curStock": 21}, {"name": "Tonic-band(토니켓 소)", "loc": "E구역", "spec": "소/ea", "minStock": 3, "curStock": 6}, {"name": "과산화수소수(H2O2)/그린", "loc": "E구역", "spec": "250ml/ea", "minStock": 10, "curStock": 10}, {"name": "그린에탄올 1L", "loc": "E구역", "spec": "1L/통", "minStock": 2, "curStock": 2}, {"name": "솜붕대 3inch", "loc": "E구역", "spec": "7.5cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 0}, {"name": "솜붕대 4inch", "loc": "E구역", "spec": "10cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 3}, {"name": "솜붕대 6inch", "loc": "E구역", "spec": "15cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 3}, {"name": "탄력붕대 두원 3inch", "loc": "E구역", "spec": "7.5cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 2}, {"name": "탄력붕대 두원 4inch", "loc": "E구역", "spec": "10cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 2}, {"name": "탄력붕대 두원 6inch", "loc": "E구역", "spec": "15cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 105}, {"name": "3M Coban Self Adherent Wrap 1inch", "loc": "E구역", "spec": "2.5cmx2m/1box/30rolls", "minStock": 1, "curStock": 1}, {"name": "4M Coban Self Adherent Wrap 2inch", "loc": "E구역", "spec": "5cmx2m/1box/36rolls", "minStock": 1, "curStock": 1}, {"name": "5M Coban Self Adherent Wrap 3inch", "loc": "E구역", "spec": "7.5cmx2m/1box/24rolls", "minStock": 1, "curStock": 1}, {"name": "BMAC-Kit", "loc": "E구역", "spec": "", "minStock": 2, "curStock": 2}, {"name": "노트롬홈", "loc": "E구역", "spec": "3ml", "minStock": 2, "curStock": 3}, {"name": "세포탁심", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 9}, {"name": "CS Heated Cricuite", "loc": "E구역", "spec": "", "minStock": 10, "curStock": 9}, {"name": "소다라임", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 12}, {"name": "세보프란", "loc": "E구역", "spec": "", "minStock": 3, "curStock": 6}, {"name": "BIS Quatro Sensor", "loc": "E구역", "spec": "186-0106/1box/25개", "minStock": 1, "curStock": 0.6}, {"name": "Endotracheal Tube 6", "loc": "E구역", "spec": "6#", "minStock": 2, "curStock": 3}, {"name": "Endotracheal Tube 6.5", "loc": "E구역", "spec": "6.5#", "minStock": 2, "curStock": 3}, {"name": "Endotracheal Tube 7", "loc": "E구역", "spec": "7#", "minStock": 2, "curStock": 3}, {"name": "ReinForced Endotracheal Tube", "loc": "E구역", "spec": "7#", "minStock": 2, "curStock": 4}, {"name": "I-Gel", "loc": "E구역", "spec": "3#", "minStock": 2, "curStock": 2}, {"name": "LMA", "loc": "E구역", "spec": "4#", "minStock": 2, "curStock": 2}, {"name": "Scution Catheter", "loc": "E구역", "spec": "", "minStock": 2, "curStock": 2}, {"name": "Airway", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 5}, {"name": "픽스롤10*10(bm5103bl)4=Super Fix", "loc": "E구역", "spec": "bm5103bl/1box/1개", "minStock": 1, "curStock": 2}, {"name": "Spinal Needle", "loc": "E구역", "spec": "16G/1봉/10개", "minStock": 1, "curStock": 1}, {"name": "Spinal Needle(척추 마취용침)", "loc": "E구역", "spec": "26Gx90mm/1box/50PCS", "minStock": 1, "curStock": 1}, {"name": "일회용 멸균주사침", "loc": "E구역", "spec": "24Gx60mm/1box/200PCS", "minStock": 1, "curStock": 1}, {"name": "3-Way Filter Tube", "loc": "E구역", "spec": "5MR090SD/1box", "minStock": 1, "curStock": 1}, {"name": "Micro DYN Prep", "loc": "E구역", "spec": "MCDPR-60-03-00/1box/15ea", "minStock": 1, "curStock": 2}, {"name": "의료용 헤드램프", "loc": "E구역", "spec": "0408-800-000/ea", "minStock": 10, "curStock": 20}];
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzP5GPGaZ5-etMBwpWxUmY7kJA8VhWI0D8QV4ZqKWuGDvT2JoNq3HduwgykmPPknHmxzg/exec";
+const FALLBACK_ITEMS = JSON.parse(document.getElementById("app-data").textContent);
 
 let items = [];
 let weeklyData = [];
-let history = JSON.parse(localStorage.getItem('or_history_v5') || '[]');
-let dashFilter = 'all';
-let dashSearch = '';
-let dashArea = 'all';
+let reqHistory = JSON.parse(localStorage.getItem("or_history_v5") || "[]");
+let dashFilter = "all";
+let dashSearch = "";
+let dashArea = "all";
 let searchTimer = null;
 let isLive = false;
 
 async function callScript(params, body) {
   let url = SCRIPT_URL;
-  if (params) url += '?' + new URLSearchParams(params).toString();
-  const opts = {method:'GET'};
+  if (params) url += "?" + new URLSearchParams(params).toString();
+  const opts = {method: "GET"};
   if (body) {
-    opts.method = 'POST';
-    opts.headers = {'Content-Type':'text/plain;charset=utf-8'};
+    opts.method = "POST";
+    opts.headers = {"Content-Type": "text/plain;charset=utf-8"};
     opts.body = JSON.stringify(body);
   }
   const res = await fetch(url, opts);
   const json = await res.json();
-  if (json.status === 'error') throw new Error(json.message);
+  if (json.status === "error") throw new Error(json.message);
   return json;
 }
 
 async function loadData() {
-  showToast('데이터 불러오는 중...');
+  showToast("데이터 불러오는 중...");
   try {
-    const res = await callScript({action:'getAll'});
+    const res = await callScript({action: "getAll"});
     items = res.data.master || [];
     weeklyData = res.data.weekly || [];
     isLive = true;
-    document.getElementById('connStatus').innerHTML = '<span class="conn-status live"><i class="ti ti-circle-filled" style="font-size:8px"></i>실시간 연결됨 · ' + items.length + '개 품목</span>';
+    document.getElementById("connStatus").innerHTML = "<span class=\"conn-status live\"><i class=\"ti ti-circle-filled\" style=\"font-size:8px\"></i>실시간 연결됨 · " + items.length + "개 품목</span>";
     renderAll();
-    showToast('✓ ' + items.length + '개 품목 로드 완료');
+    showToast("✓ " + items.length + "개 품목 로드 완료");
   } catch(e) {
-    // 연결 실패시 기본 데이터 사용
-    items = FALLBACK_ITEMS.map(i => Object.assign({}, i));
+    items = FALLBACK_ITEMS.map(function(i) { return Object.assign({}, i); });
     isLive = false;
-    document.getElementById('connStatus').innerHTML = '<span class="conn-status error"><i class="ti ti-alert-circle" style="font-size:11px"></i>오프라인 · ' + items.length + '개 품목</span>';
+    document.getElementById("connStatus").innerHTML = "<span class=\"conn-status error\"><i class=\"ti ti-alert-circle\" style=\"font-size:11px\"></i>오프라인 · " + items.length + "개 품목</span>";
     renderAll();
-    showToast('오프라인 모드 (기본 데이터)');
+    showToast("오프라인 모드");
   }
 }
 
 function getStatus(item) {
-  if (!item.minStock) return 'ok';
-  return item.curStock < item.minStock ? 'danger' : 'ok';
+  if (!item.minStock) return "ok";
+  return item.curStock < item.minStock ? "danger" : "ok";
 }
 
 function getAreas() {
-  return [...new Set(items.filter(i=>i.loc).map(i=>i.loc))].sort();
+  return Array.from(new Set(items.filter(function(i){return i.loc;}).map(function(i){return i.loc;}))).sort();
 }
 
 function renderAll() {
@@ -234,9 +237,10 @@ function renderAll() {
 }
 
 function onSearchInput(val) {
-  document.getElementById('searchClear').style.display = val ? 'block' : 'none';
+  var cl = document.getElementById("searchClear");
+  if (cl) cl.style.display = val ? "block" : "none";
   clearTimeout(searchTimer);
-  searchTimer = setTimeout(() => { dashSearch = val; renderDashboard(); }, 300);
+  searchTimer = setTimeout(function() { dashSearch = val; renderDashboard(); }, 300);
 }
 
 function onSearchCompose(val) {
@@ -246,302 +250,303 @@ function onSearchCompose(val) {
 }
 
 function clearSearch() {
-  document.getElementById('searchBox').value = '';
-  document.getElementById('searchClear').style.display = 'none';
-  dashSearch = '';
+  var sb = document.getElementById("searchBox");
+  var cl = document.getElementById("searchClear");
+  if (sb) sb.value = "";
+  if (cl) cl.style.display = "none";
+  dashSearch = "";
   renderDashboard();
 }
 
 function setAreaTab(area, el) {
   dashArea = area;
-  document.querySelectorAll('.area-tab').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll(".area-tab").forEach(function(b) { b.classList.remove("active"); });
+  el.classList.add("active");
   renderDashboard();
 }
 
 function renderDashboard() {
-  const valid = items.filter(i => i.name);
-  const shortage = valid.filter(i => getStatus(i)==='danger');
-  const stable = valid.filter(i => getStatus(i)==='ok');
-  const areas = getAreas();
+  var valid = items.filter(function(i) { return i.name; });
+  var shortage = valid.filter(function(i) { return getStatus(i) === "danger"; });
+  var stable = valid.filter(function(i) { return getStatus(i) === "ok"; });
+  var areas = getAreas();
 
-  let filtered = valid;
-  if (dashFilter === 'danger') filtered = shortage;
-  if (dashFilter === 'ok') filtered = stable;
-  if (dashArea !== 'all') filtered = filtered.filter(i => i.loc === dashArea);
+  var filtered = valid.slice();
+  if (dashFilter === "danger") filtered = shortage.slice();
+  if (dashFilter === "ok") filtered = stable.slice();
+  if (dashArea !== "all") filtered = filtered.filter(function(i) { return i.loc === dashArea; });
   if (dashSearch.trim()) {
-    const q = dashSearch.trim().toLowerCase();
-    filtered = filtered.filter(i =>
-      i.name.toLowerCase().includes(q) ||
-      (i.loc||'').toLowerCase().includes(q) ||
-      (i.spec||'').toLowerCase().includes(q)
-    );
+    var q = dashSearch.trim().toLowerCase();
+    filtered = filtered.filter(function(i) {
+      return i.name.toLowerCase().indexOf(q) >= 0 ||
+             (i.loc || "").toLowerCase().indexOf(q) >= 0 ||
+             (i.spec || "").toLowerCase().indexOf(q) >= 0;
+    });
   }
 
-  const byArea = {};
-  filtered.forEach(i => {
-    const a = i.loc || '기타';
+  var byArea = {};
+  filtered.forEach(function(i) {
+    var a = i.loc || "기타";
     if (!byArea[a]) byArea[a] = [];
     byArea[a].push(i);
   });
 
-  const curSearch = document.getElementById('searchBox') ? document.getElementById('searchBox').value : dashSearch;
+  var curSearch = document.getElementById("searchBox") ? document.getElementById("searchBox").value : dashSearch;
 
-  let html = `
-  <div class="summary-grid">
-    <div class="s-card"><div class="s-num danger">${shortage.length}</div><div class="s-label">재고부족</div></div>
-    <div class="s-card"><div class="s-num ok">${stable.length}</div><div class="s-label">정상</div></div>
-    <div class="s-card"><div class="s-num total">${valid.length}</div><div class="s-label">전체 품목</div></div>
-  </div>
-  <div class="search-wrap">
-    <i class="ti ti-search search-icon"></i>
-    <input class="search-input" id="searchBox" type="search" placeholder="품목명 검색..."
-      value="${curSearch.replace(/"/g,'&quot;')}"
-      oninput="onSearchInput(this.value)"
-      oncompositionend="onSearchCompose(this.value)"
-      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-    <button class="search-clear" id="searchClear" onclick="clearSearch()" style="display:${curSearch?'block':'none'}"><i class="ti ti-x"></i></button>
-  </div>
-  <div class="filter-row">
-    <button class="filter-btn ${dashFilter==='all'?'active':''}" onclick="dashFilter='all';renderDashboard()">전체</button>
-    <button class="filter-btn ${dashFilter==='danger'?'active':''}" onclick="dashFilter='danger';renderDashboard()">부족만</button>
-    <button class="filter-btn ${dashFilter==='ok'?'active':''}" onclick="dashFilter='ok';renderDashboard()">정상만</button>
-  </div>
-  <div class="area-tabs">
-    <button class="area-tab ${dashArea==='all'?'active':''}" onclick="setAreaTab('all',this)">전체</button>
-    ${areas.map(a=>`<button class="area-tab ${dashArea===a?'active':''}" onclick="setAreaTab('${a}',this)">${a}</button>`).join('')}
-  </div>`;
+  var areaBtns = areas.map(function(a) {
+    return "<button class=\"area-tab " + (dashArea === a ? "active" : "") + "\" onclick=\"setAreaTab('" + a + "',this)\">" + a + "</button>";
+  }).join("");
+
+  var html = "<div class=\"summary-grid\">" +
+    "<div class=\"s-card\"><div class=\"s-num danger\">" + shortage.length + "</div><div class=\"s-label\">재고부족</div></div>" +
+    "<div class=\"s-card\"><div class=\"s-num ok\">" + stable.length + "</div><div class=\"s-label\">정상</div></div>" +
+    "<div class=\"s-card\"><div class=\"s-num total\">" + valid.length + "</div><div class=\"s-label\">전체 품목</div></div>" +
+    "</div>" +
+    "<div class=\"search-wrap\">" +
+    "<i class=\"ti ti-search search-icon\"></i>" +
+    "<input class=\"search-input\" id=\"searchBox\" type=\"search\" placeholder=\"품목명 검색...\" value=\"" + curSearch.replace(/"/g, "&quot;") + "\" oninput=\"onSearchInput(this.value)\" oncompositionend=\"onSearchCompose(this.value)\" autocomplete=\"off\" autocorrect=\"off\" autocapitalize=\"off\" spellcheck=\"false\">" +
+    "<button class=\"search-clear\" id=\"searchClear\" onclick=\"clearSearch()\" style=\"display:" + (curSearch ? "block" : "none") + "\"><i class=\"ti ti-x\"></i></button>" +
+    "</div>" +
+    "<div class=\"filter-row\">" +
+    "<button class=\"filter-btn " + (dashFilter === "all" ? "active" : "") + "\" onclick=\"dashFilter=&apos;all&apos;;renderDashboard()\">전체</button>" +
+    "<button class=\"filter-btn " + (dashFilter === "danger" ? "active" : "") + "\" onclick=\"dashFilter=&apos;danger&apos;;renderDashboard()\">부족만</button>" +
+    "<button class=\"filter-btn " + (dashFilter === "ok" ? "active" : "") + "\" onclick=\"dashFilter=&apos;ok&apos;;renderDashboard()\">정상만</button>" +
+    "</div>" +
+    "<div class=\"area-tabs\">" +
+    "<button class=\"area-tab " + (dashArea === "all" ? "active" : "") + "\" onclick=\"setAreaTab(&apos;all&apos;,this)\">전체</button>" +
+    areaBtns +
+    "</div>";
 
   if (!filtered.length) {
-    html += `<div class="empty"><i class="ti ti-search" style="font-size:32px;display:block;margin-bottom:8px"></i>"${dashSearch}" 검색 결과가 없습니다</div>`;
+    html += "<div class=\"empty\"><i class=\"ti ti-search\" style=\"font-size:32px;display:block;margin-bottom:8px\"></i>검색 결과가 없습니다</div>";
   } else {
-    Object.keys(byArea).sort().forEach(area => {
-      html += `<div class="area-section"><div class="area-header"><span><i class="ti ti-map-pin" style="font-size:13px;margin-right:4px"></i>${area}</span><span style="font-size:11px">${byArea[area].length}개</span></div>`;
-      byArea[area].forEach(item => {
-        const s = getStatus(item);
-        const safeId = btoa(unescape(encodeURIComponent(item.name))).replace(/[^a-zA-Z0-9]/g,'');
-        const ne = item.name.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-        html += `<div class="item-card ${s}">
-          <div class="item-info">
-            <div class="item-name" title="${item.name}">${item.name}</div>
-            <div class="item-meta">${item.spec||''}${item.minStock?' · 적정 '+item.minStock+'개':''}</div>
-            <div style="margin-top:4px"><span class="badge ${s}">${s==='danger'?'재고부족':'정상'}</span></div>
-          </div>
-          <div class="stock-edit-box">
-            <input class="stock-inp" id="stock_${safeId}" type="number" value="${item.curStock}" min="0" step="0.5">
-            <button class="save-btn" onclick="saveStock('${ne}','stock_${safeId}')"><i class="ti ti-device-floppy" style="font-size:16px"></i></button>
-            <button class="del-btn" onclick="confirmDelete('${ne}')"><i class="ti ti-trash" style="font-size:16px"></i></button>
-          </div>
-        </div>`;
+    Object.keys(byArea).sort().forEach(function(area) {
+      html += "<div class=\"area-section\"><div class=\"area-header\"><span><i class=\"ti ti-map-pin\" style=\"font-size:13px;margin-right:4px\"></i>" + area + "</span><span style=\"font-size:11px\">" + byArea[area].length + "개</span></div>";
+      byArea[area].forEach(function(item, idx) {
+        var s = getStatus(item);
+        var safeId = btoa(encodeURIComponent(item.name)).replace(/[^a-zA-Z0-9]/g, "");
+        var dataIdx = items.indexOf(item);
+        html += "<div class=\"item-card " + s + "\">" +
+          "<div class=\"item-info\">" +
+          "<div class=\"item-name\">" + item.name + "</div>" +
+          "<div class=\"item-meta\">" + (item.spec || "") + (item.minStock ? " · 적정 " + item.minStock + "개" : "") + "</div>" +
+          "<div style=\"margin-top:4px\"><span class=\"badge " + s + "\">" + (s === "danger" ? "재고부족" : "정상") + "</span></div>" +
+          "</div>" +
+          "<div class=\"stock-edit-box\">" +
+          "<input class=\"stock-inp\" id=\"stock_" + safeId + "\" type=\"number\" value=\"" + item.curStock + "\" min=\"0\" step=\"0.5\">" +
+          "<button class=\"save-btn\" onclick=\"saveStock(" + dataIdx + ",&apos;stock_" + safeId + "&apos;)\"><i class=\"ti ti-device-floppy\" style=\"font-size:16px\"></i></button>" +
+          "<button class=\"del-btn\" onclick=\"confirmDelete(" + dataIdx + ")\"><i class=\"ti ti-trash\" style=\"font-size:16px\"></i></button>" +
+          "</div></div>";
       });
-      html += '</div>';
+      html += "</div>";
     });
   }
-  document.getElementById('dash-content').innerHTML = html;
+  document.getElementById("dash-content").innerHTML = html;
 }
 
-async function saveStock(itemName, inputId) {
-  const val = parseFloat(document.getElementById(inputId).value) || 0;
-  showToast('저장 중...');
+async function saveStock(idx, inputId) {
+  var val = parseFloat(document.getElementById(inputId).value) || 0;
+  showToast("저장 중...");
   try {
-    if (isLive) {
-      await callScript(null, {action:'updateMasterStock', itemName, stock:val});
-    }
-    const item = items.find(i => i.name === itemName);
-    if (item) item.curStock = val;
-    showToast('✓ 재고 저장 완료');
-    renderDashboard(); renderRequest();
-  } catch(e) { showToast('저장 실패: '+e.message); }
+    if (isLive) await callScript(null, {action: "updateMasterStock", itemName: items[idx].name, stock: val});
+    items[idx].curStock = val;
+    showToast("✓ 재고 저장 완료");
+    renderDashboard();
+    renderRequest();
+  } catch(e) { showToast("저장 실패: " + e.message); }
 }
 
-async function confirmDelete(itemName) {
-  if (!confirm('"'+itemName+'"
+function confirmDelete(idx) {
+  if (!confirm(items[idx].name + "\n\n이 품목을 삭제할까요?")) return;
+  deleteItem(idx);
+}
 
-이 품목을 삭제할까요?')) return;
-  showToast('삭제 중...');
+async function deleteItem(idx) {
+  var name = items[idx].name;
+  showToast("삭제 중...");
   try {
-    if (isLive) {
-      await callScript(null, {action:'deleteItem', itemName});
-    }
-    items = items.filter(i => i.name !== itemName);
-    showToast('✓ 삭제 완료');
-    renderDashboard(); renderRequest();
-  } catch(e) { showToast('삭제 실패: '+e.message); }
+    if (isLive) await callScript(null, {action: "deleteItem", itemName: name});
+    items.splice(idx, 1);
+    showToast("✓ 삭제 완료");
+    renderDashboard();
+    renderRequest();
+  } catch(e) { showToast("삭제 실패: " + e.message); }
 }
 
 function openAddModal() {
-  ['newName','newLoc','newSpec','newMin','newCur'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('addModal').classList.add('show');
+  ["newName","newLoc","newSpec","newMin","newCur"].forEach(function(id) { document.getElementById(id).value = ""; });
+  document.getElementById("addModal").classList.add("show");
 }
-function closeAddModal() { document.getElementById('addModal').classList.remove('show'); }
+function closeAddModal() { document.getElementById("addModal").classList.remove("show"); }
 
 async function submitAddItem() {
-  const name = document.getElementById('newName').value.trim();
-  if (!name) { showToast('품목명을 입력해주세요'); return; }
-  if (items.find(i => i.name === name)) { showToast('이미 같은 이름의 품목이 있습니다'); return; }
-  const item = {
-    name, loc: document.getElementById('newLoc').value.trim(),
-    spec: document.getElementById('newSpec').value.trim(),
-    minStock: parseFloat(document.getElementById('newMin').value)||0,
-    curStock: parseFloat(document.getElementById('newCur').value)||0
+  var name = document.getElementById("newName").value.trim();
+  if (!name) { showToast("품목명을 입력해주세요"); return; }
+  if (items.find(function(i) { return i.name === name; })) { showToast("이미 같은 이름의 품목이 있습니다"); return; }
+  var item = {
+    name: name,
+    loc: document.getElementById("newLoc").value.trim(),
+    spec: document.getElementById("newSpec").value.trim(),
+    minStock: parseFloat(document.getElementById("newMin").value) || 0,
+    curStock: parseFloat(document.getElementById("newCur").value) || 0
   };
-  const btn = document.getElementById('addSubmitBtn');
+  var btn = document.getElementById("addSubmitBtn");
   btn.disabled = true;
-  showToast('추가 중...');
+  showToast("추가 중...");
   try {
-    if (isLive) {
-      await callScript(null, {action:'addItem', item});
-    }
+    if (isLive) await callScript(null, {action: "addItem", item: item});
     items.push(item);
     closeAddModal();
-    showToast('✓ '+name+' 추가 완료');
-    renderDashboard(); renderRequest();
-  } catch(e) { showToast('추가 실패: '+e.message); }
+    showToast("✓ " + name + " 추가 완료");
+    renderDashboard();
+    renderRequest();
+  } catch(e) { showToast("추가 실패: " + e.message); }
   finally { btn.disabled = false; }
 }
 
 function renderRequest() {
-  const shortage = items.filter(i => getStatus(i)==='danger' && i.minStock > 0);
+  var shortage = items.filter(function(i) { return getStatus(i) === "danger" && i.minStock > 0; });
   if (!shortage.length) {
-    document.getElementById('req-content').innerHTML = '<div class="empty"><i class="ti ti-circle-check" style="font-size:32px;display:block;margin-bottom:8px;color:#639922"></i>모든 재고가 정상입니다!</div>';
+    document.getElementById("req-content").innerHTML = "<div class=\"empty\"><i class=\"ti ti-circle-check\" style=\"font-size:32px;display:block;margin-bottom:8px;color:#639922\"></i>모든 재고가 정상입니다!</div>";
     return;
   }
-  let html = `<div class="req-card"><div class="req-header"><span><i class="ti ti-clipboard-list" style="font-size:14px;margin-right:4px"></i>물품 청구서 — 부족 ${shortage.length}개 품목</span><span style="font-size:11px">${new Date().toLocaleDateString('ko-KR')}</span></div>`;
-  shortage.forEach((item,idx) => {
-    const need = Math.max(0, item.minStock - item.curStock);
-    html += `<div class="req-row">
-      <div class="req-name"><p title="${item.name}">${item.name}</p><span>${item.loc} · ${item.spec}</span></div>
-      <div class="qty-ctrl">
-        <button class="qty-btn" onclick="adjQty('q${idx}',-1)">−</button>
-        <input class="qty-inp" id="q${idx}" type="number" value="${need}" min="0" step="0.5">
-        <button class="qty-btn" onclick="adjQty('q${idx}',1)">+</button>
-      </div>
-      <button class="chk-btn on" id="c${idx}" onclick="toggleChk(${idx})"><i class="ti ti-check"></i></button>
-    </div>`;
+  var html = "<div class=\"req-card\"><div class=\"req-header\"><span><i class=\"ti ti-clipboard-list\" style=\"font-size:14px;margin-right:4px\"></i>물품 청구서 — 부족 " + shortage.length + "개 품목</span><span style=\"font-size:11px\">" + new Date().toLocaleDateString("ko-KR") + "</span></div>";
+  shortage.forEach(function(item, idx) {
+    var need = Math.max(0, item.minStock - item.curStock);
+    html += "<div class=\"req-row\">" +
+      "<div class=\"req-name\"><p>" + item.name + "</p><span>" + item.loc + " · " + item.spec + "</span></div>" +
+      "<div class=\"qty-ctrl\">" +
+      "<button class=\"qty-btn\" onclick=\"adjQty(&apos;q" + idx + "&apos;,-1)\">−</button>" +
+      "<input class=\"qty-inp\" id=\"q" + idx + "\" type=\"number\" value=\"" + need + "\" min=\"0\" step=\"0.5\">" +
+      "<button class=\"qty-btn\" onclick=\"adjQty(&apos;q" + idx + "&apos;,1)\">+</button>" +
+      "</div>" +
+      "<button class=\"chk-btn on\" id=\"c" + idx + "\" onclick=\"toggleChk(" + idx + ")\"><i class=\"ti ti-check\"></i></button>" +
+      "</div>";
   });
-  html += `</div><button class="submit-btn" id="submitBtn" onclick="submitReq(${shortage.length})"><i class="ti ti-send" style="font-size:16px"></i>청구서 제출</button>`;
-  document.getElementById('req-content').innerHTML = html;
+  html += "</div><button class=\"submit-btn\" id=\"submitBtn\" onclick=\"submitReq(" + shortage.length + ")\"><i class=\"ti ti-send\" style=\"font-size:16px\"></i>청구서 제출</button>";
+  document.getElementById("req-content").innerHTML = html;
 }
 
 function adjQty(id, d) {
-  const el = document.getElementById(id);
-  el.value = Math.max(0, (parseFloat(el.value)||0) + d);
+  var el = document.getElementById(id);
+  el.value = Math.max(0, (parseFloat(el.value) || 0) + d);
 }
 
 function toggleChk(idx) {
-  const btn = document.getElementById('c'+idx);
-  const on = btn.classList.contains('on');
-  btn.classList.toggle('on',!on); btn.classList.toggle('off',on);
-  btn.innerHTML = on ? '<i class="ti ti-circle"></i>' : '<i class="ti ti-check"></i>';
+  var btn = document.getElementById("c" + idx);
+  var on = btn.classList.contains("on");
+  btn.classList.toggle("on", !on);
+  btn.classList.toggle("off", on);
+  btn.innerHTML = on ? "<i class=\"ti ti-circle\"></i>" : "<i class=\"ti ti-check\"></i>";
 }
 
 async function submitReq(total) {
-  const shortage = items.filter(i => getStatus(i)==='danger' && i.minStock > 0);
-  const reqs = [];
-  for (let i=0;i<total;i++) {
-    const chk = document.getElementById('c'+i);
-    if (chk && chk.classList.contains('on')) {
-      const qty = parseFloat(document.getElementById('q'+i)?.value||0);
-      if (qty > 0 && shortage[i]) reqs.push({name:shortage[i].name,loc:shortage[i].loc,spec:shortage[i].spec,curStock:shortage[i].curStock,minStock:shortage[i].minStock,qty});
+  var shortage = items.filter(function(i) { return getStatus(i) === "danger" && i.minStock > 0; });
+  var reqs = [];
+  for (var i = 0; i < total; i++) {
+    var chk = document.getElementById("c" + i);
+    if (chk && chk.classList.contains("on")) {
+      var qty = parseFloat(document.getElementById("q" + i).value || 0);
+      if (qty > 0 && shortage[i]) reqs.push({name: shortage[i].name, loc: shortage[i].loc, spec: shortage[i].spec, curStock: shortage[i].curStock, minStock: shortage[i].minStock, qty: qty});
     }
   }
-  if (!reqs.length) { showToast('청구할 항목을 선택해주세요'); return; }
-  const btn = document.getElementById('submitBtn');
+  if (!reqs.length) { showToast("청구할 항목을 선택해주세요"); return; }
+  var btn = document.getElementById("submitBtn");
   btn.disabled = true;
-  showToast('청구서 제출 중...');
+  showToast("청구서 제출 중...");
   try {
-    if (isLive) await callScript(null, {action:'submitRequest', items:reqs});
-    history.unshift({date:new Date().toLocaleString('ko-KR'),items:reqs});
-    if (history.length>30) history.pop();
-    localStorage.setItem('or_history_v5', JSON.stringify(history));
+    if (isLive) await callScript(null, {action: "submitRequest", items: reqs});
+    reqHistory.unshift({date: new Date().toLocaleString("ko-KR"), items: reqs});
+    if (reqHistory.length > 30) reqHistory.pop();
+    localStorage.setItem("or_history_v5", JSON.stringify(reqHistory));
     renderHistory();
-    showToast('✓ '+reqs.length+'개 품목 청구 완료');
-  } catch(e) { showToast('제출 실패: '+e.message); }
+    showToast("✓ " + reqs.length + "개 품목 청구 완료");
+  } catch(e) { showToast("제출 실패: " + e.message); }
   finally { btn.disabled = false; }
 }
 
 function renderWeekly() {
-  let html = `<button class="gen-btn" onclick="generateWeekly()"><i class="ti ti-refresh" style="font-size:16px"></i>오늘 날짜로 전체 품목 불러오기</button>`;
+  var html = "<button class=\"gen-btn\" onclick=\"generateWeekly()\"><i class=\"ti ti-refresh\" style=\"font-size:16px\"></i>오늘 날짜로 전체 품목 불러오기</button>";
   if (!weeklyData.length) {
-    html += '<div class="empty">주간 실사 데이터가 없습니다<br>위 버튼을 눌러 시작하세요</div>';
-    document.getElementById('weekly-content').innerHTML = html;
+    html += "<div class=\"empty\">주간 실사 데이터가 없습니다<br>위 버튼을 눌러 시작하세요</div>";
+    document.getElementById("weekly-content").innerHTML = html;
     return;
   }
-  const dateGroup = {};
-  weeklyData.forEach(w => {
+  var dateGroup = {};
+  weeklyData.forEach(function(w) {
     if (!dateGroup[w.date]) dateGroup[w.date] = [];
     dateGroup[w.date].push(w);
   });
-  const latestDate = Object.keys(dateGroup).sort().reverse()[0];
-  const rows = dateGroup[latestDate] || [];
-  const filled = rows.filter(r => r.stock !== '' && r.stock !== undefined && r.stock !== null);
-  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-    <span style="font-size:13px;font-weight:600">${latestDate}</span>
-    <span class="badge ok">${filled.length}/${rows.length} 입력완료</span>
-  </div>`;
-  rows.forEach(r => {
-    const done = r.stock !== '' && r.stock !== undefined && r.stock !== null;
-    const safeId = btoa(unescape(encodeURIComponent(r.name+r.date))).replace(/[^a-zA-Z0-9]/g,'');
-    const ne = r.name.replace(/'/g,"\\'");
-    html += `<div class="weekly-row ${done?'done':'pending'}">
-      <div class="weekly-info"><p title="${r.name}">${r.name}</p><span>${r.spec} · ${r.loc}</span></div>
-      <input class="stock-inp" id="w_${safeId}" type="number" placeholder="수량" value="${done?r.stock:''}" min="0" step="0.5">
-      <button class="save-btn" onclick="saveWeeklyStock('${ne}','${r.date}','w_${safeId}')"><i class="ti ti-device-floppy" style="font-size:16px"></i></button>
-    </div>`;
+  var latestDate = Object.keys(dateGroup).sort().reverse()[0];
+  var rows = dateGroup[latestDate] || [];
+  var filled = rows.filter(function(r) { return r.stock !== "" && r.stock !== undefined && r.stock !== null; });
+  html += "<div style=\"display:flex;justify-content:space-between;align-items:center;margin-bottom:10px\">" +
+    "<span style=\"font-size:13px;font-weight:600\">" + latestDate + "</span>" +
+    "<span class=\"badge ok\">" + filled.length + "/" + rows.length + " 입력완료</span></div>";
+  rows.forEach(function(r, idx) {
+    var done = r.stock !== "" && r.stock !== undefined && r.stock !== null;
+    var safeId = "w" + idx;
+    html += "<div class=\"weekly-row " + (done ? "done" : "pending") + "\">" +
+      "<div class=\"weekly-info\"><p>" + r.name + "</p><span>" + r.spec + " · " + r.loc + "</span></div>" +
+      "<input class=\"stock-inp\" id=\"" + safeId + "\" type=\"number\" placeholder=\"수량\" value=\"" + (done ? r.stock : "") + "\" min=\"0\" step=\"0.5\">" +
+      "<button class=\"save-btn\" onclick=\"saveWeeklyStock(" + idx + ",&apos;" + safeId + "&apos;)\"><i class=\"ti ti-device-floppy\" style=\"font-size:16px\"></i></button>" +
+      "</div>";
   });
-  document.getElementById('weekly-content').innerHTML = html;
+  document.getElementById("weekly-content").innerHTML = html;
 }
 
 async function generateWeekly() {
-  showToast('품목 불러오는 중...');
+  showToast("품목 불러오는 중...");
   try {
-    const res = await callScript(null, {action:'generateWeeklyList'});
-    showToast('✓ '+res.result.count+'개 품목 입력 완료');
+    var res = await callScript(null, {action: "generateWeeklyList"});
+    showToast("✓ " + res.result.count + "개 품목 입력 완료");
     await loadData();
-    showTab('weekly', document.querySelectorAll('.nav-btn')[2]);
-  } catch(e) { showToast('실패: '+e.message); }
+    showTab("weekly", document.querySelectorAll(".nav-btn")[2]);
+  } catch(e) { showToast("실패: " + e.message); }
 }
 
-async function saveWeeklyStock(itemName, date, inputId) {
-  const val = parseFloat(document.getElementById(inputId).value);
-  if (isNaN(val)) { showToast('수량을 입력해주세요'); return; }
-  showToast('저장 중...');
+async function saveWeeklyStock(idx, inputId) {
+  var val = parseFloat(document.getElementById(inputId).value);
+  if (isNaN(val)) { showToast("수량을 입력해주세요"); return; }
+  var r = weeklyData[idx];
+  showToast("저장 중...");
   try {
-    if (isLive) await callScript(null, {action:'updateWeeklyStock', itemName, date, stock:val});
-    const w = weeklyData.find(x => x.name===itemName && x.date===date);
-    if (w) w.stock = val;
-    const m = items.find(i => i.name===itemName);
-    if (m) { m.curStock=val; m.status=val<m.minStock?'❌ 재고부족':'✅ 안정'; }
-    showToast('✓ 저장 완료');
+    if (isLive) await callScript(null, {action: "updateWeeklyStock", itemName: r.name, date: r.date, stock: val});
+    weeklyData[idx].stock = val;
+    var m = items.find(function(i) { return i.name === r.name; });
+    if (m) { m.curStock = val; }
+    showToast("✓ 저장 완료");
     renderWeekly(); renderDashboard(); renderRequest();
-  } catch(e) { showToast('저장 실패: '+e.message); }
+  } catch(e) { showToast("저장 실패: " + e.message); }
 }
 
 function renderHistory() {
-  if (!history.length) {
-    document.getElementById('history-content').innerHTML = '<div class="empty"><i class="ti ti-inbox" style="font-size:32px;display:block;margin-bottom:8px"></i>청구 이력이 없습니다</div>';
+  if (!reqHistory.length) {
+    document.getElementById("history-content").innerHTML = "<div class=\"empty\"><i class=\"ti ti-inbox\" style=\"font-size:32px;display:block;margin-bottom:8px\"></i>청구 이력이 없습니다</div>";
     return;
   }
-  document.getElementById('history-content').innerHTML = history.map(h => `
-    <div class="history-card">
-      <div class="history-date"><i class="ti ti-clock" style="font-size:12px;margin-right:4px"></i>${h.date}</div>
-      ${h.items.map(it=>`<div class="history-row"><span style="color:#718096;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px">${it.name}</span><span class="history-qty">+${it.qty}개</span></div>`).join('')}
-    </div>`).join('');
+  document.getElementById("history-content").innerHTML = reqHistory.map(function(h) {
+    return "<div class=\"history-card\"><div class=\"history-date\"><i class=\"ti ti-clock\" style=\"font-size:12px;margin-right:4px\"></i>" + h.date + "</div>" +
+      h.items.map(function(it) {
+        return "<div class=\"history-row\"><span style=\"color:#718096;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px\">" + it.name + "</span><span class=\"history-qty\">+" + it.qty + "개</span></div>";
+      }).join("") + "</div>";
+  }).join("");
 }
 
 function showTab(tab, el) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+tab).classList.add('active');
-  el.classList.add('active');
-  document.getElementById('addFab').style.display = (tab==='dashboard') ? 'flex' : 'none';
-  if (tab==='history') renderHistory();
+  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
+  document.querySelectorAll(".nav-btn").forEach(function(b) { b.classList.remove("active"); });
+  document.getElementById("page-" + tab).classList.add("active");
+  el.classList.add("active");
+  document.getElementById("addFab").style.display = (tab === "dashboard") ? "flex" : "none";
+  if (tab === "history") renderHistory();
 }
 
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 3000);
+  var t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(function() { t.classList.remove("show"); }, 3000);
 }
 
 loadData();
