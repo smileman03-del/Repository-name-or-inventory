@@ -40,6 +40,7 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
 .imeta{font-size:11px;color:#718096;margin-bottom:8px}
 .ibot{display:flex;align-items:center;gap:6px}
 .slbl{font-size:12px;color:#718096;flex-shrink:0}
+.curstock{font-size:18px;font-weight:700;color:#2F5597;flex-shrink:0}
 .sinp{width:60px;height:36px;text-align:center;font-size:15px;font-weight:600;border:1.5px solid #cbd5e0;border-radius:6px;background:#fff;color:#1a202c}
 .sbtn{padding:8px 14px;border-radius:6px;border:none;background:#2F5597;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
 .dbtn{padding:8px 14px;border-radius:6px;border:none;background:#FFE0E0;color:#C00000;font-size:12px;font-weight:700;cursor:pointer}
@@ -277,8 +278,7 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
           html += "<span class='bdg " + s + "'>" + (s === "d" ? "재고부족" : "정상") + "</span></div>";
           html += "<div class='imeta'>" + escHtml(item.spec || "") + (item.minStock ? " · 적정 " + item.minStock + "개" : "") + " · " + escHtml(item.loc || "") + "</div>";
           html += "<div class='ibot'><span class='slbl'>현재재고</span>";
-          html += "<input class='sinp' id='" + sid + "' type='number' value='" + item.curStock + "' min='0' step='0.5' data-idx='" + idx + "'>";
-          html += "<button class='sbtn' data-save='" + idx + "' data-sid='" + sid + "'>저장</button>";
+          html += "<span class='curstock'>" + item.curStock + "개</span>";
           html += "<button class='dbtn' data-del='" + idx + "'>삭제</button>";
           html += "</div></div>";
         });
@@ -306,13 +306,7 @@ body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f
       btn.addEventListener("click", function() { setArea(this.getAttribute("data-a")); });
     });
 
-    document.querySelectorAll("[data-save]").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var idx = parseInt(this.getAttribute("data-save"));
-        var sid = this.getAttribute("data-sid");
-        saveStock(idx, sid);
-      });
-    });
+
 
     document.querySelectorAll("[data-del]").forEach(function(btn) {
       btn.addEventListener("click", function() {
