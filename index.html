@@ -2,555 +2,1071 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>수술실 소모품 재고관리</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>본정형외과 처치실 보조기 카운트</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f4f8;color:#1a202c}
-.app{max-width:680px;margin:0 auto;min-height:100vh}
-.header{background:#2F5597;padding:14px 16px;display:flex;align-items:center;position:sticky;top:0;z-index:50}
-.htitle{font-size:15px;font-weight:700;color:#fff}
-.hsub{font-size:11px;color:rgba(255,255,255,0.85);margin-top:2px}
-.rbtn{margin-left:auto;background:rgba(255,255,255,0.2);border:none;border-radius:8px;padding:7px 14px;font-size:12px;color:#fff;cursor:pointer;font-weight:600}
-.nav{display:flex;background:#fff;border-bottom:2px solid #e2e8f0;position:sticky;top:57px;z-index:40}
-.nb{flex:1;padding:12px 4px;font-size:12px;font-weight:600;color:#718096;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer}
-.nb.active{color:#2F5597;border-bottom-color:#2F5597}
-.page{display:none;padding:12px}
-.page.active{display:block}
-.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.sc{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:14px;text-align:center}
-.sn{font-size:30px;font-weight:700;line-height:1}
-.sl{font-size:11px;color:#718096;margin-top:4px}
-.sn.d{color:#C00000}.sn.o{color:#276749}.sn.t{color:#2F5597}
-.sbox{width:100%;padding:13px 16px;border:2px solid #e2e8f0;border-radius:10px;background:#fff;font-size:16px;color:#1a202c;margin-bottom:10px;display:block;-webkit-appearance:none}
-.sbox:focus{outline:none;border-color:#2F5597}
-.frow{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
-.fb{padding:7px 16px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;font-size:12px;font-weight:600;color:#718096;cursor:pointer}
-.fb.active{background:#2F5597;color:#fff;border-color:#2F5597}
-.atabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.atabs::-webkit-scrollbar{display:none}
-.at{padding:7px 16px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;font-size:12px;font-weight:600;color:#718096;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.at.active{background:#2F5597;color:#fff;border-color:#2F5597}
-.ic{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px 14px;margin-bottom:8px}
-.ic.d{border-left:4px solid #C00000}.ic.o{border-left:4px solid #276749}
-.itop{display:flex;align-items:center;gap:8px;margin-bottom:6px}
-.iname{font-size:13px;font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bdg{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;flex-shrink:0}
-.bdg.d{background:#FFE0E0;color:#C00000}.bdg.o{background:#E0F0E8;color:#276749}
-.imeta{font-size:11px;color:#718096;margin-bottom:8px}
-.ibot{display:flex;align-items:center;gap:6px}
-.slbl{font-size:12px;color:#718096;flex-shrink:0}
-.curstock{font-size:18px;font-weight:700;color:#2F5597;flex-shrink:0}
-.sinp{width:60px;height:36px;text-align:center;font-size:15px;font-weight:600;border:1.5px solid #cbd5e0;border-radius:6px;background:#fff;color:#1a202c}
-.sbtn{padding:8px 14px;border-radius:6px;border:none;background:#2F5597;color:#fff;font-size:12px;font-weight:700;cursor:pointer}
-.dbtn{padding:8px 14px;border-radius:6px;border:none;background:#FFE0E0;color:#C00000;font-size:12px;font-weight:700;cursor:pointer}
-.asec{margin-bottom:16px}
-.ahdr{font-size:13px;font-weight:700;color:#2F5597;padding:8px 12px;background:#EBF1FB;border-radius:8px;margin-bottom:6px;display:flex;justify-content:space-between}
-.rcard{background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:12px}
-.rhdr{background:#EBF1FB;padding:10px 14px;font-size:13px;font-weight:600;color:#2F5597;display:flex;justify-content:space-between;align-items:center}
-.rrow{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid #e2e8f0}
-.rname{flex:1;min-width:0}
-.rname p{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rname span{font-size:11px;color:#718096}
-.qc{display:flex;align-items:center;gap:4px}
-.qbtn{width:32px;height:32px;border-radius:6px;border:1px solid #cbd5e0;background:#f7fafc;color:#2F5597;font-size:18px;font-weight:700;cursor:pointer}
-.qinp{width:44px;height:32px;text-align:center;font-size:14px;font-weight:600;border:1px solid #e2e8f0;border-radius:6px;background:#fff;color:#1a202c}
-.ckbtn{width:36px;height:36px;border-radius:6px;border:none;font-size:14px;font-weight:700;cursor:pointer}
-.ckbtn.on{background:#2F5597;color:#fff}.ckbtn.off{background:#f0f4f8;color:#718096}
-.subbtn{width:100%;padding:15px;background:#2F5597;color:#fff;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
-.subbtn:disabled{background:#cbd5e0;color:#718096;cursor:default}
-.gbtn{width:100%;padding:13px;background:#fff;border:2px solid #2F5597;color:#2F5597;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:12px}
-.wrow{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border-radius:8px;margin-bottom:6px;border:1px solid #e2e8f0}
-.wrow.done{border-left:4px solid #276749}.wrow.pending{border-left:4px solid #BA7517}
-.winfo{flex:1;min-width:0}
-.winfo p{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.winfo span{font-size:11px;color:#718096}
-.hcard{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:12px 14px;margin-bottom:8px}
-.hdate{font-size:11px;color:#718096;margin-bottom:8px}
-.hrow{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid #e2e8f0}
-.hrow:last-child{border-bottom:none}
-.hqty{font-weight:700;color:#2F5597}
-.empty{text-align:center;padding:40px 20px;color:#718096;font-size:14px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1a202c;color:#fff;padding:12px 24px;border-radius:20px;font-size:14px;font-weight:600;z-index:300;transition:transform .25s;max-width:90%}
-.toast.show{transform:translateX(-50%) translateY(0)}
-.loading{text-align:center;padding:40px;color:#718096;font-size:13px}
-.fab{position:fixed;bottom:24px;right:calc(50% - 340px + 16px);padding:14px 22px;border-radius:30px;background:#2F5597;color:#fff;border:none;font-size:15px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(47,85,151,.4);z-index:60}
-@media(max-width:712px){.fab{right:16px}}
-.mov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;justify-content:center;z-index:200}
-.mov.show{display:flex}
-.msh{background:#fff;border-radius:16px 16px 0 0;width:100%;max-width:680px;padding:20px 16px 40px;max-height:85vh;overflow-y:auto}
-.mttl{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
-.mclose{background:none;border:none;font-size:24px;color:#718096;cursor:pointer;line-height:1}
-.fg{margin-bottom:12px}
-.fl{font-size:12px;font-weight:600;color:#4a5568;margin-bottom:5px;display:block}
-.fi{width:100%;padding:12px;border:1.5px solid #cbd5e0;border-radius:8px;font-size:15px;color:#1a202c;-webkit-appearance:none;display:block}
-.fi:focus{outline:none;border-color:#2F5597}
-.fr2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.msub{width:100%;padding:14px;background:#2F5597;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px}
-.msub:disabled{background:#cbd5e0}
+  :root{
+    --bg:#F2F4F6;
+    --panel:#FFFFFF;
+    --border:#E2E6EA;
+    --text:#221816;
+    --text-soft:#726C66;
+    --orange:#F59701;
+    --blue:#2B71B9;
+    --green:#8FB60A;
+    --red:#E83344;
+    --orange-tint:#FFF3E0;
+    --blue-tint:#E9F1FA;
+    --green-tint:#F3F8E4;
+    --red-tint:#FDECEE;
+    --radius:16px;
+    --shadow:0 1px 2px rgba(34,24,22,0.04), 0 4px 14px rgba(34,24,22,0.05);
+  }
+  *{box-sizing:border-box;}
+  html{font-size:17px;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic","Pretendard","Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:80px;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  .app{max-width:1180px;margin:0 auto;padding:14px 14px 40px;}
+
+  /* ---------- Header ---------- */
+  .topbar{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:18px 20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .brand{display:flex;align-items:center;gap:14px;min-width:0;}
+  .logo{height:44px;width:auto;flex-shrink:0;object-fit:contain;}
+  .cross-mark{
+    width:22px;height:22px;
+    display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;
+    gap:2px;
+    flex-shrink:0;
+  }
+  .cross-mark span{border-radius:3px;display:block;}
+  .cross-mark span:nth-child(1){background:var(--orange);}
+  .cross-mark span:nth-child(2){background:var(--green);}
+  .cross-mark span:nth-child(3){background:var(--blue);}
+  .cross-mark span:nth-child(4){background:var(--red);}
+  .brand-text{display:flex;align-items:center;gap:10px;min-width:0;}
+  .brand-titles{min-width:0;}
+  .brand h1{
+    font-size:1.32rem;
+    line-height:1.25;
+    margin:0;
+    font-weight:800;
+    letter-spacing:-0.01em;
+  }
+  .brand p.sub{
+    margin:2px 0 0;
+    font-size:0.92rem;
+    color:var(--text-soft);
+    font-weight:600;
+  }
+  .summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .total-badge{
+    background:var(--orange-tint);
+    border:1px solid #FBDDA8;
+    border-radius:12px;
+    padding:8px 16px;
+    text-align:center;
+    min-width:96px;
+  }
+  .total-badge .num{display:block;font-size:1.7rem;font-weight:800;color:var(--orange);line-height:1;}
+  .total-badge .lbl{display:block;font-size:0.72rem;color:var(--text-soft);margin-top:3px;font-weight:700;}
+  button.total-badge{font:inherit;appearance:none;}
+  .low-badge{background:var(--red-tint);border-color:#F6C9CE;cursor:pointer;}
+  .low-badge .num{color:var(--red);}
+  .low-badge.active{outline:2px solid var(--red);outline-offset:1px;}
+  .btn{
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:var(--text);
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:0.92rem;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .btn:hover{background:#F7F7F5;}
+  .btn:active{transform:translateY(1px);}
+  .btn.danger{color:var(--red);border-color:#F6C9CE;}
+  .btn.danger:hover{background:var(--red-tint);}
+  .btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);}
+  .btn.primary:hover{background:#DE8900;}
+  .btn.active{background:var(--red);color:#fff;border-color:var(--red);}
+  .btn.active:hover{background:#CE2938;}
+  .btn:focus-visible, .icon-btn:focus-visible, input:focus-visible, .count-btn:focus-visible{
+    outline:3px solid #2B71B9;outline-offset:2px;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .search-wrap{flex:1;min-width:220px;position:relative;}
+  .search-wrap input{
+    width:100%;
+    padding:12px 14px 12px 40px;
+    font-size:1rem;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:var(--panel);
+    color:var(--text);
+  }
+  .search-wrap input:focus{outline:none;border-color:var(--blue);}
+  .search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:0.45;}
+  .date-line{
+    font-size:0.85rem;color:var(--text-soft);font-weight:600;margin:2px 2px 12px;
+  }
+
+  /* ---------- Category grid ---------- */
+  #categoryList{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(330px, 1fr));
+    gap:14px;
+  }
+  .category{
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+    border-left:5px solid var(--accent, var(--orange));
+  }
+  .category-head{
+    display:flex;align-items:center;gap:10px;
+    padding:14px 14px 12px;
+    border-bottom:1px solid var(--border);
+  }
+  .chip{
+    width:34px;height:34px;border-radius:9px;
+    background:var(--accent-tint, var(--orange-tint));
+    color:var(--accent, var(--orange));
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:0.95rem;flex-shrink:0;
+  }
+  .category-head h2{
+    font-size:1.08rem;margin:0;flex:1;min-width:0;
+    font-weight:800;
+    overflow-wrap:anywhere;
+  }
+  .head-actions{display:flex;gap:2px;flex-shrink:0;}
+  .icon-btn{
+    border:none;background:transparent;cursor:pointer;
+    width:32px;height:32px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text-soft);font-size:1rem;
+  }
+  .icon-btn:hover{background:#F1F1EF;color:var(--text);}
+  .icon-btn.del:hover{background:var(--red-tint);color:var(--red);}
+  .collapse-btn{transition:transform .15s ease;}
+  .category.collapsed .collapse-btn{transform:rotate(-90deg);}
+  .category.collapsed .items{display:none;}
+
+  .items{padding:6px 10px 10px;}
+  .item-row{
+    display:flex;flex-direction:column;
+    gap:6px;
+    padding:10px 6px;
+    border-bottom:1px dashed var(--border);
+  }
+  .item-row:last-of-type{border-bottom:none;}
+  .item-main{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .item-label{display:flex;align-items:center;gap:4px;min-width:0;flex:1;}
+  .size-badge{
+    font-size:1.08rem;font-weight:700;
+    background:var(--accent-tint, var(--orange-tint));
+    color:var(--accent, var(--orange));
+    padding:5px 11px;border-radius:8px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;
+  }
+  .item-row .icon-btn{width:28px;height:28px;font-size:0.85rem;}
+
+  .stock-line{display:flex;align-items:center;gap:8px;padding:0 6px;font-size:0.92rem;color:var(--text-soft);}
+  .stock-line .stock-label{font-weight:700;}
+  .stock-value{font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;}
+  .stock-value.low{color:var(--red);}
+  .low-tag{background:var(--red-tint);color:var(--red);font-size:0.7rem;font-weight:800;padding:2px 7px;border-radius:6px;}
+  .threshold-note{font-size:0.78rem;color:var(--text-soft);background:#F1F1EF;padding:2px 8px;border-radius:6px;font-weight:600;}
+  .stock-line .icon-btn{width:26px;height:26px;font-size:0.78rem;margin-left:auto;}
+
+  .counter{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .count-btn{
+    width:40px;height:40px;border-radius:10px;
+    border:1px solid var(--border);background:var(--panel);
+    font-size:1.35rem;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--text);line-height:1;
+    user-select:none;
+  }
+  .count-btn.plus{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .count-btn.plus:hover{background:#DE8900;}
+  .count-btn.minus:hover{background:var(--red-tint);color:var(--red);border-color:#F6C9CE;}
+  .count-btn:active{transform:scale(0.94);}
+  .count-value{
+    min-width:2.2ch;text-align:center;
+    font-size:1.9rem;font-weight:800;font-variant-numeric:tabular-nums;
+  }
+
+  .add-item-row{padding:10px 6px 4px;}
+  .add-item-btn{
+    width:100%;
+    border:1.5px dashed var(--border);
+    background:transparent;
+    color:var(--text-soft);
+    padding:9px;border-radius:10px;
+    font-weight:700;font-size:0.9rem;cursor:pointer;
+  }
+  .add-item-btn:hover{border-color:var(--accent, var(--orange));color:var(--accent, var(--orange));background:var(--accent-tint, var(--orange-tint));}
+
+  .add-category-card{
+    border:1.5px dashed var(--border);
+    border-radius:var(--radius);
+    display:flex;align-items:center;justify-content:center;
+    min-height:88px;
+    background:transparent;
+    color:var(--text-soft);
+    font-weight:800;font-size:1rem;cursor:pointer;
+  }
+  .add-category-card:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-tint);}
+
+  .empty-state{
+    grid-column:1/-1;
+    text-align:center;
+    padding:50px 20px;
+    color:var(--text-soft);
+    font-size:1rem;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(34,24,22,0.42);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;z-index:50;
+  }
+  .modal{
+    background:var(--panel);border-radius:18px;
+    padding:22px;max-width:420px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+  }
+  .modal.wide{max-width:640px;}
+  .modal h3{margin:0 0 8px;font-size:1.15rem;font-weight:800;}
+  .modal p{margin:0 0 16px;color:var(--text-soft);font-size:0.95rem;line-height:1.5;}
+  .modal input{
+    width:100%;padding:11px 13px;font-size:1.05rem;
+    border-radius:10px;border:1px solid var(--border);margin-bottom:16px;
+  }
+  .modal input:focus{outline:none;border-color:var(--blue);}
+  .modal .field-label{display:block;font-size:0.85rem;font-weight:700;color:var(--text-soft);margin:14px 0 6px;}
+  .modal .field-label:first-of-type{margin-top:0;}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+  .modal-actions .btn{padding:10px 18px;}
+
+  .history-list{max-height:340px;overflow-y:auto;margin:-4px 0 16px;}
+  .history-row{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:12px 4px;border-bottom:1px solid var(--border);
+    cursor:pointer;
+  }
+  .history-row:hover{background:#F7F7F5;}
+  .history-row .d{font-weight:700;}
+  .history-row .t{color:var(--text-soft);font-size:0.88rem;}
+  .history-detail{max-height:360px;overflow-y:auto;}
+  .history-detail .row{display:flex;justify-content:space-between;padding:7px 2px;font-size:0.95rem;border-bottom:1px dashed var(--border);}
+  .history-detail .cat{color:var(--text-soft);font-size:0.8rem;}
+
+  .bulk-body{max-height:56vh;overflow-y:auto;margin:-2px -4px 16px 0;padding-right:6px;}
+  .bulk-cat h4{margin:16px 0 6px;font-size:0.92rem;color:var(--text-soft);border-bottom:1px solid var(--border);padding-bottom:5px;font-weight:800;}
+  .bulk-cat:first-child h4{margin-top:0;}
+  .bulk-row{display:flex;justify-content:space-between;align-items:center;padding:6px 2px;gap:10px;}
+  .bulk-row span{font-weight:600;font-size:0.96rem;}
+  .bulk-input{width:88px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:1rem;text-align:right;margin:0;}
+  .bulk-input:focus{outline:none;border-color:var(--blue);}
+
+  #toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:#221816;color:#fff;padding:11px 20px;border-radius:10px;
+    font-size:0.92rem;font-weight:600;opacity:0;pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease;
+    z-index:60;
+    max-width:90vw;text-align:center;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .loading-wrap{
+    grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-soft);
+  }
+
+  footer.note{
+    text-align:center;color:var(--text-soft);font-size:0.8rem;margin-top:24px;line-height:1.6;
+  }
+
+  @media (max-width:560px){
+    html{font-size:16px;}
+    .brand h1{font-size:1.1rem;}
+    .logo{height:36px;}
+    .summary{width:100%;justify-content:space-between;}
+    #categoryList{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
-    <div>
-      <div class="htitle">&#127973; 수술실 소모품 관리</div>
-      <div class="hsub" id="cstat">연결 확인 중...</div>
+
+  <div class="topbar">
+    <div class="brand">
+      <img class="logo" src="data:image/jpeg;base64,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" alt="본정형외과 로고">
+      <div class="brand-text">
+        <div class="cross-mark"><span></span><span></span><span></span><span></span></div>
+        <div class="brand-titles">
+          <h1>처치실 보조기 일일 카운트</h1>
+          <p class="sub">BONE 정형외과 · 천안</p>
+        </div>
+      </div>
     </div>
-    <button class="rbtn" id="rbtn">새로고침</button>
+    <div class="summary">
+      <div class="total-badge">
+        <span class="num" id="totalCount">0</span>
+        <span class="lbl">오늘 총 사용</span>
+      </div>
+      <button class="total-badge low-badge" id="lowStockBadge" title="클릭하면 재고부족 품목만 볼 수 있어요">
+        <span class="num" id="lowStockCount">0</span>
+        <span class="lbl">재고부족</span>
+      </button>
+      <button class="icon-btn" id="thresholdBtn" aria-label="재고부족 기준 수정" title="재고부족 기준 수정" style="border:1px solid var(--border);">&#9881;</button>
+      <button class="btn" id="historyBtn">지난 기록</button>
+      <button class="btn danger" id="resetBtn">오늘 초기화</button>
+    </div>
   </div>
-  <nav class="nav">
-    <button class="nb active" id="tab-dashboard">&#128202; 현황</button>
-    <button class="nb" id="tab-request">&#128203; 청구</button>
-    <button class="nb" id="tab-weekly">&#128197; 주간실사</button>
-    <button class="nb" id="tab-history">&#128336; 이력</button>
-  </nav>
-  <div class="page active" id="page-dashboard"><div id="dc" class="loading">데이터 불러오는 중...</div></div>
-  <div class="page" id="page-request"><div id="rc" class="loading">데이터 불러오는 중...</div></div>
-  <div class="page" id="page-weekly"><div id="wc" class="loading">데이터 불러오는 중...</div></div>
-  <div class="page" id="page-history"><div id="hc" class="empty">&#128269; 청구 이력이 없습니다</div></div>
-</div>
-<button class="fab" id="fab">+ 품목 추가</button>
-<div class="mov" id="mov">
-  <div class="msh">
-    <div class="mttl"><span>&#128230; 새 품목 추가</span><button class="mclose" id="mclose">&#10005;</button></div>
-    <div class="fg"><label class="fl">품목명 *</label><input class="fi" id="nname" placeholder="예: Surgical Glove 7.0"></div>
-    <div class="fr2">
-      <div class="fg"><label class="fl">보관위치</label><input class="fi" id="nloc" placeholder="예: A구역"></div>
-      <div class="fg"><label class="fl">규격/단위</label><input class="fi" id="nspec" placeholder="예: ⓑ"></div>
+
+  <div class="date-line" id="todayLabel"></div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" placeholder="품목 검색 (예: wrist, 좌L, 깁스신발)">
     </div>
-    <div class="fr2">
-      <div class="fg"><label class="fl">적정재고</label><input class="fi" id="nmin" type="number" min="0" placeholder="0"></div>
-      <div class="fg"><label class="fl">현재재고</label><input class="fi" id="ncur" type="number" min="0" placeholder="0"></div>
-    </div>
-    <button class="msub" id="msub">품목 추가하기</button>
+    <button class="btn" id="bulkStockBtn">재고 일괄 입력</button>
+    <button class="btn" id="stockFilterBtn">재고부족만 보기</button>
+    <button class="btn" id="expandAllBtn">전체 펼치기</button>
+    <button class="btn" id="collapseAllBtn">전체 접기</button>
   </div>
+
+  <div id="categoryList">
+    <div class="loading-wrap">불러오는 중...</div>
+  </div>
+
+  <footer class="note">이 카운트와 재고는 처치실 전체 선생님이 함께 보고 기록하는 공용 데이터입니다 · 날짜가 바뀌면 사용 카운트는 자동으로 0부터 다시 시작되지만 재고 수량은 계속 이어집니다 · 사용(+) 시 재고가 자동으로 1개 줄어듭니다</footer>
 </div>
-<div class="toast" id="toast"></div>
-<script id="jdata" type="application/json">
-[{"name": "BD angio catheter 18x30mm", "loc": "A구역", "spec": "18Gx30mm/1box", "minStock": 2, "curStock": 1}, {"name": "BD angio catheter 18x48mm", "loc": "A구역", "spec": "18Gx48mm/2box", "minStock": 1, "curStock": 1}, {"name": "BD angio catheter 22", "loc": "A구역", "spec": "22G ⓑ", "minStock": 2, "curStock": 1}, {"name": "BD angio catheter 24", "loc": "A구역", "spec": "24G ⓑ", "minStock": 2, "curStock": 2}, {"name": "18G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "23G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "25G needle", "loc": "A구역", "spec": "5/8 ⓑ", "minStock": 1, "curStock": 2}, {"name": "26G needle1/2", "loc": "A구역", "spec": "1/2 ⓑ", "minStock": 1, "curStock": 2}, {"name": "26G needle", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 0}, {"name": "Endo pouch", "loc": "A구역", "spec": "TLB4040/1box/10개", "minStock": 10, "curStock": 1}, {"name": "Endoknot Coated Vicryl 0", "loc": "A구역", "spec": "straight 22mm", "minStock": 10, "curStock": 1}, {"name": "Soundreach(CS1405H)", "loc": "A구역", "spec": "5mmX14cm ⓑ", "minStock": 3, "curStock": 7}, {"name": "Soundreach", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Long Bovie tip(일회용손조절식전기수술기용전극)", "loc": "A구역", "spec": "BLM-40A ⓑ", "minStock": 1, "curStock": 1}, {"name": "AbsorbaTack(흡수성체내용스태플)", "loc": "A구역", "spec": "5mm ⓑ", "minStock": 1, "curStock": 1}, {"name": "Spacemaker Pro(SMBTTRNDX)", "loc": "A구역", "spec": "10mm-12mm ⓑ", "minStock": 1, "curStock": 3}, {"name": "HEALTHPORT Baxter (이식형의약품주입기)", "loc": "A구역", "spec": "SIN9027/1box", "minStock": 3, "curStock": 5}, {"name": "HEALTHPORT Baxter (카테터삽입기)", "loc": "A구역", "spec": "SIN9031/1box", "minStock": 3, "curStock": 4}, {"name": "chemoport needle (의약품직접주입기구)", "loc": "A구역", "spec": "ea (AH502015)", "minStock": 5, "curStock": 2}, {"name": "Ovum Aspiration Needle Single Lumen", "loc": "A구역", "spec": "K-OPS-1035-RWH-ET", "minStock": 5, "curStock": 7}, {"name": "Meta Clip-p PCLL03A", "loc": "A구역", "spec": "PCLL03A", "minStock": 1, "curStock": 1}, {"name": "Meta Clip-p PCXL04A", "loc": "A구역", "spec": "PCXL04A", "minStock": 1, "curStock": 1}, {"name": "메디커튼가이드", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Lap Loop Suture", "loc": "A구역", "spec": "1-0/Suture/1box20개", "minStock": 2, "curStock": 1}, {"name": "Lap Loop Tie", "loc": "A구역", "spec": "SutureTie", "minStock": 1, "curStock": 2}, {"name": "One pouch(Sunmedix) 500", "loc": "A구역", "spec": "500ml ⓑ", "minStock": 5, "curStock": 15}, {"name": "One pouch(Sunmedix) 700", "loc": "A구역", "spec": "700ml ⓑ", "minStock": 10, "curStock": 5}, {"name": "비아이펀넬", "loc": "A구역", "spec": "1box/5ea", "minStock": 1, "curStock": 1}, {"name": "1cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 0.5}, {"name": "3cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 4}, {"name": "5cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 1}, {"name": "10cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 1}, {"name": "20cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 5, "curStock": 2}, {"name": "50cc syringe", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 3}, {"name": "60cc syringe", "loc": "A구역", "spec": "enema용 ⓑ", "minStock": 1, "curStock": 2}, {"name": "TOT mesh", "loc": "A구역", "spec": "ⓑ", "minStock": 5, "curStock": 6}, {"name": "One port 3.4구", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 7}, {"name": "Penco Bio-Port 12mm trocar", "loc": "A구역", "spec": "ea", "minStock": 3, "curStock": 1}, {"name": "Penco Bio-Port 10mm trocar", "loc": "A구역", "spec": "1box/6ea", "minStock": 2, "curStock": 4}, {"name": "Penco Bio-Port 5mm trocar", "loc": "A구역", "spec": "1box/6ea", "minStock": 2, "curStock": 3}, {"name": "POPUP mesh", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 13}, {"name": "Urine bag", "loc": "A구역", "spec": "묶음", "minStock": 20, "curStock": 40}, {"name": "8Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "14Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "16Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 2, "curStock": 6}, {"name": "24Fr foley catheter", "loc": "A구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "BT Drainage Tube", "loc": "A구역", "spec": "BT Circle 6 ⓑ", "minStock": 5, "curStock": 7}, {"name": "소다라임", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 12}, {"name": "Sani Sleeve", "loc": "A구역", "spec": "ⓑ", "minStock": 3, "curStock": 3}, {"name": "Endo tracheal tube 6-1", "loc": "A구역", "spec": "6 ⓑ", "minStock": 1, "curStock": 4}, {"name": "Endo tracheal tube  6.5-1", "loc": "A구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 4}, {"name": "Endo tracheal tube 7-1", "loc": "A구역", "spec": "7.0 ⓑ", "minStock": 1, "curStock": 7}, {"name": "Endo tracheal tube(갑상선) 6", "loc": "A구역", "spec": "6.0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Endo tracheal tube(갑상선) 6.5", "loc": "A구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Endo tracheal tube(갑상선) 7-1", "loc": "A구역", "spec": "7.0 ⓑ", "minStock": 1, "curStock": 8}, {"name": "airway #5", "loc": "A구역", "spec": "ea", "minStock": 10, "curStock": 20}, {"name": "Suction catheter", "loc": "A구역", "spec": "N110-02-12/ea", "minStock": 20, "curStock": 50}, {"name": "요관용스텐트", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "The RUMZ system(Disposable Ulterine Manipulator tip)", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 3}, {"name": "Hartz Raum", "loc": "A구역", "spec": "D-5Fr-S110-7/ea", "minStock": 2, "curStock": 3}, {"name": "혈관내 튜브카테터(picc)", "loc": "A구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "혈관내 튜브카테터(c-line)", "loc": "A구역", "spec": "ea", "minStock": 3, "curStock": 3}, {"name": "VISISTAT(스킨 스테플러)", "loc": "A구역", "spec": "35W/box", "minStock": 5, "curStock": 15}, {"name": "일회용수술용스태플기구(remover)", "loc": "A구역", "spec": "ea", "minStock": 2, "curStock": 2}, {"name": "Kronnner Manipujector", "loc": "A구역", "spec": "6003/ea", "minStock": 5, "curStock": 13}, {"name": "Uni Circuit Ⅱ", "loc": "A구역", "spec": "성인 180cm/3L/ea", "minStock": 10, "curStock": 6}, {"name": "AirSoft Mask", "loc": "A구역", "spec": "#5 W/Valve/ea", "minStock": 10, "curStock": 9}, {"name": "Vido Laryngoscope Handle", "loc": "A구역", "spec": "1box", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade00", "loc": "A구역", "spec": "CR-D-MIL00", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade0", "loc": "A구역", "spec": "CR-D-MIL0", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade1", "loc": "A구역", "spec": "CR-D-MAC1", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade2", "loc": "A구역", "spec": "CR-D-MAC2", "minStock": 1, "curStock": 1}, {"name": "Vido Laryngoscope Blade3", "loc": "A구역", "spec": "CR-D-MAC3", "minStock": 3, "curStock": 8}, {"name": "Sugisorb (sv113) 1", "loc": "B구역", "spec": "1/40mm/ⓑ", "minStock": 2, "curStock": 1}, {"name": "Sugisorb (sv213) 2-0", "loc": "B구역", "spec": "2-0/36mm/ⓑ", "minStock": 2, "curStock": 7}, {"name": "Sugisorb (sv211) 2-0 26mm", "loc": "B구역", "spec": "2-0/26mm/ⓑ", "minStock": 2, "curStock": 3}, {"name": "Sugisorb (sv317) 3-0", "loc": "B구역", "spec": "3-0/26mm/ⓑ", "minStock": 2, "curStock": 1.5}, {"name": "Sugisorb (sv432) 4-0 16mm", "loc": "B구역", "spec": "4-0/16mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "surgisorb(sv413) 4-0", "loc": "B구역", "spec": "4-0/ 17mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb (sv512) 5-0", "loc": "B구역", "spec": "5-0/13mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon (NB324) 3-0 ©", "loc": "B구역", "spec": "3-0©/25mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "Nylon (NB434) 4-0 ©", "loc": "B구역", "spec": "4-0©/18mm/ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Nylon (NB526) 5-0 ©", "loc": "B구역", "spec": "5-0©/15mm/ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Nylon (NB717)7-0 ©", "loc": "B구역", "spec": "7-0©/11mm/ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Polysorb (UL878)", "loc": "B구역", "spec": "2-0/27mm/ⓑ", "minStock": 1, "curStock": 2}, {"name": "Chromic (CO122)", "loc": "B구역", "spec": "1-0/37mm/ⓑ", "minStock": 1, "curStock": 1}, {"name": "Monosyn (C2023624)", "loc": "B구역", "spec": "4-0/19mm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "V-loc(180)", "loc": "B구역", "spec": "0/1box/5ea", "minStock": 2, "curStock": 5}, {"name": "V-loc(90)", "loc": "B구역", "spec": "2-0/1box/5ea", "minStock": 2, "curStock": 14}, {"name": "White Silk 5", "loc": "B구역", "spec": "No.5", "minStock": 5, "curStock": 24}, {"name": "White Silk 6", "loc": "B구역", "spec": "No.6", "minStock": 5, "curStock": 62}, {"name": "White Silk 7", "loc": "B구역", "spec": "No.7", "minStock": 5, "curStock": 12}, {"name": "White Silk 8", "loc": "B구역", "spec": "No.8", "minStock": 5, "curStock": 2}, {"name": "Mess 10-1", "loc": "B구역", "spec": "10# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 11-1", "loc": "B구역", "spec": "11# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 15-1", "loc": "B구역", "spec": "15# ⓑ", "minStock": 1, "curStock": 2}, {"name": "Mess 20", "loc": "B구역", "spec": "20# ⓑ", "minStock": 1, "curStock": 1}, {"name": "AIDerm 6x7cm", "loc": "B구역", "spec": "6x7cm/ⓑ", "minStock": 2, "curStock": 3}, {"name": "AIDerm 10x10cm", "loc": "B구역", "spec": "10x10cm/ⓑ", "minStock": 2, "curStock": 2}, {"name": "금실 13mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 60, "curStock": 8}, {"name": "금실 25mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 15, "curStock": 15}, {"name": "금실 38mm", "loc": "B구역", "spec": "1봉지/50ea", "minStock": 120, "curStock": 15}, {"name": "Surgicel Original", "loc": "B구역", "spec": "19535/5.1X7.6cm/1box", "minStock": 1, "curStock": 1}, {"name": "Tegaderm", "loc": "B구역", "spec": "1626W/10x12cm/1box", "minStock": 1, "curStock": 2}, {"name": "메디터치 Border", "loc": "B구역", "spec": "5.5mmx6.5mm/1box", "minStock": 1, "curStock": 1}, {"name": "Steri-Strip 6mm", "loc": "B구역", "spec": "6mm/ea", "minStock": 20, "curStock": 0.1}, {"name": "Steri-Strip 12mm", "loc": "B구역", "spec": "12mm/ea", "minStock": 1, "curStock": 1}, {"name": "Spinal Needle 18G", "loc": "B구역", "spec": "18Gx90mm/1box/50ea", "minStock": 1, "curStock": 1}, {"name": "박스테이프", "loc": "B구역", "spec": "롤", "minStock": 2, "curStock": 3}, {"name": "Rely + On Parasafe 100mg", "loc": "B구역", "spec": "100mg/통", "minStock": 2, "curStock": 2}, {"name": "Rely + On Parasafe", "loc": "B구역", "spec": "Test Tip", "minStock": 1, "curStock": 3}, {"name": "Bio Spike Guard", "loc": "B구역", "spec": "1box", "minStock": 1, "curStock": 0.2}, {"name": "고무장갑", "loc": "B구역", "spec": "S사이즈/ea", "minStock": 2, "curStock": 0}, {"name": "물티슈", "loc": "B구역", "spec": "ea", "minStock": 3, "curStock": 2}, {"name": "CUTAN PLAST", "loc": "B구역", "spec": "80x50x10mm/1box", "minStock": 1, "curStock": 1}, {"name": "Liqui Band Surgical", "loc": "B구역", "spec": "S/ea", "minStock": 1, "curStock": 1}, {"name": "N/S 1000", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 3, "curStock": 1}, {"name": "N/S 500", "loc": "C구역", "spec": "500ml ⓑ", "minStock": 1, "curStock": 0.3}, {"name": "N/S 100", "loc": "C구역", "spec": "100ml ⓑ", "minStock": 2, "curStock": 2}, {"name": "N/S 20", "loc": "C구역", "spec": "20ml ⓑ", "minStock": 1, "curStock": 4}, {"name": "H/S", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 2, "curStock": 1}, {"name": "D/W", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 1, "curStock": 0.2}, {"name": "D/S 1000", "loc": "C구역", "spec": "1000ml ⓑ", "minStock": 0, "curStock": 0.2}, {"name": "D/S 500", "loc": "C구역", "spec": "500ml ⓑ", "minStock": 0, "curStock": 0.2}, {"name": "생리식염키트주사", "loc": "C구역", "spec": "250ml", "minStock": 1, "curStock": 11}, {"name": "MarkingPen", "loc": "C구역", "spec": "PK-DSMP01", "minStock": 1, "curStock": 2}, {"name": "4*4 Gauze", "loc": "C구역", "spec": "10x10x8겹/1box/20매", "minStock": 10, "curStock": 11}, {"name": "수성 탈지면롤 에스 3호", "loc": "C구역", "spec": "3호 20mm/봉지", "minStock": 5, "curStock": 5}, {"name": "수성 탈지면롤 에스 5호", "loc": "C구역", "spec": "5호 32mm/봉지", "minStock": 5, "curStock": 4}, {"name": "대한위재 거즈-에스 (거즈볼형)", "loc": "C구역", "spec": "22x25cm/봉지/200매", "minStock": 3, "curStock": 2}, {"name": "Baro Vac(SS100M 3.2)", "loc": "C구역", "spec": "100ml/1box", "minStock": 2, "curStock": 2}, {"name": "Baro Vac(PP400M 3.2)", "loc": "C구역", "spec": "400ml/1box", "minStock": 1, "curStock": 3}, {"name": "Vabien(SL0837)", "loc": "C구역", "spec": "5mmX37cm (curved) ⓑ", "minStock": 10, "curStock": 13}, {"name": "일회용발조절식전기수술기용전극", "loc": "C구역", "spec": "5x330mm", "minStock": 10, "curStock": 43}, {"name": "멸균증류수", "loc": "C구역", "spec": "1L ⓑ", "minStock": 3, "curStock": 2}, {"name": "크린조", "loc": "C구역", "spec": "1L ⓑ", "minStock": 3, "curStock": 10}, {"name": "5.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "6.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 1}, {"name": "6.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 3}, {"name": "7.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 3, "curStock": 4}, {"name": "7.5 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 3}, {"name": "8.0 glove", "loc": "C구역", "spec": "ⓑ", "minStock": 2, "curStock": 1}, {"name": "해피레이", "loc": "C구역", "spec": "봉지/10ea", "minStock": 30, "curStock": 31}, {"name": "안심포인트", "loc": "C구역", "spec": "L/60x75cm/1box/50ea", "minStock": 1, "curStock": 2}, {"name": "복대", "loc": "C구역", "spec": "ea", "minStock": 30, "curStock": 34}, {"name": "프로테스칼", "loc": "C구역", "spec": "1.5ml ⓑ", "minStock": 10, "curStock": 30}, {"name": "그린플라스트큐", "loc": "C구역", "spec": "ⓑ", "minStock": 10, "curStock": 10}, {"name": "타코실 2매", "loc": "C구역", "spec": "4.8x4.8cm/box", "minStock": 5, "curStock": 10}, {"name": "타코실 roll", "loc": "C구역", "spec": "4.8x4.8cm/box", "minStock": 10, "curStock": 13}, {"name": "Bovie (일반)", "loc": "C구역", "spec": "EP-3025M/1box/25ea", "minStock": 1, "curStock": 1.5}, {"name": "Bovie (뾰족)", "loc": "C구역", "spec": "EP-3027M-N/1box/25ea", "minStock": 1, "curStock": 2}, {"name": "G-Plate", "loc": "C구역", "spec": "GD7131C/1box", "minStock": 0.5, "curStock": 0.5}, {"name": "수액세트", "loc": "C구역", "spec": "M122/봉지", "minStock": 1, "curStock": 1}, {"name": "Extension Line", "loc": "C구역", "spec": "90mm/봉지", "minStock": 1, "curStock": 1}, {"name": "Accufuser Puls", "loc": "C구역", "spec": "P2015M/1box/10ea", "minStock": 2, "curStock": 2}, {"name": "Mommy Caty - Plus", "loc": "C구역", "spec": "MCPO2KR-S", "minStock": 10, "curStock": 18}, {"name": "포비돈소독용", "loc": "C구역", "spec": "소독용4L", "minStock": 5, "curStock": 5}, {"name": "포비돈세정용", "loc": "C구역", "spec": "세정용4L", "minStock": 2, "curStock": 2.5}, {"name": "ALCOHOL(알콜)70%", "loc": "C구역", "spec": "18L", "minStock": 1, "curStock": 0.2}, {"name": "그린소독용에탄올", "loc": "C구역", "spec": "1L", "minStock": 5, "curStock": 6}, {"name": "이아루릴 프리필 50ml", "loc": "C구역", "spec": "E03614 ⓑ", "minStock": 40, "curStock": 21}, {"name": "ARTISENTIAL", "loc": "C구역", "spec": "8mmx250mm/1box", "minStock": 3, "curStock": 4}, {"name": "E.O Gas Pouch 10cm", "loc": "C구역", "spec": "10cm", "minStock": 1, "curStock": 1.5}, {"name": "E.O Gas Pouch 20cm", "loc": "C구역", "spec": "20cm", "minStock": 1, "curStock": 0}, {"name": "E.O Gas Pouch 30cm", "loc": "C구역", "spec": "30cm", "minStock": 1, "curStock": 0.5}, {"name": "E.O Gas Pouch 40cm", "loc": "C구역", "spec": "40cm", "minStock": 1, "curStock": 1.5}, {"name": "집진매트", "loc": "C구역", "spec": "MAT/445mmx1155mm", "minStock": 2, "curStock": 1.5}, {"name": "3M E.O Gas Indicator", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "3M Steam Indicator", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "3M Steam Indicator Tape", "loc": "C구역", "spec": "", "minStock": 1, "curStock": 1}, {"name": "Poly - Glove", "loc": "C구역", "spec": "1box/200장", "minStock": 3, "curStock": 2}, {"name": "Eol Swab (알콜솜)", "loc": "C구역", "spec": "", "minStock": 5, "curStock": 7}, {"name": "3M Micoropore Tape (White)", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 3}, {"name": "3M Duraproe", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 1}, {"name": "3M Transproe", "loc": "C구역", "spec": "1Inch/1box", "minStock": 1, "curStock": 1}, {"name": "Lidocaine Jelly", "loc": "C구역", "spec": "120g/ea", "minStock": 1, "curStock": 10}, {"name": "모아랩 일반형 밴드", "loc": "C구역", "spec": "20mm/100매", "minStock": 1, "curStock": 3}, {"name": "3M Monitoring Electrode", "loc": "C구역", "spec": "2223H/봉", "minStock": 3, "curStock": 1}, {"name": "Hand Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 3}, {"name": "Knee Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "Knee A/S Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 1}, {"name": "Shoulder A/S Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.5}, {"name": "Shoulder Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.2}, {"name": "Hip Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 0.2}, {"name": "Basic Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "TKRA Pack", "loc": "D구역", "spec": "1box/4pack", "minStock": 1, "curStock": 2}, {"name": "Breast Pack(1box=4개)(3시간이내) CB1700", "loc": "D구역", "spec": "1box/4pack", "minStock": 2, "curStock": 3}, {"name": "Breast Pack(1box=4개)(3시간이상) SJ-CBS-400-1", "loc": "D구역", "spec": "1box/4pack", "minStock": 2, "curStock": 5}, {"name": "Nomal DeliveryPack(Drape-7ea)1시간미만팩", "loc": "D구역", "spec": "1box/7pack", "minStock": 2, "curStock": 10}, {"name": "세보프란", "loc": "D구역", "spec": "1box", "minStock": 5, "curStock": 6}, {"name": "리알로 1cc", "loc": "D구역", "spec": "RIDM1020 ⓑ", "minStock": 5, "curStock": 8}, {"name": "라큐디 1.5ml", "loc": "D구역", "spec": "1.5ml ⓑ", "minStock": 5, "curStock": 6}, {"name": "라큐디 20ml", "loc": "D구역", "spec": "2.0ml ⓑ", "minStock": 5, "curStock": 4}, {"name": "MR tip 4번", "loc": "D구역", "spec": "4번", "minStock": 5, "curStock": 30}, {"name": "MR tip 5번", "loc": "D구역", "spec": "5번", "minStock": 5, "curStock": 8}, {"name": "MR tip 6번", "loc": "D구역", "spec": "6번", "minStock": 10, "curStock": 6}, {"name": "Endo suction", "loc": "D구역", "spec": "open end type", "minStock": 2, "curStock": 3}, {"name": "LC-20(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LC-25(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-10(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-20(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 2}, {"name": "LP-25(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "BA-513(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 12}, {"name": "K03(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 7}, {"name": "E01(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "Condyloma Tip(일회용손조절식전기수술기용전극)", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "알보칠", "loc": "D구역", "spec": "병", "minStock": 1, "curStock": 1}, {"name": "초음파 프푸브 커버", "loc": "D구역", "spec": "DFO-PCL-R/1box", "minStock": 1, "curStock": 0}, {"name": "라미나리아 1번", "loc": "D구역", "spec": "1번", "minStock": 5, "curStock": 7}, {"name": "라미나리아 3번", "loc": "D구역", "spec": "3번", "minStock": 5, "curStock": 4}, {"name": "라미나리아 5번", "loc": "D구역", "spec": "5번", "minStock": 5, "curStock": 2}, {"name": "Dual tulip", "loc": "D구역", "spec": "봉지", "minStock": 5, "curStock": 4}, {"name": "더모픽스", "loc": "D구역", "spec": "ea", "minStock": 5, "curStock": 3}, {"name": "지노브이", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 2}, {"name": "지노프로", "loc": "D구역", "spec": "ea", "minStock": 5, "curStock": 11}, {"name": "지노베타딘", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "지노콜라", "loc": "D구역", "spec": "ea", "minStock": 10, "curStock": 3}, {"name": "오베스틴", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "유트로게스탄", "loc": "D구역", "spec": "ea", "minStock": 1, "curStock": 1}, {"name": "뮤라젠", "loc": "D구역", "spec": "ⓑ", "minStock": 1, "curStock": 1}, {"name": "Catetere MMS U-71501직장용 튜브 • 카테터", "loc": "D구역", "spec": "7.5fr/묶음", "minStock": 10, "curStock": 64}, {"name": "Catetere MMS U-72603 요로내압 측정 • 카테터", "loc": "D구역", "spec": "6fr/묶음", "minStock": 10, "curStock": 65}, {"name": "Super UL STAR(초음파 프린트용지)", "loc": "D구역", "spec": "1100HG/1box/6ea", "minStock": 1, "curStock": 1.5}, {"name": "Pro Care (Latex Glove)", "loc": "D구역", "spec": "KL101512A/XS/box", "minStock": 1, "curStock": 2}, {"name": "SONO Jelly", "loc": "D구역", "spec": "통", "minStock": 1, "curStock": 0.1}, {"name": "일회용 면도기", "loc": "D구역", "spec": "box", "minStock": 20, "curStock": 1}, {"name": "KM SURGEON CAP", "loc": "D구역", "spec": "CA-101-1/100pcs/box", "minStock": 2, "curStock": 1}, {"name": "일회용 마스크", "loc": "D구역", "spec": "50ea/box", "minStock": 3, "curStock": 5}, {"name": "헥시딘 스크랍", "loc": "D구역", "spec": "15ml/1box/20개", "minStock": 2, "curStock": 1}, {"name": "DISPOSABLE CAP(KM) 수술용모자(청색-일회용)", "loc": "D구역", "spec": "NURS/BLUE/1BOX/100EA", "minStock": 2, "curStock": 5}, {"name": "Surgical Mask", "loc": "D구역", "spec": "50ea/box", "minStock": 2, "curStock": 2}, {"name": "Sugisorb 1", "loc": "E구역", "spec": "1 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb 2-0", "loc": "E구역", "spec": "2-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Sugisorb 3-0", "loc": "E구역", "spec": "3-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Vicryl 4-0", "loc": "E구역", "spec": "4-0 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon 1-0", "loc": "E구역", "spec": "1-0© ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Nylon 2-0", "loc": "E구역", "spec": "2-0©", "minStock": 1, "curStock": 0.1}, {"name": "Nylon 4-0", "loc": "E구역", "spec": "4-0© ⓑ", "minStock": 1, "curStock": 2}, {"name": "Nylon 5-0", "loc": "E구역", "spec": "5-0© ⓑ", "minStock": 1, "curStock": 0.5}, {"name": "Nylon 6-0", "loc": "E구역", "spec": "6-0© ⓑ", "minStock": 1, "curStock": 1}, {"name": "Nylon 3-0 ®", "loc": "E구역", "spec": "3-0® ⓑ", "minStock": 1, "curStock": 2}, {"name": "Nylon 4-0 ®", "loc": "E구역", "spec": "4-0® ⓑ", "minStock": 1, "curStock": 1}, {"name": "Ethibond 2", "loc": "E구역", "spec": "2/X4843G", "minStock": 1, "curStock": 0.5}, {"name": "Ethibond 5", "loc": "E구역", "spec": "5", "minStock": 1, "curStock": 1}, {"name": "프리베리3", "loc": "E구역", "spec": "3ml/box", "minStock": 5, "curStock": 10}, {"name": "수동식 일회용 천공기 SWVP-135", "loc": "E구역", "spec": "SWVP-135/box", "minStock": 2, "curStock": 2}, {"name": "수동식 일회용 천공기 SWVP-115", "loc": "E구역", "spec": "SWVP-115/box", "minStock": 2, "curStock": 2}, {"name": "Bone Cement(골시멘트)", "loc": "E구역", "spec": "SPINOFILL/box", "minStock": 2, "curStock": 2}, {"name": "Mess 10", "loc": "E구역", "spec": "10# ⓑ", "minStock": 1, "curStock": 1}, {"name": "Mess 11", "loc": "E구역", "spec": "11# ⓑ", "minStock": 1, "curStock": 1}, {"name": "Mess 15", "loc": "E구역", "spec": "15# ⓑ", "minStock": 1, "curStock": 1}, {"name": "하이겐트 5x5", "loc": "E구역", "spec": "5x5cm", "minStock": 3, "curStock": 9}, {"name": "하이겐트 10x10", "loc": "E구역", "spec": "10x10cm", "minStock": 3, "curStock": 3}, {"name": "AIDerm", "loc": "E구역", "spec": "6x7cm/box", "minStock": 1, "curStock": 1}, {"name": "Allevyn Life heel (25cm x 25.2cm)", "loc": "E구역", "spec": "66801304/1box", "minStock": 1, "curStock": 1}, {"name": "Bactigra", "loc": "E구역", "spec": "10x10", "minStock": 1, "curStock": 2}, {"name": "Bone Stat", "loc": "E구역", "spec": "25ml ⓑ", "minStock": 1, "curStock": 2}, {"name": "MarkingPen-1", "loc": "E구역", "spec": "ea", "minStock": 10, "curStock": 10}, {"name": "Fix Gard 2inch", "loc": "E구역", "spec": "2inch/1box", "minStock": 0.5, "curStock": 0.8}, {"name": "Fix Gard 3inch", "loc": "E구역", "spec": "3inch/1box", "minStock": 2, "curStock": 2}, {"name": "Fix Gard 4inch", "loc": "E구역", "spec": "4inch/1box", "minStock": 2, "curStock": 1}, {"name": "Fix Gard 6inch", "loc": "E구역", "spec": "6inch/1box", "minStock": 2, "curStock": 2}, {"name": "Barovac 400cc(k3002104세운)", "loc": "E구역", "spec": "PP400L(4.8)/1box/5개  ⓑ", "minStock": 1, "curStock": 1.5}, {"name": "Surgi Van", "loc": "E구역", "spec": "60x45 ⓑ", "minStock": 1, "curStock": 2}, {"name": "WellFlowBand", "loc": "E구역", "spec": "Line/1box/50개", "minStock": 10, "curStock": 10}, {"name": "의료용 세정기 TUR Y-Set", "loc": "E구역", "spec": "HS-E-100/ea", "minStock": 5, "curStock": 11}, {"name": "Sorbact 7x9", "loc": "E구역", "spec": "7x9", "minStock": 1, "curStock": 12}, {"name": "Sorbact 10x10", "loc": "E구역", "spec": "10x10", "minStock": 1, "curStock": 7}, {"name": "Sorbact 10x20", "loc": "E구역", "spec": "10x20", "minStock": 1, "curStock": 10}, {"name": "Roll Wire 0.18mm", "loc": "E구역", "spec": "0.18mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.32mm", "loc": "E구역", "spec": "0.32mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.38mm", "loc": "E구역", "spec": "0.38mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.46mm", "loc": "E구역", "spec": "0.46mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.56mm", "loc": "E구역", "spec": "0.56mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.76mm", "loc": "E구역", "spec": "0.76mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 0.86mm", "loc": "E구역", "spec": "0.86mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 1.0mm", "loc": "E구역", "spec": "1.0mm", "minStock": 1, "curStock": 1}, {"name": "Roll Wire 1.2mm", "loc": "E구역", "spec": "1.2mm", "minStock": 1, "curStock": 1}, {"name": "K-Wire 0.8", "loc": "E구역", "spec": "0.8", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1", "loc": "E구역", "spec": "1", "minStock": 1, "curStock": 2}, {"name": "K-Wire 1.2", "loc": "E구역", "spec": "1.2", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1.4", "loc": "E구역", "spec": "1.4", "minStock": 1, "curStock": 1}, {"name": "K-Wire 1.6", "loc": "E구역", "spec": "1.6", "minStock": 1, "curStock": 2}, {"name": "K-Wire1.8", "loc": "E구역", "spec": "1.8", "minStock": 1, "curStock": 2}, {"name": "Ball K-Wire 0.9", "loc": "E구역", "spec": "0.9", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1", "loc": "E구역", "spec": "1", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.2", "loc": "E구역", "spec": "1.2", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.4", "loc": "E구역", "spec": "1.4", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.6", "loc": "E구역", "spec": "1.6", "minStock": 1, "curStock": 1}, {"name": "Ball K-Wire 1.8", "loc": "E구역", "spec": "1.8", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2", "loc": "E구역", "spec": "2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.2", "loc": "E구역", "spec": "2.2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.4", "loc": "E구역", "spec": "2.4", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 2.8", "loc": "E구역", "spec": "2.8", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 3.2", "loc": "E구역", "spec": "3.2", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 3.6", "loc": "E구역", "spec": "3.6", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 4", "loc": "E구역", "spec": "4", "minStock": 1, "curStock": 1}, {"name": "Steinmann Pin 4.8", "loc": "E구역", "spec": "4.8", "minStock": 1, "curStock": 1}, {"name": "TC-Band 4인치", "loc": "E구역", "spec": "4인치/1box/12개", "minStock": 1, "curStock": 12}, {"name": "TC-Band 6인치", "loc": "E구역", "spec": "6인치/1box/9개", "minStock": 1, "curStock": 7}, {"name": "Tap Seal 10x40", "loc": "E구역", "spec": "10x40/1box/10개", "minStock": 1, "curStock": 2}, {"name": "Tap Seal 20x40", "loc": "E구역", "spec": "20x40/1box/5개", "minStock": 1, "curStock": 1}, {"name": "Cotton 3인치", "loc": "E구역", "spec": "3인치/ea", "minStock": 5, "curStock": 5}, {"name": "Cotton 4인치", "loc": "E구역", "spec": "4인치/ea", "minStock": 10, "curStock": 10}, {"name": "Cotton 6인치", "loc": "E구역", "spec": "6인치/ea", "minStock": 10, "curStock": 10}, {"name": "All Silicone Penrose Drainage Tube", "loc": "E구역", "spec": "8mmx300mm(봉)", "minStock": 1, "curStock": 1}, {"name": "VISISTAT(스킨 스테플러)", "loc": "E구역", "spec": "35W", "minStock": 1, "curStock": 15}, {"name": "Stapler Remover", "loc": "E구역", "spec": "Remover", "minStock": 1, "curStock": 1}, {"name": "Glove 6", "loc": "E구역", "spec": "6 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 6.5", "loc": "E구역", "spec": "6.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 7", "loc": "E구역", "spec": "7 ⓑ", "minStock": 1, "curStock": 2}, {"name": "Glove 7.5", "loc": "E구역", "spec": "7.5 ⓑ", "minStock": 1, "curStock": 1}, {"name": "Glove 8", "loc": "E구역", "spec": "8 ⓑ", "minStock": 1, "curStock": 1}, {"name": "GAMMEX 7.5", "loc": "E구역", "spec": "7.5 ⓑ", "minStock": 1, "curStock": 2}, {"name": "GAMMEX 8", "loc": "E구역", "spec": "8 ⓑ", "minStock": 1, "curStock": 3}, {"name": "Double Arm Needle", "loc": "E구역", "spec": "1box", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Rrsector 4.0", "loc": "E구역", "spec": "Rrsector 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Aggressive 4.0", "loc": "E구역", "spec": "Aggressive 4.0/ea", "minStock": 1, "curStock": 2}, {"name": "Shaver Tip Round Burs 4.0", "loc": "E구역", "spec": "Round Burs 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Barrel Burs 4.0", "loc": "E구역", "spec": "Barrel Burs 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip ⓢHood Bur 2.0", "loc": "E구역", "spec": "ⓢHood Bur 2.0/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip ⓢRadius 2.5", "loc": "E구역", "spec": "ⓢRadius 2.5/ea", "minStock": 1, "curStock": 1}, {"name": "Shaver Tip Tomcat 4.0", "loc": "E구역", "spec": "Tomcat 4.0/ea", "minStock": 1, "curStock": 1}, {"name": "Zeus-X", "loc": "E구역", "spec": "box", "minStock": 1, "curStock": 1}, {"name": "ST,Reed", "loc": "E구역", "spec": "box", "minStock": 2, "curStock": 3}, {"name": "JointSeal", "loc": "E구역", "spec": "box", "minStock": 3, "curStock": 3}, {"name": "본칩", "loc": "E구역", "spec": "15cc", "minStock": 1, "curStock": 1}, {"name": "본칩", "loc": "E구역", "spec": "30cc", "minStock": 1, "curStock": 1}, {"name": "Rafugen DBM Gel Pro0.5", "loc": "E구역", "spec": "0.5cc", "minStock": 1, "curStock": 1}, {"name": "Rafugen DBM Gel Pro1", "loc": "E구역", "spec": "1cc", "minStock": 1, "curStock": 2}, {"name": "Fast Fix 360", "loc": "E구역", "spec": "box", "minStock": 5, "curStock": 5}, {"name": "Bovie Pro Pencil(EP-302M)", "loc": "E구역", "spec": "일반용/1box", "minStock": 10, "curStock": 10}, {"name": "G-PLATE1", "loc": "E구역", "spec": "GD7131C/1box", "minStock": 10, "curStock": 10}, {"name": "대한관류용 멸균생리식염수", "loc": "E구역", "spec": "1000ML/1box/10개", "minStock": 1, "curStock": 13}, {"name": "삼진 타우로린 주사2%", "loc": "E구역", "spec": "250ml/1box/10개", "minStock": 1, "curStock": 18}, {"name": "B-cover Band", "loc": "E구역", "spec": "1box/30개", "minStock": 15, "curStock": 33}, {"name": "생리식염수관주액 (세척용)", "loc": "E구역", "spec": "3000ml/1box/4개", "minStock": 2, "curStock": 3}, {"name": "WellFlowBand Bottle", "loc": "E구역", "spec": "Bottle/1box/50개", "minStock": 15, "curStock": 7}, {"name": "Tonic-band(토니켓 대)", "loc": "E구역", "spec": "대/ea", "minStock": 10, "curStock": 10}, {"name": "Tonic-band(토니켓 중)", "loc": "E구역", "spec": "중/ea", "minStock": 10, "curStock": 21}, {"name": "Tonic-band(토니켓 소)", "loc": "E구역", "spec": "소/ea", "minStock": 3, "curStock": 6}, {"name": "과산화수소수(H2O2)/그린", "loc": "E구역", "spec": "250ml/ea", "minStock": 10, "curStock": 10}, {"name": "그린에탄올 1L", "loc": "E구역", "spec": "1L/통", "minStock": 2, "curStock": 2}, {"name": "솜붕대 3inch", "loc": "E구역", "spec": "7.5cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 0}, {"name": "솜붕대 4inch", "loc": "E구역", "spec": "10cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 3}, {"name": "솜붕대 6inch", "loc": "E구역", "spec": "15cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 3}, {"name": "탄력붕대 두원 3inch", "loc": "E구역", "spec": "7.5cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 2}, {"name": "탄력붕대 두원 4inch", "loc": "E구역", "spec": "10cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 2}, {"name": "탄력붕대 두원 6inch", "loc": "E구역", "spec": "15cmx250cm/봉지/12rolls", "minStock": 1, "curStock": 105}, {"name": "3M Coban Self Adherent Wrap 1inch", "loc": "E구역", "spec": "2.5cmx2m/1box/30rolls", "minStock": 1, "curStock": 1}, {"name": "4M Coban Self Adherent Wrap 2inch", "loc": "E구역", "spec": "5cmx2m/1box/36rolls", "minStock": 1, "curStock": 1}, {"name": "5M Coban Self Adherent Wrap 3inch", "loc": "E구역", "spec": "7.5cmx2m/1box/24rolls", "minStock": 1, "curStock": 1}, {"name": "BMAC-Kit", "loc": "E구역", "spec": "", "minStock": 2, "curStock": 2}, {"name": "노트롬홈", "loc": "E구역", "spec": "3ml", "minStock": 2, "curStock": 3}, {"name": "세포탁심", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 9}, {"name": "CS Heated Cricuite", "loc": "E구역", "spec": "", "minStock": 10, "curStock": 9}, {"name": "소다라임", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 12}, {"name": "세보프란", "loc": "E구역", "spec": "", "minStock": 3, "curStock": 6}, {"name": "BIS Quatro Sensor", "loc": "E구역", "spec": "186-0106/1box/25개", "minStock": 1, "curStock": 0.6}, {"name": "Endotracheal Tube 6", "loc": "E구역", "spec": "6#", "minStock": 2, "curStock": 3}, {"name": "Endotracheal Tube 6.5", "loc": "E구역", "spec": "6.5#", "minStock": 2, "curStock": 3}, {"name": "Endotracheal Tube 7", "loc": "E구역", "spec": "7#", "minStock": 2, "curStock": 3}, {"name": "ReinForced Endotracheal Tube", "loc": "E구역", "spec": "7#", "minStock": 2, "curStock": 4}, {"name": "I-Gel", "loc": "E구역", "spec": "3#", "minStock": 2, "curStock": 2}, {"name": "LMA", "loc": "E구역", "spec": "4#", "minStock": 2, "curStock": 2}, {"name": "Scution Catheter", "loc": "E구역", "spec": "", "minStock": 2, "curStock": 2}, {"name": "Airway", "loc": "E구역", "spec": "", "minStock": 5, "curStock": 5}, {"name": "픽스롤10*10(bm5103bl)4=Super Fix", "loc": "E구역", "spec": "bm5103bl/1box/1개", "minStock": 1, "curStock": 2}, {"name": "Spinal Needle", "loc": "E구역", "spec": "16G/1봉/10개", "minStock": 1, "curStock": 1}, {"name": "Spinal Needle(척추 마취용침)", "loc": "E구역", "spec": "26Gx90mm/1box/50PCS", "minStock": 1, "curStock": 1}, {"name": "일회용 멸균주사침", "loc": "E구역", "spec": "24Gx60mm/1box/200PCS", "minStock": 1, "curStock": 1}, {"name": "3-Way Filter Tube", "loc": "E구역", "spec": "5MR090SD/1box", "minStock": 1, "curStock": 1}, {"name": "Micro DYN Prep", "loc": "E구역", "spec": "MCDPR-60-03-00/1box/15ea", "minStock": 1, "curStock": 2}, {"name": "의료용 헤드램프", "loc": "E구역", "spec": "0408-800-000/ea", "minStock": 10, "curStock": 20}]
-</script>
+
+<div id="modalRoot"></div>
+<div id="toast"></div>
+
 <script>
+(function(){
+  "use strict";
 
-(function() {
-  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwmneGNffnnv3F_s8tkXeDgm_3hSvGH1X8qgMDpKuev743MNmkelDbisFQdGHulAlkmww/exec";
-  var items = [];
-  var weeklyData = [];
-  var reqHist = JSON.parse(localStorage.getItem("orh6") || "[]");
-  var dashFilter = "all";
-  var dashSearch = "";
-  var dashArea = "all";
-  var searchTimer = null;
-  var isLive = false;
+  var CATALOG = [["복대", [""]], ["팔걸이 (파랑)", [""]], ["팔걸이 (분홍)", [""]], ["깁스신발", ["S", "M", "L", "XL"]], ["M-splint (thumb)", ["좌 S", "좌 M", "좌 L", "우 S", "우 M", "우 L"]], ["M-splint (wrist)", ["좌 S", "좌 M", "좌 L", "좌 XL", "우 S", "우 M", "우 L", "우 XL"]], ["M-splint (finger)", ["S", "M", "L"]], ["M-splint Leg (ankle)", ["S", "M", "L", "XL", "XXL"]], ["M-splint (long leg)", ["M", "L", "XL"]], ["JS-Tap EB (elbow)", ["S", "M", "L", "XL"]], ["JS-Tap KB (knee)", ["S", "M", "L", "XL"]], ["Q-splint (Ulnar)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (wrist)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (thumb)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (long arm)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (short leg)", ["소", "플러스 소", "중", "대"]], ["Q-splint (cylinder)", ["좌M", "좌L", "우M", "우L"]], ["Q-splint (long leg)", ["소", "플러스 소", "중", "대"]]];
+  var ACCENTS = [
+    {c:'#F59701', t:'#FFF3E0'},
+    {c:'#2B71B9', t:'#E9F1FA'},
+    {c:'#8FB60A', t:'#F3F8E4'},
+    {c:'#E83344', t:'#FDECEE'}
+  ];
 
-  function getFallback() {
-    var el = document.getElementById("jdata");
-    return JSON.parse(el.textContent || el.innerText);
-  }
+  var items = [];        // {id, category, size, stock}
+  var counts = {};        // {itemId: number}
+  var collapsedCats = {}; // {categoryName: bool}
+  var todayKey = "";
+  var settings = { lowStockThreshold: 5 };
+  var stockFilterOn = false;
 
-  function api(params, body) {
-    var url = SCRIPT_URL;
-    if (params) {
-      var qs = Object.keys(params).map(function(k) {
-        return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]);
-      }).join("&");
-      url += "?" + qs;
-    }
-    var opts = { method: "GET" };
-    if (body) {
-      opts.method = "POST";
-      opts.headers = { "Content-Type": "text/plain;charset=utf-8" };
-      opts.body = JSON.stringify(body);
-    }
-    return fetch(url, opts)
-      .then(function(r) { return r.json(); })
-      .then(function(j) { if (j.status === "error") throw new Error(j.message); return j; });
-  }
+  /* ---------- 구글 시트 연동 (Apps Script 웹앱 API) ---------- */
+  // ⚠️ 배포 후 여기에 실제 웹앱 URL을 붙여넣으세요.
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNCB6JunDEn7TSfF7S78yO1oTRpDRqLs7uHiKOUQAgH_Nh0lg29TpgHYOhv2usCOWG/exec";
 
-  function loadData() {
-    showToast("데이터 불러오는 중...");
-    api({ action: "getAll" }).then(function(res) {
-      items = res.data.master || [];
-      weeklyData = res.data.weekly || [];
-      isLive = true;
-      document.getElementById("cstat").textContent = "실시간 연결됨 · " + items.length + "개 품목";
-      renderAll();
-      showToast(items.length + "개 품목 로드 완료");
-    }).catch(function() {
-      var fb = getFallback();
-      items = fb.map(function(i) { return Object.assign({}, i); });
-      isLive = false;
-      document.getElementById("cstat").textContent = "오프라인 · " + items.length + "개 품목";
-      renderAll();
-      showToast("오프라인 모드");
-    });
-  }
-
-  function getStatus(item) {
-    if (!item.minStock) return "o";
-    return item.curStock < item.minStock ? "d" : "o";
-  }
-
-  function getAreas() {
-    var seen = {}, result = [];
-    items.forEach(function(i) {
-      if (i.loc && !seen[i.loc]) { seen[i.loc] = true; result.push(i.loc); }
-    });
-    return result.sort();
-  }
-
-  function renderAll() { renderDashboard(); renderRequest(); renderWeekly(); }
-
-  function doSearch() {
-    var el = document.getElementById("sb");
-    if (el) dashSearch = el.value;
-    renderDashboard();
-  }
-
-  function setArea(area) {
-    dashArea = area;
-    renderDashboard();
-  }
-
-  function setFilter(f) {
-    dashFilter = f;
-    renderDashboard();
-  }
-
-  function renderDashboard() {
-    var valid = items.filter(function(i) { return i.name; });
-    var shortage = valid.filter(function(i) { return getStatus(i) === "d"; });
-    var stable = valid.filter(function(i) { return getStatus(i) === "o"; });
-    var areaList = getAreas();
-
-    var filtered = valid.slice();
-    if (dashFilter === "d") filtered = shortage.slice();
-    if (dashFilter === "o") filtered = stable.slice();
-    if (dashArea !== "all") {
-      filtered = filtered.filter(function(i) { return i.loc === dashArea; });
-    }
-    if (dashSearch.trim()) {
-      var q = dashSearch.trim().toLowerCase();
-      filtered = filtered.filter(function(i) {
-        return i.name.toLowerCase().indexOf(q) >= 0 || (i.loc || "").toLowerCase().indexOf(q) >= 0;
+  window.storage = {
+    get: async function(key){
+      var res = await fetch(SCRIPT_URL + '?action=get&key=' + encodeURIComponent(key));
+      if (!res.ok) throw new Error('네트워크 오류: ' + res.status);
+      var data = await res.json();
+      if (data.error) throw new Error(data.error);
+      if (data.value === null || data.value === undefined) return null;
+      return { key: data.key, value: data.value, shared: true };
+    },
+    set: async function(key, value){
+      var res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'set', key: key, value: value })
       });
-    }
-
-    var byArea = {};
-    filtered.forEach(function(i) {
-      var a = i.loc || "기타";
-      if (!byArea[a]) byArea[a] = [];
-      byArea[a].push(i);
-    });
-
-    var curSearch = document.getElementById("sb") ? document.getElementById("sb").value : dashSearch;
-
-    var html = "";
-    html += "<div class='sgrid'>";
-    html += "<div class='sc'><div class='sn d'>" + shortage.length + "</div><div class='sl'>재고부족</div></div>";
-    html += "<div class='sc'><div class='sn o'>" + stable.length + "</div><div class='sl'>정상</div></div>";
-    html += "<div class='sc'><div class='sn t'>" + valid.length + "</div><div class='sl'>전체 품목</div></div>";
-    html += "</div>";
-    html += "<input class='sbox' id='sb' type='search' placeholder='품목명 검색...' value='" + curSearch.replace(/'/g, "&#39;") + "' autocomplete='off' autocorrect='off' autocapitalize='off'>";
-    html += "<div class='frow'>";
-    html += "<button class='fb" + (dashFilter === "all" ? " active" : "") + "' data-f='all'>전체</button>";
-    html += "<button class='fb" + (dashFilter === "d" ? " active" : "") + "' data-f='d'>부족만</button>";
-    html += "<button class='fb" + (dashFilter === "o" ? " active" : "") + "' data-f='o'>정상만</button>";
-    html += "</div>";
-    html += "<div class='atabs'>";
-    html += "<button class='at" + (dashArea === "all" ? " active" : "") + "' data-a='all'>전체</button>";
-    areaList.forEach(function(a) {
-      html += "<button class='at" + (dashArea === a ? " active" : "") + "' data-a='" + a + "'>" + a + "</button>";
-    });
-    html += "</div>";
-
-    if (!filtered.length) {
-      html += "<div class='empty'>검색 결과가 없습니다</div>";
-    } else {
-      Object.keys(byArea).sort().forEach(function(area) {
-        html += "<div class='asec'><div class='ahdr'><span>" + area + "</span><span>" + byArea[area].length + "개</span></div>";
-        byArea[area].forEach(function(item) {
-          var s = getStatus(item);
-          var idx = items.indexOf(item);
-          var sid = "s" + idx;
-          html += "<div class='ic " + s + "'>";
-          html += "<div class='itop'><div class='iname'>" + escHtml(item.name) + "</div>";
-          html += "<span class='bdg " + s + "'>" + (s === "d" ? "재고부족" : "정상") + "</span></div>";
-          html += "<div class='imeta'>" + escHtml(item.spec || "") + (item.minStock ? " · 적정 " + item.minStock + "개" : "") + " · " + escHtml(item.loc || "") + "</div>";
-          html += "<div class='ibot'><span class='slbl'>현재재고</span>";
-          html += "<span class='curstock'>" + item.curStock + "개</span>";
-          html += "<button class='dbtn' data-del='" + idx + "'>삭제</button>";
-          html += "</div></div>";
-        });
-        html += "</div>";
+      if (!res.ok) throw new Error('네트워크 오류: ' + res.status);
+      var data = await res.json();
+      if (data.error) throw new Error(data.error);
+      return { key: data.key, value: data.value, shared: true };
+    },
+    list: async function(prefix){
+      var res = await fetch(SCRIPT_URL + '?action=list&prefix=' + encodeURIComponent(prefix || ''));
+      if (!res.ok) throw new Error('네트워크 오류: ' + res.status);
+      var data = await res.json();
+      if (data.error) throw new Error(data.error);
+      return { keys: data.keys || [] };
+    },
+    delete: async function(key){
+      var res = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ action: 'delete', key: key })
       });
+      if (!res.ok) throw new Error('네트워크 오류: ' + res.status);
+      return await res.json();
     }
+  };
 
-    document.getElementById("dc").innerHTML = html;
-
-    // 이벤트 재연결
-    var sbEl = document.getElementById("sb");
-    if (sbEl) {
-      sbEl.addEventListener("input", function() {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(doSearch, 400);
-      });
-      sbEl.addEventListener("compositionend", doSearch);
-    }
-
-    document.querySelectorAll(".fb").forEach(function(btn) {
-      btn.addEventListener("click", function() { setFilter(this.getAttribute("data-f")); });
-    });
-
-    document.querySelectorAll(".at").forEach(function(btn) {
-      btn.addEventListener("click", function() { setArea(this.getAttribute("data-a")); });
-    });
-
-
-
-    document.querySelectorAll("[data-del]").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var idx = parseInt(this.getAttribute("data-del"));
-        deleteItem(idx);
-      });
-    });
+  function pad(n){ return n < 10 ? "0"+n : ""+n; }
+  function todayStr(){
+    var d = new Date();
+    return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  }
+  function friendlyDate(dstr){
+    var d = new Date(dstr+"T00:00:00");
+    if (isNaN(d.getTime())) return dstr;
+    var days = ['일','월','화','수','목','금','토'];
+    return d.getFullYear()+"년 "+(d.getMonth()+1)+"월 "+d.getDate()+"일 ("+days[d.getDay()]+")";
+  }
+  function uid(){
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return 'id-'+Date.now()+'-'+Math.random().toString(16).slice(2);
   }
 
-  function escHtml(str) {
-    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
-  }
-
-  function saveStock(idx, sid) {
-    var val = parseFloat(document.getElementById(sid).value) || 0;
-    showToast("저장 중...");
-    var p = isLive ? api(null, { action: "updateMasterStock", itemName: items[idx].name, stock: val }) : Promise.resolve();
-    p.then(function() {
-      items[idx].curStock = val;
-      showToast("재고 저장 완료");
-      renderDashboard();
-      renderRequest();
-    }).catch(function() { showToast("저장 실패"); });
-  }
-
-  function deleteItem(idx) {
-    if (!confirm(items[idx].name + "\n\n이 품목을 삭제할까요?")) return;
-    var name = items[idx].name;
-    showToast("삭제 중...");
-    var p = isLive ? api(null, { action: "deleteItem", itemName: name }) : Promise.resolve();
-    p.then(function() {
-      items.splice(idx, 1);
-      showToast("삭제 완료");
-      renderDashboard();
-      renderRequest();
-    }).catch(function() { showToast("삭제 실패"); });
-  }
-
-  function openModal() {
-    ["nname","nloc","nspec","nmin","ncur"].forEach(function(id) { document.getElementById(id).value = ""; });
-    document.getElementById("mov").classList.add("show");
-  }
-  function closeModal() { document.getElementById("mov").classList.remove("show"); }
-
-  function addItem() {
-    var name = document.getElementById("nname").value.trim();
-    if (!name) { showToast("품목명을 입력해주세요"); return; }
-    if (items.find(function(i) { return i.name === name; })) { showToast("이미 같은 이름의 품목이 있습니다"); return; }
-    var item = {
-      name: name,
-      loc: document.getElementById("nloc").value.trim(),
-      spec: document.getElementById("nspec").value.trim(),
-      minStock: parseFloat(document.getElementById("nmin").value) || 0,
-      curStock: parseFloat(document.getElementById("ncur").value) || 0
-    };
-    var btn = document.getElementById("msub");
-    btn.disabled = true;
-    showToast("추가 중...");
-    var p = isLive ? api(null, { action: "addItem", item: item }) : Promise.resolve();
-    p.then(function() {
-      items.push(item);
-      closeModal();
-      showToast(name + " 추가 완료");
-      renderDashboard();
-      renderRequest();
-    }).catch(function() { showToast("추가 실패"); }).finally(function() { btn.disabled = false; });
-  }
-
-  function renderRequest() {
-    var shortage = items.filter(function(i) { return getStatus(i) === "d" && i.minStock > 0; });
-    if (!shortage.length) {
-      document.getElementById("rc").innerHTML = "<div class='empty'>모든 재고가 정상입니다!</div>";
-      return;
-    }
-    var html = "<div class='rcard'><div class='rhdr'><span>물품 청구서 - 부족 " + shortage.length + "개 품목</span><span>" + new Date().toLocaleDateString("ko-KR") + "</span></div>";
-    shortage.forEach(function(item, idx) {
-      var need = Math.max(0, item.minStock - item.curStock);
-      html += "<div class='rrow'>";
-      html += "<div class='rname'><p>" + escHtml(item.name) + "</p><span>" + escHtml(item.loc) + " · " + escHtml(item.spec) + "</span></div>";
-      html += "<div class='qc'>";
-      html += "<button class='qbtn' data-qid='q" + idx + "' data-qd='-1'>-</button>";
-      html += "<input class='qinp' id='q" + idx + "' type='number' value='" + need + "' min='0' step='0.5'>";
-      html += "<button class='qbtn' data-qid='q" + idx + "' data-qd='1'>+</button>";
-      html += "</div>";
-      html += "<button class='ckbtn on' id='c" + idx + "' data-ck='" + idx + "'>✓</button>";
-      html += "</div>";
-    });
-    html += "</div><button class='subbtn' id='subbtn' data-total='" + shortage.length + "'>청구서 제출</button>";
-    document.getElementById("rc").innerHTML = html;
-
-    document.querySelectorAll("[data-qid]").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var qid = this.getAttribute("data-qid");
-        var d = parseFloat(this.getAttribute("data-qd"));
-        var el = document.getElementById(qid);
-        el.value = Math.max(0, (parseFloat(el.value) || 0) + d);
-      });
-    });
-
-    document.querySelectorAll("[data-ck]").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var on = this.classList.contains("on");
-        this.classList.toggle("on", !on);
-        this.classList.toggle("off", on);
-        this.textContent = on ? "○" : "✓";
-      });
-    });
-
-    var subBtn = document.getElementById("subbtn");
-    if (subBtn) {
-      subBtn.addEventListener("click", function() {
-        var total = parseInt(this.getAttribute("data-total"));
-        submitReq(total);
-      });
-    }
-  }
-
-  function submitReq(total) {
-    var shortage = items.filter(function(i) { return getStatus(i) === "d" && i.minStock > 0; });
-    var reqs = [];
-    for (var i = 0; i < total; i++) {
-      var chk = document.getElementById("c" + i);
-      if (chk && chk.classList.contains("on")) {
-        var qty = parseFloat(document.getElementById("q" + i).value || 0);
-        if (qty > 0 && shortage[i]) {
-          reqs.push({ name: shortage[i].name, loc: shortage[i].loc, spec: shortage[i].spec, curStock: shortage[i].curStock, minStock: shortage[i].minStock, qty: qty });
-        }
-      }
-    }
-    if (!reqs.length) { showToast("청구할 항목을 선택해주세요"); return; }
-    var btn = document.getElementById("subbtn");
-    btn.disabled = true;
-    showToast("청구서 제출 중...");
-    var p = isLive ? api(null, { action: "submitRequest", items: reqs }) : Promise.resolve();
-    p.then(function() {
-      reqHist.unshift({ date: new Date().toLocaleString("ko-KR"), items: reqs });
-      if (reqHist.length > 30) reqHist.pop();
-      localStorage.setItem("orh6", JSON.stringify(reqHist));
-      renderHistory();
-      showToast(reqs.length + "개 품목 청구 완료");
-    }).catch(function() { showToast("제출 실패"); }).finally(function() { btn.disabled = false; });
-  }
-
-  function renderWeekly() {
-    var html = "<button class='gbtn' id='gbtn'>오늘 날짜로 전체 품목 불러오기</button>";
-    if (!weeklyData.length) {
-      html += "<div class='empty'>주간 실사 데이터가 없습니다</div>";
-      document.getElementById("wc").innerHTML = html;
-      document.getElementById("gbtn").addEventListener("click", generateWeekly);
-      return;
-    }
-    var dg = {};
-    weeklyData.forEach(function(w) { if (!dg[w.date]) dg[w.date] = []; dg[w.date].push(w); });
-    var ld = Object.keys(dg).sort().reverse()[0];
-    var rows = dg[ld] || [];
-    var filled = rows.filter(function(r) { return r.stock !== "" && r.stock !== undefined && r.stock !== null; });
-    html += "<div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:10px'><span style='font-size:13px;font-weight:600'>" + ld + "</span><span class='bdg o'>" + filled.length + "/" + rows.length + " 입력완료</span></div>";
-    rows.forEach(function(r, idx) {
-      var done = r.stock !== "" && r.stock !== undefined && r.stock !== null;
-      html += "<div class='wrow " + (done ? "done" : "pending") + "'>";
-      html += "<div class='winfo'><p>" + escHtml(r.name) + "</p><span>" + escHtml(r.spec) + " · " + escHtml(r.loc) + "</span></div>";
-      html += "<input class='sinp' id='w" + idx + "' type='number' placeholder='수량' value='" + (done ? r.stock : "") + "' min='0' step='0.5'>";
-      html += "<button class='sbtn' data-widx='" + idx + "' data-wsid='w" + idx + "'>저장</button>";
-      html += "</div>";
-    });
-    document.getElementById("wc").innerHTML = html;
-    document.getElementById("gbtn").addEventListener("click", generateWeekly);
-    document.querySelectorAll("[data-widx]").forEach(function(btn) {
-      btn.addEventListener("click", function() {
-        var idx = parseInt(this.getAttribute("data-widx"));
-        var sid = this.getAttribute("data-wsid");
-        saveWeeklyStock(idx, sid);
-      });
-    });
-  }
-
-  function generateWeekly() {
-    showToast("품목 불러오는 중...");
-    api(null, { action: "generateWeeklyList" }).then(function(res) {
-      showToast(res.result.count + "개 품목 입력 완료");
-      loadData();
-    }).catch(function(e) { showToast("실패: " + e.message); });
-  }
-
-  function saveWeeklyStock(idx, sid) {
-    var val = parseFloat(document.getElementById(sid).value);
-    if (isNaN(val)) { showToast("수량을 입력해주세요"); return; }
-    var r = weeklyData[idx];
-    showToast("저장 중...");
-    var p = isLive ? api(null, { action: "updateWeeklyStock", itemName: r.name, date: r.date, stock: val }) : Promise.resolve();
-    p.then(function() {
-      weeklyData[idx].stock = val;
-      var m = items.find(function(i) { return i.name === r.name; });
-      if (m) m.curStock = val;
-      showToast("저장 완료");
-      renderWeekly(); renderDashboard(); renderRequest();
-    }).catch(function() { showToast("저장 실패"); });
-  }
-
-  function renderHistory() {
-    if (!reqHist.length) {
-      document.getElementById("hc").innerHTML = "<div class='empty'>청구 이력이 없습니다</div>";
-      return;
-    }
-    var html = reqHist.map(function(h) {
-      return "<div class='hcard'><div class='hdate'>" + h.date + "</div>" +
-        h.items.map(function(it) {
-          return "<div class='hrow'><span style='overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px'>" + escHtml(it.name) + "</span><span class='hqty'>+" + it.qty + "개</span></div>";
-        }).join("") + "</div>";
-    }).join("");
-    document.getElementById("hc").innerHTML = html;
-  }
-
-  function showTab(tab) {
-    document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
-    document.querySelectorAll(".nb").forEach(function(b) { b.classList.remove("active"); });
-    document.getElementById("page-" + tab).classList.add("active");
-    document.getElementById("tab-" + tab).classList.add("active");
-    document.getElementById("fab").style.display = (tab === "dashboard") ? "flex" : "none";
-    if (tab === "history") renderHistory();
-  }
-
-  function showToast(msg) {
-    var t = document.getElementById("toast");
+  function showToast(msg){
+    var t = document.getElementById('toast');
     t.textContent = msg;
-    t.classList.add("show");
-    setTimeout(function() { t.classList.remove("show"); }, 3000);
+    t.classList.add('show');
+    clearTimeout(showToast._tm);
+    showToast._tm = setTimeout(function(){ t.classList.remove('show'); }, 2200);
   }
 
-  // 이벤트 등록
-  document.getElementById("rbtn").addEventListener("click", loadData);
-  document.getElementById("fab").addEventListener("click", openModal);
-  document.getElementById("mclose").addEventListener("click", closeModal);
-  document.getElementById("msub").addEventListener("click", addItem);
-  document.getElementById("mov").addEventListener("click", function(e) { if (e.target === this) closeModal(); });
+  async function getJSON(key, shared, fallback){
+    try{
+      var res = await window.storage.get(key, shared);
+      if (!res || res.value === undefined || res.value === null) return fallback;
+      return JSON.parse(res.value);
+    }catch(e){
+      return fallback;
+    }
+  }
+  async function setJSON(key, shared, value){
+    try{
+      var res = await window.storage.set(key, JSON.stringify(value), shared);
+      if (!res) showToast('저장에 실패했어요. 다시 시도해주세요.');
+      return !!res;
+    }catch(e){
+      showToast('저장에 실패했어요. 인터넷 연결을 확인해주세요.');
+      return false;
+    }
+  }
+  async function listKeys(prefix, shared){
+    try{
+      var res = await window.storage.list(prefix, shared);
+      if (!res || !res.keys) return [];
+      return res.keys;
+    }catch(e){
+      return [];
+    }
+  }
 
-  document.getElementById("tab-dashboard").addEventListener("click", function() { showTab("dashboard"); });
-  document.getElementById("tab-request").addEventListener("click", function() { showTab("request"); });
-  document.getElementById("tab-weekly").addEventListener("click", function() { showTab("weekly"); });
-  document.getElementById("tab-history").addEventListener("click", function() { showTab("history"); });
+  function buildDefaultItems(){
+    var arr = [];
+    CATALOG.forEach(function(cat){
+      var name = cat[0], sizes = cat[1];
+      sizes.forEach(function(sz){
+        arr.push({ id: uid(), category: name, size: sz || "기본", stock: 0 });
+      });
+    });
+    return arr;
+  }
 
-  loadData();
+  function categoryOrder(){
+    var seen = [], set = {};
+    items.forEach(function(it){
+      if (!set[it.category]){ set[it.category]=true; seen.push(it.category); }
+    });
+    return seen;
+  }
+
+  function accentFor(catName){
+    var order = categoryOrder();
+    var idx = order.indexOf(catName);
+    if (idx < 0) idx = 0;
+    return ACCENTS[idx % ACCENTS.length];
+  }
+
+  function totalToday(){
+    var sum = 0;
+    Object.keys(counts).forEach(function(k){ sum += (counts[k]||0); });
+    return sum;
+  }
+
+  function updateTotalBadge(){
+    document.getElementById('totalCount').textContent = totalToday();
+  }
+
+  function itemThreshold(it){
+    return (it && typeof it.threshold === 'number' && !isNaN(it.threshold)) ? it.threshold : settings.lowStockThreshold;
+  }
+
+  function lowStockCount(){
+    return items.filter(function(it){ return (it.stock||0) <= itemThreshold(it); }).length;
+  }
+  function updateHeaderLowBadge(){
+    var el = document.getElementById('lowStockCount');
+    if (el) el.textContent = lowStockCount();
+  }
+
+  async function persistCounts(){
+    await setJSON('counts:'+todayKey, true, counts);
+  }
+  async function persistItems(){
+    await setJSON('items', true, items);
+  }
+  async function persistSettings(){
+    await setJSON('settings', true, settings);
+  }
+
+  function updateStockDom(id){
+    var it = items.find(function(x){ return x.id === id; });
+    if (!it) return;
+    var low = (it.stock||0) <= itemThreshold(it);
+    var sv = document.getElementById('sv-'+id);
+    if (sv){ sv.textContent = (it.stock||0)+'개'; sv.classList.toggle('low', low); }
+    var lt = document.getElementById('lt-'+id);
+    if (lt) lt.style.display = low ? 'inline-block' : 'none';
+  }
+
+  function changeCount(id, delta){
+    var it = items.find(function(x){ return x.id === id; });
+    if (!it) return;
+    var cur = counts[id] || 0;
+    var next = Math.max(0, cur + delta);
+    var applied = next - cur;
+    counts[id] = next;
+    it.stock = (it.stock||0) - applied;
+    var el = document.getElementById('cv-'+id);
+    if (el) el.textContent = next;
+    updateTotalBadge();
+    persistCounts();
+    if (applied !== 0){
+      persistItems();
+      updateHeaderLowBadge();
+      if (stockFilterOn){ render(); } else { updateStockDom(id); }
+      if ((it.stock||0) <= 0) showToast('"'+it.category+' · '+it.size+'" 재고가 부족해요.');
+    }
+  }
+
+  function editStock(id){
+    var it = items.find(function(x){ return x.id === id; });
+    if (!it) return;
+    var currentThreshold = (typeof it.threshold === 'number' && !isNaN(it.threshold)) ? it.threshold : '';
+    openModal(
+      '<h3>재고 / 부족 기준 수정</h3>'+
+      '<p>'+esc(it.category+' · '+it.size)+'</p>'+
+      '<label class="field-label">현재 재고 수량</label>'+
+      '<input id="mStock" type="number" inputmode="numeric" min="0" value="'+(it.stock||0)+'">'+
+      '<label class="field-label">이 품목만의 재고부족 기준 (비워두면 전체 기본값 '+settings.lowStockThreshold+' 사용)</label>'+
+      '<input id="mThreshold" type="number" inputmode="numeric" min="0" placeholder="예: 5" value="'+currentThreshold+'">'+
+      '<div class="modal-actions"><button class="btn" id="mCancel">취소</button><button class="btn primary" id="mSave">저장</button></div>',
+      function(){
+        var stockInput = document.getElementById('mStock');
+        stockInput.focus();
+        stockInput.select();
+        document.getElementById('mCancel').onclick = closeModal;
+        document.getElementById('mSave').onclick = function(){
+          var sv = parseInt(stockInput.value, 10);
+          it.stock = isNaN(sv) ? 0 : Math.max(0, sv);
+
+          var tRaw = document.getElementById('mThreshold').value.trim();
+          if (tRaw === ''){
+            delete it.threshold;
+          } else {
+            var tv = parseInt(tRaw, 10);
+            it.threshold = isNaN(tv) ? undefined : Math.max(0, tv);
+            if (it.threshold === undefined) delete it.threshold;
+          }
+
+          closeModal();
+          persistItems();
+          updateHeaderLowBadge();
+          render();
+          showToast('재고와 부족 기준을 저장했어요.');
+        };
+      }
+    );
+  }
+
+  function toggleStockFilter(){
+    stockFilterOn = !stockFilterOn;
+    var b1 = document.getElementById('stockFilterBtn');
+    var b2 = document.getElementById('lowStockBadge');
+    if (b1) b1.classList.toggle('active', stockFilterOn);
+    if (b2) b2.classList.toggle('active', stockFilterOn);
+    render();
+  }
+
+  function editThreshold(){
+    promptModal('전체 기본 재고부족 기준', '개별 기준을 따로 설정하지 않은 품목에 적용되는 기본값이에요. 재고가 이 수량 이하이면 "부족"으로 표시됩니다.', '예: 5', String(settings.lowStockThreshold), '저장', function(val){
+      var v = parseInt(val, 10);
+      settings.lowStockThreshold = isNaN(v) ? 5 : Math.max(0, v);
+      persistSettings();
+      updateHeaderLowBadge();
+      render();
+      showToast('전체 기본 기준을 저장했어요.');
+    }, 'number');
+  }
+
+  function openBulkStock(){
+    var order = categoryOrder();
+    var html = '<h3>재고 일괄 입력</h3><p>각 품목의 현재 재고 수량을 확인하고 한 번에 저장하세요.</p>'+
+      '<div class="bulk-body">'+
+      order.map(function(cat){
+        var catItems = items.filter(function(x){ return x.category === cat; });
+        return '<div class="bulk-cat"><h4>'+esc(cat)+'</h4>'+
+          catItems.map(function(it){
+            return '<div class="bulk-row"><span>'+esc(it.size)+'</span>'+
+              '<input type="number" min="0" inputmode="numeric" class="bulk-input" data-id="'+it.id+'" value="'+(it.stock||0)+'"></div>';
+          }).join('')+
+        '</div>';
+      }).join('')+
+      '</div>'+
+      '<div class="modal-actions"><button class="btn" id="mCancel">취소</button><button class="btn primary" id="mSave">저장</button></div>';
+
+    openModal(html, function(){
+      document.getElementById('mCancel').onclick = closeModal;
+      document.getElementById('mSave').onclick = async function(){
+        document.querySelectorAll('.bulk-input').forEach(function(inp){
+          var id = inp.getAttribute('data-id');
+          var it = items.find(function(x){ return x.id === id; });
+          if (it){
+            var v = parseInt(inp.value, 10);
+            it.stock = isNaN(v) ? 0 : Math.max(0, v);
+          }
+        });
+        closeModal();
+        await persistItems();
+        updateHeaderLowBadge();
+        render();
+        showToast('재고를 저장했어요.');
+      };
+    }, 'wide');
+  }
+
+  /* ---------- Modal helpers ---------- */
+  function openModal(html, onMount, extraClass){
+    var root = document.getElementById('modalRoot');
+    var cls = 'modal' + (extraClass ? ' '+extraClass : '');
+    root.innerHTML = '<div class="modal-backdrop" id="mb"><div class="'+cls+'">'+html+'</div></div>';
+    var bd = document.getElementById('mb');
+    bd.addEventListener('click', function(e){ if (e.target === bd) closeModal(); });
+    document.addEventListener('keydown', escHandler);
+    if (onMount) onMount(root);
+  }
+  function escHandler(e){ if (e.key === 'Escape') closeModal(); }
+  function closeModal(){
+    document.getElementById('modalRoot').innerHTML = '';
+    document.removeEventListener('keydown', escHandler);
+  }
+
+  function confirmModal(title, desc, confirmLabel, onConfirm){
+    openModal(
+      '<h3>'+title+'</h3><p>'+desc+'</p>'+
+      '<div class="modal-actions">'+
+        '<button class="btn" id="mCancel">취소</button>'+
+        '<button class="btn danger" id="mOk">'+confirmLabel+'</button>'+
+      '</div>',
+      function(){
+        document.getElementById('mCancel').onclick = closeModal;
+        document.getElementById('mOk').onclick = function(){ closeModal(); onConfirm(); };
+      }
+    );
+  }
+
+  function promptModal(title, desc, placeholder, initial, confirmLabel, onConfirm, inputType){
+    var type = inputType || 'text';
+    var extraAttrs = type === 'number' ? ' inputmode="numeric" min="0"' : '';
+    openModal(
+      '<h3>'+title+'</h3>'+(desc ? '<p>'+desc+'</p>' : '')+
+      '<input id="mInput" type="'+type+'"'+extraAttrs+' placeholder="'+placeholder+'" value="'+(initial||'').replace(/"/g,'&quot;')+'">'+
+      '<div class="modal-actions">'+
+        '<button class="btn" id="mCancel">취소</button>'+
+        '<button class="btn primary" id="mOk">'+confirmLabel+'</button>'+
+      '</div>',
+      function(){
+        var input = document.getElementById('mInput');
+        input.focus();
+        input.select();
+        document.getElementById('mCancel').onclick = closeModal;
+        document.getElementById('mOk').onclick = function(){
+          var v = input.value.trim();
+          if (!v) { input.focus(); return; }
+          closeModal();
+          onConfirm(v);
+        };
+        input.addEventListener('keydown', function(e){
+          if (e.key === 'Enter') document.getElementById('mOk').click();
+        });
+      }
+    );
+  }
+
+  /* ---------- Item / category mutations ---------- */
+  function addItemToCategory(catName){
+    promptModal('품목 추가', catName+' 그룹에 새 규격을 추가합니다.', '예: S, 좌L, XL 등', '', '추가', function(val){
+      items.push({ id: uid(), category: catName, size: val, stock: 0 });
+      persistItems();
+      updateHeaderLowBadge();
+      render();
+      showToast('품목을 추가했어요.');
+    });
+  }
+
+  function editItem(id){
+    var it = items.find(function(x){ return x.id === id; });
+    if (!it) return;
+    promptModal('품목 수정', it.category+' 그룹의 규격명을 수정합니다.', '규격', it.size, '저장', function(val){
+      it.size = val;
+      persistItems();
+      render();
+      showToast('수정했어요.');
+    });
+  }
+
+  function deleteItem(id){
+    var it = items.find(function(x){ return x.id === id; });
+    if (!it) return;
+    confirmModal('품목 삭제', '"'+it.category+' · '+it.size+'" 품목을 삭제할까요? 오늘 카운트도 함께 사라집니다.', '삭제', function(){
+      items = items.filter(function(x){ return x.id !== id; });
+      delete counts[id];
+      persistItems();
+      persistCounts();
+      updateHeaderLowBadge();
+      render();
+      showToast('삭제했어요.');
+    });
+  }
+
+  function editCategory(catName){
+    promptModal('그룹명 수정', '', '그룹 이름', catName, '저장', function(val){
+      items.forEach(function(it){ if (it.category === catName) it.category = val; });
+      var wasCollapsed = collapsedCats[catName];
+      delete collapsedCats[catName];
+      if (wasCollapsed) collapsedCats[val] = true;
+      persistItems();
+      render();
+      showToast('그룹명을 수정했어요.');
+    });
+  }
+
+  function deleteCategory(catName){
+    var count = items.filter(function(x){ return x.category === catName; }).length;
+    confirmModal('그룹 삭제', '"'+catName+'" 그룹과 소속 품목 '+count+'개를 모두 삭제할까요?', '삭제', function(){
+      items.filter(function(x){ return x.category === catName; }).forEach(function(x){ delete counts[x.id]; });
+      items = items.filter(function(x){ return x.category !== catName; });
+      persistItems();
+      persistCounts();
+      updateHeaderLowBadge();
+      render();
+      showToast('그룹을 삭제했어요.');
+    });
+  }
+
+  function addCategory(){
+    promptModal('새 그룹 추가', '보조기 종류(그룹) 이름을 입력해주세요.', '예: Wrist splint', '', '추가', function(catName){
+      promptModal('규격 추가', catName+' 그룹의 첫 규격을 입력해주세요. (규격이 없으면 "기본"으로 입력)', '예: S, M, 좌L', '기본', '완료', function(sz){
+        items.push({ id: uid(), category: catName, size: sz, stock: 0 });
+        persistItems();
+        updateHeaderLowBadge();
+        render();
+        showToast('새 그룹을 추가했어요.');
+      });
+    });
+  }
+
+  function resetToday(){
+    confirmModal('오늘 카운트 초기화', friendlyDate(todayKey)+' 카운트를 전부 0으로 되돌릴까요? 이 작업은 되돌릴 수 없습니다.', '초기화', async function(){
+      counts = {};
+      await persistCounts();
+      render();
+      showToast('오늘 카운트를 초기화했어요.');
+    });
+  }
+
+  /* ---------- History ---------- */
+  async function openHistory(){
+    openModal('<h3>지난 기록</h3><p>불러오는 중...</p>', function(){});
+    var keys = await listKeys('counts:', true);
+    keys = keys.filter(function(k){ return k !== todayKey; });
+    keys.sort().reverse();
+    keys = keys.slice(0, 30);
+
+    if (keys.length === 0){
+      openModal('<h3>지난 기록</h3><p>아직 지난 기록이 없어요.</p><div class="modal-actions"><button class="btn" id="mClose">닫기</button></div>', function(){
+        document.getElementById('mClose').onclick = closeModal;
+      });
+      return;
+    }
+
+    var rows = [];
+    for (var i=0;i<keys.length;i++){
+      var k = keys[i];
+      var d = await getJSON(k, true, {});
+      var total = Object.keys(d).reduce(function(s,id){ return s + (d[id]||0); }, 0);
+      var dateLabel = k.indexOf('counts:') === 0 ? k.slice(7) : k;
+      rows.push({ key:k, date: dateLabel, total: total, data: d });
+    }
+
+    var html = '<h3>지난 기록</h3><div class="history-list">'+
+      rows.map(function(r,i){
+        return '<div class="history-row" data-idx="'+i+'"><span class="d">'+friendlyDate(r.date)+'</span><span class="t">총 '+r.total+'개</span></div>';
+      }).join('')+
+      '</div><div class="modal-actions"><button class="btn" id="mClose">닫기</button></div>';
+
+    openModal(html, function(){
+      document.getElementById('mClose').onclick = closeModal;
+      document.querySelectorAll('.history-row').forEach(function(el){
+        el.addEventListener('click', function(){
+          var r = rows[parseInt(el.getAttribute('data-idx'),10)];
+          showHistoryDetail(r);
+        });
+      });
+    });
+  }
+
+  function showHistoryDetail(r){
+    var nonzero = Object.keys(r.data).filter(function(id){ return (r.data[id]||0) > 0; });
+    var rowsHtml;
+    if (nonzero.length === 0){
+      rowsHtml = '<p>이 날은 기록된 사용량이 없어요.</p>';
+    } else {
+      rowsHtml = '<div class="history-detail">'+ nonzero.map(function(id){
+        var it = items.find(function(x){ return x.id === id; });
+        var label = it ? (it.category+' · '+it.size) : '(삭제된 품목)';
+        return '<div class="row"><span>'+label+'</span><span><b>'+r.data[id]+'</b></span></div>';
+      }).join('') + '</div>';
+    }
+    openModal(
+      '<h3>'+friendlyDate(r.date)+'</h3><p>총 '+r.total+'개 사용</p>'+rowsHtml+
+      '<div class="modal-actions"><button class="btn" id="mBack">뒤로</button><button class="btn primary" id="mClose">닫기</button></div>',
+      function(){
+        document.getElementById('mClose').onclick = closeModal;
+        document.getElementById('mBack').onclick = openHistory;
+      }
+    );
+  }
+
+  /* ---------- Render ---------- */
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function render(){
+    var listEl = document.getElementById('categoryList');
+    var query = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+
+    var order = categoryOrder();
+    var htmlParts = [];
+    var anyMatch = false;
+
+    order.forEach(function(catName){
+      var catItems = items.filter(function(x){ return x.category === catName; });
+      var accent = accentFor(catName);
+      var filteredItems = catItems.filter(function(it){
+        var matchesQuery = !query || (it.category+' '+it.size).toLowerCase().indexOf(query) !== -1;
+        var matchesStock = !stockFilterOn || (it.stock||0) <= itemThreshold(it);
+        return matchesQuery && matchesStock;
+      });
+      if ((query || stockFilterOn) && filteredItems.length === 0) return;
+      anyMatch = true;
+
+      var collapsed = !!collapsedCats[catName];
+      var chipChar = catName.trim().charAt(0).toUpperCase();
+
+      var itemsHtml = filteredItems.map(function(it){
+        var c = counts[it.id] || 0;
+        var stock = it.stock||0;
+        var low = stock <= itemThreshold(it);
+        return (
+          '<div class="item-row" data-id="'+it.id+'">'+
+            '<div class="item-main">'+
+              '<div class="item-label">'+
+                '<span class="size-badge" style="--accent:'+accent.c+';--accent-tint:'+accent.t+'">'+esc(it.size)+'</span>'+
+                '<button class="icon-btn edit-item" data-id="'+it.id+'" aria-label="수정" title="수정">&#9998;</button>'+
+                '<button class="icon-btn del del-item" data-id="'+it.id+'" aria-label="삭제" title="삭제">&#128465;</button>'+
+              '</div>'+
+              '<div class="counter">'+
+                '<button class="count-btn minus" data-id="'+it.id+'" data-d="-1" aria-label="'+esc(it.size)+' 감소">&minus;</button>'+
+                '<span class="count-value" id="cv-'+it.id+'">'+c+'</span>'+
+                '<button class="count-btn plus" data-id="'+it.id+'" data-d="1" aria-label="'+esc(it.size)+' 증가">+</button>'+
+              '</div>'+
+            '</div>'+
+            '<div class="stock-line">'+
+              '<span class="stock-label">재고</span>'+
+              '<span class="stock-value'+(low?' low':'')+'" id="sv-'+it.id+'">'+stock+'개</span>'+
+              '<span class="low-tag" id="lt-'+it.id+'" style="display:'+(low?'inline-block':'none')+'">부족</span>'+
+              (typeof it.threshold==='number' ? '<span class="threshold-note">기준 '+it.threshold+'개</span>' : '')+
+              '<button class="icon-btn edit-stock" data-id="'+it.id+'" aria-label="재고 수정" title="재고 수정">&#9998;</button>'+
+            '</div>'+
+          '</div>'
+        );
+      }).join('');
+
+      htmlParts.push(
+        '<section class="category'+(collapsed?' collapsed':'')+'" style="--accent:'+accent.c+';--accent-tint:'+accent.t+'" data-cat="'+esc(catName)+'">'+
+          '<div class="category-head">'+
+            '<span class="chip">'+esc(chipChar)+'</span>'+
+            '<h2>'+esc(catName)+'</h2>'+
+            '<div class="head-actions">'+
+              '<button class="icon-btn edit-cat" data-cat="'+esc(catName)+'" aria-label="그룹명 수정" title="그룹명 수정">&#9998;</button>'+
+              '<button class="icon-btn del del-cat" data-cat="'+esc(catName)+'" aria-label="그룹 삭제" title="그룹 삭제">&#128465;</button>'+
+              '<button class="icon-btn collapse-btn" data-cat="'+esc(catName)+'" aria-label="접기/펼치기" title="접기/펼치기">&#9660;</button>'+
+            '</div>'+
+          '</div>'+
+          '<div class="items">'+itemsHtml+
+            '<div class="add-item-row"><button class="add-item-btn" data-cat="'+esc(catName)+'">+ 규격 추가</button></div>'+
+          '</div>'+
+        '</section>'
+      );
+    });
+
+    if (!query && !stockFilterOn){
+      htmlParts.push('<button class="add-category-card" id="addCatBtn">+ 새 그룹 추가</button>');
+    }
+
+    if ((query || stockFilterOn) && !anyMatch){
+      var emptyMsg = query ? ('"'+esc(query)+'" 검색 결과가 없어요.') : '재고부족 품목이 없어요.';
+      listEl.innerHTML = '<div class="empty-state">'+emptyMsg+'</div>';
+    } else {
+      listEl.innerHTML = htmlParts.join('');
+    }
+
+    // wire events
+    listEl.querySelectorAll('.count-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        changeCount(btn.getAttribute('data-id'), parseInt(btn.getAttribute('data-d'),10));
+      });
+    });
+    listEl.querySelectorAll('.edit-item').forEach(function(btn){
+      btn.addEventListener('click', function(){ editItem(btn.getAttribute('data-id')); });
+    });
+    listEl.querySelectorAll('.del-item').forEach(function(btn){
+      btn.addEventListener('click', function(){ deleteItem(btn.getAttribute('data-id')); });
+    });
+    listEl.querySelectorAll('.edit-stock').forEach(function(btn){
+      btn.addEventListener('click', function(){ editStock(btn.getAttribute('data-id')); });
+    });
+    listEl.querySelectorAll('.edit-cat').forEach(function(btn){
+      btn.addEventListener('click', function(){ editCategory(btn.getAttribute('data-cat')); });
+    });
+    listEl.querySelectorAll('.del-cat').forEach(function(btn){
+      btn.addEventListener('click', function(){ deleteCategory(btn.getAttribute('data-cat')); });
+    });
+    listEl.querySelectorAll('.collapse-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var cat = btn.getAttribute('data-cat');
+        collapsedCats[cat] = !collapsedCats[cat];
+        render();
+      });
+    });
+    listEl.querySelectorAll('.add-item-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){ addItemToCategory(btn.getAttribute('data-cat')); });
+    });
+    var addCatBtn = document.getElementById('addCatBtn');
+    if (addCatBtn) addCatBtn.addEventListener('click', addCategory);
+
+    updateTotalBadge();
+  }
+
+  function checkDateRollover(){
+    var t = todayStr();
+    if (t !== todayKey){
+      todayKey = t;
+      document.getElementById('todayLabel').textContent = friendlyDate(todayKey);
+      getJSON('counts:'+todayKey, true, {}).then(function(c){
+        counts = c || {};
+        render();
+      });
+    }
+  }
+
+  async function init(){
+    todayKey = todayStr();
+    document.getElementById('todayLabel').textContent = friendlyDate(todayKey);
+
+    var loadedItems = await getJSON('items', true, null);
+    if (!loadedItems || !loadedItems.length){
+      items = buildDefaultItems();
+      await persistItems();
+    } else {
+      items = loadedItems.map(function(it){
+        if (typeof it.stock !== 'number' || isNaN(it.stock)) it.stock = 0;
+        if (typeof it.threshold === 'number' && (isNaN(it.threshold) || it.threshold < 0)) delete it.threshold;
+        return it;
+      });
+    }
+
+    var loadedSettings = await getJSON('settings', true, null);
+    if (loadedSettings && typeof loadedSettings.lowStockThreshold === 'number'){
+      settings = loadedSettings;
+    } else {
+      settings = { lowStockThreshold: 5 };
+      await persistSettings();
+    }
+
+    counts = await getJSON('counts:'+todayKey, true, {});
+
+    render();
+    updateHeaderLowBadge();
+
+    document.getElementById('searchInput').addEventListener('input', render);
+    document.getElementById('resetBtn').addEventListener('click', resetToday);
+    document.getElementById('historyBtn').addEventListener('click', openHistory);
+    document.getElementById('bulkStockBtn').addEventListener('click', openBulkStock);
+    document.getElementById('stockFilterBtn').addEventListener('click', toggleStockFilter);
+    document.getElementById('lowStockBadge').addEventListener('click', toggleStockFilter);
+    document.getElementById('thresholdBtn').addEventListener('click', editThreshold);
+    document.getElementById('expandAllBtn').addEventListener('click', function(){
+      collapsedCats = {}; render();
+    });
+    document.getElementById('collapseAllBtn').addEventListener('click', function(){
+      categoryOrder().forEach(function(c){ collapsedCats[c] = true; });
+      render();
+    });
+
+    setInterval(checkDateRollover, 60000);
+  }
+
+  init();
 })();
-
 </script>
 </body>
 </html>
