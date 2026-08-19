@@ -890,6 +890,27 @@ async function deleteItem(id){
   setSyncing(false);
   render();
 }
+// 새 품목을 같은 부서·같은 소분류(카테고리) 품목들 바로 아래에 끼워 넣기 위한 함수
+function insertItemInOrder(newItem){
+  let insertAt = -1;
+  // 1순위: 같은 부서 + 같은 소분류의 마지막 품목 위치
+  for(let idx=0; idx<STATE.items.length; idx++){
+    const it = STATE.items[idx];
+    if(it.dept === newItem.dept && it.cat === newItem.cat) insertAt = idx;
+  }
+  // 2순위: 같은 소분류가 없으면 같은 부서의 마지막 품목 위치
+  if(insertAt === -1){
+    for(let idx=0; idx<STATE.items.length; idx++){
+      const it = STATE.items[idx];
+      if(it.dept === newItem.dept) insertAt = idx;
+    }
+  }
+  if(insertAt === -1){
+    STATE.items.push(newItem);
+  } else {
+    STATE.items.splice(insertAt + 1, 0, newItem);
+  }
+}
 function openItemModal(item){
   const isNew = !item;
   const backdrop = document.createElement('div');
@@ -939,7 +960,7 @@ function openItemModal(item){
       if(isNew){
         const stock = Math.max(0, parseInt(document.getElementById('fStock').value)||0);
         const result = await apiPost({ action:'itemAdd', dept, cat, name, spec, par, stock, memo });
-        STATE.items.push({ id: result.id, dept, cat, name, spec, par, stock, memo });
+        insertItemInOrder({ id: result.id, dept, cat, name, spec, par, stock, memo });
         toast('품목이 추가됐어요');
       } else {
         await apiPost({ action:'itemUpdate', id: item.id, dept, cat, name, spec, par, memo });
