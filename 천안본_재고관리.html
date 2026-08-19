@@ -447,8 +447,26 @@ function toast(msg){
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=> el.classList.remove('show'), 2200);
 }
+// 소분류(카테고리) 정렬 기준: 새 품목이 항상 같은 카테고리 아래로 들어가도록
+const CAT_ORDER = ['의약품', '소모품', '문구'];
+function catRank(cat){
+  const idx = CAT_ORDER.indexOf(cat);
+  return idx === -1 ? CAT_ORDER.length : idx;
+}
+function deptRank(dept){
+  const idx = DEPTS.indexOf(dept);
+  return idx === -1 ? DEPTS.length : idx;
+}
 function itemsForDept(dept){
-  return dept === '전체' ? STATE.items : STATE.items.filter(i=>i.dept===dept);
+  const list = dept === '전체' ? STATE.items.slice() : STATE.items.filter(i=>i.dept===dept);
+  // 부서(전체보기일 때만) → 소분류 순으로 정렬. 같은 소분류 안에서는 원래 순서 유지(안정 정렬).
+  return list.sort((a, b)=>{
+    if(dept === '전체'){
+      const d = deptRank(a.dept) - deptRank(b.dept);
+      if(d !== 0) return d;
+    }
+    return catRank(a.cat) - catRank(b.cat);
+  });
 }
 function catsForDept(dept){
   const set = new Set(itemsForDept(dept).map(i=>i.cat));
