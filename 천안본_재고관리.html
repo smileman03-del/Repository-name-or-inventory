@@ -588,7 +588,15 @@ function renderDashboard(main){
       `).join('')}
     </div>
   `;
-  document.getElementById('searchInput').addEventListener('input', e=>{ STATE.search = e.target.value; renderDashboardListOnly(); });
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    STATE.search = e.target.value;
+    if(e.isComposing) return; // 한글 조합(자모 결합) 중에는 다시 그리지 않음 — 안 그러면 자음/모음이 끊겨 보임
+    renderDashboardListOnly();
+  });
+  document.getElementById('searchInput').addEventListener('compositionend', e=>{
+    STATE.search = e.target.value;
+    renderDashboardListOnly();
+  });
   renderCatFilter();
 }
 function renderDashboardListOnly(){
@@ -846,7 +854,15 @@ function renderManage(main){
       `).join('')}
     </div>
   `;
-  document.getElementById('searchInput').addEventListener('input', e=>{ STATE.search=e.target.value; renderManageListOnly(); });
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    STATE.search = e.target.value;
+    if(e.isComposing) return; // 한글 조합(자모 결합) 중에는 다시 그리지 않음 — 안 그러면 자음/모음이 끊겨 보임
+    renderManageListOnly();
+  });
+  document.getElementById('searchInput').addEventListener('compositionend', e=>{
+    STATE.search = e.target.value;
+    renderManageListOnly();
+  });
   renderCatFilter();
   document.getElementById('addItemBtn').addEventListener('click', ()=> openItemModal(null));
   main.querySelectorAll('.editBtn').forEach(b=> b.addEventListener('click', ()=> openItemModal(STATE.items.find(i=>i.id==b.dataset.id))));
