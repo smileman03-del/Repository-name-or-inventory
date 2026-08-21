@@ -336,7 +336,10 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const DEPTS = ["마취과", "수술실", "처치실", "통증", "병동", "물리치료실"];
+const DEPTS = ["수술실", "처치실", "통증", "병동", "물리치료실"];
+// 예전에 "마취과"/"수술실"로 따로 저장돼 있던 데이터를 합쳐진 대분류로 자동 변환
+const DEPT_MERGE_MAP = { "마취과": "수술실", "수술실": "수술실" };
+function normalizeDept(dept){ return DEPT_MERGE_MAP[dept] || dept; }
 
 // ⚠️ 아래 SCRIPT_URL을 구글 Apps Script 배포 후 발급받은 웹앱 URL로 교체하세요.
 // README.md의 "Apps Script 배포" 단계를 참고하세요.
@@ -394,11 +397,16 @@ async function loadAll(){
   try{
     const data = await apiGet('getAll');
     STATE.items = (data.items||[]).map(i=>({
-      id: i.id, dept: i.dept, cat: i.cat, name: i.name,
+      id: i.id, dept: normalizeDept(i.dept), cat: i.cat, name: i.name,
       spec: i.spec || '', par: Number(i.par)||0, stock: Number(i.stock)||0, memo: i.memo || ''
     }));
-    STATE.audits = data.audits || {};
-    STATE.requests = (data.requests||[]).map(r=>({ id: r.id, date: r.date, dept: r.dept, items: r.items||[] }));
+    STATE.audits = {};
+    Object.entries(data.audits || {}).forEach(([d, date])=>{
+      const nd = normalizeDept(d);
+      // 같은 병합 부서에 기록이 여러 개면 더 최근 날짜를 사용
+      if(!STATE.audits[nd] || date > STATE.audits[nd]) STATE.audits[nd] = date;
+    });
+    STATE.requests = (data.requests||[]).map(r=>({ id: r.id, date: r.date, dept: normalizeDept(r.dept), items: r.items||[] }));
     STATE.loaded = true;
     setConnected(true, '연결됨');
   }catch(e){
