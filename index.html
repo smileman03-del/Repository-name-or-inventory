@@ -444,6 +444,54 @@
     }
   };
 
+  /* ---------- 품목(Items) 전용 API — 구글 시트의 Items 표를 행 단위로 조작 ---------- */
+  async function apiGetItems(){
+    var res = await fetch(SCRIPT_URL + '?action=getItems');
+    if (!res.ok) throw new Error('네트워크 오류: ' + res.status);
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data.items || [];
+  }
+  async function apiPost(payload){
+    var res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('네트워크 오류: ' + res.status);
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+    return data;
+  }
+  // 새 품목 추가. id는 서버(구글 시트)가 만들어서 돌려줘요.
+  async function apiAddItem(category, size, stock, threshold){
+    var payload = { action: 'addItem', category: category, size: size, stock: stock || 0 };
+    if (typeof threshold === 'number' && !isNaN(threshold)) payload.threshold = threshold;
+    var data = await apiPost(payload);
+    return data.item;
+  }
+  async function apiDeleteItem(id){
+    return apiPost({ action: 'deleteItem', id: id });
+  }
+  // patch: {category?, size?, stock?, threshold?, clearThreshold?} — 넘긴 필드만 바뀌어요.
+  async function apiUpdateItem(id, patch){
+    var payload = Object.assign({ action: 'updateItem', id: id }, patch);
+    return apiPost(payload);
+  }
+  async function apiBulkUpdateStock(updates){
+    return apiPost({ action: 'bulkUpdateStock', updates: updates });
+  }
+  // 카운트 +/- 버튼 전용: 재고 변경 + 사용기록을 서버에서 한 번에 안전하게 처리
+  async function apiCountChange(id, delta){
+    return apiPost({ action: 'countChange', id: id, delta: delta });
+  }
+  async function apiRenameCategory(oldName, newName){
+    return apiPost({ action: 'renameCategory', oldName: oldName, newName: newName });
+  }
+  async function apiDeleteCategory(category){
+    return apiPost({ action: 'deleteCategory', category: category });
+  }
+
   function pad(n){ return n < 10 ? "0"+n : ""+n; }
   function todayStr(){
     var d = new Date();
@@ -552,31 +600,6 @@
   // 품목만 지금 내가 가진 값으로 덮어써서 저장합니다. 이렇게 하면 다른 기기가 그 사이에
   // 바꿔놓은 '다른 품목'의 값은 그대로 보존됩니다 (통째로 덮어쓰기 방지).
   // changedIds를 생략하면 기존처럼 전체를 저장합니다 (품목/카테고리 추가·삭제 같은 구조 변경용).
-  async function persistItems(changedIds){
-    if (changedIds && changedIds.length){
-      try {
-        var remote = await getJSON('items', true, null);
-        if (remote && Array.isArray(remote)){
-          var byId = {};
-          remote.forEach(function(r){ byId[r.id] = r; });
-          changedIds.forEach(function(id){
-            var local = items.find(function(x){ return x.id === id; });
-            if (local) byId[id] = local;
-          });
-          var merged = remote.map(function(r){ return byId[r.id] || r; });
-          items.forEach(function(local){
-            if (!remote.some(function(r){ return r.id === local.id; })) merged.push(local);
-          });
-          items = merged;
-          await setJSON('items', true, items);
-          return;
-        }
-      } catch(e){
-        console.error('재고 병합 저장 실패, 전체 저장으로 대체합니다.', e);
-      }
-    }
-    await setJSON('items', true, items);
-  }
   async function persistSettings(){
     await setJSON('settings', true, settings);
   }
@@ -604,7 +627,10 @@
     updateTotalBadge();
     persistCounts();
     if (applied !== 0){
-      persistItems([id]);
+      apiCountChange(id, -applied).catch(function(e){
+        console.error('재고 저장 실패', e);
+        showToast('재고 저장에 실패했어요. 인터넷 연결을 확인해주세요.');
+      });
       updateHeaderLowBadge();
       if (stockFilterOn){ render(); } else { updateStockDom(id); }
       if ((it.stock||0) <= 0) showToast('"'+it.category+' · '+it.size+'" 재고가 부족해요.');
@@ -633,16 +659,22 @@
           it.stock = isNaN(sv) ? 0 : Math.max(0, sv);
 
           var tRaw = document.getElementById('mThreshold').value.trim();
+          var patch = { stock: it.stock };
           if (tRaw === ''){
             delete it.threshold;
+            patch.clearThreshold = true;
           } else {
             var tv = parseInt(tRaw, 10);
             it.threshold = isNaN(tv) ? undefined : Math.max(0, tv);
             if (it.threshold === undefined) delete it.threshold;
+            else patch.threshold = it.threshold;
           }
 
           closeModal();
-          persistItems([id]);
+          apiUpdateItem(id, patch).catch(function(e){
+            console.error('저장 실패', e);
+            showToast('저장에 실패했어요. 인터넷 연결을 확인해주세요.');
+          });
           updateHeaderLowBadge();
           render();
           showToast('재고와 부족 기준을 저장했어요.');
@@ -690,22 +722,29 @@
     openModal(html, function(){
       document.getElementById('mCancel').onclick = closeModal;
       document.getElementById('mSave').onclick = async function(){
-        var changedIds = [];
+        var updates = [];
         document.querySelectorAll('.bulk-input').forEach(function(inp){
           var id = inp.getAttribute('data-id');
           var it = items.find(function(x){ return x.id === id; });
           if (it){
             var v = parseInt(inp.value, 10);
             var newStock = isNaN(v) ? 0 : Math.max(0, v);
-            if (newStock !== (it.stock||0)) changedIds.push(id);
+            if (newStock !== (it.stock||0)) updates.push({ id: id, stock: newStock });
             it.stock = newStock;
           }
         });
         closeModal();
-        await persistItems(changedIds);
+        if (updates.length){
+          try {
+            await apiBulkUpdateStock(updates);
+            showToast('재고를 저장했어요.');
+          } catch(e){
+            console.error('일괄 저장 실패', e);
+            showToast('저장에 실패했어요. 인터넷 연결을 확인해주세요.');
+          }
+        }
         updateHeaderLowBadge();
         render();
-        showToast('재고를 저장했어요.');
       };
     }, 'wide');
   }
@@ -770,73 +809,103 @@
 
   /* ---------- Item / category mutations ---------- */
   function addItemToCategory(catName){
-    promptModal('품목 추가', catName+' 그룹에 새 규격을 추가합니다.', '예: S, 좌L, XL 등', '', '추가', function(val){
-      items.push({ id: uid(), category: catName, size: val, stock: 0 });
-      persistItems();
-      updateHeaderLowBadge();
-      render();
-      showToast('품목을 추가했어요.');
+    promptModal('품목 추가', catName+' 그룹에 새 규격을 추가합니다.', '예: S, 좌L, XL 등', '', '추가', async function(val){
+      try {
+        var created = await apiAddItem(catName, val, 0);
+        items.push(created);
+        updateHeaderLowBadge();
+        render();
+        showToast('품목을 추가했어요.');
+      } catch(e){
+        console.error('품목 추가 실패', e);
+        showToast('품목 추가에 실패했어요. 인터넷 연결을 확인해주세요.');
+      }
     });
   }
 
   function editItem(id){
     var it = items.find(function(x){ return x.id === id; });
     if (!it) return;
-    promptModal('품목 수정', it.category+' 그룹의 규격명을 수정합니다.', '규격', it.size, '저장', function(val){
+    promptModal('품목 수정', it.category+' 그룹의 규격명을 수정합니다.', '규격', it.size, '저장', async function(val){
       it.size = val;
-      persistItems();
       render();
-      showToast('수정했어요.');
+      try {
+        await apiUpdateItem(id, { size: val });
+        showToast('수정했어요.');
+      } catch(e){
+        console.error('수정 실패', e);
+        showToast('저장에 실패했어요. 인터넷 연결을 확인해주세요.');
+      }
     });
   }
 
   function deleteItem(id){
     var it = items.find(function(x){ return x.id === id; });
     if (!it) return;
-    confirmModal('품목 삭제', '"'+it.category+' · '+it.size+'" 품목을 삭제할까요? 오늘 카운트도 함께 사라집니다.', '삭제', function(){
+    confirmModal('품목 삭제', '"'+it.category+' · '+it.size+'" 품목을 삭제할까요? 오늘 카운트도 함께 사라집니다.', '삭제', async function(){
       items = items.filter(function(x){ return x.id !== id; });
       delete counts[id];
-      persistItems();
-      persistCounts();
       updateHeaderLowBadge();
       render();
-      showToast('삭제했어요.');
+      try {
+        await apiDeleteItem(id);
+        await persistCounts();
+        showToast('삭제했어요.');
+      } catch(e){
+        console.error('삭제 실패', e);
+        showToast('삭제에 실패했어요. 인터넷 연결을 확인해주세요.');
+      }
     });
   }
 
   function editCategory(catName){
-    promptModal('그룹명 수정', '', '그룹 이름', catName, '저장', function(val){
+    promptModal('그룹명 수정', '', '그룹 이름', catName, '저장', async function(val){
       items.forEach(function(it){ if (it.category === catName) it.category = val; });
       var wasCollapsed = collapsedCats[catName];
       delete collapsedCats[catName];
       if (wasCollapsed) collapsedCats[val] = true;
-      persistItems();
       render();
-      showToast('그룹명을 수정했어요.');
+      try {
+        await apiRenameCategory(catName, val);
+        showToast('그룹명을 수정했어요.');
+      } catch(e){
+        console.error('그룹명 수정 실패', e);
+        showToast('저장에 실패했어요. 인터넷 연결을 확인해주세요.');
+      }
     });
   }
 
   function deleteCategory(catName){
     var count = items.filter(function(x){ return x.category === catName; }).length;
-    confirmModal('그룹 삭제', '"'+catName+'" 그룹과 소속 품목 '+count+'개를 모두 삭제할까요?', '삭제', function(){
+    confirmModal('그룹 삭제', '"'+catName+'" 그룹과 소속 품목 '+count+'개를 모두 삭제할까요?', '삭제', async function(){
       items.filter(function(x){ return x.category === catName; }).forEach(function(x){ delete counts[x.id]; });
       items = items.filter(function(x){ return x.category !== catName; });
-      persistItems();
-      persistCounts();
       updateHeaderLowBadge();
       render();
-      showToast('그룹을 삭제했어요.');
+      try {
+        await apiDeleteCategory(catName);
+        await persistCounts();
+        showToast('그룹을 삭제했어요.');
+      } catch(e){
+        console.error('그룹 삭제 실패', e);
+        showToast('삭제에 실패했어요. 인터넷 연결을 확인해주세요.');
+      }
     });
   }
 
   function addCategory(){
     promptModal('새 그룹 추가', '보조기 종류(그룹) 이름을 입력해주세요.', '예: Wrist splint', '', '추가', function(catName){
-      promptModal('규격 추가', catName+' 그룹의 첫 규격을 입력해주세요. (규격이 없으면 "기본"으로 입력)', '예: S, M, 좌L', '기본', '완료', function(sz){
-        items.push({ id: uid(), category: catName, size: sz, stock: 0 });
-        persistItems();
-        updateHeaderLowBadge();
-        render();
-        showToast('새 그룹을 추가했어요.');
+      promptModal('규격 추가', catName+' 그룹의 첫 규격을 입력해주세요. (규격이 없으면 "기본"으로 입력)', '예: S, M, 좌L', '기본', '완료', async function(sz){
+        try {
+          var created = await apiAddItem(catName, sz, 0);
+          items.push(created);
+          updateHeaderLowBadge();
+          render();
+          showToast('새 그룹을 추가했어요.');
+        } catch(e){
+          console.error('그룹 추가 실패', e);
+          showToast('추가에 실패했어요. 인터넷 연결을 확인해주세요.');
+        }
       });
     });
   }
@@ -1055,13 +1124,9 @@
     if (document.getElementById('modalRoot') && document.getElementById('modalRoot').innerHTML.trim() !== '') return;
     isSyncing = true;
     try {
-      var loadedItems = await getJSON('items', true, null);
+      var loadedItems = await apiGetItems();
       if (loadedItems && loadedItems.length){
-        items = loadedItems.map(function(it){
-          if (typeof it.stock !== 'number' || isNaN(it.stock)) it.stock = 0;
-          if (typeof it.threshold === 'number' && (isNaN(it.threshold) || it.threshold < 0)) delete it.threshold;
-          return it;
-        });
+        items = loadedItems;
       }
       var loadedCounts = await getJSON('counts:'+todayKey, true, {});
       counts = loadedCounts || {};
@@ -1078,16 +1143,22 @@
     todayKey = todayStr();
     document.getElementById('todayLabel').textContent = friendlyDate(todayKey);
 
-    var loadedItems = await getJSON('items', true, null);
+    var loadedItems = await apiGetItems();
     if (!loadedItems || !loadedItems.length){
-      items = buildDefaultItems();
-      await persistItems();
+      // 처음 실행: 기본 카탈로그를 구글 시트(Items 표)에 한 줄씩 만들어줍니다.
+      items = [];
+      var defaults = buildDefaultItems();
+      for (var di = 0; di < defaults.length; di++){
+        var d = defaults[di];
+        try {
+          var created = await apiAddItem(d.category, d.size, 0);
+          items.push(created);
+        } catch(e){
+          console.error('기본 품목 생성 실패', d, e);
+        }
+      }
     } else {
-      items = loadedItems.map(function(it){
-        if (typeof it.stock !== 'number' || isNaN(it.stock)) it.stock = 0;
-        if (typeof it.threshold === 'number' && (isNaN(it.threshold) || it.threshold < 0)) delete it.threshold;
-        return it;
-      });
+      items = loadedItems;
     }
 
     var loadedSettings = await getJSON('settings', true, null);
