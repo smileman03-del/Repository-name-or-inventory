@@ -548,7 +548,33 @@
   async function persistCounts(){
     await setJSON('counts:'+todayKey, true, counts);
   }
-  async function persistItems(){
+  // changedIds를 넘기면: 서버의 최신 items를 다시 받아온 뒤, 그 changedIds에 해당하는
+  // 품목만 지금 내가 가진 값으로 덮어써서 저장합니다. 이렇게 하면 다른 기기가 그 사이에
+  // 바꿔놓은 '다른 품목'의 값은 그대로 보존됩니다 (통째로 덮어쓰기 방지).
+  // changedIds를 생략하면 기존처럼 전체를 저장합니다 (품목/카테고리 추가·삭제 같은 구조 변경용).
+  async function persistItems(changedIds){
+    if (changedIds && changedIds.length){
+      try {
+        var remote = await getJSON('items', true, null);
+        if (remote && Array.isArray(remote)){
+          var byId = {};
+          remote.forEach(function(r){ byId[r.id] = r; });
+          changedIds.forEach(function(id){
+            var local = items.find(function(x){ return x.id === id; });
+            if (local) byId[id] = local;
+          });
+          var merged = remote.map(function(r){ return byId[r.id] || r; });
+          items.forEach(function(local){
+            if (!remote.some(function(r){ return r.id === local.id; })) merged.push(local);
+          });
+          items = merged;
+          await setJSON('items', true, items);
+          return;
+        }
+      } catch(e){
+        console.error('재고 병합 저장 실패, 전체 저장으로 대체합니다.', e);
+      }
+    }
     await setJSON('items', true, items);
   }
   async function persistSettings(){
@@ -578,7 +604,7 @@
     updateTotalBadge();
     persistCounts();
     if (applied !== 0){
-      persistItems();
+      persistItems([id]);
       updateHeaderLowBadge();
       if (stockFilterOn){ render(); } else { updateStockDom(id); }
       if ((it.stock||0) <= 0) showToast('"'+it.category+' · '+it.size+'" 재고가 부족해요.');
@@ -616,7 +642,7 @@
           }
 
           closeModal();
-          persistItems();
+          persistItems([id]);
           updateHeaderLowBadge();
           render();
           showToast('재고와 부족 기준을 저장했어요.');
@@ -664,16 +690,19 @@
     openModal(html, function(){
       document.getElementById('mCancel').onclick = closeModal;
       document.getElementById('mSave').onclick = async function(){
+        var changedIds = [];
         document.querySelectorAll('.bulk-input').forEach(function(inp){
           var id = inp.getAttribute('data-id');
           var it = items.find(function(x){ return x.id === id; });
           if (it){
             var v = parseInt(inp.value, 10);
-            it.stock = isNaN(v) ? 0 : Math.max(0, v);
+            var newStock = isNaN(v) ? 0 : Math.max(0, v);
+            if (newStock !== (it.stock||0)) changedIds.push(id);
+            it.stock = newStock;
           }
         });
         closeModal();
-        await persistItems();
+        await persistItems(changedIds);
         updateHeaderLowBadge();
         render();
         showToast('재고를 저장했어요.');
@@ -1018,6 +1047,33 @@
     }
   }
 
+  var isSyncing = false;
+  // 다른 기기가 바꾼 재고/카운트를 화면에 반영하기 위해 서버에서 다시 불러옵니다.
+  // 입력 중(모달이 열려 있는 동안)에는 건드리지 않도록 건너뜁니다.
+  async function refreshFromServer(){
+    if (isSyncing) return;
+    if (document.getElementById('modalRoot') && document.getElementById('modalRoot').innerHTML.trim() !== '') return;
+    isSyncing = true;
+    try {
+      var loadedItems = await getJSON('items', true, null);
+      if (loadedItems && loadedItems.length){
+        items = loadedItems.map(function(it){
+          if (typeof it.stock !== 'number' || isNaN(it.stock)) it.stock = 0;
+          if (typeof it.threshold === 'number' && (isNaN(it.threshold) || it.threshold < 0)) delete it.threshold;
+          return it;
+        });
+      }
+      var loadedCounts = await getJSON('counts:'+todayKey, true, {});
+      counts = loadedCounts || {};
+      render();
+      updateHeaderLowBadge();
+    } catch(e){
+      console.error('자동 새로고침 실패', e);
+    } finally {
+      isSyncing = false;
+    }
+  }
+
   async function init(){
     todayKey = todayStr();
     document.getElementById('todayLabel').textContent = friendlyDate(todayKey);
@@ -1063,6 +1119,10 @@
     });
 
     setInterval(checkDateRollover, 60000);
+    setInterval(refreshFromServer, 30000);
+    document.addEventListener('visibilitychange', function(){
+      if (document.visibilityState === 'visible') refreshFromServer();
+    });
   }
 
   init();
