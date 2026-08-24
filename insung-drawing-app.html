@@ -112,27 +112,26 @@
   .board-card span{ font-size:0.72rem; font-weight:700; color:#777; }
   .board-empty{ text-align:center; color:#aaa; font-size:0.9rem; padding:40px 10px; }
 
-  .walk-overlay{
-    position:fixed; inset:0; display:none; z-index:100; flex-direction:column;
-  }
-  .walk-overlay.show{ display:flex; }
-  .walk-scene{ flex:1; position:relative; overflow:hidden; }
-  .walk-scene.scene-dino{ background:linear-gradient(180deg,#BEE3C4 0%, #8FCB94 55%, #6FAF74 100%); }
-  .walk-scene.scene-sea{ background:linear-gradient(180deg,#BEE7FA 0%, #6FC3E8 60%, #3E9FCB 100%); }
-  .walk-scene.scene-land{ background:linear-gradient(180deg,#FFE9B0 0%, #F7CE7E 55%, #E0AE55 100%); }
-  .walk-scene.scene-bug{ background:linear-gradient(180deg,#DDF3D0 0%, #B8E89E 60%, #93CE75 100%); }
-  .walk-deco{ position:absolute; inset:0; pointer-events:none; opacity:.55; }
-  .walk-actor{ position:absolute; width:110px; height:110px; will-change:left,top,transform; }
+  .board-scene-wrap{ position:relative; border-radius:20px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:12px; }
+  .walk-scene{ height:260px; position:relative; overflow:hidden; }
+  .walk-scene.scene-dino{ background:linear-gradient(180deg,#FFFDEB 0%, #E1F8DC 45%, #ABE8A4 100%); }
+  .walk-scene.scene-sea{ background:linear-gradient(180deg,#F1FCFF 0%, #C9EFFF 45%, #7FD4F5 100%); }
+  .walk-scene.scene-land{ background:linear-gradient(180deg,#FFFBEA 0%, #FFEFC0 45%, #FFD98A 100%); }
+  .walk-scene.scene-bug{ background:linear-gradient(180deg,#F6FFEC 0%, #E5FBCB 45%, #C7F2A3 100%); }
+  .walk-scene.scene-all{ background:linear-gradient(180deg,#FFF7E9 0%, #F0FBFF 45%, #E9FFF0 100%); }
+  .walk-deco{ position:absolute; inset:0; pointer-events:none; }
+  .walk-actor{ position:absolute; width:78px; height:78px; will-change:transform; }
   .walk-actor img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 6px rgba(0,0,0,.15)); }
-  .walk-bar{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; background:rgba(0,0,0,.55); }
-  .walk-bar button{
-    border:none; border-radius:12px; padding:9px 16px; font-family:inherit; font-weight:700; font-size:0.85rem;
-    background:#fff; color:#333; cursor:pointer;
+  #fullscreenBtn{
+    position:absolute; right:10px; bottom:10px; z-index:2; border:none; border-radius:12px; padding:8px 12px;
+    font-family:inherit; font-weight:700; font-size:0.78rem; background:rgba(255,255,255,.92); color:#333; cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,0.1);
   }
-  .walk-bar .timer{ color:#fff; font-weight:700; font-size:0.85rem; }
+  .board-scene-wrap:fullscreen .walk-scene{ height:100vh; }
 </style>
 </head>
 <body>
+
 <div class="app">
   <header>
     <h1>🖍️ 조인성의 그림그리기</h1>
@@ -189,27 +188,18 @@
       <button data-f="land">🦁 육상</button>
       <button data-f="bug">🦋 곤충</button>
     </div>
+    <div class="board-scene-wrap" id="boardSceneWrap">
+      <div class="walk-scene" id="walkScene">
+        <svg class="walk-deco" id="walkDeco" viewBox="0 0 800 500" preserveAspectRatio="none"></svg>
+      </div>
+      <button id="fullscreenBtn">⛶ 전체화면(TV연결용)</button>
+    </div>
     <div class="board-grid" id="boardGrid"></div>
     <div class="board-empty" id="boardEmpty">아직 게시판에 보낸 그림이 없어요.<br>그림을 완성하고 "게시판으로" 버튼을 눌러보세요!</div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
-
-<!-- ===================== 걷기 애니메이션 오버레이 ===================== -->
-<div class="walk-overlay" id="walkOverlay">
-  <div class="walk-bar">
-    <span class="timer" id="walkTimer">3:00</span>
-    <div>
-      <button id="fullscreenBtn">⛶ 전체화면(TV연결용)</button>
-      <button id="closeWalkBtn">✕ 닫기</button>
-    </div>
-  </div>
-  <div class="walk-scene" id="walkScene">
-    <svg class="walk-deco" id="walkDeco" viewBox="0 0 800 500" preserveAspectRatio="none"></svg>
-    <div class="walk-actor" id="walkActor"><img id="walkActorImg" src=""></div>
-  </div>
-</div>
 
 <!-- ===================== 도안 템플릿 (연한 안내선) ===================== -->
 <div style="display:none">
@@ -304,6 +294,84 @@ let eraserOn = false;
 let strokes = [];
 let boardItems = [];
 let boardFilterVal = 'all';
+let maskCanvas = null;
+
+/* ---------- silhouette mask (flood-fill from edges to find "outside") ---------- */
+function computeMask(imgEl){
+  const w=400, h=400;
+  const c = document.createElement('canvas');
+  c.width=w; c.height=h;
+  const cx = c.getContext('2d');
+  cx.drawImage(imgEl,0,0,w,h);
+  let data;
+  try{ data = cx.getImageData(0,0,w,h); } catch(e){ return null; }
+  const px = data.data;
+  const n = w*h;
+
+  // 1) ink = not-background (the outline pixels)
+  const ink = new Uint8Array(n);
+  for(let i=0;i<n;i++){
+    const r=px[i*4], g=px[i*4+1], b=px[i*4+2];
+    ink[i] = (r>232 && g>232 && b>232) ? 0 : 1;
+  }
+
+  // 2) separable dilation (bridges small gaps like open legs/mouth) using sliding-window counts
+  const R = 12;
+  const tmp = new Uint8Array(n);
+  // horizontal pass
+  for(let y=0;y<h;y++){
+    const row = y*w;
+    let count = 0;
+    for(let x=0; x<Math.min(R,w); x++) count += ink[row+x];
+    for(let x=0; x<w; x++){
+      const addX = x+R, remX = x-R-1;
+      if(addX<w) count += ink[row+addX];
+      if(remX>=0) count -= ink[row+remX];
+      tmp[row+x] = count>0 ? 1 : 0;
+    }
+  }
+  const wall = new Uint8Array(n);
+  // vertical pass
+  for(let x=0;x<w;x++){
+    let count = 0;
+    for(let y=0; y<Math.min(R,h); y++) count += tmp[y*w+x];
+    for(let y=0; y<h; y++){
+      const addY=y+R, remY=y-R-1;
+      if(addY<h) count += tmp[addY*w+x];
+      if(remY>=0) count -= tmp[remY*w+x];
+      wall[y*w+x] = count>0 ? 1 : 0;
+    }
+  }
+
+  // 3) flood fill "outside" from the border through non-wall pixels
+  const outside = new Uint8Array(n);
+  const stack = [];
+  for(let x=0;x<w;x++){ stack.push(x); stack.push(x+(h-1)*w); }
+  for(let y=0;y<h;y++){ stack.push(y*w); stack.push((w-1)+y*w); }
+  while(stack.length){
+    const idx = stack.pop();
+    if(idx<0||idx>=n||outside[idx]) continue;
+    if(wall[idx]) continue;
+    outside[idx]=1;
+    const x = idx % w, y = (idx / w)|0;
+    if(x>0) stack.push(idx-1);
+    if(x<w-1) stack.push(idx+1);
+    if(y>0) stack.push(idx-w);
+    if(y<h-1) stack.push(idx+w);
+  }
+
+  // 4) inside = anything not reached from the border
+  const maskData = cx.createImageData(w,h);
+  for(let i=0;i<n;i++){
+    maskData.data[i*4]=255; maskData.data[i*4+1]=255; maskData.data[i*4+2]=255;
+    maskData.data[i*4+3] = outside[i] ? 0 : 255;
+  }
+  const mc = document.createElement('canvas');
+  mc.width=w; mc.height=h;
+  mc.getContext('2d').putImageData(maskData,0,0);
+  return mc;
+}
+tmplImg.addEventListener('load', ()=>{ maskCanvas = computeMask(tmplImg); });
 
 /* ---------- species chips ---------- */
 function renderSpeciesRow(){
@@ -334,10 +402,12 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
 /* ---------- canvas drawing ---------- */
 const canvas = document.getElementById('drawCanvas');
 const ctx = canvas.getContext('2d');
+let canvasSize = 400;
 function resizeCanvas(){
   const outer = document.querySelector('.canvas-outer');
   const available = outer.clientWidth - 20; // minus 10px padding each side
   const size = Math.max(100, Math.floor(available));
+  canvasSize = size;
   const wrap = document.getElementById('canvasWrap');
   wrap.style.width = size + 'px';
   wrap.style.height = size + 'px';
@@ -378,10 +448,19 @@ function endStroke(){
   drawing = false;
   if(curStroke && curStroke.pts.length>0) strokes.push(curStroke);
   curStroke = null;
+  clipToMask();
 }
 canvas.addEventListener('pointerup', endStroke);
 canvas.addEventListener('pointercancel', endStroke);
 canvas.addEventListener('pointerleave', ()=>{ if(drawing) endStroke(); });
+
+function clipToMask(){
+  if(!maskCanvas) return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-in';
+  ctx.drawImage(maskCanvas, 0, 0, canvasSize, canvasSize);
+  ctx.restore();
+}
 
 function drawSegment(stroke, i){
   if(i<0) return;
@@ -397,6 +476,7 @@ function redraw(){
   ctx.globalCompositeOperation='source-over';
   ctx.clearRect(0,0,canvas.width,canvas.height);
   strokes.forEach(s=>{ for(let i=0;i<s.pts.length-1;i++) drawSegment(s,i); });
+  clipToMask();
 }
 function clearStrokes(){ strokes=[]; redraw(); }
 
@@ -441,16 +521,33 @@ function showToast(msg){
 
 /* send to board: composite guide + drawing */
 document.getElementById('sendBtn').addEventListener('click', ()=>{
+  const colored = document.createElement('canvas');
+  colored.width = 400; colored.height = 400;
+  const cctx = colored.getContext('2d');
+  cctx.drawImage(canvas, 0, 0, 400, 400);
+  if (maskCanvas) {
+    cctx.globalCompositeOperation = 'destination-in';
+    cctx.drawImage(maskCanvas, 0, 0, 400, 400);
+    cctx.globalCompositeOperation = 'source-over';
+  }
+
   const off = document.createElement('canvas');
   off.width = 400; off.height = 400;
   const octx = off.getContext('2d');
-  octx.fillStyle = '#ffffff'; octx.fillRect(0,0,400,400);
-  octx.drawImage(canvas, 0, 0, 400, 400);
+  // 실루엣 모양(안쪽)만 흰색으로 채우고, 바깥은 완전히 투명하게 둔다 (상자 없음)
+  if (maskCanvas) octx.drawImage(maskCanvas, 0, 0, 400, 400);
+  octx.drawImage(colored, 0, 0, 400, 400);
   octx.globalAlpha = 0.6;
   octx.globalCompositeOperation = 'multiply';
   octx.drawImage(tmplImg,0,0,400,400);
   octx.globalAlpha = 1;
   octx.globalCompositeOperation = 'source-over';
+  // 곱하기 블렌드가 바깥으로 새는 것을 막기 위한 최종 안전 클리핑
+  if (maskCanvas) {
+    octx.globalCompositeOperation = 'destination-in';
+    octx.drawImage(maskCanvas, 0, 0, 400, 400);
+    octx.globalCompositeOperation = 'source-over';
+  }
   const dataUrl = off.toDataURL('image/png');
   const sp = categories[currentCat].species.find(s=>s.id===currentSpecies);
   boardItems.unshift({ id: Date.now(), cat: currentCat, name: sp.name, emoji: sp.emoji, dataUrl });
@@ -467,6 +564,7 @@ function switchView(v){
   document.getElementById('viewDraw').classList.toggle('active', v==='draw');
   document.getElementById('viewBoard').classList.toggle('active', v==='board');
   if(v==='board') renderBoard();
+  else stopWalk();
   if(v==='draw') setTimeout(resizeCanvas, 30);
 }
 document.querySelectorAll('#boardFilter button').forEach(b=>{
@@ -477,91 +575,134 @@ document.querySelectorAll('#boardFilter button').forEach(b=>{
     renderBoard();
   });
 });
+function currentFilteredItems(){
+  return boardFilterVal==='all' ? boardItems : boardItems.filter(i=>i.cat===boardFilterVal);
+}
 function renderBoard(){
   const grid = document.getElementById('boardGrid');
   const empty = document.getElementById('boardEmpty');
   grid.innerHTML = '';
-  const items = boardFilterVal==='all' ? boardItems : boardItems.filter(i=>i.cat===boardFilterVal);
+  const items = currentFilteredItems();
   empty.style.display = items.length ? 'none' : 'block';
+  document.getElementById('boardSceneWrap').style.display = items.length ? 'block' : 'none';
   items.forEach(item=>{
     const card = document.createElement('div');
     card.className='board-card';
     card.innerHTML = `<img src="${item.dataUrl}"><span>${item.emoji} ${item.name}</span>`;
-    card.addEventListener('click', ()=> openWalk(item));
     grid.appendChild(card);
   });
+  startWalk(items.slice(0,12));
 }
 
-/* ---------- walk animation ---------- */
-const walkOverlay = document.getElementById('walkOverlay');
+/* ---------- walk animation (multiple actors, continuous free movement + bounce) ---------- */
 const walkScene = document.getElementById('walkScene');
-const walkActor = document.getElementById('walkActor');
-const walkActorImg = document.getElementById('walkActorImg');
-const walkTimer = document.getElementById('walkTimer');
 const walkDeco = document.getElementById('walkDeco');
 let walkRAF = null;
-let walkStart = 0;
-const WALK_DURATION = 180000; // 3분
+let lastTickTime = 0;
+let actors = [];
 
 const SCENES = {
-  dino:{cls:'scene-dino', deco:`<circle cx="80" cy="80" r="45" fill="#fff" opacity=".7"/><circle cx="700" cy="60" r="30" fill="#fff" opacity=".6"/><circle cx="620" cy="110" r="40" fill="#fff" opacity=".5"/>`},
-  sea:{cls:'scene-sea', deco:`<circle cx="100" cy="380" r="10" fill="#fff"/><circle cx="150" cy="330" r="6" fill="#fff"/><circle cx="600" cy="400" r="12" fill="#fff"/><circle cx="680" cy="340" r="7" fill="#fff"/><circle cx="400" cy="420" r="9" fill="#fff"/>`},
-  land:{cls:'scene-land', deco:`<circle cx="680" cy="70" r="50" fill="#FFF3C4"/>`},
-  bug:{cls:'scene-bug', deco:`<circle cx="90" cy="70" r="40" fill="#fff" opacity=".7"/><circle cx="650" cy="90" r="30" fill="#fff" opacity=".6"/>`}
+  dino:{cls:'scene-dino', deco:`
+    <circle cx="690" cy="70" r="55" fill="#FFF7D6"/>
+    <ellipse cx="110" cy="85" rx="65" ry="24" fill="#fff" opacity=".9"/>
+    <ellipse cx="170" cy="75" rx="45" ry="18" fill="#fff" opacity=".9"/>
+    <ellipse cx="600" cy="140" rx="55" ry="20" fill="#fff" opacity=".85"/>
+    <path d="M0,480 Q100,450 200,480 T400,480 T600,480 T800,480 V500 H0 Z" fill="#8ED988" opacity=".7"/>`},
+  sea:{cls:'scene-sea', deco:`
+    <circle cx="120" cy="400" r="9" fill="#fff" opacity=".8"/>
+    <circle cx="165" cy="350" r="6" fill="#fff" opacity=".8"/>
+    <circle cx="610" cy="420" r="11" fill="#fff" opacity=".8"/>
+    <circle cx="690" cy="360" r="7" fill="#fff" opacity=".8"/>
+    <circle cx="420" cy="440" r="8" fill="#fff" opacity=".8"/>
+    <path d="M0,480 Q100,460 200,480 T400,480 T600,480 T800,480 V500 H0 Z" fill="#4FB6E0" opacity=".55"/>`},
+  land:{cls:'scene-land', deco:`
+    <circle cx="690" cy="70" r="58" fill="#FFF3C4"/>
+    <ellipse cx="130" cy="90" rx="60" ry="22" fill="#fff" opacity=".9"/>
+    <path d="M0,480 Q100,455 200,480 T400,480 T600,480 T800,480 V500 H0 Z" fill="#E8B85C" opacity=".6"/>`},
+  bug:{cls:'scene-bug', deco:`
+    <circle cx="100" cy="70" r="45" fill="#fff" opacity=".85"/>
+    <circle cx="670" cy="95" r="35" fill="#fff" opacity=".8"/>
+    <path d="M0,470 Q100,445 200,470 T400,470 T600,470 T800,470 V500 H0 Z" fill="#8FD65E" opacity=".65"/>`},
+  all:{cls:'scene-all', deco:`
+    <circle cx="690" cy="70" r="50" fill="#FFF3C4"/>
+    <ellipse cx="120" cy="90" rx="55" ry="20" fill="#fff" opacity=".9"/>
+    <path d="M60,300 Q200,220 340,300 Q480,220 620,300 Q680,270 740,300" fill="none" stroke="#FF9F9F" stroke-width="10" opacity=".5"/>
+    <path d="M60,315 Q200,235 340,315 Q480,235 620,315 Q680,285 740,315" fill="none" stroke="#FFD27F" stroke-width="10" opacity=".5"/>
+    <path d="M60,330 Q200,250 340,330 Q480,250 620,330 Q680,300 740,330" fill="none" stroke="#9FE0A8" stroke-width="10" opacity=".5"/>`}
 };
 
-function openWalk(item){
-  walkOverlay.classList.add('show');
-  walkScene.className = 'walk-scene ' + SCENES[item.cat].cls;
-  walkDeco.innerHTML = SCENES[item.cat].deco;
-  walkActorImg.src = item.dataUrl;
-  startWalk();
+function sceneKeyFor(items){
+  const cats = [...new Set(items.map(i=>i.cat))];
+  return cats.length===1 ? cats[0] : 'all';
 }
-document.getElementById('closeWalkBtn').addEventListener('click', closeWalk);
-function closeWalk(){
-  walkOverlay.classList.remove('show');
+
+function startWalk(items){
   if(walkRAF) cancelAnimationFrame(walkRAF);
-  if(document.fullscreenElement) document.exitFullscreen();
+  document.querySelectorAll('.walk-actor').forEach(el=>el.remove());
+  actors = [];
+  if(!items || !items.length) return;
+
+  const key = sceneKeyFor(items);
+  walkScene.className = 'walk-scene ' + SCENES[key].cls;
+  walkDeco.innerHTML = SCENES[key].deco;
+
+  const sceneW = walkScene.clientWidth || 400;
+  const sceneH = walkScene.clientHeight || 260;
+  const actorSize = items.length > 6 ? 60 : 78;
+  actors = items.map(item=>{
+    const el = document.createElement('div');
+    el.className = 'walk-actor';
+    el.style.width = actorSize+'px';
+    el.style.height = actorSize+'px';
+    const img = document.createElement('img');
+    img.src = item.dataUrl;
+    el.appendChild(img);
+    walkScene.appendChild(el);
+    const speed = 35 + Math.random()*35; // px/sec
+    const angle = Math.random()*Math.PI*2;
+    return {
+      el, w:actorSize, h:actorSize,
+      x: Math.random()*Math.max(10, sceneW-actorSize),
+      y: Math.random()*Math.max(10, sceneH-actorSize),
+      vx: Math.cos(angle)*speed,
+      vy: Math.sin(angle)*speed,
+      bobPhase: Math.random()*1000
+    };
+  });
+  lastTickTime = performance.now();
+  tick();
+}
+function stopWalk(){
+  if(walkRAF) cancelAnimationFrame(walkRAF);
+  walkRAF = null;
 }
 document.getElementById('fullscreenBtn').addEventListener('click', ()=>{
-  if(!document.fullscreenElement) walkOverlay.requestFullscreen().catch(()=>{});
+  const wrap = document.getElementById('boardSceneWrap');
+  if(!document.fullscreenElement) wrap.requestFullscreen().catch(()=>{});
   else document.exitFullscreen();
 });
 
-function startWalk(){
-  walkStart = performance.now();
-  if(walkRAF) cancelAnimationFrame(walkRAF);
-  tick();
-}
-function tick(){
-  const now = performance.now();
-  const elapsed = now - walkStart;
-  const remain = Math.max(0, WALK_DURATION - elapsed);
-  const mm = Math.floor(remain/60000);
-  const ss = Math.floor((remain%60000)/1000);
-  walkTimer.textContent = `${mm}:${ss.toString().padStart(2,'0')}`;
+function tick(now){
+  now = now || performance.now();
+  const dt = Math.min(0.05, (now - lastTickTime)/1000);
+  lastTickTime = now;
 
   const sceneW = walkScene.clientWidth || 400;
-  const sceneH = walkScene.clientHeight || 400;
-  const actorW = 110;
-  const margin = 10;
-  const usable = Math.max(50, sceneW - actorW - margin*2);
-  const period = 6000; // 6초에 한 번 왕복 반쪽
-  const t = (elapsed % (period*2)) / period; // 0~2
-  let progress, dir;
-  if(t < 1){ progress = t; dir = 1; } else { progress = 2 - t; dir = -1; }
-  const x = margin + usable * progress;
-  const bob = Math.abs(Math.sin(elapsed/260)) * 12;
-  const baseY = sceneH - actorW - 20;
-  walkActor.style.left = x + 'px';
-  walkActor.style.top = (baseY - bob) + 'px';
-  walkActor.style.transform = `scaleX(${dir})`;
+  const sceneH = walkScene.clientHeight || 260;
 
-  if(elapsed < WALK_DURATION){
-    walkRAF = requestAnimationFrame(tick);
-  } else {
-    walkTimer.textContent = '0:00';
-  }
+  actors.forEach((a,i)=>{
+    a.x += a.vx*dt;
+    a.y += a.vy*dt;
+    if(a.x <= 0){ a.x = 0; a.vx = Math.abs(a.vx); }
+    if(a.x >= sceneW - a.w){ a.x = sceneW - a.w; a.vx = -Math.abs(a.vx); }
+    if(a.y <= 0){ a.y = 0; a.vy = Math.abs(a.vy); }
+    if(a.y >= sceneH - a.h){ a.y = sceneH - a.h; a.vy = -Math.abs(a.vy); }
+    const bob = Math.sin((now + a.bobPhase)/260) * 5;
+    const dir = a.vx >= 0 ? 1 : -1;
+    a.el.style.transform = `translate(${a.x}px, ${a.y + bob}px) scaleX(${dir})`;
+  });
+
+  walkRAF = requestAnimationFrame(tick);
 }
 
 /* ---------- init ---------- */
