@@ -353,6 +353,7 @@
       </button>
       <button class="icon-btn" id="thresholdBtn" aria-label="재고부족 기준 수정" title="재고부족 기준 수정" style="border:1px solid var(--border);">&#9881;</button>
       <button class="btn" id="historyBtn">지난 기록</button>
+      <button class="btn" id="biweekBtn">2주 통계</button>
       <button class="btn danger" id="resetBtn">오늘 초기화</button>
     </div>
   </div>
@@ -910,6 +911,93 @@
     });
   }
 
+  /* ---------- 2주 단위 통계 ---------- */
+  // 1970-01-05(월요일)를 기준점으로 14일씩 끊어서, 어떤 날짜든 항상 같은 2주 구간에
+  // 속하도록 만듭니다. 이렇게 하면 나중에 다시 열어도 구간 경계가 흔들리지 않아요.
+  function biweekBucketInfo(dateStr){
+    var d = new Date(dateStr+'T00:00:00');
+    var epoch = new Date(1970,0,5); // 기준 월요일
+    var diffDays = Math.floor((d - epoch)/86400000);
+    var bucketIndex = Math.floor(diffDays/14);
+    var bucketStart = new Date(epoch.getTime() + bucketIndex*14*86400000);
+    var bucketEnd = new Date(bucketStart.getTime() + 13*86400000);
+    function fmt(dt){ return dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate()); }
+    return { index: bucketIndex, startStr: fmt(bucketStart), endStr: fmt(bucketEnd) };
+  }
+  function friendlyRange(startStr, endStr){
+    var s = new Date(startStr+'T00:00:00'), e = new Date(endStr+'T00:00:00');
+    function short(dt){ return (dt.getMonth()+1)+'월 '+dt.getDate()+'일'; }
+    return s.getFullYear()+'년 '+short(s)+' ~ '+short(e);
+  }
+
+  async function openBiweekStats(){
+    openModal('<h3>2주 단위 통계</h3><p>불러오는 중...</p>', function(){});
+    var keys = await listKeys('counts:', true);
+    var buckets = {};
+    for (var i=0;i<keys.length;i++){
+      var k = keys[i];
+      var dateStr = k.indexOf('counts:')===0 ? k.slice(7) : k;
+      var info = biweekBucketInfo(dateStr);
+      var d = await getJSON(k, true, {});
+      if (!buckets[info.index]) buckets[info.index] = { startStr: info.startStr, endStr: info.endStr, total: 0, byItem: {} };
+      var b = buckets[info.index];
+      Object.keys(d).forEach(function(id){
+        var v = d[id]||0;
+        if (!v) return;
+        b.total += v;
+        b.byItem[id] = (b.byItem[id]||0) + v;
+      });
+    }
+    var bucketList = Object.keys(buckets).map(function(idx){ return { idx: parseInt(idx,10), data: buckets[idx] }; });
+    bucketList.sort(function(a,b){ return b.idx - a.idx; });
+
+    if (bucketList.length === 0){
+      openModal('<h3>2주 단위 통계</h3><p>아직 집계할 기록이 없어요.</p><div class="modal-actions"><button class="btn" id="mClose">닫기</button></div>', function(){
+        document.getElementById('mClose').onclick = closeModal;
+      });
+      return;
+    }
+
+    var html = '<h3>2주 단위 통계</h3><p>14일씩 묶어서 품목 사용량을 합산했어요. 기간을 눌러 품목별 내역을 보세요.</p><div class="history-list">'+
+      bucketList.map(function(b,i){
+        return '<div class="history-row" data-idx="'+i+'"><span class="d">'+friendlyRange(b.data.startStr,b.data.endStr)+'</span><span class="t">총 '+b.data.total+'개</span></div>';
+      }).join('')+
+      '</div><div class="modal-actions"><button class="btn" id="mClose">닫기</button></div>';
+
+    openModal(html, function(){
+      document.getElementById('mClose').onclick = closeModal;
+      document.querySelectorAll('.history-row').forEach(function(el){
+        el.addEventListener('click', function(){
+          var b = bucketList[parseInt(el.getAttribute('data-idx'),10)];
+          showBiweekDetail(b, bucketList);
+        });
+      });
+    });
+  }
+
+  function showBiweekDetail(b, bucketList){
+    var entries = Object.keys(b.data.byItem).map(function(id){
+      var it = items.find(function(x){ return x.id===id; });
+      var label = it ? (it.category+' · '+it.size) : '(삭제된 품목)';
+      return { label: label, v: b.data.byItem[id] };
+    }).sort(function(a,c){ return c.v - a.v; });
+
+    var rowsHtml = entries.length === 0
+      ? '<p>이 기간엔 기록된 사용량이 없어요.</p>'
+      : '<div class="history-detail">'+ entries.map(function(e){
+          return '<div class="row"><span>'+esc(e.label)+'</span><span><b>'+e.v+'</b></span></div>';
+        }).join('') + '</div>';
+
+    openModal(
+      '<h3>'+friendlyRange(b.data.startStr,b.data.endStr)+'</h3><p>총 '+b.data.total+'개 사용</p>'+rowsHtml+
+      '<div class="modal-actions"><button class="btn" id="mBack">뒤로</button><button class="btn primary" id="mClose">닫기</button></div>',
+      function(){
+        document.getElementById('mClose').onclick = closeModal;
+        document.getElementById('mBack').onclick = function(){ openBiweekStats(); };
+      }
+    );
+  }
+
   /* ---------- History ---------- */
   async function openHistory(){
     openModal('<h3>지난 기록</h3><p>불러오는 중...</p>', function(){});
@@ -1182,6 +1270,7 @@
     document.getElementById('searchInput').addEventListener('input', render);
     document.getElementById('resetBtn').addEventListener('click', resetToday);
     document.getElementById('historyBtn').addEventListener('click', openHistory);
+    document.getElementById('biweekBtn').addEventListener('click', openBiweekStats);
     document.getElementById('bulkStockBtn').addEventListener('click', openBulkStock);
     document.getElementById('stockFilterBtn').addEventListener('click', toggleStockFilter);
     document.getElementById('lowStockBadge').addEventListener('click', toggleStockFilter);
