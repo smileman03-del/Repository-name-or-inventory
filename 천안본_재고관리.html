@@ -899,13 +899,17 @@ function bindManageListEvents(){
 }
 function renderManage(main){
   main.innerHTML = `
-    <button class="btn btn-primary" id="addItemBtn" style="margin-bottom:14px;">+ 새 품목 추가</button>
+    <div class="btn-row" style="margin-bottom:14px;gap:8px;">
+      <button class="btn btn-primary" id="addItemBtn" style="flex:1;">+ 새 품목 추가</button>
+      <button class="btn btn-secondary" id="bulkCatBtn" style="flex:1;">소분류 일괄 변경</button>
+    </div>
     <div class="search-bar"><input type="text" id="searchInput" placeholder="품목명 검색" value="${esc(STATE.search)}"></div>
     <div class="cat-filter" id="catFilter"></div>
     <div class="card" style="padding:4px 12px;" id="itemListCard">
       ${manageListHtml()}
     </div>
   `;
+  document.getElementById('bulkCatBtn').addEventListener('click', ()=> openBulkCatModal());
   document.getElementById('searchInput').addEventListener('input', e=>{
     STATE.search = e.target.value;
     if(e.isComposing) return; // 한글 조합(자모 결합) 중에는 다시 그리지 않음 — 안 그러면 자음/모음이 끊겨 보임
@@ -961,6 +965,69 @@ function insertItemInOrder(newItem){
   } else {
     STATE.items.splice(insertAt + 1, 0, newItem);
   }
+}
+function openBulkCatModal(){
+  const dept = STATE.dept === '전체' ? DEPTS[0] : STATE.dept;
+  const backdrop = document.createElement('div');
+  backdrop.className='modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-title"><span>소분류 일괄 변경</span><span class="modal-close" id="closeModal">✕</span></div>
+      <label class="field-label">대분류 (부서)</label>
+      <select id="bDept">${DEPTS.map(d=>`<option value="${esc(d)}" ${dept===d?'selected':''}>${esc(d)}</option>`).join('')}</select>
+      <label class="field-label">바꿀 소분류</label>
+      <select id="bCat">
+        <option value="의약품">의약품</option>
+        <option value="소모품">소모품</option>
+        <option value="보조기">보조기</option>
+        <option value="문구">문구</option>
+      </select>
+      <label class="field-label">품목명 목록 (한 줄에 하나씩, 또는 쉼표로 구분)</label>
+      <textarea id="bNames" rows="8" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;" placeholder="예:&#10;M-splint&#10;JS-Tap EB&#10;목발"></textarea>
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-secondary" id="cancelBulk">취소</button>
+        <button class="btn btn-primary" id="applyBulk">적용</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  const close = ()=> backdrop.remove();
+  backdrop.addEventListener('click', e=>{ if(e.target===backdrop) close(); });
+  document.getElementById('closeModal').addEventListener('click', close);
+  document.getElementById('cancelBulk').addEventListener('click', close);
+  document.getElementById('applyBulk').addEventListener('click', async ()=>{
+    const targetDept = document.getElementById('bDept').value;
+    const targetCat = document.getElementById('bCat').value;
+    const raw = document.getElementById('bNames').value;
+    const names = raw.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+    if(names.length===0){ toast('품목명을 입력해주세요'); return; }
+    const applyBtn = document.getElementById('applyBulk');
+    applyBtn.disabled = true;
+    setSyncing(true);
+    const notFound = [];
+    let changed = 0;
+    for(const nm of names){
+      const match = STATE.items.find(i=> i.dept===targetDept && i.name.trim()===nm);
+      if(!match){ notFound.push(nm); continue; }
+      if(match.cat === targetCat){ changed++; continue; } // 이미 해당 소분류면 통과
+      try{
+        await apiPost({ action:'itemUpdate', id: match.id, cat: targetCat });
+        match.cat = targetCat;
+        changed++;
+      }catch(e2){
+        console.error(e2);
+        notFound.push(nm + ' (저장 실패)');
+      }
+    }
+    setSyncing(false);
+    applyBtn.disabled = false;
+    close();
+    if(notFound.length===0){
+      toast(`${changed}개 품목의 소분류를 '${targetCat}'로 변경했어요`);
+    }else{
+      toast(`${changed}개 변경, ${notFound.length}개는 못 찾았어요: ${notFound.join(', ')}`);
+    }
+    render();
+  });
 }
 function openItemModal(item){
   const isNew = !item;
