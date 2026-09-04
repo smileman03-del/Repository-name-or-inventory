@@ -336,9 +336,9 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const DEPTS = ["수술실", "처치실", "통증", "병동", "물리치료실"];
-// 예전에 "마취과"/"수술실"로 따로 저장돼 있던 데이터를 합쳐진 대분류로 자동 변환
-const DEPT_MERGE_MAP = { "마취과": "수술실", "수술실": "수술실" };
+const DEPTS = ["수술실", "처치실", "병동", "물리치료실"];
+// 예전에 "마취과"/"수술실", "처치실"/"통증"으로 따로 저장돼 있던 데이터를 합쳐진 대분류로 자동 변환
+const DEPT_MERGE_MAP = { "마취과": "수술실", "수술실": "수술실", "통증": "처치실", "처치실": "처치실" };
 function normalizeDept(dept){ return DEPT_MERGE_MAP[dept] || dept; }
 
 // ⚠️ 아래 SCRIPT_URL을 구글 Apps Script 배포 후 발급받은 웹앱 URL로 교체하세요.
@@ -456,7 +456,7 @@ function toast(msg){
   toastTimer = setTimeout(()=> el.classList.remove('show'), 2200);
 }
 // 소분류(카테고리) 정렬 기준: 새 품목이 항상 같은 카테고리 아래로 들어가도록
-const CAT_ORDER = ['의약품', '소모품', '문구'];
+const CAT_ORDER = ['의약품', '소모품', '보조기', '문구'];
 function catRank(cat){
   const idx = CAT_ORDER.indexOf(cat);
   return idx === -1 ? CAT_ORDER.length : idx;
@@ -975,6 +975,7 @@ function openItemModal(item){
       <select id="fCat">
         <option value="의약품" ${item&&item.cat==='의약품'?'selected':''}>의약품</option>
         <option value="소모품" ${item&&item.cat==='소모품'?'selected':''}>소모품</option>
+        <option value="보조기" ${item&&item.cat==='보조기'?'selected':''}>보조기</option>
         <option value="문구" ${item&&item.cat==='문구'?'selected':''}>문구</option>
       </select>
       <label class="field-label">품목명</label>
