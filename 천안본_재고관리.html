@@ -982,7 +982,7 @@ function openBulkCatModal(){
         <option value="보조기">보조기</option>
         <option value="문구">문구</option>
       </select>
-      <label class="field-label">품목명 목록 (한 줄에 하나씩, 또는 쉼표로 구분)</label>
+      <label class="field-label">품목명 목록 (한 줄에 하나씩, 또는 쉼표로 구분 · 앞글자가 같으면 자동으로 찾아서 반영돼요)</label>
       <textarea id="bNames" rows="8" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;" placeholder="예:&#10;M-splint&#10;JS-Tap EB&#10;목발"></textarea>
       <div class="btn-row" style="margin-top:16px;">
         <button class="btn btn-secondary" id="cancelBulk">취소</button>
@@ -1006,16 +1006,20 @@ function openBulkCatModal(){
     const notFound = [];
     let changed = 0;
     for(const nm of names){
-      const match = STATE.items.find(i=> i.dept===targetDept && i.name.trim()===nm);
-      if(!match){ notFound.push(nm); continue; }
-      if(match.cat === targetCat){ changed++; continue; } // 이미 해당 소분류면 통과
-      try{
-        await apiPost({ action:'itemUpdate', id: match.id, cat: targetCat });
-        match.cat = targetCat;
-        changed++;
-      }catch(e2){
-        console.error(e2);
-        notFound.push(nm + ' (저장 실패)');
+      const needle = nm.toLowerCase();
+      // 완전 일치가 아니라 "앞부분이 같은" 품목까지 모두 찾아서 반영 (띄어쓰기·뒤에 붙은 규격 등 차이 허용)
+      const matches = STATE.items.filter(i=> i.dept===targetDept && i.name.trim().toLowerCase().startsWith(needle));
+      if(matches.length===0){ notFound.push(nm); continue; }
+      for(const match of matches){
+        if(match.cat === targetCat){ changed++; continue; } // 이미 해당 소분류면 통과
+        try{
+          await apiPost({ action:'itemUpdate', id: match.id, cat: targetCat });
+          match.cat = targetCat;
+          changed++;
+        }catch(e2){
+          console.error(e2);
+          notFound.push(`${match.name} (저장 실패)`);
+        }
       }
     }
     setSyncing(false);
