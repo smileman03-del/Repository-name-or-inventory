@@ -91,9 +91,6 @@
   .total-badge .num{display:block;font-size:1.7rem;font-weight:800;color:var(--orange);line-height:1;}
   .total-badge .lbl{display:block;font-size:0.72rem;color:var(--text-soft);margin-top:3px;font-weight:700;}
   button.total-badge{font:inherit;appearance:none;}
-  .low-badge{background:var(--red-tint);border-color:#F6C9CE;cursor:pointer;}
-  .low-badge .num{color:var(--red);}
-  .low-badge.active{outline:2px solid var(--red);outline-offset:1px;}
   .btn{
     border:1px solid var(--border);
     background:var(--panel);
@@ -202,13 +199,6 @@
   }
   .item-row .icon-btn{width:28px;height:28px;font-size:0.85rem;}
 
-  .stock-line{display:flex;align-items:center;gap:8px;padding:0 6px;font-size:0.92rem;color:var(--text-soft);}
-  .stock-line .stock-label{font-weight:700;}
-  .stock-value{font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;}
-  .stock-value.low{color:var(--red);}
-  .low-tag{background:var(--red-tint);color:var(--red);font-size:0.7rem;font-weight:800;padding:2px 7px;border-radius:6px;}
-  .threshold-note{font-size:0.78rem;color:var(--text-soft);background:#F1F1EF;padding:2px 8px;border-radius:6px;font-weight:600;}
-  .stock-line .icon-btn{width:26px;height:26px;font-size:0.78rem;margin-left:auto;}
 
   .counter{display:flex;align-items:center;gap:10px;flex-shrink:0;}
   .count-btn{
@@ -295,13 +285,6 @@
   .history-detail .row{display:flex;justify-content:space-between;padding:7px 2px;font-size:0.95rem;border-bottom:1px dashed var(--border);}
   .history-detail .cat{color:var(--text-soft);font-size:0.8rem;}
 
-  .bulk-body{max-height:56vh;overflow-y:auto;margin:-2px -4px 16px 0;padding-right:6px;}
-  .bulk-cat h4{margin:16px 0 6px;font-size:0.92rem;color:var(--text-soft);border-bottom:1px solid var(--border);padding-bottom:5px;font-weight:800;}
-  .bulk-cat:first-child h4{margin-top:0;}
-  .bulk-row{display:flex;justify-content:space-between;align-items:center;padding:6px 2px;gap:10px;}
-  .bulk-row span{font-weight:600;font-size:0.96rem;}
-  .bulk-input{width:88px;padding:8px 10px;border-radius:8px;border:1px solid var(--border);font-size:1rem;text-align:right;margin:0;}
-  .bulk-input:focus{outline:none;border-color:var(--blue);}
 
   #toast{
     position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
@@ -347,11 +330,6 @@
         <span class="num" id="totalCount">0</span>
         <span class="lbl">오늘 총 사용</span>
       </div>
-      <button class="total-badge low-badge" id="lowStockBadge" title="클릭하면 재고부족 품목만 볼 수 있어요">
-        <span class="num" id="lowStockCount">0</span>
-        <span class="lbl">재고부족</span>
-      </button>
-      <button class="icon-btn" id="thresholdBtn" aria-label="재고부족 기준 수정" title="재고부족 기준 수정" style="border:1px solid var(--border);">&#9881;</button>
       <button class="btn" id="historyBtn">지난 기록</button>
       <button class="btn" id="biweekBtn">2주 통계</button>
       <button class="btn danger" id="resetBtn">오늘 초기화</button>
@@ -365,8 +343,6 @@
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="searchInput" placeholder="품목 검색 (예: wrist, 좌L, 깁스신발)">
     </div>
-    <button class="btn" id="bulkStockBtn">재고 일괄 입력</button>
-    <button class="btn" id="stockFilterBtn">재고부족만 보기</button>
     <button class="btn" id="expandAllBtn">전체 펼치기</button>
     <button class="btn" id="collapseAllBtn">전체 접기</button>
   </div>
@@ -375,7 +351,7 @@
     <div class="loading-wrap">불러오는 중...</div>
   </div>
 
-  <footer class="note">이 카운트와 재고는 처치실 전체 선생님이 함께 보고 기록하는 공용 데이터입니다 · 날짜가 바뀌면 사용 카운트는 자동으로 0부터 다시 시작되지만 재고 수량은 계속 이어집니다 · 사용(+) 시 재고가 자동으로 1개 줄어듭니다</footer>
+  <footer class="note">이 카운트는 처치실 전체 선생님이 함께 보고 기록하는 공용 데이터입니다 · 날짜가 바뀌면 사용 카운트는 자동으로 0부터 다시 시작됩니다</footer>
 </div>
 
 <div id="modalRoot"></div>
@@ -397,8 +373,6 @@
   var counts = {};        // {itemId: number}
   var collapsedCats = {}; // {categoryName: bool}
   var todayKey = "";
-  var settings = { lowStockThreshold: 5 };
-  var stockFilterOn = false;
 
   /* ---------- 구글 시트 연동 (Apps Script 웹앱 API) ---------- */
   // ⚠️ 깃허브에 올라가는 실제 웹앱 주소입니다. Apps Script를 재배포해도 이 exec 주소는
@@ -474,12 +448,6 @@
   async function apiUpdateItem(id, patch){
     var payload = Object.assign({ action: 'updateItem', id: id }, patch);
     return apiPost(payload);
-  }
-  async function apiBulkUpdateStock(updates){
-    return apiPost({ action: 'bulkUpdateStock', updates: updates });
-  }
-  async function apiCountChange(id, delta){
-    return apiPost({ action: 'countChange', id: id, delta: delta });
   }
   async function apiRenameCategory(oldName, newName){
     return apiPost({ action: 'renameCategory', oldName: oldName, newName: newName });
@@ -577,33 +545,8 @@
     document.getElementById('totalCount').textContent = totalToday();
   }
 
-  function itemThreshold(it){
-    return (it && typeof it.threshold === 'number' && !isNaN(it.threshold)) ? it.threshold : settings.lowStockThreshold;
-  }
-
-  function lowStockCount(){
-    return items.filter(function(it){ return (it.stock||0) <= itemThreshold(it); }).length;
-  }
-  function updateHeaderLowBadge(){
-    var el = document.getElementById('lowStockCount');
-    if (el) el.textContent = lowStockCount();
-  }
-
   async function persistCounts(){
     await setJSON('counts:'+todayKey, true, counts);
-  }
-  async function persistSettings(){
-    await setJSON('settings', true, settings);
-  }
-
-  function updateStockDom(id){
-    var it = items.find(function(x){ return x.id === id; });
-    if (!it) return;
-    var low = (it.stock||0) <= itemThreshold(it);
-    var sv = document.getElementById('sv-'+id);
-    if (sv){ sv.textContent = (it.stock||0)+'개'; sv.classList.toggle('low', low); }
-    var lt = document.getElementById('lt-'+id);
-    if (lt) lt.style.display = low ? 'inline-block' : 'none';
   }
 
   function changeCount(id, delta){
@@ -611,134 +554,11 @@
     if (!it) return;
     var cur = counts[id] || 0;
     var next = Math.max(0, cur + delta);
-    var applied = next - cur;
     counts[id] = next;
-    it.stock = (it.stock||0) - applied;
     var el = document.getElementById('cv-'+id);
     if (el) el.textContent = next;
     updateTotalBadge();
     persistCounts();
-    if (applied !== 0){
-      apiCountChange(id, -applied).catch(function(e){
-        console.error('재고 저장 실패', e);
-        showToast('재고 저장에 실패했어요. 인터넷 연결을 확인해주세요.');
-      });
-      updateHeaderLowBadge();
-      if (stockFilterOn){ render(); } else { updateStockDom(id); }
-      if ((it.stock||0) <= 0) showToast('"'+it.category+' · '+it.size+'" 재고가 부족해요.');
-    }
-  }
-
-  function editStock(id){
-    var it = items.find(function(x){ return x.id === id; });
-    if (!it) return;
-    var currentThreshold = (typeof it.threshold === 'number' && !isNaN(it.threshold)) ? it.threshold : '';
-    openModal(
-      '<h3>재고 / 부족 기준 수정</h3>'+
-      '<p>'+esc(it.category+' · '+it.size)+'</p>'+
-      '<label class="field-label">현재 재고 수량</label>'+
-      '<input id="mStock" type="number" inputmode="numeric" min="0" value="'+(it.stock||0)+'">'+
-      '<label class="field-label">이 품목만의 재고부족 기준 (비워두면 전체 기본값 '+settings.lowStockThreshold+' 사용)</label>'+
-      '<input id="mThreshold" type="number" inputmode="numeric" min="0" placeholder="예: 5" value="'+currentThreshold+'">'+
-      '<div class="modal-actions"><button class="btn" id="mCancel">취소</button><button class="btn primary" id="mSave">저장</button></div>',
-      function(){
-        var stockInput = document.getElementById('mStock');
-        stockInput.focus();
-        stockInput.select();
-        document.getElementById('mCancel').onclick = closeModal;
-        document.getElementById('mSave').onclick = function(){
-          var sv = parseInt(stockInput.value, 10);
-          it.stock = isNaN(sv) ? 0 : Math.max(0, sv);
-
-          var tRaw = document.getElementById('mThreshold').value.trim();
-          var patch = { stock: it.stock };
-          if (tRaw === ''){
-            delete it.threshold;
-            patch.clearThreshold = true;
-          } else {
-            var tv = parseInt(tRaw, 10);
-            it.threshold = isNaN(tv) ? undefined : Math.max(0, tv);
-            if (it.threshold === undefined) delete it.threshold;
-            else patch.threshold = it.threshold;
-          }
-
-          closeModal();
-          apiUpdateItem(id, patch).catch(function(e){
-            console.error('저장 실패', e);
-            showToast('저장에 실패했어요. 인터넷 연결을 확인해주세요.');
-          });
-          updateHeaderLowBadge();
-          render();
-          showToast('재고와 부족 기준을 저장했어요.');
-        };
-      }
-    );
-  }
-
-  function toggleStockFilter(){
-    stockFilterOn = !stockFilterOn;
-    var b1 = document.getElementById('stockFilterBtn');
-    var b2 = document.getElementById('lowStockBadge');
-    if (b1) b1.classList.toggle('active', stockFilterOn);
-    if (b2) b2.classList.toggle('active', stockFilterOn);
-    render();
-  }
-
-  function editThreshold(){
-    promptModal('전체 기본 재고부족 기준', '개별 기준을 따로 설정하지 않은 품목에 적용되는 기본값이에요. 재고가 이 수량 이하이면 "부족"으로 표시됩니다.', '예: 5', String(settings.lowStockThreshold), '저장', function(val){
-      var v = parseInt(val, 10);
-      settings.lowStockThreshold = isNaN(v) ? 5 : Math.max(0, v);
-      persistSettings();
-      updateHeaderLowBadge();
-      render();
-      showToast('전체 기본 기준을 저장했어요.');
-    }, 'number');
-  }
-
-  function openBulkStock(){
-    var order = categoryOrder();
-    var html = '<h3>재고 일괄 입력</h3><p>각 품목의 현재 재고 수량을 확인하고 한 번에 저장하세요.</p>'+
-      '<div class="bulk-body">'+
-      order.map(function(cat){
-        var catItems = items.filter(function(x){ return x.category === cat; });
-        return '<div class="bulk-cat"><h4>'+esc(cat)+'</h4>'+
-          catItems.map(function(it){
-            return '<div class="bulk-row"><span>'+esc(it.size)+'</span>'+
-              '<input type="number" min="0" inputmode="numeric" class="bulk-input" data-id="'+it.id+'" value="'+(it.stock||0)+'"></div>';
-          }).join('')+
-        '</div>';
-      }).join('')+
-      '</div>'+
-      '<div class="modal-actions"><button class="btn" id="mCancel">취소</button><button class="btn primary" id="mSave">저장</button></div>';
-
-    openModal(html, function(){
-      document.getElementById('mCancel').onclick = closeModal;
-      document.getElementById('mSave').onclick = async function(){
-        var updates = [];
-        document.querySelectorAll('.bulk-input').forEach(function(inp){
-          var id = inp.getAttribute('data-id');
-          var it = items.find(function(x){ return x.id === id; });
-          if (it){
-            var v = parseInt(inp.value, 10);
-            var newStock = isNaN(v) ? 0 : Math.max(0, v);
-            if (newStock !== (it.stock||0)) updates.push({ id: id, stock: newStock });
-            it.stock = newStock;
-          }
-        });
-        closeModal();
-        if (updates.length){
-          try {
-            await apiBulkUpdateStock(updates);
-            showToast('재고를 저장했어요.');
-          } catch(e){
-            console.error('일괄 저장 실패', e);
-            showToast('저장에 실패했어요. 인터넷 연결을 확인해주세요.');
-          }
-        }
-        updateHeaderLowBadge();
-        render();
-      };
-    }, 'wide');
   }
 
   /* ---------- Modal helpers ---------- */
@@ -805,7 +625,6 @@
       try {
         var created = await apiAddItem(catName, val, 0);
         items.push(created);
-        updateHeaderLowBadge();
         render();
         showToast('품목을 추가했어요.');
       } catch(e){
@@ -837,7 +656,6 @@
     confirmModal('품목 삭제', '"'+it.category+' · '+it.size+'" 품목을 삭제할까요? 오늘 카운트도 함께 사라집니다.', '삭제', async function(){
       items = items.filter(function(x){ return x.id !== id; });
       delete counts[id];
-      updateHeaderLowBadge();
       render();
       try {
         await apiDeleteItem(id);
@@ -872,7 +690,6 @@
     confirmModal('그룹 삭제', '"'+catName+'" 그룹과 소속 품목 '+count+'개를 모두 삭제할까요?', '삭제', async function(){
       items.filter(function(x){ return x.category === catName; }).forEach(function(x){ delete counts[x.id]; });
       items = items.filter(function(x){ return x.category !== catName; });
-      updateHeaderLowBadge();
       render();
       try {
         await apiDeleteCategory(catName);
@@ -891,7 +708,6 @@
         try {
           var created = await apiAddItem(catName, sz, 0);
           items.push(created);
-          updateHeaderLowBadge();
           render();
           showToast('새 그룹을 추가했어요.');
         } catch(e){
@@ -1078,11 +894,9 @@
       var catItems = items.filter(function(x){ return x.category === catName; });
       var accent = accentFor(catName);
       var filteredItems = catItems.filter(function(it){
-        var matchesQuery = !query || (it.category+' '+it.size).toLowerCase().indexOf(query) !== -1;
-        var matchesStock = !stockFilterOn || (it.stock||0) <= itemThreshold(it);
-        return matchesQuery && matchesStock;
+        return !query || (it.category+' '+it.size).toLowerCase().indexOf(query) !== -1;
       });
-      if ((query || stockFilterOn) && filteredItems.length === 0) return;
+      if (query && filteredItems.length === 0) return;
       anyMatch = true;
 
       var collapsed = !!collapsedCats[catName];
@@ -1090,8 +904,6 @@
 
       var itemsHtml = filteredItems.map(function(it){
         var c = counts[it.id] || 0;
-        var stock = it.stock||0;
-        var low = stock <= itemThreshold(it);
         return (
           '<div class="item-row" data-id="'+it.id+'">'+
             '<div class="item-main">'+
@@ -1105,13 +917,6 @@
                 '<span class="count-value" id="cv-'+it.id+'">'+c+'</span>'+
                 '<button class="count-btn plus" data-id="'+it.id+'" data-d="1" aria-label="'+esc(it.size)+' 증가">+</button>'+
               '</div>'+
-            '</div>'+
-            '<div class="stock-line">'+
-              '<span class="stock-label">재고</span>'+
-              '<span class="stock-value'+(low?' low':'')+'" id="sv-'+it.id+'">'+stock+'개</span>'+
-              '<span class="low-tag" id="lt-'+it.id+'" style="display:'+(low?'inline-block':'none')+'">부족</span>'+
-              (typeof it.threshold==='number' ? '<span class="threshold-note">기준 '+it.threshold+'개</span>' : '')+
-              '<button class="icon-btn edit-stock" data-id="'+it.id+'" aria-label="재고 수정" title="재고 수정">&#9998;</button>'+
             '</div>'+
           '</div>'
         );
@@ -1135,12 +940,12 @@
       );
     });
 
-    if (!query && !stockFilterOn){
+    if (!query){
       htmlParts.push('<button class="add-category-card" id="addCatBtn">+ 새 그룹 추가</button>');
     }
 
-    if ((query || stockFilterOn) && !anyMatch){
-      var emptyMsg = query ? ('"'+esc(query)+'" 검색 결과가 없어요.') : '재고부족 품목이 없어요.';
+    if (query && !anyMatch){
+      var emptyMsg = '"'+esc(query)+'" 검색 결과가 없어요.';
       listEl.innerHTML = '<div class="empty-state">'+emptyMsg+'</div>';
     } else {
       listEl.innerHTML = htmlParts.join('');
@@ -1157,9 +962,6 @@
     });
     listEl.querySelectorAll('.del-item').forEach(function(btn){
       btn.addEventListener('click', function(){ deleteItem(btn.getAttribute('data-id')); });
-    });
-    listEl.querySelectorAll('.edit-stock').forEach(function(btn){
-      btn.addEventListener('click', function(){ editStock(btn.getAttribute('data-id')); });
     });
     listEl.querySelectorAll('.edit-cat').forEach(function(btn){
       btn.addEventListener('click', function(){ editCategory(btn.getAttribute('data-cat')); });
@@ -1208,7 +1010,6 @@
       var loadedCounts = await getJSON('counts:'+todayKey, true, {});
       counts = loadedCounts || {};
       render();
-      updateHeaderLowBadge();
     } catch(e){
       console.error('자동 새로고침 실패', e);
     } finally {
@@ -1254,27 +1055,14 @@
       items = loadedItems;
     }
 
-    var loadedSettings = await getJSON('settings', true, null);
-    if (loadedSettings && typeof loadedSettings.lowStockThreshold === 'number'){
-      settings = loadedSettings;
-    } else {
-      settings = { lowStockThreshold: 5 };
-      await persistSettings();
-    }
-
     counts = await getJSON('counts:'+todayKey, true, {});
 
     render();
-    updateHeaderLowBadge();
 
     document.getElementById('searchInput').addEventListener('input', render);
     document.getElementById('resetBtn').addEventListener('click', resetToday);
     document.getElementById('historyBtn').addEventListener('click', openHistory);
     document.getElementById('biweekBtn').addEventListener('click', openBiweekStats);
-    document.getElementById('bulkStockBtn').addEventListener('click', openBulkStock);
-    document.getElementById('stockFilterBtn').addEventListener('click', toggleStockFilter);
-    document.getElementById('lowStockBadge').addEventListener('click', toggleStockFilter);
-    document.getElementById('thresholdBtn').addEventListener('click', editThreshold);
     document.getElementById('expandAllBtn').addEventListener('click', function(){
       collapsedCats = {}; render();
     });
