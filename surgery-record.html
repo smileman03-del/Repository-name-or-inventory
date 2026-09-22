@@ -245,7 +245,7 @@
   </div>
 
   <div class="note-box">
-    이 앱은 브라우저에 저장되는 독립 실행형 기록지입니다. 실제 의사랑 EMR과의 자동 연동은 원내 DB 접속 정보 확인 후 추가할 예정입니다.
+    이 앱은 브라우저에 저장되는 독립 실행형 기록지입니다. 실제 의사랑 EMR과의 자동 연동은 원내 DB 접속 정보 확인 후 추가할 예정이며, 현재는 <b>CSV 내보내기</b>로 연계할 수 있습니다.
   </div>
   <div class="note-box warn">
     <b>수술종류별 권장품목(★)은 일반적인 임상 지식을 바탕으로 만든 초안입니다.</b> 실제 저희 병원에서 쓰는 품목·규격과 다를 수 있으니 검토해 주세요. "관리" 탭에서 품목/수술종류를 자유롭게 추가·삭제할 수 있고, 재료기록 작성 화면에서 체크 상태를 그대로 새 권장품목으로 저장할 수도 있습니다.
@@ -1229,7 +1229,7 @@ const DEFAULT_TYPES = [{"code": "ACL", "label": "ACL · 전방십자인대재건
 
       const html = `
         <div style="font-family:'Noto Sans KR',sans-serif;color:${C.ink};width:720px;padding:20px;background:#fff;">
-          <div style="text-align:center;font-size:19px;font-weight:700;margin-bottom:4px;">천안본정형외과 · 수술실 기록지</div>
+          <div style="text-align:center;font-size:19px;font-weight:700;margin-bottom:4px;">천안본정형외과 · 수술재료기록지</div>
           <div style="text-align:center;font-size:10.5px;color:${C.inkSoft};margin-bottom:14px;">문서번호 ${esc(docId)} &nbsp;&nbsp; 출력일 ${esc(now.toLocaleDateString('ko-KR'))}</div>
           <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
             ${sectionRow('■ 환자 정보')}
@@ -1293,7 +1293,7 @@ const DEFAULT_TYPES = [{"code": "ACL", "label": "ACL · 전방십자인대재건
       overlayEl = overlay;
 
       const target = holder.firstElementChild;
-      const filename = `수술실기록지_${data.p_name||'환자'}_${data.s_date||''}.pdf`;
+      const filename = `수술재료기록_${data.p_name||'환자'}_${data.s_date||''}.pdf`;
       const pdfBlob = await html2pdf().set({
         margin: 8,
         filename,
