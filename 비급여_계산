@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<!-- saved from url=(0084)file:///C:/Users/boneo/Desktop/%EB%B9%84%EA%B8%89%EC%97%AC%20%EC%B2%B4%ED%81%AC.html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5F3EF">
+<title>비급여 수술 체크리스트</title>
+<link rel="stylesheet" href="./비급여 수술 체크리스트_files/pretendard.min.css">
+<style>
+:root{--ink:#17191A;--mut:#6E7375;--dim:#9A9FA2;--line:rgba(0,0,0,.07);--acc:#1273a8;--bg:#F5F3EF}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#D8D5D0;font-family:Pretendard,-apple-system,system-ui,sans-serif;color:var(--ink)}
+body{display:flex;justify-content:center;align-items:flex-start}
+#app{display:flex;flex-direction:column;height:100dvh;width:100%;max-width:480px;background:var(--bg);box-shadow:0 0 40px rgba(0,0,0,.18)}
+.hd{flex:none;padding:calc(env(safe-area-inset-top) + 16px) 18px 12px;border-bottom:1px solid rgba(0,0,0,.06)}
+.bd{flex:1;overflow:auto;padding:14px 18px 24px;-webkit-overflow-scrolling:touch}
+.ft{flex:none;padding:12px 18px calc(env(safe-area-inset-bottom) + 14px);background:#fff;border-top:1px solid var(--line);display:flex;align-items:center;gap:14px}
+.h1{font-size:28px;font-weight:700;letter-spacing:-.03em;line-height:1.2}
+.h2{font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.25;margin-top:12px}
+.sub{font-size:12.5px;color:var(--dim);margin-top:7px}
+.link{font-size:15px;font-weight:600;color:var(--acc)}
+.card{background:#fff;border:1px solid var(--line);border-radius:15px;padding:14px 15px}
+.row{display:flex;align-items:center;gap:12px}
+.grow{flex:1;min-width:0}
+.name{font-size:14.5px;font-weight:600;letter-spacing:-.01em;line-height:1.35}
+.meta{font-size:11.5px;color:var(--dim);margin-top:4px;font-family:ui-monospace,Menlo,monospace;word-break:break-all}
+.amt{font-size:14.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.tabs{display:flex;gap:6px;margin-top:13px;overflow:auto}
+.tab{flex:none;padding:7px 12px;border-radius:9px;background:rgba(0,0,0,.05);color:var(--mut);font-size:12.5px;font-weight:500}
+.tab.on{background:var(--ink);color:#fff;font-weight:600}
+.box{width:21px;height:21px;border-radius:7px;border:1.5px solid #C9CDCF;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;font-size:12px;font-weight:700}
+.box.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.stp{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.045);border-radius:8px;padding:5px 9px;font-weight:600;font-size:13px}
+.stp b{min-width:14px;text-align:center;font-variant-numeric:tabular-nums}
+.btn{border-radius:12px;padding:14px 18px;font-size:15px;font-weight:600;text-align:center}
+.btn.p{background:var(--acc);color:#fff}
+.btn.d{background:var(--ink);color:#fff}
+.btn.g{background:rgba(0,0,0,.05);color:#3D4245}
+.dash{border:1.5px dashed #CFD3D5;border-radius:14px;padding:14px;text-align:center;font-size:14px;font-weight:600;color:var(--mut);margin-top:12px}
+input{font-family:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid rgba(0,0,0,.09);border-radius:11px;padding:11px 13px;width:100%;outline:none}
+.st{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--mut);margin-top:9px}
+.dot{width:6px;height:6px;border-radius:50%;background:#c1443a}
+.dot.ok{background:#3f9c5f}
+.list{display:flex;flex-direction:column;gap:9px}
+.warn{background:#fdf1ee;border:1px solid rgba(193,68,58,.35);border-radius:16px;padding:16px}
+.mini{border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;flex:none}
+.hide{display:none}
+</style>
+<style id="claude-agent-animation-styles">
+      @keyframes claude-pulse {
+        0%, 100% { opacity: 0.6; }
+        50% { opacity: 1; }
+      }
+      #claude-agent-glow-border-inner {
+        animation: claude-pulse 2s ease-in-out infinite;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #claude-agent-glow-border-inner {
+          animation: none;
+        }
+      }
+    </style><style id="sx-enhancements-css">
+/* ── 커서: 클릭 가능 요소 전체 ── */
+[data-a], .link, .btn, .dash, .tab, .mini, .stp span { cursor: pointer; user-select: none; }
+input, textarea { cursor: text; user-select: auto; }
+
+/* ── .link (텍스트 링크) 호버 ── */
+.link:hover { opacity: 0.65; }
+
+/* ── .btn 버튼 호버 ── */
+.btn.p:hover { background: #0e5f8a !important; }
+.btn.d:hover { filter: brightness(0.88); }
+.btn.g:hover { background: rgba(0,0,0,.10) !important; }
+
+/* ── .dash (점선 카드 버튼) 호버 ── */
+.dash:hover { background: #EEF2FF; border-color: #93C5FD; color: #1D4ED8; }
+
+/* ── .tab 필터 탭 호버 ── */
+.tab:not(.on):hover { background: rgba(0,0,0,.10); color: var(--ink); }
+
+/* ── .mini 버튼 호버 ── */
+.mini:hover { opacity: 0.78; }
+
+/* ── 수량 스테퍼 −/+ 호버 ── */
+.stp span:hover { background: rgba(0,0,0,.10); border-radius: 4px; padding: 1px 4px; }
+
+/* ── 체크박스(.box) 호버 ── */
+.box:not(.on):hover { border-color: var(--acc) !important; }
+.box.on:hover { opacity: 0.82; }
+
+/* ── 홈 · 세트 카드 호버 ── */
+#app .card.row[data-a="open"]:hover,
+#app .card.row[data-a="catalog"]:hover { background: #F0F4FF; }
+
+/* ── 카탈로그(항목추가) 카드 ── */
+#app .card.row[data-a="add"]:hover,
+#app .card.row[data-a="remove"]:not([data-a="remove"]):hover { background: #F0F4FF !important; }
+#app .card.row[data-a="remove"] { background: #F0FDF4 !important; box-shadow: inset 3px 0 0 #22C55E; }
+#app .card.row[data-a="remove"]:hover { background: #DCFCE7 !important; }
+
+/* ── 관리자 항목 카드 호버 ── */
+#app .card.row[data-a="edititem"]:hover { background: #F5F5FF; }
+
+/* ── listView 카드 안 toggle 영역 호버 ── */
+#app .card [data-a="toggle"]:hover { color: var(--acc); }
+#app .card [data-a="toggle"] .name:hover { color: var(--acc); }
+
+/* ── reviewView 누락 항목 행 호버 ── */
+#app .row[data-a="use"]:hover, #app [data-a="use"]:hover { opacity: 0.82; }
+#app [data-a="skip"]:hover { opacity: 0.78; }
+
+/* ── 수술 배지 ── */
+#sx-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px;
+  background: linear-gradient(90deg,#EEF2FF 0%,#F0F9FF 100%);
+  border-bottom: 1.5px solid #C7D7FD;
+  font-size: 13px;
+}
+</style></head>
+<body>
+<div id="app"><div class="hd"><div class="row"><div class="grow" style="font-size:20px;font-weight:700">항목 추가</div><div class="link" data-a="list">완료</div></div><div id="sx-badge"><span style="color:#6B7280;font-size:12px;font-weight:500">수술 세트</span><span style="font-weight:700;color:#1D4ED8;font-size:15px;margin-left:4px">▸ Suture</span></div><input placeholder="항목명 · 영문 · 관리코드" style="margin-top:12px" value=""><div class="tabs"><div class="tab on" data-a="tab" data-v="전체">전체</div><div class="tab " data-a="tab" data-v="행위료">행위료</div><div class="tab " data-a="tab" data-v="치료재료대">치료재료대</div><div class="tab " data-a="tab" data-v="약제">약제</div></div></div><div class="bd"><div style="font-size:11.5px;color:var(--dim);margin-bottom:10px">80개 결과</div><div class="list"><div class="card row" data-a="add" data-v="HSZ634"><div class="grow"><div class="name">경피적경막외강신경성형술</div><div class="meta">처치 및 수술료  ·  HSZ634</div></div><div class="amt" style="font-size:14px;text-align:right">₩500,000–₩900,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="FSZ084-3"><div class="grow"><div class="name">체외충격파치료</div><div class="meta">처치 및 수술료  ·  FSZ084-3</div></div><div class="amt" style="font-size:14px;text-align:right">₩50,000</div><div class="box on" style="border-radius:8px">✓</div></div><div class="card row" data-a="add" data-v="FSZ084-5"><div class="grow"><div class="name">체외충격파치료 1000R</div><div class="meta">처치 및 수술료  ·  FSZ084-5</div></div><div class="amt" style="font-size:14px;text-align:right">₩50,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="FSZ084-9"><div class="grow"><div class="name">체외충격파치료 OR</div><div class="meta">처치 및 수술료  ·  FSZ084-9</div></div><div class="amt" style="font-size:14px;text-align:right">₩90,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="LCZ246"><div class="grow"><div class="name">허혈성 변형 알부민</div><div class="meta">검사료  ·  LCZ246</div></div><div class="amt" style="font-size:14px;text-align:right">₩66,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="D6620"><div class="grow"><div class="name">SARS-CoV-2 항원검사</div><div class="meta">검사료  ·  D6620</div></div><div class="amt" style="font-size:14px;text-align:right">₩30,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="D1502W-1"><div class="grow"><div class="name">ABO genntyping</div><div class="meta">검사료  ·  D1502W-1</div></div><div class="amt" style="font-size:14px;text-align:right">₩129,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM5102EM"><div class="grow"><div class="name">3M SOFT CLOTH WITH LINER /cm당</div><div class="meta">드레싱 고정류  ·  XBM5102EM</div></div><div class="amt" style="font-size:14px;text-align:right">₩300</div><div class="box on" style="border-radius:8px">✓</div></div><div class="card row" data-a="add" data-v="XK9206119"><div class="grow"><div class="name">에드플렉스-에스아이</div><div class="meta">출혈방지 압박 밴드  ·  XK9206119</div></div><div class="amt" style="font-size:14px;text-align:right">₩3,900</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBK7000JP"><div class="grow"><div class="name">PENKO STN</div><div class="meta">압박용밴드(스토키넷)  ·  XBK7000JP</div></div><div class="amt" style="font-size:14px;text-align:right">₩150,000</div><div class="box on" style="border-radius:8px">✓</div></div><div class="card row" data-a="add" data-v="XBK7000VW"><div class="grow"><div class="name">RAPBAND</div><div class="meta">혈전예방지혈용압박밴드  ·  TKRA  ·  XBK7000VW</div></div><div class="amt" style="font-size:14px;text-align:right">₩290,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBK7111DQ"><div class="grow"><div class="name">PEHAHAFT LATEX FREE</div><div class="meta">자착거즈붕대  ·  1.5''  ·  XBK7111DQ</div></div><div class="amt" style="font-size:14px;text-align:right">₩6,000</div><div class="box on" style="border-radius:8px">✓</div></div><div class="card row" data-a="add" data-v="X100-B"><div class="grow"><div class="name">STACK(Mellet Finger Sprint)</div><div class="meta">손가락부목  ·  X100-B</div></div><div class="amt" style="font-size:14px;text-align:right">₩22,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BM5021AP"><div class="grow"><div class="name">5X7</div><div class="meta">멸균드레싱밴드  ·  BM5021AP</div></div><div class="amt" style="font-size:14px;text-align:right">₩3,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM7100IP"><div class="grow"><div class="name">S-BAND</div><div class="meta">고정밴드(석션_압박용)  ·  XBM7100IP</div></div><div class="amt" style="font-size:14px;text-align:right">₩95,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBC1213OT"><div class="grow"><div class="name">SURGIWRAP</div><div class="meta">냉온찜질기기  ·  XBC1213OT</div></div><div class="amt" style="font-size:14px;text-align:right">₩77,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBK7104JP"><div class="grow"><div class="name">PENKO HEAT WARMER</div><div class="meta">히트워머+자착붕대  ·  XBK7104JP</div></div><div class="amt" style="font-size:14px;text-align:right">₩120,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BK7000GS"><div class="grow"><div class="name">Plio Band</div><div class="meta">풀리오밴드  ·  BK7000GS</div></div><div class="amt" style="font-size:14px;text-align:right">₩67,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BC120JO"><div class="grow"><div class="name">TONIC BAND</div><div class="meta">토닉밴드(지혈대)  ·  BC120JO</div></div><div class="amt" style="font-size:14px;text-align:right">₩120,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM5106XE"><div class="grow"><div class="name">suction&amp;irrgation</div><div class="meta">전동식의료용세정기  ·  XBM5106XE</div></div><div class="amt" style="font-size:14px;text-align:right">₩300,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM5106XE-1"><div class="grow"><div class="name">E21CA-01</div><div class="meta">내시경펌프튜빙셋트  ·  XBM5106XE-1</div></div><div class="amt" style="font-size:14px;text-align:right">₩300,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM3001RQ"><div class="grow"><div class="name">NDA PLUS</div><div class="meta">상처수복치료재료  ·  XBM3001RQ</div></div><div class="amt" style="font-size:14px;text-align:right">₩69,000</div><div class="box on" style="border-radius:8px">✓</div></div><div class="card row" data-a="add" data-v="XBK7100IP"><div class="grow"><div class="name">B-COVER BAND</div><div class="meta">B-Cover 밴드  ·  XBK7100IP</div></div><div class="amt" style="font-size:14px;text-align:right">₩67,000</div><div class="box on" style="border-radius:8px">✓</div></div><div class="card row" data-a="add" data-v="XBM5110BL"><div class="grow"><div class="name">고정, 마커,사이즈</div><div class="meta">BNG fix(밸크로고정)  ·  XBM5110BL</div></div><div class="amt" style="font-size:14px;text-align:right">₩28,500</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BM5102FK"><div class="grow"><div class="name">X-선 차폐</div><div class="meta">RD SCATTER  ·  BM5102FK</div></div><div class="amt" style="font-size:14px;text-align:right">₩90,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM2600VTB"><div class="grow"><div class="name">콜라플레오</div><div class="meta">조직보충제(인대, 건, 근육)/처치수술  ·  0.5cc  ·  XBM2600VTB</div></div><div class="amt" style="font-size:14px;text-align:right">₩180,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM2600VTT"><div class="grow"><div class="name">뉴젠콜(NEW GENCOL A)</div><div class="meta">조직보충제(인대, 건, 근육)/처치수술  ·  1cc  ·  XBM2600VTT</div></div><div class="amt" style="font-size:14px;text-align:right">₩850,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM5301SN10"><div class="grow"><div class="name">COLLATAMP G</div><div class="meta">유착방지제  ·  10*10  ·  XBM5301SN10</div></div><div class="amt" style="font-size:14px;text-align:right">₩960,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM5302VT"><div class="grow"><div class="name">GENTAQ</div><div class="meta">창상피복제  ·  5*5/10*10  ·  XBM5302VT</div></div><div class="amt" style="font-size:14px;text-align:right">₩650,000–₩1,100,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM2000LJ"><div class="grow"><div class="name">ADVAN filim</div><div class="meta">창상피복제  ·  45*60,35*35  ·  XBM2000LJ</div></div><div class="amt" style="font-size:14px;text-align:right">₩120,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM5001GI"><div class="grow"><div class="name">하큐어패치</div><div class="meta">창상피복제  ·  67x34mm  ·  XBM5001GI</div></div><div class="amt" style="font-size:14px;text-align:right">₩90,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="K9205037"><div class="grow"><div class="name">TAP SEAL</div><div class="meta">지혈용 거즈  ·  K9205037</div></div><div class="amt" style="font-size:14px;text-align:right">₩85,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBC0102QT"><div class="grow"><div class="name">BONGENER(0.5cc)</div><div class="meta">인체조직유래 2차 가공뼈등  ·  XBC0102QT</div></div><div class="amt" style="font-size:14px;text-align:right">₩930,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBC0101KJ"><div class="grow"><div class="name">DBM DEMIOS(1~5cc)</div><div class="meta">인체조직유래 2차 가공뼈등  ·  XBC0101KJ</div></div><div class="amt" style="font-size:14px;text-align:right">₩930,000–₩3,300,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBC0106ED"><div class="grow"><div class="name">PENOSS</div><div class="meta">인체조직유래 2차 가공뼈등  ·  XBC0106ED</div></div><div class="amt" style="font-size:14px;text-align:right">₩1,980,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBC0108ED"><div class="grow"><div class="name">X-stick(DBM)</div><div class="meta">인체조직유래 2차 가공뼈등  ·  XBC0108ED</div></div><div class="amt" style="font-size:14px;text-align:right">₩990,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBTS01019A"><div class="grow"><div class="name">3x3㎠</div><div class="meta">Megaderm  ·  XBTS01019A</div></div><div class="amt" style="font-size:14px;text-align:right">₩1,660,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBTS01019B"><div class="grow"><div class="name">3x4㎠</div><div class="meta">Megaderm  ·  XBTS01019B</div></div><div class="amt" style="font-size:14px;text-align:right">₩2,300,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBTS01019C"><div class="grow"><div class="name">4x5㎠</div><div class="meta">Megaderm  ·  XBTS01019C</div></div><div class="amt" style="font-size:14px;text-align:right">₩2,990,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BF0201SH"><div class="grow"><div class="name">L - DISC(일회용발조절식전기수술기용전극)</div><div class="meta">처치 및 수술재료  ·  BF0201SH</div></div><div class="amt" style="font-size:14px;text-align:right">₩1,950,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBJ4801RA"><div class="grow"><div class="name">ST REED</div><div class="meta">처치 및 수술재료  ·  XBJ4801RA</div></div><div class="amt" style="font-size:14px;text-align:right">₩500,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XBM5131JP"><div class="grow"><div class="name">PENKO DF SURGI</div><div class="meta">처치 및 수술재료  ·  XBM5131JP</div></div><div class="amt" style="font-size:14px;text-align:right">₩25,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BJ4801GV"><div class="grow"><div class="name">PEN Cathter ⓒ</div><div class="meta">수술 치료재료대  ·  EDEN EPIDURAL CATHTER  ·  BJ4801GV</div></div><div class="amt" style="font-size:14px;text-align:right">₩1,200,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XA226"><div class="grow"><div class="name">목발</div><div class="meta">치료재료대  ·  XA226</div></div><div class="amt" style="font-size:14px;text-align:right">₩30,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XA227"><div class="grow"><div class="name">석고신발</div><div class="meta">치료재료대  ·  XA227</div></div><div class="amt" style="font-size:14px;text-align:right">₩15,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XA228"><div class="grow"><div class="name">손목보호대 TFCC</div><div class="meta">치료재료대  ·  XA228</div></div><div class="amt" style="font-size:14px;text-align:right">₩30,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XA230"><div class="grow"><div class="name">팔걸이</div><div class="meta">치료재료대  ·  XA230</div></div><div class="amt" style="font-size:14px;text-align:right">₩10,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XA231"><div class="grow"><div class="name">Ultra sling</div><div class="meta">치료재료대  ·  XA231</div></div><div class="amt" style="font-size:14px;text-align:right">₩140,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="XA232"><div class="grow"><div class="name">벨포밴드</div><div class="meta">치료재료대  ·  XA232</div></div><div class="amt" style="font-size:14px;text-align:right">₩15,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BC1271SI"><div class="grow"><div class="name">Kenny Howard</div><div class="meta">치료재료대  ·  BC1271SI</div></div><div class="amt" style="font-size:14px;text-align:right">₩140,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BC1201VY"><div class="grow"><div class="name">Corset</div><div class="meta">치료재료대  ·  BC1201VY</div></div><div class="amt" style="font-size:14px;text-align:right">₩42,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BC1260YF"><div class="grow"><div class="name">소프트칼라</div><div class="meta">치료재료대  ·  BC1260YF</div></div><div class="amt" style="font-size:14px;text-align:right">₩15,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BC1208OR"><div class="grow"><div class="name">필라델피아</div><div class="meta">치료재료대  ·  BC1208OR</div></div><div class="amt" style="font-size:14px;text-align:right">₩80,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BM5008LJ 3ml"><div class="grow"><div class="name">MICRODYN PREP</div><div class="meta">치료재료대  ·  3ML  ·  BM5008LJ 3ml</div></div><div class="amt" style="font-size:14px;text-align:right">₩30,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="BM5008LJ"><div class="grow"><div class="name">MICRODYN PREP</div><div class="meta">치료재료대  ·  26ML  ·  BM5008LJ</div></div><div class="amt" style="font-size:14px;text-align:right">₩60,000</div><div class="box on" style="border-radius:8px">✓</div></div><div class="card row" data-a="add" data-v="BK7000MS"><div class="grow"><div class="name">MST 압박용스타키넷</div><div class="meta">치료재료대  ·  BK7000MS</div></div><div class="amt" style="font-size:14px;text-align:right">₩30,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="643601510"><div class="grow"><div class="name">제놀쿨카타플라스마 (녹십자상아)</div><div class="meta">약제  ·  643601510</div></div><div class="amt" style="font-size:14px;text-align:right">₩3,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="659900090"><div class="grow"><div class="name">스티몰액 (한국팜비오)</div><div class="meta">약제  ·  659900090</div></div><div class="amt" style="font-size:14px;text-align:right">₩30,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="659900340"><div class="grow"><div class="name">아큐판주사액</div><div class="meta">약제  ·  659900340</div></div><div class="amt" style="font-size:14px;text-align:right">₩15,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="645102113-B"><div class="grow"><div class="name">아르믹스주</div><div class="meta">약제  ·  645102113-B</div></div><div class="amt" style="font-size:14px;text-align:right">₩85,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="W669904600"><div class="grow"><div class="name">리포라제주</div><div class="meta">약제  ·  W669904600</div></div><div class="amt" style="font-size:14px;text-align:right">₩70,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="W651601530"><div class="grow"><div class="name">퓨리랙스</div><div class="meta">약제  ·  W651601530</div></div><div class="amt" style="font-size:14px;text-align:right">₩150,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="X622900010"><div class="grow"><div class="name">카티스템(CATISTEM) 1.5ml vial</div><div class="meta">약제  ·  X622900010</div></div><div class="amt" style="font-size:14px;text-align:right">₩9,600,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="670600790"><div class="grow"><div class="name">고단위비타민</div><div class="meta">약제 메리트씨주사  ·  670600790</div></div><div class="amt" style="font-size:14px;text-align:right">₩30,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="WQ60218024"><div class="grow"><div class="name">독감 지씨플루프리실린</div><div class="meta">약제  ·  WQ60218024</div></div><div class="amt" style="font-size:14px;text-align:right">₩35,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="X675100010"><div class="grow"><div class="name">인스트라젤</div><div class="meta">약제  ·  X675100010</div></div><div class="amt" style="font-size:14px;text-align:right">₩45,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="D652903290"><div class="grow"><div class="name">알리버(현탁액)</div><div class="meta">약제  ·  D652903290</div></div><div class="amt" style="font-size:14px;text-align:right">₩3,500</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="W647801080"><div class="grow"><div class="name">타우로린주(250ml)</div><div class="meta">약제  ·  W647801080</div></div><div class="amt" style="font-size:14px;text-align:right">₩170,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="D654801000"><div class="grow"><div class="name">안티라제정</div><div class="meta">약제  ·  D654801000</div></div><div class="amt" style="font-size:14px;text-align:right">₩600</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="W655404371"><div class="grow"><div class="name">슈가메덱스나트륨</div><div class="meta">약제  ·  W655404371</div></div><div class="amt" style="font-size:14px;text-align:right">₩250,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="W671705671"><div class="grow"><div class="name">멀티포텐9주</div><div class="meta">약제  ·  W671705671</div></div><div class="amt" style="font-size:14px;text-align:right">₩60,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="D654205212"><div class="grow"><div class="name">나바론크림 38g</div><div class="meta">약제  ·  D654205212</div></div><div class="amt" style="font-size:14px;text-align:right">₩10,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="D564205211"><div class="grow"><div class="name">나바론크림 75g</div><div class="meta">약제  ·  D564205211</div></div><div class="amt" style="font-size:14px;text-align:right">₩16,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="654802250-B"><div class="grow"><div class="name">비엠하이디주</div><div class="meta">약제  ·  654802250-B</div></div><div class="amt" style="font-size:14px;text-align:right">₩40,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="641100431"><div class="grow"><div class="name">네비도주사바이알</div><div class="meta">약제  ·  4ml  ·  641100431</div></div><div class="amt" style="font-size:14px;text-align:right">₩290,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="WLIPO00001"><div class="grow"><div class="name">리포타손주</div><div class="meta">약제  ·  4mg  ·  WLIPO00001</div></div><div class="amt" style="font-size:14px;text-align:right">₩80,000</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="647802340"><div class="grow"><div class="name">트레스탄캡슐</div><div class="meta">약제  ·  647802340</div></div><div class="amt" style="font-size:14px;text-align:right">₩900</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="W645104103"><div class="grow"><div class="name">멸균생리식염 kit</div><div class="meta">약제  ·  110ml  ·  W645104103</div></div><div class="amt" style="font-size:14px;text-align:right">₩10,500</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="645104511"><div class="grow"><div class="name">멸균생리식염 syringe</div><div class="meta">약제  ·  10ml  ·  645104511</div></div><div class="amt" style="font-size:14px;text-align:right">₩2,500</div><div class="box " style="border-radius:8px"></div></div><div class="card row" data-a="add" data-v="W650304561"><div class="grow"><div class="name">프로제아㈜시린지</div><div class="meta">약제  ·  0.3mg  ·  W650304561</div></div><div class="amt" style="font-size:14px;text-align:right">₩90,000</div><div class="box " style="border-radius:8px"></div></div></div></div></div>
+<script id="jcatalog" type="application/json">[{"c":"HSZ634","s":"행위료","g":"처치 및 수술료","n":"경피적경막외강신경성형술","e":"","p":700000,"lo":500000,"hi":900000},{"c":"FSZ084-3","s":"행위료","g":"처치 및 수술료","n":"체외충격파치료","e":"","p":50000,"lo":0,"hi":0},{"c":"FSZ084-5","s":"행위료","g":"처치 및 수술료","n":"체외충격파치료 1000R","e":"","p":50000,"lo":0,"hi":0},{"c":"FSZ084-9","s":"행위료","g":"처치 및 수술료","n":"체외충격파치료 OR","e":"","p":90000,"lo":0,"hi":0},{"c":"LCZ246","s":"행위료","g":"검사료","n":"허혈성 변형 알부민","e":"","p":66000,"lo":0,"hi":0},{"c":"D6620","s":"행위료","g":"검사료","n":"SARS-CoV-2 항원검사","e":"","p":30000,"lo":0,"hi":0},{"c":"D1502W-1","s":"행위료","g":"검사료","n":"ABO genntyping","e":"","p":129000,"lo":0,"hi":0},{"c":"XBM5102EM","s":"치료재료대","g":"드레싱 고정류","n":"3M SOFT CLOTH WITH LINER /cm당","e":"","p":300,"lo":0,"hi":0},{"c":"XK9206119","s":"치료재료대","g":"출혈방지 압박 밴드","n":"에드플렉스-에스아이","e":"","p":3900,"lo":0,"hi":0},{"c":"XBK7000JP","s":"치료재료대","g":"압박용밴드(스토키넷)","n":"PENKO STN","e":"","p":150000,"lo":0,"hi":0},{"c":"XBK7000VW","s":"치료재료대","g":"혈전예방지혈용압박밴드","n":"RAPBAND","e":"TKRA","p":290000,"lo":0,"hi":0},{"c":"XBK7111DQ","s":"치료재료대","g":"자착거즈붕대","n":"PEHAHAFT LATEX FREE","e":"1.5''","p":6000,"lo":0,"hi":0},{"c":"X100-B","s":"치료재료대","g":"손가락부목","n":"STACK(Mellet Finger Sprint)","e":"","p":22000,"lo":0,"hi":0},{"c":"BM5021AP","s":"치료재료대","g":"멸균드레싱밴드","n":"5X7","e":"","p":3000,"lo":0,"hi":0},{"c":"XBM7100IP","s":"치료재료대","g":"고정밴드(석션_압박용)","n":"S-BAND","e":"","p":95000,"lo":0,"hi":0},{"c":"XBC1213OT","s":"치료재료대","g":"냉온찜질기기","n":"SURGIWRAP","e":"","p":77000,"lo":0,"hi":0},{"c":"XBK7104JP","s":"치료재료대","g":"히트워머+자착붕대","n":"PENKO HEAT WARMER","e":"","p":120000,"lo":0,"hi":0},{"c":"BK7000GS","s":"치료재료대","g":"풀리오밴드","n":"Plio Band","e":"","p":67000,"lo":0,"hi":0},{"c":"BC120JO","s":"치료재료대","g":"토닉밴드(지혈대)","n":"TONIC BAND","e":"","p":120000,"lo":0,"hi":0},{"c":"XBM5106XE","s":"치료재료대","g":"전동식의료용세정기","n":"suction&irrgation","e":"","p":300000,"lo":0,"hi":0},{"c":"XBM5106XE-1","s":"치료재료대","g":"내시경펌프튜빙셋트","n":"E21CA-01","e":"","p":300000,"lo":0,"hi":0},{"c":"XBM3001RQ","s":"치료재료대","g":"상처수복치료재료","n":"NDA PLUS","e":"","p":69000,"lo":0,"hi":0},{"c":"XBK7100IP","s":"치료재료대","g":"B-Cover 밴드","n":"B-COVER BAND","e":"","p":67000,"lo":0,"hi":0},{"c":"XBM5110BL","s":"치료재료대","g":"BNG fix(밸크로고정)","n":"고정, 마커,사이즈","e":"","p":28500,"lo":0,"hi":0},{"c":"BM5102FK","s":"치료재료대","g":"RD SCATTER","n":"X-선 차폐","e":"","p":90000,"lo":0,"hi":0},{"c":"XBM2600VTB","s":"치료재료대","g":"조직보충제(인대, 건, 근육)/처치수술","n":"콜라플레오","e":"0.5cc","p":180000,"lo":0,"hi":0},{"c":"XBM2600VTT","s":"치료재료대","g":"조직보충제(인대, 건, 근육)/처치수술","n":"뉴젠콜(NEW GENCOL A)","e":"1cc","p":850000,"lo":0,"hi":0},{"c":"XBM5301SN10","s":"치료재료대","g":"유착방지제","n":"COLLATAMP G","e":"10*10","p":960000,"lo":0,"hi":0},{"c":"XBM5302VT","s":"치료재료대","g":"창상피복제","n":"GENTAQ","e":"5*5/10*10","p":650000,"lo":650000,"hi":1100000},{"c":"XBM2000LJ","s":"치료재료대","g":"창상피복제","n":"ADVAN filim","e":"45*60,35*35","p":120000,"lo":0,"hi":0},{"c":"XBM5001GI","s":"치료재료대","g":"창상피복제","n":"하큐어패치","e":"67x34mm","p":90000,"lo":0,"hi":0},{"c":"K9205037","s":"치료재료대","g":"지혈용 거즈","n":"TAP SEAL","e":"","p":85000,"lo":0,"hi":0},{"c":"XBC0102QT","s":"치료재료대","g":"인체조직유래 2차 가공뼈등","n":"BONGENER(0.5cc)","e":"","p":930000,"lo":0,"hi":0},{"c":"XBC0101KJ","s":"치료재료대","g":"인체조직유래 2차 가공뼈등","n":"DBM DEMIOS(1~5cc)","e":"","p":1450000,"lo":930000,"hi":3300000},{"c":"XBC0106ED","s":"치료재료대","g":"인체조직유래 2차 가공뼈등","n":"PENOSS","e":"","p":1980000,"lo":0,"hi":0},{"c":"XBC0108ED","s":"치료재료대","g":"인체조직유래 2차 가공뼈등","n":"X-stick(DBM)","e":"","p":990000,"lo":0,"hi":0},{"c":"XBTS01019A","s":"치료재료대","g":"Megaderm","n":"3x3㎠","e":"","p":1660000,"lo":0,"hi":0},{"c":"XBTS01019B","s":"치료재료대","g":"Megaderm","n":"3x4㎠","e":"","p":2300000,"lo":0,"hi":0},{"c":"XBTS01019C","s":"치료재료대","g":"Megaderm","n":"4x5㎠","e":"","p":2990000,"lo":0,"hi":0},{"c":"BF0201SH","s":"치료재료대","g":"처치 및 수술재료","n":"L - DISC(일회용발조절식전기수술기용전극)","e":"","p":1950000,"lo":0,"hi":0},{"c":"XBJ4801RA","s":"치료재료대","g":"처치 및 수술재료","n":"ST REED","e":"","p":500000,"lo":0,"hi":0},{"c":"XBM5131JP","s":"치료재료대","g":"처치 및 수술재료","n":"PENKO DF SURGI","e":"","p":25000,"lo":0,"hi":0},{"c":"BJ4801GV","s":"치료재료대","g":"수술 치료재료대","n":"PEN Cathter ⓒ","e":"EDEN EPIDURAL CATHTER","p":1200000,"lo":0,"hi":0},{"c":"BM5008LJ","s":"치료재료대","g":"처치 및 수술재료","n":"MICRODYN PREP","e":"3ml","p":30000,"lo":0,"hi":0},{"c":"XA226","s":"치료재료대","g":"치료재료대","n":"목발","e":"","p":30000,"lo":0,"hi":0},{"c":"XA227","s":"치료재료대","g":"치료재료대","n":"석고신발","e":"","p":15000,"lo":0,"hi":0},{"c":"XA228","s":"치료재료대","g":"치료재료대","n":"손목보호대 TFCC","e":"","p":30000,"lo":0,"hi":0},{"c":"XA230","s":"치료재료대","g":"치료재료대","n":"팔걸이","e":"","p":10000,"lo":0,"hi":0},{"c":"XA231","s":"치료재료대","g":"치료재료대","n":"Ultra sling","e":"","p":140000,"lo":0,"hi":0},{"c":"XA232","s":"치료재료대","g":"치료재료대","n":"벨포밴드","e":"","p":15000,"lo":0,"hi":0},{"c":"BC1271SI","s":"치료재료대","g":"치료재료대","n":"Kenny Howard","e":"","p":140000,"lo":0,"hi":0},{"c":"BC1201VY","s":"치료재료대","g":"치료재료대","n":"Corset","e":"","p":42000,"lo":0,"hi":0},{"c":"BC1260YF","s":"치료재료대","g":"치료재료대","n":"소프트칼라","e":"","p":15000,"lo":0,"hi":0},{"c":"BC1208OR","s":"치료재료대","g":"치료재료대","n":"필라델피아","e":"","p":80000,"lo":0,"hi":0},{"c":"BM5008LJ-26","s":"치료재료대","g":"치료재료대","n":"MICRODYN PREP","e":"26ML","p":60000,"lo":0,"hi":0},{"c":"BK7000MS","s":"치료재료대","g":"치료재료대","n":"MST 압박용스타키넷","e":"","p":30000,"lo":50000,"hi":0},{"c":"643601510","s":"약제","g":"약제","n":"제놀쿨카타플라스마 (녹십자상아)","e":"","p":3000,"lo":0,"hi":0},{"c":"659900090","s":"약제","g":"약제","n":"스티몰액 (한국팜비오)","e":"","p":30000,"lo":0,"hi":0},{"c":"659900340","s":"약제","g":"약제","n":"아큐판주사액","e":"","p":15000,"lo":0,"hi":0},{"c":"645102113-B","s":"약제","g":"약제","n":"아르믹스주","e":"","p":85000,"lo":0,"hi":0},{"c":"W669904600","s":"약제","g":"약제","n":"리포라제주","e":"","p":70000,"lo":0,"hi":0},{"c":"W651601530","s":"약제","g":"약제","n":"퓨리랙스","e":"","p":150000,"lo":0,"hi":0},{"c":"X622900010","s":"약제","g":"약제","n":"카티스템(CATISTEM) 1.5ml vial","e":"","p":9600000,"lo":0,"hi":0},{"c":"670600790","s":"약제","g":"약제 메리트씨주사 ","n":"고단위비타민","e":"","p":30000,"lo":0,"hi":0},{"c":"WQ60218024","s":"약제","g":"약제","n":"독감 지씨플루프리실린","e":"","p":35000,"lo":0,"hi":0},{"c":"X675100010","s":"약제","g":"약제","n":"인스트라젤","e":"","p":45000,"lo":0,"hi":0},{"c":"D652903290","s":"약제","g":"약제","n":"알리버(현탁액)","e":"","p":3500,"lo":0,"hi":0},{"c":"W647801080","s":"약제","g":"약제","n":"타우로린주(250ml)","e":"","p":170000,"lo":0,"hi":0},{"c":"D654801000","s":"약제","g":"약제","n":"안티라제정","e":"","p":600,"lo":0,"hi":0},{"c":"W655404371","s":"약제","g":"약제","n":"슈가메덱스나트륨","e":"","p":250000,"lo":0,"hi":0},{"c":"W671705671","s":"약제","g":"약제","n":"멀티포텐9주","e":"","p":60000,"lo":0,"hi":0},{"c":"D654205212","s":"약제","g":"약제","n":"나바론크림 38g","e":"","p":10000,"lo":0,"hi":0},{"c":"D564205211","s":"약제","g":"약제","n":"나바론크림 75g","e":"","p":16000,"lo":0,"hi":0},{"c":"654802250-B","s":"약제","g":"약제","n":"비엠하이디주","e":"","p":40000,"lo":0,"hi":0},{"c":"641100431","s":"약제","g":"약제","n":"네비도주사바이알","e":"4ml","p":290000,"lo":0,"hi":0},{"c":"WLIPO00001","s":"약제","g":"약제","n":"리포타손주","e":"4mg","p":80000,"lo":0,"hi":0},{"c":"647802340","s":"약제","g":"약제","n":"트레스탄캡슐","e":"","p":900,"lo":0,"hi":0},{"c":"W645104103","s":"약제","g":"약제","n":"멸균생리식염 kit","e":"110ml","p":10500,"lo":0,"hi":0},{"c":"645104511","s":"약제","g":"약제","n":"멸균생리식염 syringe","e":"10ml","p":2500,"lo":0,"hi":0},{"c":"W650304561","s":"약제","g":"약제","n":"프로제아㈜시린지","e":"0.3mg","p":90000,"lo":0,"hi":0},{"c":"W6455604001","s":"약제","g":"약제","n":"노트롬액(시약)","e":"","p":50000,"lo":0,"hi":0},{"c":"681800016-B","s":"약제","g":"약제","n":"박티그라(픽스)","e":"10x10","p":7000,"lo":0,"hi":0}]</script>
+<script id="jsets" type="application/json">[{"name":"경막외 신경성형술 (PEN)","note":"통증클리닉 · 당일 (추정)","codes":["HSZ634","BJ4801GV","BM5008LJ","WLIPO00001"]},{"name":"어깨 관절경","note":"전신마취 · 입원 (추정)","codes":["XA231","XBC1213OT","XBK7100IP","XBM3001RQ","W655404371"]},{"name":"무릎 관절경 · 반월상연골","note":"전신/척추마취 (추정)","codes":["XBK7000VW","BK7000GS","XBM2600VTB","W655404371"]},{"name":"척추 유합 · 골이식","note":"입원 · 골대체재 포함 (추정)","codes":["XBC0101KJ","XBC0102QT","K9205037","BC1201VY","W655404371"]},{"name":"골절 처치 · 캐스트","note":"외래 · 당일 (추정)","codes":["XA226","XA227","XA230","XBK7111DQ","XA232"]}]</script>
+<script>
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwckGyr7yebJHe5QOWsFYgHQ6E8oab4wv5oeU7ppaoOo_v3IyyrxYSeADb0JRdE2c04/exec";
+var BASIS = "2026.08.21 공시";
+
+var CAT = JSON.parse(document.getElementById("jcatalog").textContent);
+var SETS = JSON.parse(document.getElementById("jsets").textContent);
+var S = { screen:"home", title:"", list:[], qty:{}, amt:{}, base:[], tab:"전체", q:"", online:false, patient:"", staff:"", msg:"", edit:false, pin:"", form:null, aq:"", dup:[] };
+
+try {
+  var cc = localStorage.getItem("bg_cat"); if (cc) CAT = JSON.parse(cc);
+  var cs = localStorage.getItem("bg_sets"); if (cs) SETS = JSON.parse(cs);
+  S.staff = localStorage.getItem("bg_staff") || "";
+} catch (e) {}
+try { S.dup = checkDupCodes(); } catch (e) {}
+function api(action, payload) {
+  if (!SCRIPT_URL || SCRIPT_URL === "SCRIPT_URL_HERE") return Promise.reject("URL 미설정");
+  var u = SCRIPT_URL + "?action=" + action;
+  if (payload) u += "&payload=" + encodeURIComponent(JSON.stringify(payload));
+  return fetch(u).then(function (r) { return r.json(); }).then(function (j) {
+    if (!j.ok) throw new Error(j.error); return j.data;
+  });
+}
+function checkDupCodes() {
+  var seen = {}, dup = {};
+  CAT.forEach(function (i) {
+    if (seen[i.c]) dup[i.c] = true; else seen[i.c] = true;
+  });
+  return Object.keys(dup);
+}
+function sync() {
+  api("all").then(function (d) {
+    if (d.catalog && d.catalog.length) { CAT = d.catalog; localStorage.setItem("bg_cat", JSON.stringify(CAT)); }
+    if (d.sets) { SETS = d.sets; localStorage.setItem("bg_sets", JSON.stringify(SETS)); }
+    S.online = true; S.dup = checkDupCodes(); render();
+  }).catch(function () { S.online = false; S.dup = checkDupCodes(); render(); });
+}
+
+function won(n) { return "₩" + Math.round(n || 0).toLocaleString("ko-KR"); }
+function item(c) { for (var i = 0; i < CAT.length; i++) if (CAT[i].c === c) return CAT[i]; return null; }
+function unit(i) { var v = S.amt[i.c]; return (v === undefined || v === "" || isNaN(+v)) ? i.p : +v; }
+function picked() { return S.list.filter(function (c) { return S.qty[c] > 0; }); }
+function total() { return picked().reduce(function (a, c) { var i = item(c); return a + (i ? unit(i) * S.qty[c] : 0); }, 0); }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (m) { return ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" })[m]; }); }
+function el(html) { var d = document.createElement("div"); d.innerHTML = html; return d.firstElementChild; }
+
+function openSet(s) {
+  S.title = s.name; S.list = s.codes.slice(); S.base = s.codes.slice();
+  S.qty = {}; s.codes.forEach(function (c) { S.qty[c] = 1; });
+  S.amt = {}; S.tab = "전체"; S.msg = ""; S.screen = "list"; render();
+}
+
+/* ---------- screens ---------- */
+function homeView() {
+  var v = el('<div id="app"><div class="bd" style="padding-top:calc(env(safe-area-inset-top) + 28px)"></div></div>');
+  var b = v.querySelector(".bd");
+  b.appendChild(el('<div class="h1">비급여 계산기</div>'));  b.appendChild(el('<div class="st"><span class="dot ' + (S.online ? "ok" : "") + '"></span>' +
+    (S.online ? "실시간 연결됨 · " : "오프라인(저장본) · ") + esc(BASIS) + " 기준 · " + CAT.length + '개 항목 <span class="link" data-a="sync">새로고침</span></div>'));
+
+  if (S.dup && S.dup.length) {
+    b.appendChild(el('<div class="warn" style="margin-top:14px"><div style="font-size:14.5px;font-weight:700;color:#a5382e">관리코드 중복 ' + S.dup.length + '건 발견</div>' +
+      '<div style="font-size:12.5px;color:#8a5049;margin-top:5px;line-height:1.6">아래 관리코드를 여러 항목이 함께 쓰고 있어, 하나를 체크하면 같은 코드의 다른 항목도 같이 체크됩니다. \'관리자 · 항목 관리\'에서 중복 항목의 관리코드를 서로 다르게 바꿔주세요.</div>' +
+      '<div style="font-size:12px;font-family:ui-monospace,Menlo,monospace;color:#a5382e;margin-top:9px;font-weight:600">' + S.dup.map(esc).join(", ") + "</div></div>"));
+  }
+
+  var srch = el('<div class="card row" style="margin-top:16px" data-a="catalog"><span style="width:15px;height:15px;border-radius:50%;border:2px solid #A9AEB1"></span><span style="color:#9A9FA2;font-size:15px">항목 · 관리코드 검색</span></div>');
+  b.appendChild(srch);
+
+  b.appendChild(el('<div class="row" style="margin:26px 0 12px"><div class="grow" style="font-size:17px;font-weight:700">수술 세트</div>' +
+    '<div class="link" style="font-size:13px" data-a="edit">' + (S.edit ? "완료" : "편집") + '</div></div>'));
+  var list = el('<div class="list"></div>');
+  SETS.forEach(function (s, idx) {
+    var sum = s.codes.reduce(function (a, c) { var i = item(c); return a + (i ? i.p : 0); }, 0);
+    var card = el('<div class="card row"' + (S.edit ? "" : ' data-a="open" data-i="' + idx + '"') + '>' +
+      (S.edit ? '<div class="mini" style="background:#fdf1ee;color:#a5382e" data-a="delset" data-i="' + idx + '">삭제</div>' : "") +
+      '<div class="grow"><div class="name" style="font-size:16px">' + esc(s.name) + '</div>' +
+      '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">' + esc(s.note) + ' · ' + s.codes.length + '개 항목</div></div>' +
+      '<div style="text-align:right"><div class="amt" style="color:#0f5f8c">' + won(sum) + '</div>' +
+      '<div style="font-size:11px;color:#A9AEB1;margin-top:3px">전체 사용 시</div></div></div>');
+    list.appendChild(card);
+  });
+  b.appendChild(list);
+  b.appendChild(el('<div class="dash" data-a="newset">＋ 새 세트 만들기</div>'));
+  if (!S.online) b.appendChild(el('<div style="font-size:12px;color:var(--dim);margin-top:18px;line-height:1.6">구글 시트에 연결되지 않아 마지막으로 받은 가격표로 동작 중입니다. 저장은 연결 후 가능합니다.</div>'));
+  b.appendChild(el('<div style="text-align:center;margin-top:26px;font-size:13px;font-weight:600;color:var(--dim)" data-a="admin">관리자 · 항목 관리</div>'));
+  return v;
+}
+
+function listView() {
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div><div class="ft"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd"), f = v.querySelector(".ft");
+  h.appendChild(el('<div class="row"><div class="grow link" data-a="home">← 세트</div><div class="link" style="font-size:13px" data-a="edit">' + (S.edit ? "완료" : "항목 삭제") + '</div></div>'));
+  h.appendChild(el('<div class="h2">' + esc(S.title || "새 체크리스트") + "</div>"));
+  var tabs = el('<div class="tabs"></div>');
+  ["전체", "행위료", "치료재료대", "약제"].forEach(function (t) {
+    tabs.appendChild(el('<div class="tab ' + (S.tab === t ? "on" : "") + '" data-a="tab" data-v="' + t + '">' + t + "</div>"));
+  });
+  h.appendChild(tabs);
+
+  var list = el('<div class="list"></div>');
+  S.list.forEach(function (c) {
+    var i = item(c); if (!i) return;
+    if (S.tab !== "전체" && i.s !== S.tab) return;
+    var n = S.qty[c] || 0, rng = i.lo && i.hi;
+    var card = el('<div class="card">' +
+      '<div class="row" style="align-items:flex-start">' +
+        '<div class="box ' + (n > 0 ? "on" : "") + '" data-a="toggle" data-v="' + c + '">✓</div>' +
+        (S.edit ? '<div class="mini" style="background:#fdf1ee;color:#a5382e" data-a="remove" data-v="' + c + '">삭제</div>' : "") +
+        '<div class="grow" data-a="toggle" data-v="' + c + '"><div class="name">' + esc(i.n) + '</div>' +
+          '<div class="meta">' + esc([i.s, i.e, i.c].filter(Boolean).join("  ·  ")) + "</div>" +
+          (rng ? '<div style="font-size:11.5px;font-weight:500;color:#b06a1f;margin-top:5px">범위 ' + won(i.lo) + "–" + won(i.hi) + " · 실제 금액 입력</div>" : "") +
+        "</div>" +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">' +
+          '<div class="amt">' + won(unit(i) * (n || 1)) + "</div>" +
+          (n > 0 ? '<div class="stp"><span data-a="dec" data-v="' + c + '">−</span><b>' + n + '</b><span data-a="inc" data-v="' + c + '">＋</span></div>' : "") +
+        "</div>" +
+      "</div>" +
+      (rng && n > 0 ? '<div class="row" style="margin-top:11px;padding-top:11px;border-top:1px solid rgba(0,0,0,.06)">' +
+        '<span style="font-size:12px;color:var(--mut)">단가</span>' +
+        '<input inputmode="numeric" data-a="amt" data-v="' + c + '" value="' + esc(S.amt[c] === undefined ? i.p : S.amt[c]) + '" style="text-align:right;font-weight:600">' +
+        '<span style="font-size:12px;color:var(--mut)">원</span></div>' : "") +
+      "</div>");
+    list.appendChild(card);
+  });
+  b.appendChild(list);
+  b.appendChild(el('<div class="dash" data-a="catalog">＋ 항목 추가</div>'));
+
+  f.appendChild(el('<div class="grow"><div style="font-size:11.5px;color:var(--dim)">선택 ' + picked().length + '건 합계</div>' +
+    '<div style="font-size:24px;font-weight:700;letter-spacing:-.02em;margin-top:5px;font-variant-numeric:tabular-nums">' + won(total()) + "</div></div>"));
+  if (picked().length) f.appendChild(el('<div class="btn g" style="padding:14px 15px" data-a="explain">환자 설명</div>'));
+  f.appendChild(el('<div class="btn p" data-a="review">수술 종료</div>'));
+  return v;
+}
+
+function explainView() {
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd");
+  h.appendChild(el('<div class="row"><div class="grow link" data-a="list">← 돌아가기</div></div>'));
+  b.appendChild(el('<div style="font-size:12.5px;font-weight:700;color:var(--acc);letter-spacing:.02em;margin-top:6px">비급여 안내</div>'));
+  b.appendChild(el('<div style="font-size:25px;font-weight:700;margin-top:6px;letter-spacing:-.02em;line-height:1.3">' + esc(S.title || "이번 수술") + "</div>"));
+  b.appendChild(el('<div style="font-size:13.5px;color:var(--mut);margin-top:8px;line-height:1.5">이 수술에서 사용된 비급여 항목과 예상 금액입니다.</div>'));
+
+  if (!picked().length) {
+    b.appendChild(el('<div class="dash" style="margin-top:24px">체크된 항목이 없습니다</div>'));
+    return v;
+  }
+
+  var list = el('<div class="list" style="margin-top:24px;gap:0"></div>');
+  picked().forEach(function (c) {
+    var i = item(c); if (!i) return;
+    var n = S.qty[c];
+    list.appendChild(el('<div style="padding:14px 0;border-bottom:1px solid rgba(0,0,0,.07)">' +
+      '<div class="row" style="align-items:flex-start"><div class="grow" style="font-size:17px;font-weight:600;line-height:1.4">' +
+        esc(i.n) + (n > 1 ? ' <span style="color:var(--dim);font-weight:500;font-size:14px">×' + n + "</span>" : "") + "</div>" +
+      '<div style="font-size:18px;font-weight:700;white-space:nowrap;margin-left:12px;font-variant-numeric:tabular-nums">' + won(unit(i) * n) + "</div></div>" +
+      (i.e ? '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">' + esc(i.e) + "</div>" : "") +
+      "</div>"));
+  });
+  b.appendChild(list);
+
+  b.appendChild(el('<div class="row" style="margin-top:6px;padding-top:16px;border-top:2px solid var(--ink)">' +
+    '<div class="grow" style="font-size:16px;font-weight:700">총 비급여 예상 금액</div>' +
+    '<div style="font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums">' + won(total()) + "</div></div>"));
+  b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-top:20px;line-height:1.7">' + esc(BASIS) +
+    ' 단가 기준입니다. 실제 청구 금액은 수술 중 사용량에 따라 달라질 수 있습니다.</div>'));
+  return v;
+}
+
+function catalogView() {
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd");
+  h.appendChild(el('<div class="row"><div class="grow" style="font-size:20px;font-weight:700">항목 추가</div><div class="link" data-a="list">완료</div></div>'));
+  var inp = el('<input placeholder="항목명 · 영문 · 관리코드" style="margin-top:12px" value="' + esc(S.q) + '">');
+  inp.addEventListener("input", function (e) { S.q = e.target.value; renderResults(b); });
+  h.appendChild(inp);
+  var tabs = el('<div class="tabs"></div>');
+  ["전체", "행위료", "치료재료대", "약제"].forEach(function (t) {
+    tabs.appendChild(el('<div class="tab ' + (S.tab === t ? "on" : "") + '" data-a="tab" data-v="' + t + '">' + t + "</div>"));
+  });
+  h.appendChild(tabs);
+  renderResults(b);
+  setTimeout(function () { if (S.q === "") inp.focus(); }, 60);
+  return v;
+}
+function renderResults(b) {
+  b.innerHTML = "";
+  var q = S.q.trim().toLowerCase();
+  var res = CAT.filter(function (i) { return S.tab === "전체" || i.s === S.tab; })
+    .filter(function (i) { return !q || (i.n + " " + i.e + " " + i.c + " " + i.g).toLowerCase().indexOf(q) >= 0; })
+    .slice(0, 80);
+  b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-bottom:10px">' + res.length + "개 결과</div>"));
+  var list = el('<div class="list"></div>');
+  res.forEach(function (i) {
+    var on = S.qty[i.c] > 0;
+    list.appendChild(el('<div class="card row" data-a="add" data-v="' + i.c + '">' +
+      '<div class="grow"><div class="name">' + esc(i.n) + '</div><div class="meta">' + esc([i.g, i.e, i.c].filter(Boolean).join("  ·  ")) + "</div></div>" +
+      '<div class="amt" style="font-size:14px;text-align:right">' + ((i.lo && i.hi) ? won(i.lo) + "–" + won(i.hi) : won(i.p)) + "</div>" +
+      '<div class="box ' + (on ? "on" : "") + '" style="border-radius:8px">' + (on ? "✓" : "") + "</div></div>"));
+  });
+  b.appendChild(list);
+}
+
+function reviewView() {
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd");
+  h.appendChild(el('<div class="row"><div class="grow link" data-a="list">← 편집</div><div style="font-size:13px;font-weight:600;color:var(--mut)">누락 확인</div></div>'));
+  var miss = S.base.filter(function (c) { return !(S.qty[c] > 0); });
+  if (miss.length) {
+    var w = el('<div class="warn"><div style="font-size:16px;font-weight:700;color:#a5382e">체크되지 않은 세트 항목 ' + miss.length + "건</div>" +
+      '<div style="font-size:12.5px;color:#8a5049;margin-top:5px;line-height:1.6">이 수술에서 통상 함께 쓰는 항목입니다. 사용했다면 지금 추가하세요.</div>' +
+      '<div class="list" style="margin-top:14px"></div></div>');
+    var wl = w.querySelector(".list");
+    miss.forEach(function (c) {
+      var i = item(c); if (!i) return;
+      wl.appendChild(el('<div class="row" style="background:#fff;border-radius:12px;padding:12px 13px">' +
+        '<div class="grow"><div class="name" style="font-size:14px">' + esc(i.n) + '</div><div class="meta">' + esc([i.s, won(i.p), i.c].join("  ·  ")) + "</div></div>" +
+        '<div class="mini" style="background:var(--acc);color:#fff" data-a="use" data-v="' + c + '">사용함</div>' +
+        '<div class="mini" style="background:rgba(0,0,0,.05);color:var(--mut)" data-a="skip" data-v="' + c + '">미사용</div></div>'));
+    });
+    b.appendChild(w);
+  } else {
+    b.appendChild(el('<div class="card" style="border-color:rgba(63,156,95,.45)"><div style="font-size:16px;font-weight:700;color:#2f7a49">세트 항목 누락 없음</div>' +
+      '<div style="font-size:12.5px;color:var(--mut);margin-top:5px">' + picked().length + "건 · " + won(total()) + "</div></div>"));
+  }
+  var pi = el('<div class="card" style="margin-top:12px"><div style="font-size:13px;font-weight:600">케이스 정보</div></div>');
+  var p1 = el('<input placeholder="환자 ID / 등록번호" value="' + esc(S.patient) + '" style="margin-top:10px">');
+  p1.addEventListener("input", function (e) { S.patient = e.target.value; });
+  var p2 = el('<input placeholder="작성자" value="' + esc(S.staff) + '" style="margin-top:8px">');
+  p2.addEventListener("input", function (e) { S.staff = e.target.value; localStorage.setItem("bg_staff", e.target.value); });
+  pi.appendChild(p1); pi.appendChild(p2);
+  b.appendChild(pi);
+  b.appendChild(el('<div class="btn d" style="margin-top:14px" data-a="claim">청구 목록 만들기</div>'));
+  return v;
+}
+
+function claimView() {
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd");
+  h.appendChild(el('<div class="row"><div class="grow link" data-a="list">← 편집</div><div style="font-size:13px;font-weight:600;color:var(--mut)">' + esc(BASIS) + "</div></div>"));
+  var card = el('<div class="card" style="border-radius:18px;padding:20px 18px"></div>');
+  card.appendChild(el('<div style="font-size:19px;font-weight:700;letter-spacing:-.02em">' + esc(S.title || "새 체크리스트") + "</div>"));
+  card.appendChild(el('<div style="font-size:12.5px;color:var(--dim);margin-top:5px">' +
+    esc([S.patient ? "환자 " + S.patient : "", S.staff ? "작성 " + S.staff : "", "관리코드 포함"].filter(Boolean).join(" · ")) + "</div>"));
+  card.appendChild(el('<div style="height:1px;background:rgba(0,0,0,.08);margin:16px 0"></div>'));
+  ["행위료", "치료재료대", "약제"].forEach(function (sec) {
+    var lines = picked().map(item).filter(function (i) { return i && i.s === sec; });
+    if (!lines.length) return;
+    var sum = lines.reduce(function (a, i) { return a + unit(i) * S.qty[i.c]; }, 0);
+    var g = el('<div style="margin-bottom:16px"><div class="row" style="margin-bottom:9px"><div class="grow" style="font-size:12.5px;font-weight:600;color:var(--acc)">' + sec + "</div>" +
+      '<div style="font-size:12.5px;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums">' + won(sum) + '</div></div><div class="list" style="gap:9px"></div></div>');
+    var gl = g.querySelector(".list");
+    lines.forEach(function (i) {
+      gl.appendChild(el('<div class="row" style="align-items:baseline;gap:10px">' +
+        '<div class="grow"><div style="font-size:13.5px;color:#3D4245;line-height:1.4">' + esc(i.n) + '</div>' +
+        '<div style="font-size:10.5px;font-family:ui-monospace,Menlo,monospace;color:#B0B4B7;margin-top:3px">' + esc(i.c) + "</div></div>" +
+        '<div style="font-size:12px;color:#A9AEB1">×' + S.qty[i.c] + "</div>" +
+        '<div class="amt" style="font-size:13.5px;min-width:74px;text-align:right">' + won(unit(i) * S.qty[i.c]) + "</div></div>"));
+    });
+    card.appendChild(g);
+  });
+  card.appendChild(el('<div style="height:1px;background:rgba(0,0,0,.08);margin:4px 0 14px"></div>'));
+  card.appendChild(el('<div class="row" style="align-items:baseline"><div class="grow" style="font-size:15px;font-weight:600">합계</div>' +
+    '<div style="font-size:26px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums">' + won(total()) + "</div></div>"));
+  b.appendChild(card);
+  if (S.msg) b.appendChild(el('<div style="font-size:12.5px;color:var(--acc);margin-top:12px;font-weight:600">' + esc(S.msg) + "</div>"));
+  var acts = el('<div class="row" style="gap:9px;margin-top:14px"></div>');
+  acts.appendChild(el('<div class="btn g grow" data-a="copy">목록 복사</div>'));
+  acts.appendChild(el('<div class="btn d grow" data-a="save">시트에 기록</div>'));
+  b.appendChild(acts);
+  b.appendChild(el('<div class="btn p" style="margin-top:9px" data-a="explain">환자 설명 화면 열기</div>'));
+  b.appendChild(el('<div class="btn g" style="margin-top:9px" data-a="saveset">이 구성을 세트로 저장</div>'));
+  b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-top:14px;line-height:1.6">' + esc(BASIS) + ' 단가 기준입니다. 범위 단가 항목은 입력된 실제 금액으로 계산됩니다.</div>'));
+  return v;
+}
+
+/* ---------- admin ---------- */
+function adminView() {
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd");
+  h.appendChild(el('<div class="row"><div class="grow" style="font-size:20px;font-weight:700">항목 관리</div><div class="link" data-a="home">닫기</div></div>'));
+  h.appendChild(el('<div class="sub">구글 시트 · 비급여 단가표에 직접 반영됩니다</div>'));
+  var inp = el('<input placeholder="항목명 · 관리코드 검색" style="margin-top:12px" value="' + esc(S.aq) + '">');
+  inp.addEventListener("input", function (e) { S.aq = e.target.value; renderAdminList(b); });
+  h.appendChild(inp);
+  renderAdminList(b);
+  return v;
+}
+function renderAdminList(b) {
+  b.innerHTML = "";
+  b.appendChild(el('<div class="btn p" data-a="newitem">＋ 새 항목 추가</div>'));
+  if (S.msg) b.appendChild(el('<div style="font-size:12.5px;font-weight:600;color:var(--acc);margin-top:12px">' + esc(S.msg) + "</div>"));
+  var q = S.aq.trim().toLowerCase();
+  var res = CAT.filter(function (i) { return !q || (i.n + " " + i.e + " " + i.c + " " + i.g).toLowerCase().indexOf(q) >= 0; }).slice(0, 80);
+  b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin:16px 0 10px">' + res.length + "개 표시 · 전체 " + CAT.length + "개</div>"));
+  var list = el('<div class="list"></div>');
+  res.forEach(function (i) {
+    list.appendChild(el('<div class="card row" data-a="edititem" data-v="' + esc(i.c) + '">' +
+      '<div class="grow"><div class="name">' + esc(i.n) + '</div><div class="meta">' + esc([i.s, i.g, i.c].filter(Boolean).join("  ·  ")) + "</div></div>" +
+      '<div class="amt" style="font-size:14px">' + won(i.p) + '</div>' +
+      '<div style="color:var(--dim);font-size:18px">›</div></div>'));
+  });
+  b.appendChild(list);
+}
+
+function fieldRow(label, key, ph) {
+  var w = el('<div style="margin-top:10px"><div style="font-size:11.5px;font-weight:600;color:var(--mut);margin-bottom:5px">' + label + "</div></div>");
+  var i = el('<input data-f="' + key + '" placeholder="' + esc(ph || "") + '" value="' + esc(S.form[key] == null ? "" : S.form[key]) + '">');
+  i.addEventListener("input", function (e) { S.form[key] = e.target.value; });
+  w.appendChild(i);
+  return w;
+}
+
+function itemFormView() {
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd");
+  var isNew = !S.form.orig;
+  h.appendChild(el('<div class="row"><div class="grow link" data-a="admin">← 목록</div><div style="font-size:13px;font-weight:600;color:var(--mut)">' + (isNew ? "새 항목" : "항목 수정") + "</div></div>"));
+  var f = el('<div class="card"></div>');
+  var secw = el('<div style="margin-top:2px"><div style="font-size:11.5px;font-weight:600;color:var(--mut);margin-bottom:6px">구분</div><div class="tabs" style="margin-top:0"></div></div>');
+  var st = secw.querySelector(".tabs");
+  ["행위료", "치료재료대", "약제"].forEach(function (t) {
+    st.appendChild(el('<div class="tab ' + (S.form.s === t ? "on" : "") + '" data-a="fsec" data-v="' + t + '">' + t + "</div>"));
+  });
+  f.appendChild(secw);
+  f.appendChild(fieldRow("항목명", "n", "예: 하큐어패치"));
+  f.appendChild(fieldRow("중분류", "g", "예: 창상피복제"));
+  f.appendChild(fieldRow("영문/규격", "e", "예: 67x34mm"));
+  f.appendChild(fieldRow("관리코드 (필수 · 중복 불가)", "c", "예: XBM5001GI"));
+  f.appendChild(fieldRow("수가코드", "code2", "예: BM5001GI"));
+  f.appendChild(fieldRow("단가 (원)", "p", "90000"));
+  f.appendChild(fieldRow("최저비용 (선택)", "lo", "범위 항목만"));
+  f.appendChild(fieldRow("최고비용 (선택)", "hi", "범위 항목만"));
+  f.appendChild(fieldRow("비고", "note", ""));
+  b.appendChild(f);
+  if (S.msg) b.appendChild(el('<div style="font-size:12.5px;font-weight:600;color:#a5382e;margin-top:12px">' + esc(S.msg) + "</div>"));
+  b.appendChild(el('<div class="btn d" style="margin-top:14px" data-a="saveitem">' + (isNew ? "추가" : "저장") + "</div>"));
+  if (!isNew) b.appendChild(el('<div class="btn g" style="margin-top:9px;color:#a5382e" data-a="delitem">이 항목 삭제</div>'));
+  b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-top:14px;line-height:1.6">관리코드를 바꾸면 기존 세트에서 그 항목이 빠집니다. 가격만 바뀔 때는 단가만 수정하세요.</div>'));
+  return v;
+}
+
+/* ---------- actions ---------- */
+function claimLines() {
+  return picked().map(function (c) { var i = item(c); return { code: i.c, name: i.n, qty: S.qty[c], unit: unit(i) }; });
+}
+var actions = {
+  home: function () { S.screen = "home"; S.edit = false; S.msg = ""; },
+  admin: function () {
+    if (!S.pin) {
+      var p = prompt("관리자 PIN");
+      if (!p) return;
+      S.pin = p;
+      api("checkPin", { pin: p }).then(function () { S.msg = ""; S.screen = "admin"; render(); })
+        .catch(function (e) { S.pin = ""; alert("PIN 확인 실패: " + e); });
+      return;
+    }
+    S.msg = ""; S.aq = S.aq || ""; S.screen = "admin";
+  },
+  newitem: function () {
+    S.form = { s: "치료재료대", g: "", n: "", e: "", c: "", code2: "", p: "", lo: "", hi: "", note: "", orig: "" };
+    S.msg = ""; S.screen = "itemform";
+  },
+  edititem: function (v) {
+    var i = item(v); if (!i) return;
+    S.form = { s: i.s, g: i.g, n: i.n, e: i.e, c: i.c, code2: i.code2 || "", p: i.p, lo: i.lo || "", hi: i.hi || "", note: i.note || "", orig: i.c };
+    S.msg = ""; S.screen = "itemform";
+  },
+  fsec: function (v) { S.form.s = v; },
+  saveitem: function () {
+    var f = S.form;
+    if (!f.n || !String(f.n).trim()) { S.msg = "항목명을 입력하세요."; return; }
+    if (!f.c || !String(f.c).trim()) { S.msg = "관리코드를 입력하세요."; return; }
+    var p = Object.assign({}, f, { pin: S.pin, p: Number(String(f.p).replace(/[^\d]/g, "")) || 0,
+      lo: Number(String(f.lo).replace(/[^\d]/g, "")) || 0, hi: Number(String(f.hi).replace(/[^\d]/g, "")) || 0 });
+    S.msg = "저장 중...";
+    api(f.orig ? "updateItem" : "addItem", p).then(function () {
+      S.msg = f.orig ? "수정되었습니다." : "추가되었습니다.";
+      S.screen = "admin"; sync();
+    }).catch(function (e) { S.msg = "실패: " + e; render(); });
+  },
+  delitem: function () {
+    if (!confirm('"' + S.form.n + '" 항목을 단가표에서 삭제할까요?')) return;
+    S.msg = "삭제 중...";
+    api("deleteItem", { pin: S.pin, c: S.form.orig }).then(function () {
+      S.msg = "삭제되었습니다."; S.screen = "admin"; sync();
+    }).catch(function (e) { S.msg = "실패: " + e; render(); });
+  },
+  edit: function () { S.edit = !S.edit; },
+  newset: function () {
+    var n = prompt("새 세트 이름 (예: 어깨 회전근개 봉합술)");
+    if (!n) return;
+    S.title = n.trim(); S.list = []; S.base = []; S.qty = {}; S.amt = {}; S.q = ""; S.edit = false; S.screen = "catalog";
+  },
+  delset: function (v, t) {
+    var s = SETS[+t.getAttribute("data-i")];
+    if (!confirm('"' + s.name + '" 세트를 삭제할까요?')) return;
+    SETS = SETS.filter(function (x) { return x.name !== s.name; });
+    localStorage.setItem("bg_sets", JSON.stringify(SETS));
+    api("deleteSet", { name: s.name }).then(sync).catch(function () {});
+  },
+  remove: function (v) {
+    S.list = S.list.filter(function (c) { return c !== v; });
+    S.base = S.base.filter(function (c) { return c !== v; });
+    delete S.qty[v]; delete S.amt[v];
+  },
+  list: function () { S.screen = "list"; },
+  catalog: function () { S.q = ""; S.screen = "catalog"; },
+  review: function () { S.screen = "review"; },
+  claim: function () { S.msg = ""; S.screen = "claim"; },
+  explain: function () { S.screen = "explain"; },
+  sync: function () { sync(); },
+
+  open: function (v, t) { openSet(SETS[+t.getAttribute("data-i")]); },
+  tab: function (v) { S.tab = v; },
+  toggle: function (v) { S.qty[v] = S.qty[v] > 0 ? 0 : 1; },
+  inc: function (v) { S.qty[v] = (S.qty[v] || 0) + 1; },
+  dec: function (v) { S.qty[v] = Math.max(0, (S.qty[v] || 0) - 1); },
+  use: function (v) { S.qty[v] = 1; },
+  skip: function (v) { S.base = S.base.filter(function (c) { return c !== v; }); },
+  add: function (v) {
+    if (S.list.indexOf(v) < 0) S.list.push(v);
+    S.qty[v] = S.qty[v] > 0 ? 0 : 1;
+    if (!S.title) S.title = "새 체크리스트";
+  },
+  copy: function () {
+    var t = claimLines().map(function (l) { return [l.code, l.name, l.qty, l.unit * l.qty].join("\t"); }).join("\n") + "\n합계\t\t\t" + total();
+    if (navigator.clipboard) navigator.clipboard.writeText(t);
+    S.msg = "청구 목록을 복사했습니다.";
+  },
+  save: function () {
+    S.msg = "기록 중...";
+    api("saveCase", { setName: S.title, patient: S.patient, staff: S.staff, lines: claimLines() })
+      .then(function (d) { S.msg = "구글 시트에 " + d.saved + "행 기록됨."; render(); })
+      .catch(function (e) { S.msg = "기록 실패: " + e; render(); });
+  },
+  saveset: function () {
+    S.msg = "저장 중...";
+    api("saveSet", { name: S.title, note: "사용 기록", codes: picked() })
+      .then(function () { S.msg = "세트를 저장했습니다."; sync(); })
+      .catch(function (e) { S.msg = "저장 실패: " + e; render(); });
+  }
+};
+
+document.addEventListener("click", function (ev) {
+  var t = ev.target.closest("[data-a]"); if (!t) return;
+  var a = t.getAttribute("data-a"), v = t.getAttribute("data-v");
+  if (!actions[a]) return;
+  actions[a](v, t);
+  render();
+});
+document.addEventListener("input", function (ev) {
+  var t = ev.target.closest('[data-a="amt"]'); if (!t) return;
+  S.amt[t.getAttribute("data-v")] = t.value.replace(/[^\d]/g, "");
+});
+document.addEventListener("change", function (ev) {
+  if (ev.target.closest('[data-a="amt"]')) render();
+});
+
+var lastScreen = null;
+function render() {
+  var views = { home: homeView, list: listView, catalog: catalogView, review: reviewView, claim: claimView, admin: adminView, itemform: itemFormView, explain: explainView };
+  var next = views[S.screen]();
+  var cur = document.getElementById("app");
+  var sameScreen = S.screen === lastScreen;
+  var scroll = (sameScreen && cur && cur.querySelector(".bd")) ? cur.querySelector(".bd").scrollTop : 0;
+  cur.replaceWith(next);
+  if (sameScreen && next.querySelector(".bd")) next.querySelector(".bd").scrollTop = scroll;
+  lastScreen = S.screen;
+}
+render();
+sync();
+</script>
+
+<script id="sx-enhancements-js">
+(function(){
+  // 스크롤 위치 고정
+  function patchRR(){
+    if(typeof renderResults==='function'&&!window._sxRROrig){
+      window._sxRROrig=renderResults;
+      window.renderResults=function(){
+        var bd=document.querySelector('.bd');
+        var saved=bd?bd.scrollTop:0;
+        window._sxRROrig.apply(this,arguments);
+        requestAnimationFrame(function(){
+          var nb=document.querySelector('.bd');
+          if(nb) nb.scrollTop=saved;
+        });
+      };
+    }
+  }
+  patchRR();
+  document.addEventListener('DOMContentLoaded',patchRR);
+  setTimeout(patchRR,300); setTimeout(patchRR,800);
+
+  // 수술 세트 배지
+  function badge(){
+    var hd=document.querySelector('#app .hd');
+    if(!hd||document.getElementById('sx-badge')) return;
+    var tEl=hd.querySelector('.grow');
+    if(!tEl||tEl.textContent.trim()!=='항목 추가') return;
+    var nm=window.S&&window.S.title;
+    if(!nm) return;
+    var b=document.createElement('div');
+    b.id='sx-badge';
+    b.innerHTML='<span style="color:#6B7280;font-size:12px;font-weight:500">수술 세트<\/span>'
+      +'<span style="font-weight:700;color:#1D4ED8;font-size:15px;margin-left:4px">▸ '+nm+'<\/span>';
+    var inp=hd.querySelector('input');
+    hd.insertBefore(b,inp);
+  }
+  var obs=new MutationObserver(function(){
+    clearTimeout(window._sxBT);
+    window._sxBT=setTimeout(badge,50);
+  });
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){ obs.observe(document.body,{childList:true,subtree:true}); });
+  } else {
+    obs.observe(document.body,{childList:true,subtree:true});
+  }
+  badge();
+})();
+<\/script>
+</body></html>
