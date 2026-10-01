@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<style>
+  body{margin:0;background:#F3F5F8;}
+  @page{size:A4 landscape;margin:12mm;}
+  @media print{
+    [data-noprint="true"]{display:none !important;}
+    [data-print-mode="month-report"] .app-shell{display:none !important;}
+    [data-print-mode="day-plan"] .month-report-modal{display:none !important;}
+    .month-report-modal, .day-plan-print-wrap{position:static !important;box-shadow:none !important;background:#fff !important;}
+  }
+  a{color:#3B6FA8;}
+  a:hover{color:#2C577F;}
+</style>
+</helmet>
+<div data-print-mode="{{ printMode }}" style="min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard','Malgun Gothic','Segoe UI',sans-serif;color:#1F2430;">
+
+  <datalist id="doctorList"><sc-for list="{{ doctors }}" as="d" hint-placeholder-count="1"><option value="{{ d }}"></option></sc-for></datalist>
+  <datalist id="surgeryList"><sc-for list="{{ surgerySuggestions }}" as="s" hint-placeholder-count="10"><option value="{{ s }}"></option></sc-for></datalist>
+  <datalist id="diagnosisList"><sc-for list="{{ diagnosisSuggestions }}" as="s" hint-placeholder-count="10"><option value="{{ s }}"></option></sc-for></datalist>
+
+  <div class="app-shell" style="max-width:1200px;margin:0 auto;padding:20px 20px 60px;">
+
+    <div data-noprint="true" style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:18px 22px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;min-width:0;">
+        <img src="uploads/KakaoTalk_20260810_171504416.png" alt="본정형외과 로고" style="height:38px;flex-shrink:0;"/>
+      </div>
+      <h1 style="font-size:1.3rem;line-height:1.25;margin:0;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;">수술계획표</h1>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+        <sc-if value="{{ isMonthView }}" hint-placeholder-val="{{ true }}">
+          <button onClick="{{ openMonthReport }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">리포트 내보내기</button>
+        </sc-if>
+        <sc-if value="{{ isDayView }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ backToMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">← 월별보기</button>
+          <button onClick="{{ openAddForm }}" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">＋ 수술 추가</button>
+          <button onClick="{{ printDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{ isMonthView }}" hint-placeholder-val="{{ true }}">
+      <div>
+        <div data-noprint="true" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button onClick="{{ prevMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
+            <div style="font-size:1.15rem;font-weight:800;min-width:120px;text-align:center;">{{ monthLabel }}</div>
+            <button onClick="{{ nextMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
+            <button onClick="{{ goTodayMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
+          </div>
+          <div style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:8px 16px;font-size:0.88rem;font-weight:700;color:#3B6FA8;">
+            이달 수술 {{ monthTotalCount }}건 (취소 {{ monthCancelledCount }}건 제외)
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:16px;overflow:hidden;">
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;">
+            <sc-for list="{{ weekDays }}" as="wd" hint-placeholder-count="7">
+              <div style="text-align:center;font-size:0.85rem;font-weight:800;color:{{ wd.color }};padding:6px 0;">{{ wd.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">
+            <sc-for list="{{ monthCells }}" as="cell" hint-placeholder-count="42">
+              <div onClick="{{ cell.onClick }}" style="{{ cell.cellStyle }}">
+                <div style="{{ cell.dayNumStyle }}">{{ cell.dayNum }}</div>
+                <sc-if value="{{ cell.hasCount }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:4px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:2px 6px;font-size:0.72rem;font-weight:800;display:inline-block;">{{ cell.countLabel }}</div>
+                </sc-if>
+                <sc-if value="{{ cell.hasCancelled }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:3px;color:#8A8F98;font-size:0.68rem;font-weight:700;">취소 {{ cell.cancelledCount }}</div>
+                </sc-if>
+                <sc-if value="{{ cell.hasEmergency }}" hint-placeholder-val="{{ false }}">
+                  <div style="margin-top:3px;color:#E0384A;font-size:0.68rem;font-weight:800;">응급 있음</div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ isDayView }}" hint-placeholder-val="{{ false }}">
+      <div class="day-plan-print-wrap">
+        <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+          <button onClick="{{ prevDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
+          <button onClick="{{ nextDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
+          <button onClick="{{ goTodayDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
+        </div>
+        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+          <h2 style="margin:0;font-size:1.4rem;font-weight:800;">{{ selectedDateLabel }}</h2>
+          <div style="font-size:0.9rem;color:#6B7280;font-weight:700;">수술 {{ dayCount }}건 (취소 제외) · 취소 {{ dayCancelledCount }}건</div>
+        </div>
+
+        <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow-x:auto;">
+          <table style="width:100%;border-collapse:collapse;min-width:1600px;font-size:0.82rem;">
+            <thead>
+              <tr style="background:#F3F5F8;">
+                <sc-for list="{{ tableHeaders }}" as="h" hint-placeholder-count="20">
+                  <th style="text-align:center;padding:9px 10px;font-weight:800;color:#6B7280;white-space:nowrap;border-bottom:1px solid #E3E7ED;">{{ h }}</th>
+                </sc-for>
+                <th data-noprint="true" style="padding:9px 10px;border-bottom:1px solid #E3E7ED;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ daySurgeries }}" as="row" hint-placeholder-count="3">
+                <tr style="{{ row.rowStyle }}">
+                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.timeLabel }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.doctor }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.chartNo }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.name }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.genderAge }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.anesthesia }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.surgeryName }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.side }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.diagnosis }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.urgency }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.duration }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.room }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.npo }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.allergy }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.anticoag }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.infection }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.implant }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.cArm }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.position }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.status }}</td>
+                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.note }}</td>
+                  <td data-noprint="true" style="padding:9px 10px;white-space:nowrap;">
+                    <button onClick="{{ row.onEdit }}" style="border:none;background:transparent;color:#3B6FA8;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>
+                    <button onClick="{{ row.onDelete }}" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;">삭제</button>
+                  </td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+          <sc-if value="{{ dayIsEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:40px;text-align:center;color:#6B7280;font-size:0.95rem;">이 날짜에 등록된 수술이 없습니다.</div>
+          </sc-if>
+        </div>
+        <div data-noprint="true" style="margin-top:10px;font-size:0.78rem;color:#8A8F98;">색 표시: 응급 빨강 · 감염/알레르기/항응고제 복용 중 주황 · 금식 미확인 노랑 · 취소 회색</div>
+      </div>
+    </sc-if>
+
+  </div>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="true" style="position:fixed;inset:0;background:rgba(31,36,48,0.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;">
+      <div style="background:#FFFFFF;border-radius:18px;padding:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+        <h3 style="margin:0 0 16px;font-size:1.2rem;font-weight:800;">{{ formTitle }}</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <sc-for list="{{ formFields }}" as="f" hint-placeholder-count="20">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <label style="font-size:0.82rem;font-weight:700;color:#6B7280;">{{ f.label }}</label>
+              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
+                <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;background:#FFFFFF;">
+                  <sc-for list="{{ f.options }}" as="opt" hint-placeholder-count="4">
+                    <option value="{{ opt }}">{{ opt }}</option>
+                  </sc-for>
+                </select>
+              </sc-if>
+              <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ false }}">
+                <input type="text" value="{{ f.value }}" onChange="{{ f.onChange }}" list="{{ f.datalistId }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
+              </sc-if>
+              <sc-if value="{{ f.isNumber }}" hint-placeholder-val="{{ false }}">
+                <input type="number" value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
+              </sc-if>
+              <sc-if value="{{ f.isDate }}" hint-placeholder-val="{{ false }}">
+                <input type="date" value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
+              </sc-if>
+              <sc-if value="{{ f.isTime }}" hint-placeholder-val="{{ false }}">
+                <input type="time" value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;">
+          <sc-if value="{{ isEditing }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ deleteFromForm }}" style="border:1px solid #F6C9CE;background:#FDECEE;color:#E0384A;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-right:auto;">삭제</button>
+          </sc-if>
+          <button onClick="{{ closeForm }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">취소</button>
+          <button onClick="{{ saveForm }}" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">저장</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ monthReportOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;background:rgba(31,36,48,0.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;">
+      <div class="month-report-modal" style="background:#FFFFFF;border-radius:18px;padding:26px 28px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+        <h3 style="margin:0 0 4px;font-size:1.25rem;font-weight:800;">{{ monthLabel }} 수술현황 리포트</h3>
+        <p style="margin:0 0 16px;color:#6B7280;font-size:0.9rem;">천안본정형외과</p>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <div style="flex:1;background:#E8EFF6;border-radius:12px;padding:12px 14px;">
+            <div style="font-size:1.6rem;font-weight:800;color:#3B6FA8;">{{ monthTotalCount }}</div>
+            <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">진행 수술 건수(취소 제외)</div>
+          </div>
+          <div style="flex:1;background:#F1F2F4;border-radius:12px;padding:12px 14px;">
+            <div style="font-size:1.6rem;font-weight:800;color:#6B7280;">{{ monthCancelledCount }}</div>
+            <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">취소 건수</div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #E3E7ED;padding-top:10px;">
+          <sc-for list="{{ monthReportRows }}" as="r" hint-placeholder-count="10">
+            <div style="display:flex;justify-content:space-between;padding:7px 2px;font-size:0.9rem;border-bottom:1px dashed #E3E7ED;">
+              <span>{{ r.label }}</span>
+              <span>{{ r.count }}건<sc-if value="{{ r.hasCancelled }}" hint-placeholder-val="{{ false }}"> (취소 {{ r.cancelledCount }})</sc-if></span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ monthReportEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:20px 2px;color:#6B7280;font-size:0.9rem;">이 달에 등록된 수술이 없습니다.</div>
+          </sc-if>
+        </div>
+        <div data-noprint="true" style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+          <button onClick="{{ closeMonthReport }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">닫기</button>
+          <button onClick="{{ printMonthReport }}" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const GENDER = ['남','여'];
+const ANESTHESIA = ['전신마취','척추마취','경막외마취','신경차단','국소마취','수면마취'];
+const URGENCY = ['예정','응급'];
+const DURATION = ['30분','1시간','1시간 30분','2시간','2시간 30분','3시간','3시간 이상'];
+const NPO = ['확인','미확인'];
+const ALLERGY = ['없음','있음'];
+const ANTICOAG = ['복용 안 함','복용 중','중단 완료'];
+const INFECTION = ['없음','MRSA','VRE','B형간염','C형간염','기타'];
+const CARM = ['필요','불필요'];
+const POSITION = ['앙와위','측와위','복와위','비치체어','견인대 사용','해당없음'];
+const STATUS = ['예정','진행 중','완료','취소'];
+const SIDE = ['좌','우','양측','해당없음'];
+const WEEKDAY_LABELS = ['일','월','화','수','목','금','토'];
+const SURGERY_SUGGESTIONS = ['ACL · 전방십자인대재건술','ATFL · 발목인대재건술','BPHA · 고관절반치환술','CTR · 수근관감압술','HTO · 근위경골절골술','Meniscectomy · 반월상연골절제술','Meniscus Repair · 반월상연골봉합술','Meniscus Root Repair · 후근봉합술','PEN · 경막외신경성형술','PFNA · 대퇴부근위부골절수술','RCT · 회전근개봉합술','TKRA · 무릎 인공관절수술','Trigger Finger · 방아쇠수지수술','ORIF · 발목골절수술','ORIF · 손목골절수술','ORIF · 어깨골절수술','MUA · 오십견 마취하 도수조작술','VP · 척추체성형술','SUTURE 창상봉합술','E & B 절제생검','INGROWING NAIL 내향성 발톱','CORN REMOVAL 티눈제거','CRIF Foot','CRIF Hand'];
+const DIAGNOSIS_SUGGESTIONS = ['ACL tear','Chronic ankle instability','Femoral neck fracture','Carpal tunnel syndrome','Medial knee osteoarthritis (varus)','Meniscus tear','Meniscus root tear','Lumbar disc herniation','Lumbar spinal stenosis','Intertrochanteric fracture','Rotator cuff tear','Knee osteoarthritis','Trigger finger','Ankle fracture','Distal radius fracture','Proximal humerus fracture','Adhesive capsulitis (frozen shoulder)','Vertebral compression fracture','Laceration','Soft tissue mass','Ingrown toenail','Corn (clavus)','Foot fracture','Hand fracture'];
+const STORE_KEY = 'cheonan-ortho-surgery-plan-v1';
+const TABLE_HEADERS = ['시간','집도의','차트번호','환자명','성별/나이','마취종류','수술명','부위','진단명','응급/예정','예상시간','병실','금식','알레르기','항응고제','감염','임플란트/재료','C-arm','체위','상태','비고'];
+
+function pad2(n){ return n < 10 ? '0'+n : ''+n; }
+function toISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function fromISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function uid(){ return 'sx-'+Date.now()+'-'+Math.random().toString(16).slice(2,8); }
+function timeToMinutes(t){ if(!t) return 0; const [h,m]=t.split(':').map(Number); return h*60+(m||0); }
+
+function defaultFormData(dateStr, doctors){
+  return {
+    date: dateStr, time: '09:00', doctor: doctors[0] || '', chartNo: '', name: '',
+    gender: GENDER[0], age: '', anesthesia: ANESTHESIA[0], surgeryName: '', side: SIDE[3],
+    diagnosis: '', urgency: URGENCY[0], duration: DURATION[0], room: '', npo: NPO[0],
+    allergy: ALLERGY[0], anticoag: ANTICOAG[0], infection: INFECTION[0], implant: '',
+    cArm: CARM[1], position: POSITION[0], status: STATUS[0], note: ''
+  };
+}
+
+class Component extends DCLogic {
+  state = {
+    view: 'month',
+    monthYear: new Date().getFullYear(),
+    monthMonth: new Date().getMonth(),
+    selectedDate: toISO(new Date()),
+    surgeries: [],
+    doctors: ['김진일'],
+    formOpen: false,
+    editingId: null,
+    formData: null,
+    monthReportOpen: false,
+    loaded: false
+  };
+
+  componentDidMount(){
+    try {
+      const raw = window.localStorage.getItem(STORE_KEY);
+      if (raw) {
+        const data = JSON.parse(raw);
+        this.setState({
+          surgeries: data.surgeries || [],
+          doctors: (data.doctors && data.doctors.length) ? data.doctors : ['김진일'],
+          loaded: true
+        });
+      } else {
+        this.setState({ loaded: true });
+      }
+    } catch(e){ this.setState({ loaded: true }); }
+  }
+
+  persist(surgeries, doctors){
+    try {
+      window.localStorage.setItem(STORE_KEY, JSON.stringify({ surgeries, doctors }));
+    } catch(e){}
+  }
+
+  makeFieldHandler(key){
+    return (e) => {
+      const val = e.target.value;
+      this.setState(s => ({ formData: Object.assign({}, s.formData, { [key]: val }) }));
+    };
+  }
+
+  prevMonth(){ this.setState(s => { let m=s.monthMonth-1,y=s.monthYear; if(m<0){m=11;y--;} return {monthMonth:m,monthYear:y}; }); }
+  nextMonth(){ this.setState(s => { let m=s.monthMonth+1,y=s.monthYear; if(m>11){m=0;y++;} return {monthMonth:m,monthYear:y}; }); }
+  goTodayMonth(){ const d=new Date(); this.setState({monthYear:d.getFullYear(),monthMonth:d.getMonth()}); }
+
+  goToDate(dateStr){ this.setState({ selectedDate: dateStr, view: 'day' }); }
+  backToMonth(){ this.setState({ view: 'month' }); }
+  prevDay(){ this.setState(s => { const d=fromISO(s.selectedDate); d.setDate(d.getDate()-1); return {selectedDate:toISO(d)}; }); }
+  nextDay(){ this.setState(s => { const d=fromISO(s.selectedDate); d.setDate(d.getDate()+1); return {selectedDate:toISO(d)}; }); }
+  goTodayDay(){ this.setState({ selectedDate: toISO(new Date()) }); }
+
+  openAddForm(){
+    this.setState(s => ({ formOpen: true, editingId: null, formData: defaultFormData(s.selectedDate, s.doctors) }));
+  }
+  openEditForm(id){
+    this.setState(s => {
+      const rec = s.surgeries.find(x => x.id === id);
+      if (!rec) return null;
+      return { formOpen: true, editingId: id, formData: Object.assign({}, rec) };
+    });
+  }
+  closeForm(){ this.setState({ formOpen: false, editingId: null, formData: null }); }
+
+  saveForm(){
+    this.setState(s => {
+      const fd = s.formData;
+      if (!fd) return null;
+      let surgeries = s.surgeries.slice();
+      if (s.editingId) {
+        surgeries = surgeries.map(x => x.id === s.editingId ? Object.assign({}, fd, { id: s.editingId }) : x);
+      } else {
+        surgeries.push(Object.assign({}, fd, { id: uid() }));
+      }
+      let doctors = s.doctors.slice();
+      if (fd.doctor && doctors.indexOf(fd.doctor) === -1) doctors.push(fd.doctor);
+      this.persist(surgeries, doctors);
+      return { surgeries, doctors, formOpen: false, editingId: null, formData: null };
+    });
+  }
+
+  deleteFromForm(){
+    if (!window.confirm('이 수술 일정을 삭제할까요?')) return;
+    this.setState(s => {
+      const surgeries = s.surgeries.filter(x => x.id !== s.editingId);
+      this.persist(surgeries, s.doctors);
+      return { surgeries, formOpen: false, editingId: null, formData: null };
+    });
+  }
+
+  deleteRecord(id){
+    if (!window.confirm('이 수술 일정을 삭제할까요?')) return;
+    this.setState(s => {
+      const surgeries = s.surgeries.filter(x => x.id !== id);
+      this.persist(surgeries, s.doctors);
+      return { surgeries };
+    });
+  }
+
+  openMonthReport(){ this.setState({ monthReportOpen: true }); }
+  closeMonthReport(){ this.setState({ monthReportOpen: false }); }
+  printDay(){ window.print(); }
+  printMonthReport(){ window.print(); }
+
+  rowStyleFor(s){
+    if (s.status === '취소') return { background:'#F1F2F4', borderBottom:'1px solid #E3E7ED', color:'#8A8F98' };
+    if (s.urgency === '응급') return { background:'#FDECEE', borderBottom:'1px solid #F6C9CE' };
+    if ((s.infection && s.infection !== '없음') || s.allergy === '있음' || s.anticoag === '복용 중') return { background:'#FFF3E0', borderBottom:'1px solid #FBDDA8' };
+    if (s.npo === '미확인') return { background:'#FFFBE0', borderBottom:'1px solid #F5E39C' };
+    return { background:'#FFFFFF', borderBottom:'1px solid #E3E7ED' };
+  }
+
+  renderVals(){
+    const s = this.state;
+    const doctors = s.doctors;
+    const monthLabel = s.monthYear + '년 ' + (s.monthMonth+1) + '월';
+    const weekDays = WEEKDAY_LABELS.map((label,i) => ({ label, color: i===0 ? '#E0384A' : (i===6 ? '#3B6FA8' : '#6B7280') }));
+
+    const firstOfMonth = new Date(s.monthYear, s.monthMonth, 1);
+    const startOffset = firstOfMonth.getDay();
+    const gridStart = new Date(s.monthYear, s.monthMonth, 1 - startOffset);
+    const today = toISO(new Date());
+
+    const byDate = {};
+    s.surgeries.forEach(rec => {
+      if (!byDate[rec.date]) byDate[rec.date] = [];
+      byDate[rec.date].push(rec);
+    });
+
+    const monthCells = [];
+    for (let i=0;i<42;i++){
+      const d = new Date(gridStart);
+      d.setDate(gridStart.getDate()+i);
+      const dateStr = toISO(d);
+      const inMonth = d.getMonth() === s.monthMonth;
+      const recs = byDate[dateStr] || [];
+      const active = recs.filter(r => r.status !== '취소');
+      const cancelled = recs.filter(r => r.status === '취소');
+      const hasEmergency = active.some(r => r.urgency === '응급');
+      const isToday = dateStr === today;
+      monthCells.push({
+        key: dateStr,
+        dayNum: d.getDate(),
+        onClick: () => this.goToDate(dateStr),
+        hasCount: active.length > 0,
+        countLabel: active.length + '건',
+        hasCancelled: cancelled.length > 0,
+        cancelledCount: cancelled.length,
+        hasEmergency,
+        cellStyle: {
+          minHeight:'86px', borderRadius:'10px', padding:'8px',
+          background: isToday ? '#E8EFF6' : (inMonth ? '#FFFFFF' : '#F7F8FA'),
+          border: isToday ? '1px solid #3B6FA8' : '1px solid #EDEFF2',
+          cursor:'pointer', opacity: inMonth ? 1 : 0.5
+        },
+        dayNumStyle: { fontSize:'0.9rem', fontWeight: isToday ? 800 : 700, color: isToday ? '#3B6FA8' : '#1F2430' }
+      });
+    }
+
+    let monthTotalCount = 0, monthCancelledCount = 0;
+    const daysInMonth = new Date(s.monthYear, s.monthMonth+1, 0).getDate();
+    const monthReportRows = [];
+    for (let day=1; day<=daysInMonth; day++){
+      const dateStr = s.monthYear+'-'+pad2(s.monthMonth+1)+'-'+pad2(day);
+      const recs = byDate[dateStr] || [];
+      const active = recs.filter(r => r.status !== '취소');
+      const cancelled = recs.filter(r => r.status === '취소');
+      monthTotalCount += active.length;
+      monthCancelledCount += cancelled.length;
+      if (recs.length > 0) {
+        monthReportRows.push({
+          label: (s.monthMonth+1)+'월 '+day+'일 ('+WEEKDAY_LABELS[new Date(s.monthYear,s.monthMonth,day).getDay()]+')',
+          count: active.length,
+          hasCancelled: cancelled.length > 0,
+          cancelledCount: cancelled.length
+        });
+      }
+    }
+
+    const selDate = fromISO(s.selectedDate);
+    const selectedDateLabel = selDate.getFullYear()+'년 '+(selDate.getMonth()+1)+'월 '+selDate.getDate()+'일 ('+WEEKDAY_LABELS[selDate.getDay()]+')';
+    const dayRecs = (byDate[s.selectedDate] || []).slice().sort((a,b) => timeToMinutes(a.time)-timeToMinutes(b.time));
+    const dayActive = dayRecs.filter(r => r.status !== '취소');
+    const dayCancelled = dayRecs.filter(r => r.status === '취소');
+
+    const daySurgeries = dayRecs.map(r => ({
+      timeLabel: r.time || '',
+      doctor: r.doctor || '', chartNo: r.chartNo || '', name: r.name || '',
+      genderAge: (r.gender||'') + ' / ' + (r.age||''),
+      anesthesia: r.anesthesia || '', surgeryName: r.surgeryName || '', side: r.side || '',
+      diagnosis: r.diagnosis || '', urgency: r.urgency || '', duration: r.duration || '',
+      room: r.room || '', npo: r.npo || '', allergy: r.allergy || '', anticoag: r.anticoag || '',
+      infection: r.infection || '', implant: r.implant || '', cArm: r.cArm || '', position: r.position || '',
+      status: r.status || '', note: r.note || '',
+      rowStyle: this.rowStyleFor(r),
+      onEdit: () => this.openEditForm(r.id),
+      onDelete: () => this.deleteRecord(r.id)
+    }));
+
+    const formFieldsDefs = s.formData ? [
+      {key:'date', label:'수술일자', kind:'date', options:[]},
+      {key:'time', label:'수술시간', kind:'time', options:[]},
+      {key:'doctor', label:'집도의', kind:'text', options:[], datalistId:'doctorList'},
+      {key:'chartNo', label:'차트번호', kind:'text', options:[]},
+      {key:'name', label:'환자 이름', kind:'text', options:[]},
+      {key:'gender', label:'성별', kind:'select', options:GENDER},
+      {key:'age', label:'나이', kind:'number', options:[]},
+      {key:'anesthesia', label:'마취종류', kind:'select', options:ANESTHESIA},
+      {key:'surgeryName', label:'수술명', kind:'text', options:[], datalistId:'surgeryList'},
+      {key:'side', label:'수술부위', kind:'select', options:SIDE},
+      {key:'diagnosis', label:'진단명', kind:'text', options:[], datalistId:'diagnosisList'},
+      {key:'urgency', label:'응급/예정', kind:'select', options:URGENCY},
+      {key:'duration', label:'예상소요시간', kind:'select', options:DURATION},
+      {key:'room', label:'입원병실', kind:'text', options:[]},
+      {key:'npo', label:'금식(NPO)', kind:'select', options:NPO},
+      {key:'allergy', label:'알레르기', kind:'select', options:ALLERGY},
+      {key:'anticoag', label:'항응고제', kind:'select', options:ANTICOAG},
+      {key:'infection', label:'감염여부', kind:'select', options:INFECTION},
+      {key:'implant', label:'임플란트/재료', kind:'text', options:[]},
+      {key:'cArm', label:'C-arm', kind:'select', options:CARM},
+      {key:'position', label:'체위', kind:'select', options:POSITION},
+      {key:'status', label:'진행상태', kind:'select', options:STATUS},
+      {key:'note', label:'비고', kind:'text', options:[]}
+    ] : [];
+
+    const formFields = formFieldsDefs.map(f => ({
+      key:f.key, label:f.label, options:f.options, datalistId: f.datalistId || '',
+      value: s.formData[f.key],
+      isSelect: f.kind==='select', isText: f.kind==='text', isNumber: f.kind==='number',
+      isDate: f.kind==='date', isTime: f.kind==='time',
+      onChange: this.makeFieldHandler(f.key)
+    }));
+
+    return {
+      view: s.view, isMonthView: s.view==='month', isDayView: s.view==='day',
+      printMode: s.monthReportOpen ? 'month-report' : 'day-plan',
+      monthLabel, weekDays, monthCells,
+      monthTotalCount, monthCancelledCount,
+      prevMonth: () => this.prevMonth(), nextMonth: () => this.nextMonth(), goTodayMonth: () => this.goTodayMonth(),
+      openMonthReport: () => this.openMonthReport(), monthReportOpen: s.monthReportOpen,
+      closeMonthReport: () => this.closeMonthReport(), printMonthReport: () => this.printMonthReport(),
+      monthReportRows, monthReportEmpty: monthReportRows.length === 0,
+      backToMonth: () => this.backToMonth(),
+      selectedDateLabel, dayCount: dayActive.length, dayCancelledCount: dayCancelled.length,
+      daySurgeries, dayIsEmpty: daySurgeries.length === 0,
+      tableHeaders: TABLE_HEADERS,
+      prevDay: () => this.prevDay(), nextDay: () => this.nextDay(), goTodayDay: () => this.goTodayDay(),
+      openAddForm: () => this.openAddForm(), printDay: () => this.printDay(),
+      formOpen: s.formOpen, isEditing: !!s.editingId,
+      formTitle: s.editingId ? '수술 일정 수정' : '수술 일정 추가',
+      formFields, saveForm: () => this.saveForm(), closeForm: () => this.closeForm(),
+      deleteFromForm: () => this.deleteFromForm(),
+      doctors, surgerySuggestions: SURGERY_SUGGESTIONS, diagnosisSuggestions: DIAGNOSIS_SUGGESTIONS
+    };
+  }
+}
+
+</script>
+</body>
+</html>
