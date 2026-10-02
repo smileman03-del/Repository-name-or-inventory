@@ -1,235 +1,116 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="./support.js"></script>
-</head>
-<body>
-<x-dc>
-<helmet>
+<title>천안본정형외과 수술계획표</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <style>
-  body{margin:0;background:#F3F5F8;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:#F3F5F8;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard','Malgun Gothic','Segoe UI',sans-serif;color:#1F2430;}
+  button{font-family:inherit;}
+  a{color:#3B6FA8;}
+  a:hover{color:#2C577F;}
   @page{size:A4 landscape;margin:12mm;}
   @media print{
     [data-noprint="true"]{display:none !important;}
-    [data-print-mode="month-report"] .app-shell{display:none !important;}
-    [data-print-mode="day-plan"] .month-report-modal{display:none !important;}
-    .month-report-modal, .day-plan-print-wrap{position:static !important;box-shadow:none !important;background:#fff !important;}
+    body[data-print-mode="month-report"] .app-shell{display:none !important;}
+    body[data-print-mode="day-plan"] .month-report-modal{display:none !important;}
+    .month-report-modal,.day-plan-print-wrap{position:static !important;box-shadow:none !important;background:#fff !important;}
   }
-  a{color:#3B6FA8;}
-  a:hover{color:#2C577F;}
 </style>
-</helmet>
-<div data-print-mode="{{ printMode }}" style="min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard','Malgun Gothic','Segoe UI',sans-serif;color:#1F2430;">
+</head>
+<body data-print-mode="day-plan">
 
-  <datalist id="doctorList"><sc-for list="{{ doctors }}" as="d" hint-placeholder-count="1"><option value="{{ d }}"></option></sc-for></datalist>
-  <datalist id="surgeryList"><sc-for list="{{ surgerySuggestions }}" as="s" hint-placeholder-count="10"><option value="{{ s }}"></option></sc-for></datalist>
-  <datalist id="diagnosisList"><sc-for list="{{ diagnosisSuggestions }}" as="s" hint-placeholder-count="10"><option value="{{ s }}"></option></sc-for></datalist>
+<datalist id="doctorList"></datalist>
+<datalist id="surgeryList"></datalist>
+<datalist id="diagnosisList"></datalist>
 
-  <div class="app-shell" style="max-width:1200px;margin:0 auto;padding:20px 20px 60px;">
+<div class="app-shell" style="max-width:1200px;margin:0 auto;padding:20px 20px 60px;">
 
-    <div data-noprint="true" style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:18px 22px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:16px;">
-      <div style="display:flex;align-items:center;min-width:0;">
-        <img src="uploads/KakaoTalk_20260810_171504416.png" alt="본정형외과 로고" style="height:38px;flex-shrink:0;"/>
-      </div>
-      <h1 style="font-size:1.3rem;line-height:1.25;margin:0;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;">수술계획표</h1>
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-        <sc-if value="{{ isMonthView }}" hint-placeholder-val="{{ true }}">
-          <button onClick="{{ openMonthReport }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">리포트 내보내기</button>
-        </sc-if>
-        <sc-if value="{{ isDayView }}" hint-placeholder-val="{{ false }}">
-          <button onClick="{{ backToMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">← 월별보기</button>
-          <button onClick="{{ openAddForm }}" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">＋ 수술 추가</button>
-          <button onClick="{{ printDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>
-        </sc-if>
-      </div>
+  <div data-noprint="true" style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:18px 22px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;min-width:0;">
+      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/6xaJSlACEQAAAAEAABZ/anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFllqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmYzMGU3NjY2LTIyNTUtNGZiNi1hZDg2LTRjYzRhZjA5M2VmNwAAAAOUanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuWp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNof+YoXDy0w12jQcjLzc0/RAAAAG1jYm9yo2lkYzpmb3JtYXRqaW1hZ2UvanBlZ2ppbnN0YW5jZUlEeCx4bXA6aWlkOjdjOTUxODdiLWY3MmUtNGMxMS1iNDVkLTk3NjlhNDcxN2JhOGxyZWxhdGlvbnNoaXBocGFyZW50T2YAAAHianVtYgAAAEFqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmFjdGlvbnMudjIAAAAAGGMyc2jiNiFPtZkebZ9VE5O0OqIYAAABmWNib3KiZ2FjdGlvbnOComZhY3Rpb25rYzJwYS5vcGVuZWRqcGFyYW1ldGVyc6FraW5ncmVkaWVudHOBomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCCQ/t/3pl1Q96+mOM5Sv05ozFa7dAXmmYsL9XdZF3ElOKRmYWN0aW9ueB1jb20uYW50aHJvcGljLmNsYXVkZS5wcm92aWRlZGpwYXJhbWV0ZXJzoXgfY29tLmFudGhyb3BpYy5vcmlnaW4tY29uZmlkZW5jZWd1bmtub3dua2Rlc2NyaXB0aW9ueGZDbGF1ZGUgcHJvdmlkZWQgdGhpcyBmaWxlIGF0IHRoZSByZXF1ZXN0IG9mIGEgdXNlciBhbmQgbWF5IGhhdmUgY3JlYXRlZCBvciBtb2RpZmllZCB0aGUgZmlsZSBjb250ZW50cy5tc29mdHdhcmVBZ2VudKFkbmFtZWZDbGF1ZGVyYWxsQWN0aW9uc0luY2x1ZGVk9QAAAMhqdW1iAAAAQGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaGFzaC5kYXRhAAAAABhjMnNoOOkYb5xrNofZAijwna1zkgAAAIBjYm9ypWNhbGdmc2hhMjU2Y3BhZE4AAAAAAAAAAAAAAAAAAGRoYXNoWCCHL+xxPJODuLPLfV71fg1bS0mjeEC2kWS8BOMh16hmw2RuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBRmbGVuZ3RoGRaLAAACPmp1bWIAAAAnanVtZGMyY2wAEQAQgAAAqgA4m3EDYzJwYS5jbGFpbS52MgAAAAIPY2JvcqVjYWxnZnNoYTI1NmlzaWduYXR1cmV4TXNlbGYjanVtYmY9L2MycGEvdXJuOmMycGE6ZjMwZTc2NjYtMjI1NS00ZmI2LWFkODYtNGNjNGFmMDkzZWY3L2MycGEuc2lnbmF0dXJlamluc3RhbmNlSUR4LHhtcDppaWQ6YWM1ZmNhYzEtYTk1MS00OTY3LWIxODMtMmQ0ZGQwZjNkYzk5cmNyZWF0ZWRfYXNzZXJ0aW9uc4OiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYIJD+3/emXVD3r6Y4zlK/TmjMVrt0BeaZiwv1d1kXcSU4omN1cmx4KnNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuYWN0aW9ucy52MmRoYXNoWCDvLjE/gKDXEUmT6sISlSGajsnNbsVSLJEQA3QcwDhsd6JjdXJseClzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmhhc2guZGF0YWRoYXNoWCCnMZbUlUJPt4A3+zwy+loWnz7qmmrHEpl2Jvf5XaGGuXRjbGFpbV9nZW5lcmF0b3JfaW5mb6NkbmFtZW9BbnRocm9waWMgRmlsZXNndmVyc2lvbmUxLjAuMGtzcGVjVmVyc2lvbmUyLjQuMAAAEDhqdW1iAAAAKGp1bWRjMmNzABEAEIAAAKoAOJtxA2MycGEuc2lnbmF0dXJlAAAAEAhjYm9y0oRZAhKiASYYIVkCCjCCAgYwggGNoAMCAQICFEDloAruwjnQvriD+gZCBT1nVRMAMAoGCCqGSM49BAMDMEkxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMS4wLAYDVQQDEyVBbnRocm9waWMgQ29udGVudCBDcmVkZW50aWFscyBSb290IENBMB4XDTI2MDgwNzE4NDM1NloXDTI4MDgwNjE5NDM1NlowRDEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxKTAnBgNVBAMTIEFudGhyb3BpYyBDbGF1ZGUgQ29udGVudCBTaWduaW5nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmHoKa8tQGAUU1TS9QqU5W0Tp2N3XsvlK7BfQt6YWKwEzd2R3/dzKPEUDdCjlLjp9fT+KFjRVnuZ9v0oXvTe3k6NYMFYwDgYDVR0PAQH/BAQDAgeAMBUGA1UdJQQOMAwGCisGAQQBg+heAgEwDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBTOUeIEgU5kWyP448TPmj6cwddcwjAKBggqhkjOPQQDAwNnADBkAjAxcx0UngF60stVjs5G4T2eiptsBk5mf9oCtfJPAUBl8qs/PEXa8+gk1/X5QJ2DVcYCMHBfXN31YapiSqYvlIWrDVDJKOvXMl+kkz37Wt0PBI8sw486Mq6JeOhT+lRR4b1HCaFjcGFkWQ2eAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="본정형외과 로고" style="height:38px;flex-shrink:0;"/>
     </div>
-
-    <sc-if value="{{ isMonthView }}" hint-placeholder-val="{{ true }}">
-      <div>
-        <div data-noprint="true" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <button onClick="{{ prevMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
-            <div style="font-size:1.15rem;font-weight:800;min-width:120px;text-align:center;">{{ monthLabel }}</div>
-            <button onClick="{{ nextMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
-            <button onClick="{{ goTodayMonth }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
-          </div>
-          <div style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:8px 16px;font-size:0.88rem;font-weight:700;color:#3B6FA8;">
-            이달 수술 {{ monthTotalCount }}건 (취소 {{ monthCancelledCount }}건 제외)
-          </div>
-        </div>
-
-        <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:16px;overflow:hidden;">
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;">
-            <sc-for list="{{ weekDays }}" as="wd" hint-placeholder-count="7">
-              <div style="text-align:center;font-size:0.85rem;font-weight:800;color:{{ wd.color }};padding:6px 0;">{{ wd.label }}</div>
-            </sc-for>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;">
-            <sc-for list="{{ monthCells }}" as="cell" hint-placeholder-count="42">
-              <div onClick="{{ cell.onClick }}" style="{{ cell.cellStyle }}">
-                <div style="{{ cell.dayNumStyle }}">{{ cell.dayNum }}</div>
-                <sc-if value="{{ cell.hasCount }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:4px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:2px 6px;font-size:0.72rem;font-weight:800;display:inline-block;">{{ cell.countLabel }}</div>
-                </sc-if>
-                <sc-if value="{{ cell.hasCancelled }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:3px;color:#8A8F98;font-size:0.68rem;font-weight:700;">취소 {{ cell.cancelledCount }}</div>
-                </sc-if>
-                <sc-if value="{{ cell.hasEmergency }}" hint-placeholder-val="{{ false }}">
-                  <div style="margin-top:3px;color:#E0384A;font-size:0.68rem;font-weight:800;">응급 있음</div>
-                </sc-if>
-              </div>
-            </sc-for>
-          </div>
-        </div>
-      </div>
-    </sc-if>
-
-    <sc-if value="{{ isDayView }}" hint-placeholder-val="{{ false }}">
-      <div class="day-plan-print-wrap">
-        <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-          <button onClick="{{ prevDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
-          <button onClick="{{ nextDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
-          <button onClick="{{ goTodayDay }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
-        </div>
-        <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
-          <h2 style="margin:0;font-size:1.4rem;font-weight:800;">{{ selectedDateLabel }}</h2>
-          <div style="font-size:0.9rem;color:#6B7280;font-weight:700;">수술 {{ dayCount }}건 (취소 제외) · 취소 {{ dayCancelledCount }}건</div>
-        </div>
-
-        <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow-x:auto;">
-          <table style="width:100%;border-collapse:collapse;min-width:1600px;font-size:0.82rem;">
-            <thead>
-              <tr style="background:#F3F5F8;">
-                <sc-for list="{{ tableHeaders }}" as="h" hint-placeholder-count="20">
-                  <th style="text-align:center;padding:9px 10px;font-weight:800;color:#6B7280;white-space:nowrap;border-bottom:1px solid #E3E7ED;">{{ h }}</th>
-                </sc-for>
-                <th data-noprint="true" style="padding:9px 10px;border-bottom:1px solid #E3E7ED;"></th>
-              </tr>
-            </thead>
-            <tbody>
-              <sc-for list="{{ daySurgeries }}" as="row" hint-placeholder-count="3">
-                <tr style="{{ row.rowStyle }}">
-                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.timeLabel }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.doctor }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.chartNo }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.name }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.genderAge }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.anesthesia }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.surgeryName }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.side }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.diagnosis }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.urgency }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.duration }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.room }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.npo }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.allergy }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.anticoag }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.infection }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.implant }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.cArm }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.position }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">{{ row.status }}</td>
-                  <td style="padding:9px 10px;white-space:nowrap;">{{ row.note }}</td>
-                  <td data-noprint="true" style="padding:9px 10px;white-space:nowrap;">
-                    <button onClick="{{ row.onEdit }}" style="border:none;background:transparent;color:#3B6FA8;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>
-                    <button onClick="{{ row.onDelete }}" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;">삭제</button>
-                  </td>
-                </tr>
-              </sc-for>
-            </tbody>
-          </table>
-          <sc-if value="{{ dayIsEmpty }}" hint-placeholder-val="{{ false }}">
-            <div style="padding:40px;text-align:center;color:#6B7280;font-size:0.95rem;">이 날짜에 등록된 수술이 없습니다.</div>
-          </sc-if>
-        </div>
-        <div data-noprint="true" style="margin-top:10px;font-size:0.78rem;color:#8A8F98;">색 표시: 응급 빨강 · 감염/알레르기/항응고제 복용 중 주황 · 금식 미확인 노랑 · 취소 회색</div>
-      </div>
-    </sc-if>
-
+    <h1 style="font-size:1.3rem;line-height:1.25;margin:0;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;">수술계획표</h1>
+    <div id="topRightActions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;"></div>
   </div>
 
-  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
-    <div data-noprint="true" style="position:fixed;inset:0;background:rgba(31,36,48,0.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;">
-      <div style="background:#FFFFFF;border-radius:18px;padding:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-        <h3 style="margin:0 0 16px;font-size:1.2rem;font-weight:800;">{{ formTitle }}</h3>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-          <sc-for list="{{ formFields }}" as="f" hint-placeholder-count="20">
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <label style="font-size:0.82rem;font-weight:700;color:#6B7280;">{{ f.label }}</label>
-              <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">
-                <select value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;background:#FFFFFF;">
-                  <sc-for list="{{ f.options }}" as="opt" hint-placeholder-count="4">
-                    <option value="{{ opt }}">{{ opt }}</option>
-                  </sc-for>
-                </select>
-              </sc-if>
-              <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ false }}">
-                <input type="text" value="{{ f.value }}" onChange="{{ f.onChange }}" list="{{ f.datalistId }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
-              </sc-if>
-              <sc-if value="{{ f.isNumber }}" hint-placeholder-val="{{ false }}">
-                <input type="number" value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
-              </sc-if>
-              <sc-if value="{{ f.isDate }}" hint-placeholder-val="{{ false }}">
-                <input type="date" value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
-              </sc-if>
-              <sc-if value="{{ f.isTime }}" hint-placeholder-val="{{ false }}">
-                <input type="time" value="{{ f.value }}" onChange="{{ f.onChange }}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
-              </sc-if>
-            </div>
-          </sc-for>
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;">
-          <sc-if value="{{ isEditing }}" hint-placeholder-val="{{ false }}">
-            <button onClick="{{ deleteFromForm }}" style="border:1px solid #F6C9CE;background:#FDECEE;color:#E0384A;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-right:auto;">삭제</button>
-          </sc-if>
-          <button onClick="{{ closeForm }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">취소</button>
-          <button onClick="{{ saveForm }}" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">저장</button>
-        </div>
+  <div id="monthView" style="display:none;">
+    <div data-noprint="true" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="prevMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
+        <div id="monthLabel" style="font-size:1.15rem;font-weight:800;min-width:120px;text-align:center;"></div>
+        <button id="nextMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
+        <button id="todayMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
       </div>
+      <div id="monthCountBadge" style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:8px 16px;font-size:0.88rem;font-weight:700;color:#3B6FA8;"></div>
     </div>
-  </sc-if>
+    <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:16px;overflow:hidden;">
+      <div id="weekDaysRow" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;"></div>
+      <div id="monthGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
+    </div>
+  </div>
 
-  <sc-if value="{{ monthReportOpen }}" hint-placeholder-val="{{ false }}">
-    <div style="position:fixed;inset:0;background:rgba(31,36,48,0.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;">
-      <div class="month-report-modal" style="background:#FFFFFF;border-radius:18px;padding:26px 28px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-        <h3 style="margin:0 0 4px;font-size:1.25rem;font-weight:800;">{{ monthLabel }} 수술현황 리포트</h3>
-        <p style="margin:0 0 16px;color:#6B7280;font-size:0.9rem;">천안본정형외과</p>
-        <div style="display:flex;gap:10px;margin-bottom:16px;">
-          <div style="flex:1;background:#E8EFF6;border-radius:12px;padding:12px 14px;">
-            <div style="font-size:1.6rem;font-weight:800;color:#3B6FA8;">{{ monthTotalCount }}</div>
-            <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">진행 수술 건수(취소 제외)</div>
-          </div>
-          <div style="flex:1;background:#F1F2F4;border-radius:12px;padding:12px 14px;">
-            <div style="font-size:1.6rem;font-weight:800;color:#6B7280;">{{ monthCancelledCount }}</div>
-            <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">취소 건수</div>
-          </div>
-        </div>
-        <div style="border-top:1px solid #E3E7ED;padding-top:10px;">
-          <sc-for list="{{ monthReportRows }}" as="r" hint-placeholder-count="10">
-            <div style="display:flex;justify-content:space-between;padding:7px 2px;font-size:0.9rem;border-bottom:1px dashed #E3E7ED;">
-              <span>{{ r.label }}</span>
-              <span>{{ r.count }}건<sc-if value="{{ r.hasCancelled }}" hint-placeholder-val="{{ false }}"> (취소 {{ r.cancelledCount }})</sc-if></span>
-            </div>
-          </sc-for>
-          <sc-if value="{{ monthReportEmpty }}" hint-placeholder-val="{{ false }}">
-            <div style="padding:20px 2px;color:#6B7280;font-size:0.9rem;">이 달에 등록된 수술이 없습니다.</div>
-          </sc-if>
-        </div>
-        <div data-noprint="true" style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
-          <button onClick="{{ closeMonthReport }}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">닫기</button>
-          <button onClick="{{ printMonthReport }}" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>
-        </div>
-      </div>
+  <div id="dayView" class="day-plan-print-wrap" style="display:none;">
+    <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+      <button id="prevDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
+      <button id="nextDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
+      <button id="todayDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
     </div>
-  </sc-if>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+      <h2 id="selectedDateLabel" style="margin:0;font-size:1.4rem;font-weight:800;"></h2>
+      <div id="dayCountLabel" style="font-size:0.9rem;color:#6B7280;font-weight:700;"></div>
+    </div>
+    <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:1600px;font-size:0.82rem;">
+        <thead><tr id="tableHeadRow" style="background:#F3F5F8;"></tr></thead>
+        <tbody id="dayTableBody"></tbody>
+      </table>
+      <div id="dayEmptyMsg" style="display:none;padding:40px;text-align:center;color:#6B7280;font-size:0.95rem;">이 날짜에 등록된 수술이 없습니다.</div>
+    </div>
+    <div data-noprint="true" style="margin-top:10px;font-size:0.78rem;color:#8A8F98;">색 표시: 응급 빨강 · 감염/알레르기/항응고제 복용 중 주황 · 금식 미확인 노랑 · 취소 회색</div>
+  </div>
 
 </div>
 
-</x-dc>
-<script type="text/x-dc" data-dc-script>
+<div id="formModal" style="display:none;position:fixed;inset:0;background:rgba(31,36,48,0.42);align-items:center;justify-content:center;padding:20px;z-index:60;" data-noprint="true">
+  <div style="background:#FFFFFF;border-radius:18px;padding:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <h3 id="formTitle" style="margin:0 0 16px;font-size:1.2rem;font-weight:800;"></h3>
+    <div id="formFieldsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;">
+      <button id="deleteFormBtn" style="display:none;border:1px solid #F6C9CE;background:#FDECEE;color:#E0384A;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-right:auto;">삭제</button>
+      <button id="closeFormBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">취소</button>
+      <button id="saveFormBtn" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">저장</button>
+    </div>
+  </div>
+</div>
+
+<div id="monthReportModal" style="display:none;position:fixed;inset:0;background:rgba(31,36,48,0.42);align-items:center;justify-content:center;padding:20px;z-index:60;">
+  <div class="month-report-modal" style="background:#FFFFFF;border-radius:18px;padding:26px 28px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <h3 id="reportTitle" style="margin:0 0 4px;font-size:1.25rem;font-weight:800;"></h3>
+    <p style="margin:0 0 16px;color:#6B7280;font-size:0.9rem;">천안본정형외과</p>
+    <div style="display:flex;gap:10px;margin-bottom:16px;">
+      <div style="flex:1;background:#E8EFF6;border-radius:12px;padding:12px 14px;">
+        <div id="reportTotal" style="font-size:1.6rem;font-weight:800;color:#3B6FA8;"></div>
+        <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">진행 수술 건수(취소 제외)</div>
+      </div>
+      <div style="flex:1;background:#F1F2F4;border-radius:12px;padding:12px 14px;">
+        <div id="reportCancelled" style="font-size:1.6rem;font-weight:800;color:#6B7280;"></div>
+        <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">취소 건수</div>
+      </div>
+    </div>
+    <div id="reportRows" style="border-top:1px solid #E3E7ED;padding-top:10px;"></div>
+    <div data-noprint="true" style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+      <button id="closeReportBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">닫기</button>
+      <button id="printReportBtn" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbzg6dXukkzlP3Mr38p4OZZqS0UFeGUGYPzJFHnHli01ct9-_chDgADVxen02rlDpp7LbQ/exec';
+const STORE_KEY = 'cheonan-ortho-surgery-plan-v1';
 const GENDER = ['남','여'];
 const ANESTHESIA = ['전신마취','척추마취','경막외마취','신경차단','국소마취','수면마취'];
 const URGENCY = ['예정','응급'];
@@ -245,7 +126,6 @@ const SIDE = ['좌','우','양측','해당없음'];
 const WEEKDAY_LABELS = ['일','월','화','수','목','금','토'];
 const SURGERY_SUGGESTIONS = ['ACL · 전방십자인대재건술','ATFL · 발목인대재건술','BPHA · 고관절반치환술','CTR · 수근관감압술','HTO · 근위경골절골술','Meniscectomy · 반월상연골절제술','Meniscus Repair · 반월상연골봉합술','Meniscus Root Repair · 후근봉합술','PEN · 경막외신경성형술','PFNA · 대퇴부근위부골절수술','RCT · 회전근개봉합술','TKRA · 무릎 인공관절수술','Trigger Finger · 방아쇠수지수술','ORIF · 발목골절수술','ORIF · 손목골절수술','ORIF · 어깨골절수술','MUA · 오십견 마취하 도수조작술','VP · 척추체성형술','SUTURE 창상봉합술','E & B 절제생검','INGROWING NAIL 내향성 발톱','CORN REMOVAL 티눈제거','CRIF Foot','CRIF Hand'];
 const DIAGNOSIS_SUGGESTIONS = ['ACL tear','Chronic ankle instability','Femoral neck fracture','Carpal tunnel syndrome','Medial knee osteoarthritis (varus)','Meniscus tear','Meniscus root tear','Lumbar disc herniation','Lumbar spinal stenosis','Intertrochanteric fracture','Rotator cuff tear','Knee osteoarthritis','Trigger finger','Ankle fracture','Distal radius fracture','Proximal humerus fracture','Adhesive capsulitis (frozen shoulder)','Vertebral compression fracture','Laceration','Soft tissue mass','Ingrown toenail','Corn (clavus)','Foot fracture','Hand fracture'];
-const STORE_KEY = 'cheonan-ortho-surgery-plan-v1';
 const TABLE_HEADERS = ['시간','집도의','차트번호','환자명','성별/나이','마취종류','수술명','부위','진단명','응급/예정','예상시간','병실','금식','알레르기','항응고제','감염','임플란트/재료','C-arm','체위','상태','비고'];
 
 function pad2(n){ return n < 10 ? '0'+n : ''+n; }
@@ -253,276 +133,330 @@ function toISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.ge
 function fromISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
 function uid(){ return 'sx-'+Date.now()+'-'+Math.random().toString(16).slice(2,8); }
 function timeToMinutes(t){ if(!t) return 0; const [h,m]=t.split(':').map(Number); return h*60+(m||0); }
+function esc(str){ const d=document.createElement('div'); d.textContent = str==null?'':str; return d.innerHTML; }
 
-function defaultFormData(dateStr, doctors){
-  return {
-    date: dateStr, time: '09:00', doctor: doctors[0] || '', chartNo: '', name: '',
-    gender: GENDER[0], age: '', anesthesia: ANESTHESIA[0], surgeryName: '', side: SIDE[3],
-    diagnosis: '', urgency: URGENCY[0], duration: DURATION[0], room: '', npo: NPO[0],
-    allergy: ALLERGY[0], anticoag: ANTICOAG[0], infection: INFECTION[0], implant: '',
-    cArm: CARM[1], position: POSITION[0], status: STATUS[0], note: ''
-  };
+function defaultFormData(dateStr, doctor){
+  return { date: dateStr, time:'09:00', doctor: doctor||'', chartNo:'', name:'', gender:GENDER[0], age:'',
+    anesthesia:ANESTHESIA[0], surgeryName:'', side:SIDE[3], diagnosis:'', urgency:URGENCY[0], duration:DURATION[0],
+    room:'', npo:NPO[0], allergy:ALLERGY[0], anticoag:ANTICOAG[0], infection:INFECTION[0], implant:'',
+    cArm:CARM[1], position:POSITION[0], status:STATUS[0], note:'' };
 }
 
-class Component extends DCLogic {
-  state = {
-    view: 'month',
-    monthYear: new Date().getFullYear(),
-    monthMonth: new Date().getMonth(),
-    selectedDate: toISO(new Date()),
-    surgeries: [],
-    doctors: ['김진일'],
-    formOpen: false,
-    editingId: null,
-    formData: null,
-    monthReportOpen: false,
-    loaded: false
-  };
+const state = {
+  view: 'month',
+  monthYear: new Date().getFullYear(),
+  monthMonth: new Date().getMonth(),
+  selectedDate: toISO(new Date()),
+  surgeries: [],
+  doctors: ['김진일'],
+  editingId: null,
+  formData: null,
+  syncStatus: 'idle'
+};
 
-  componentDidMount(){
-    try {
-      const raw = window.localStorage.getItem(STORE_KEY);
-      if (raw) {
-        const data = JSON.parse(raw);
-        this.setState({
-          surgeries: data.surgeries || [],
-          doctors: (data.doctors && data.doctors.length) ? data.doctors : ['김진일'],
-          loaded: true
-        });
-      } else {
-        this.setState({ loaded: true });
-      }
-    } catch(e){ this.setState({ loaded: true }); }
-  }
-
-  persist(surgeries, doctors){
-    try {
-      window.localStorage.setItem(STORE_KEY, JSON.stringify({ surgeries, doctors }));
-    } catch(e){}
-  }
-
-  makeFieldHandler(key){
-    return (e) => {
-      const val = e.target.value;
-      this.setState(s => ({ formData: Object.assign({}, s.formData, { [key]: val }) }));
-    };
-  }
-
-  prevMonth(){ this.setState(s => { let m=s.monthMonth-1,y=s.monthYear; if(m<0){m=11;y--;} return {monthMonth:m,monthYear:y}; }); }
-  nextMonth(){ this.setState(s => { let m=s.monthMonth+1,y=s.monthYear; if(m>11){m=0;y++;} return {monthMonth:m,monthYear:y}; }); }
-  goTodayMonth(){ const d=new Date(); this.setState({monthYear:d.getFullYear(),monthMonth:d.getMonth()}); }
-
-  goToDate(dateStr){ this.setState({ selectedDate: dateStr, view: 'day' }); }
-  backToMonth(){ this.setState({ view: 'month' }); }
-  prevDay(){ this.setState(s => { const d=fromISO(s.selectedDate); d.setDate(d.getDate()-1); return {selectedDate:toISO(d)}; }); }
-  nextDay(){ this.setState(s => { const d=fromISO(s.selectedDate); d.setDate(d.getDate()+1); return {selectedDate:toISO(d)}; }); }
-  goTodayDay(){ this.setState({ selectedDate: toISO(new Date()) }); }
-
-  openAddForm(){
-    this.setState(s => ({ formOpen: true, editingId: null, formData: defaultFormData(s.selectedDate, s.doctors) }));
-  }
-  openEditForm(id){
-    this.setState(s => {
-      const rec = s.surgeries.find(x => x.id === id);
-      if (!rec) return null;
-      return { formOpen: true, editingId: id, formData: Object.assign({}, rec) };
-    });
-  }
-  closeForm(){ this.setState({ formOpen: false, editingId: null, formData: null }); }
-
-  saveForm(){
-    this.setState(s => {
-      const fd = s.formData;
-      if (!fd) return null;
-      let surgeries = s.surgeries.slice();
-      if (s.editingId) {
-        surgeries = surgeries.map(x => x.id === s.editingId ? Object.assign({}, fd, { id: s.editingId }) : x);
-      } else {
-        surgeries.push(Object.assign({}, fd, { id: uid() }));
-      }
-      let doctors = s.doctors.slice();
-      if (fd.doctor && doctors.indexOf(fd.doctor) === -1) doctors.push(fd.doctor);
-      this.persist(surgeries, doctors);
-      return { surgeries, doctors, formOpen: false, editingId: null, formData: null };
-    });
-  }
-
-  deleteFromForm(){
-    if (!window.confirm('이 수술 일정을 삭제할까요?')) return;
-    this.setState(s => {
-      const surgeries = s.surgeries.filter(x => x.id !== s.editingId);
-      this.persist(surgeries, s.doctors);
-      return { surgeries, formOpen: false, editingId: null, formData: null };
-    });
-  }
-
-  deleteRecord(id){
-    if (!window.confirm('이 수술 일정을 삭제할까요?')) return;
-    this.setState(s => {
-      const surgeries = s.surgeries.filter(x => x.id !== id);
-      this.persist(surgeries, s.doctors);
-      return { surgeries };
-    });
-  }
-
-  openMonthReport(){ this.setState({ monthReportOpen: true }); }
-  closeMonthReport(){ this.setState({ monthReportOpen: false }); }
-  printDay(){ window.print(); }
-  printMonthReport(){ window.print(); }
-
-  rowStyleFor(s){
-    if (s.status === '취소') return { background:'#F1F2F4', borderBottom:'1px solid #E3E7ED', color:'#8A8F98' };
-    if (s.urgency === '응급') return { background:'#FDECEE', borderBottom:'1px solid #F6C9CE' };
-    if ((s.infection && s.infection !== '없음') || s.allergy === '있음' || s.anticoag === '복용 중') return { background:'#FFF3E0', borderBottom:'1px solid #FBDDA8' };
-    if (s.npo === '미확인') return { background:'#FFFBE0', borderBottom:'1px solid #F5E39C' };
-    return { background:'#FFFFFF', borderBottom:'1px solid #E3E7ED' };
-  }
-
-  renderVals(){
-    const s = this.state;
-    const doctors = s.doctors;
-    const monthLabel = s.monthYear + '년 ' + (s.monthMonth+1) + '월';
-    const weekDays = WEEKDAY_LABELS.map((label,i) => ({ label, color: i===0 ? '#E0384A' : (i===6 ? '#3B6FA8' : '#6B7280') }));
-
-    const firstOfMonth = new Date(s.monthYear, s.monthMonth, 1);
-    const startOffset = firstOfMonth.getDay();
-    const gridStart = new Date(s.monthYear, s.monthMonth, 1 - startOffset);
-    const today = toISO(new Date());
-
-    const byDate = {};
-    s.surgeries.forEach(rec => {
-      if (!byDate[rec.date]) byDate[rec.date] = [];
-      byDate[rec.date].push(rec);
-    });
-
-    const monthCells = [];
-    for (let i=0;i<42;i++){
-      const d = new Date(gridStart);
-      d.setDate(gridStart.getDate()+i);
-      const dateStr = toISO(d);
-      const inMonth = d.getMonth() === s.monthMonth;
-      const recs = byDate[dateStr] || [];
-      const active = recs.filter(r => r.status !== '취소');
-      const cancelled = recs.filter(r => r.status === '취소');
-      const hasEmergency = active.some(r => r.urgency === '응급');
-      const isToday = dateStr === today;
-      monthCells.push({
-        key: dateStr,
-        dayNum: d.getDate(),
-        onClick: () => this.goToDate(dateStr),
-        hasCount: active.length > 0,
-        countLabel: active.length + '건',
-        hasCancelled: cancelled.length > 0,
-        cancelledCount: cancelled.length,
-        hasEmergency,
-        cellStyle: {
-          minHeight:'86px', borderRadius:'10px', padding:'8px',
-          background: isToday ? '#E8EFF6' : (inMonth ? '#FFFFFF' : '#F7F8FA'),
-          border: isToday ? '1px solid #3B6FA8' : '1px solid #EDEFF2',
-          cursor:'pointer', opacity: inMonth ? 1 : 0.5
-        },
-        dayNumStyle: { fontSize:'0.9rem', fontWeight: isToday ? 800 : 700, color: isToday ? '#3B6FA8' : '#1F2430' }
-      });
+function loadLocal(){
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      state.surgeries = data.surgeries || [];
+      state.doctors = (data.doctors && data.doctors.length) ? data.doctors : ['김진일'];
     }
-
-    let monthTotalCount = 0, monthCancelledCount = 0;
-    const daysInMonth = new Date(s.monthYear, s.monthMonth+1, 0).getDate();
-    const monthReportRows = [];
-    for (let day=1; day<=daysInMonth; day++){
-      const dateStr = s.monthYear+'-'+pad2(s.monthMonth+1)+'-'+pad2(day);
-      const recs = byDate[dateStr] || [];
-      const active = recs.filter(r => r.status !== '취소');
-      const cancelled = recs.filter(r => r.status === '취소');
-      monthTotalCount += active.length;
-      monthCancelledCount += cancelled.length;
-      if (recs.length > 0) {
-        monthReportRows.push({
-          label: (s.monthMonth+1)+'월 '+day+'일 ('+WEEKDAY_LABELS[new Date(s.monthYear,s.monthMonth,day).getDay()]+')',
-          count: active.length,
-          hasCancelled: cancelled.length > 0,
-          cancelledCount: cancelled.length
-        });
+  } catch(e){}
+}
+function saveLocal(){
+  try { localStorage.setItem(STORE_KEY, JSON.stringify({ surgeries: state.surgeries, doctors: state.doctors })); } catch(e){}
+}
+function setSyncLabel(status){
+  state.syncStatus = status;
+  const el = document.getElementById('syncLabel');
+  if (el) el.textContent = status==='syncing' ? '동기화 중...' : (status==='error' ? '동기화 실패' : (status==='synced' ? '구글시트 동기화됨' : ''));
+}
+function pullFromSheet(){
+  if (!SHEET_URL) return;
+  setSyncLabel('syncing');
+  fetch(SHEET_URL + '?action=get&key=surgeryPlanData')
+    .then(r => r.json())
+    .then(res => {
+      if (res && res.value) {
+        const data = JSON.parse(res.value);
+        state.surgeries = data.surgeries || [];
+        state.doctors = (data.doctors && data.doctors.length) ? data.doctors : ['김진일'];
+        renderAll();
       }
-    }
+      setSyncLabel('synced');
+    })
+    .catch(() => setSyncLabel('error'));
+}
+function pushToSheet(){
+  if (!SHEET_URL) return;
+  setSyncLabel('syncing');
+  fetch(SHEET_URL, { method:'POST', body: JSON.stringify({ action:'set', key:'surgeryPlanData', value: JSON.stringify({ surgeries: state.surgeries, doctors: state.doctors }) }) })
+    .then(() => setSyncLabel('synced'))
+    .catch(() => setSyncLabel('error'));
+}
+function persist(){ saveLocal(); pushToSheet(); }
 
-    const selDate = fromISO(s.selectedDate);
-    const selectedDateLabel = selDate.getFullYear()+'년 '+(selDate.getMonth()+1)+'월 '+selDate.getDate()+'일 ('+WEEKDAY_LABELS[selDate.getDay()]+')';
-    const dayRecs = (byDate[s.selectedDate] || []).slice().sort((a,b) => timeToMinutes(a.time)-timeToMinutes(b.time));
-    const dayActive = dayRecs.filter(r => r.status !== '취소');
-    const dayCancelled = dayRecs.filter(r => r.status === '취소');
+function rowStyleFor(s){
+  if (s.status === '취소') return 'background:#F1F2F4;border-bottom:1px solid #E3E7ED;color:#8A8F98;';
+  if (s.urgency === '응급') return 'background:#FDECEE;border-bottom:1px solid #F6C9CE;';
+  if ((s.infection && s.infection !== '없음') || s.allergy === '있음' || s.anticoag === '복용 중') return 'background:#FFF3E0;border-bottom:1px solid #FBDDA8;';
+  if (s.npo === '미확인') return 'background:#FFFBE0;border-bottom:1px solid #F5E39C;';
+  return 'background:#FFFFFF;border-bottom:1px solid #E3E7ED;';
+}
 
-    const daySurgeries = dayRecs.map(r => ({
-      timeLabel: r.time || '',
-      doctor: r.doctor || '', chartNo: r.chartNo || '', name: r.name || '',
-      genderAge: (r.gender||'') + ' / ' + (r.age||''),
-      anesthesia: r.anesthesia || '', surgeryName: r.surgeryName || '', side: r.side || '',
-      diagnosis: r.diagnosis || '', urgency: r.urgency || '', duration: r.duration || '',
-      room: r.room || '', npo: r.npo || '', allergy: r.allergy || '', anticoag: r.anticoag || '',
-      infection: r.infection || '', implant: r.implant || '', cArm: r.cArm || '', position: r.position || '',
-      status: r.status || '', note: r.note || '',
-      rowStyle: this.rowStyleFor(r),
-      onEdit: () => this.openEditForm(r.id),
-      onDelete: () => this.deleteRecord(r.id)
-    }));
-
-    const formFieldsDefs = s.formData ? [
-      {key:'date', label:'수술일자', kind:'date', options:[]},
-      {key:'time', label:'수술시간', kind:'time', options:[]},
-      {key:'doctor', label:'집도의', kind:'text', options:[], datalistId:'doctorList'},
-      {key:'chartNo', label:'차트번호', kind:'text', options:[]},
-      {key:'name', label:'환자 이름', kind:'text', options:[]},
-      {key:'gender', label:'성별', kind:'select', options:GENDER},
-      {key:'age', label:'나이', kind:'number', options:[]},
-      {key:'anesthesia', label:'마취종류', kind:'select', options:ANESTHESIA},
-      {key:'surgeryName', label:'수술명', kind:'text', options:[], datalistId:'surgeryList'},
-      {key:'side', label:'수술부위', kind:'select', options:SIDE},
-      {key:'diagnosis', label:'진단명', kind:'text', options:[], datalistId:'diagnosisList'},
-      {key:'urgency', label:'응급/예정', kind:'select', options:URGENCY},
-      {key:'duration', label:'예상소요시간', kind:'select', options:DURATION},
-      {key:'room', label:'입원병실', kind:'text', options:[]},
-      {key:'npo', label:'금식(NPO)', kind:'select', options:NPO},
-      {key:'allergy', label:'알레르기', kind:'select', options:ALLERGY},
-      {key:'anticoag', label:'항응고제', kind:'select', options:ANTICOAG},
-      {key:'infection', label:'감염여부', kind:'select', options:INFECTION},
-      {key:'implant', label:'임플란트/재료', kind:'text', options:[]},
-      {key:'cArm', label:'C-arm', kind:'select', options:CARM},
-      {key:'position', label:'체위', kind:'select', options:POSITION},
-      {key:'status', label:'진행상태', kind:'select', options:STATUS},
-      {key:'note', label:'비고', kind:'text', options:[]}
-    ] : [];
-
-    const formFields = formFieldsDefs.map(f => ({
-      key:f.key, label:f.label, options:f.options, datalistId: f.datalistId || '',
-      value: s.formData[f.key],
-      isSelect: f.kind==='select', isText: f.kind==='text', isNumber: f.kind==='number',
-      isDate: f.kind==='date', isTime: f.kind==='time',
-      onChange: this.makeFieldHandler(f.key)
-    }));
-
-    return {
-      view: s.view, isMonthView: s.view==='month', isDayView: s.view==='day',
-      printMode: s.monthReportOpen ? 'month-report' : 'day-plan',
-      monthLabel, weekDays, monthCells,
-      monthTotalCount, monthCancelledCount,
-      prevMonth: () => this.prevMonth(), nextMonth: () => this.nextMonth(), goTodayMonth: () => this.goTodayMonth(),
-      openMonthReport: () => this.openMonthReport(), monthReportOpen: s.monthReportOpen,
-      closeMonthReport: () => this.closeMonthReport(), printMonthReport: () => this.printMonthReport(),
-      monthReportRows, monthReportEmpty: monthReportRows.length === 0,
-      backToMonth: () => this.backToMonth(),
-      selectedDateLabel, dayCount: dayActive.length, dayCancelledCount: dayCancelled.length,
-      daySurgeries, dayIsEmpty: daySurgeries.length === 0,
-      tableHeaders: TABLE_HEADERS,
-      prevDay: () => this.prevDay(), nextDay: () => this.nextDay(), goTodayDay: () => this.goTodayDay(),
-      openAddForm: () => this.openAddForm(), printDay: () => this.printDay(),
-      formOpen: s.formOpen, isEditing: !!s.editingId,
-      formTitle: s.editingId ? '수술 일정 수정' : '수술 일정 추가',
-      formFields, saveForm: () => this.saveForm(), closeForm: () => this.closeForm(),
-      deleteFromForm: () => this.deleteFromForm(),
-      doctors, surgerySuggestions: SURGERY_SUGGESTIONS, diagnosisSuggestions: DIAGNOSIS_SUGGESTIONS
-    };
+function renderTopActions(){
+  const el = document.getElementById('topRightActions');
+  if (state.view === 'month') {
+    el.innerHTML = '<button id="monthReportBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">리포트 내보내기</button>';
+    document.getElementById('monthReportBtn').onclick = openMonthReport;
+  } else {
+    el.innerHTML =
+      '<button id="backToMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">← 월별보기</button>'+
+      '<button id="addSurgeryBtn" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">＋ 수술 추가</button>'+
+      '<span id="syncLabel" style="font-size:0.78rem;color:#6B7280;font-weight:700;"></span>'+
+      '<button id="printDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>';
+    document.getElementById('backToMonthBtn').onclick = () => { state.view = 'month'; renderAll(); };
+    document.getElementById('addSurgeryBtn').onclick = openAddForm;
+    document.getElementById('printDayBtn').onclick = () => window.print();
+    setSyncLabel(state.syncStatus);
   }
 }
 
+function renderMonth(){
+  document.getElementById('monthView').style.display = state.view==='month' ? 'block' : 'none';
+  if (state.view !== 'month') return;
+  document.getElementById('monthLabel').textContent = state.monthYear + '년 ' + (state.monthMonth+1) + '월';
+
+  const weekRow = document.getElementById('weekDaysRow');
+  weekRow.innerHTML = WEEKDAY_LABELS.map((l,i) => '<div style="text-align:center;font-size:0.85rem;font-weight:800;color:'+(i===0?'#E0384A':(i===6?'#3B6FA8':'#6B7280'))+';padding:6px 0;">'+l+'</div>').join('');
+
+  const firstOfMonth = new Date(state.monthYear, state.monthMonth, 1);
+  const startOffset = firstOfMonth.getDay();
+  const gridStart = new Date(state.monthYear, state.monthMonth, 1 - startOffset);
+  const today = toISO(new Date());
+  const byDate = {};
+  state.surgeries.forEach(r => { (byDate[r.date] = byDate[r.date]||[]).push(r); });
+
+  let monthTotalCount = 0, monthCancelledCount = 0;
+  const daysInMonth = new Date(state.monthYear, state.monthMonth+1, 0).getDate();
+  for (let day=1; day<=daysInMonth; day++){
+    const dateStr = state.monthYear+'-'+pad2(state.monthMonth+1)+'-'+pad2(day);
+    const recs = byDate[dateStr] || [];
+    monthTotalCount += recs.filter(r=>r.status!=='취소').length;
+    monthCancelledCount += recs.filter(r=>r.status==='취소').length;
+  }
+  document.getElementById('monthCountBadge').textContent = '이달 수술 ' + monthTotalCount + '건 (취소 ' + monthCancelledCount + '건 제외)';
+
+  const grid = document.getElementById('monthGrid');
+  let html = '';
+  for (let i=0;i<42;i++){
+    const d = new Date(gridStart); d.setDate(gridStart.getDate()+i);
+    const dateStr = toISO(d);
+    const inMonth = d.getMonth() === state.monthMonth;
+    const recs = byDate[dateStr] || [];
+    const active = recs.filter(r=>r.status!=='취소');
+    const cancelled = recs.filter(r=>r.status==='취소');
+    const hasEmergency = active.some(r=>r.urgency==='응급');
+    const isToday = dateStr === today;
+    html += '<div class="monthCell" data-date="'+dateStr+'" style="min-height:86px;border-radius:10px;padding:8px;background:'+(isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA'))+';border:'+(isToday?'1px solid #3B6FA8':'1px solid #EDEFF2')+';cursor:pointer;opacity:'+(inMonth?1:0.5)+';">'
+      + '<div style="font-size:0.9rem;font-weight:'+(isToday?800:700)+';color:'+(isToday?'#3B6FA8':'#1F2430')+';">'+d.getDate()+'</div>'
+      + (active.length>0 ? '<div style="margin-top:4px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:2px 6px;font-size:0.72rem;font-weight:800;display:inline-block;">'+active.length+'건</div>' : '')
+      + (cancelled.length>0 ? '<div style="margin-top:3px;color:#8A8F98;font-size:0.68rem;font-weight:700;">취소 '+cancelled.length+'</div>' : '')
+      + (hasEmergency ? '<div style="margin-top:3px;color:#E0384A;font-size:0.68rem;font-weight:800;">응급 있음</div>' : '')
+      + '</div>';
+  }
+  grid.innerHTML = html;
+  grid.querySelectorAll('.monthCell').forEach(cell => {
+    cell.onclick = () => { state.selectedDate = cell.getAttribute('data-date'); state.view = 'day'; renderAll(); };
+  });
+}
+
+function renderDay(){
+  document.getElementById('dayView').style.display = state.view==='day' ? 'block' : 'none';
+  if (state.view !== 'day') return;
+  const selDate = fromISO(state.selectedDate);
+  document.getElementById('selectedDateLabel').textContent = selDate.getFullYear()+'년 '+(selDate.getMonth()+1)+'월 '+selDate.getDate()+'일 ('+WEEKDAY_LABELS[selDate.getDay()]+')';
+
+  const recs = state.surgeries.filter(r => r.date === state.selectedDate).slice().sort((a,b)=>timeToMinutes(a.time)-timeToMinutes(b.time));
+  const active = recs.filter(r=>r.status!=='취소');
+  const cancelled = recs.filter(r=>r.status==='취소');
+  document.getElementById('dayCountLabel').textContent = '수술 '+active.length+'건 (취소 제외) · 취소 '+cancelled.length+'건';
+
+  document.getElementById('tableHeadRow').innerHTML = TABLE_HEADERS.map(h => '<th style="text-align:center;padding:9px 10px;font-weight:800;color:#6B7280;white-space:nowrap;border-bottom:1px solid #E3E7ED;">'+h+'</th>').join('') + '<th data-noprint="true" style="padding:9px 10px;border-bottom:1px solid #E3E7ED;"></th>';
+
+  const tbody = document.getElementById('dayTableBody');
+  if (recs.length === 0) {
+    tbody.innerHTML = '';
+    document.getElementById('dayEmptyMsg').style.display = 'block';
+  } else {
+    document.getElementById('dayEmptyMsg').style.display = 'none';
+    tbody.innerHTML = recs.map(r => {
+      const cells = [r.time, r.doctor, r.chartNo, r.name, (r.gender||'')+' / '+(r.age||''), r.anesthesia, r.surgeryName, r.side, r.diagnosis, r.urgency, r.duration, r.room, r.npo, r.allergy, r.anticoag, r.infection, r.implant, r.cArm, r.position, r.status, r.note];
+      const boldCols = [0,3,9,19];
+      const tds = cells.map((c,i) => '<td style="padding:9px 10px;white-space:nowrap;'+(boldCols.includes(i)?'font-weight:800;':'')+'">'+esc(c)+'</td>').join('');
+      return '<tr style="'+rowStyleFor(r)+'">'+tds+
+        '<td data-noprint="true" style="padding:9px 10px;white-space:nowrap;">'+
+        '<button class="editBtn" data-id="'+r.id+'" style="border:none;background:transparent;color:#3B6FA8;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>'+
+        '<button class="deleteBtn" data-id="'+r.id+'" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;">삭제</button>'+
+        '</td></tr>';
+    }).join('');
+    tbody.querySelectorAll('.editBtn').forEach(b => b.onclick = () => openEditForm(b.getAttribute('data-id')));
+    tbody.querySelectorAll('.deleteBtn').forEach(b => b.onclick = () => deleteRecord(b.getAttribute('data-id')));
+  }
+}
+
+const FORM_FIELDS = [
+  {key:'date', label:'수술일자', kind:'date'},
+  {key:'time', label:'수술시간', kind:'time'},
+  {key:'doctor', label:'집도의', kind:'text', list:'doctorList'},
+  {key:'chartNo', label:'차트번호', kind:'text'},
+  {key:'name', label:'환자 이름', kind:'text'},
+  {key:'gender', label:'성별', kind:'select', options:GENDER},
+  {key:'age', label:'나이', kind:'number'},
+  {key:'anesthesia', label:'마취종류', kind:'select', options:ANESTHESIA},
+  {key:'surgeryName', label:'수술명', kind:'text', list:'surgeryList'},
+  {key:'side', label:'수술부위', kind:'select', options:SIDE},
+  {key:'diagnosis', label:'진단명', kind:'text', list:'diagnosisList'},
+  {key:'urgency', label:'응급/예정', kind:'select', options:URGENCY},
+  {key:'duration', label:'예상소요시간', kind:'select', options:DURATION},
+  {key:'room', label:'입원병실', kind:'text'},
+  {key:'npo', label:'금식(NPO)', kind:'select', options:NPO},
+  {key:'allergy', label:'알레르기', kind:'select', options:ALLERGY},
+  {key:'anticoag', label:'항응고제', kind:'select', options:ANTICOAG},
+  {key:'infection', label:'감염여부', kind:'select', options:INFECTION},
+  {key:'implant', label:'임플란트/재료', kind:'text'},
+  {key:'cArm', label:'C-arm', kind:'select', options:CARM},
+  {key:'position', label:'체위', kind:'select', options:POSITION},
+  {key:'status', label:'진행상태', kind:'select', options:STATUS},
+  {key:'note', label:'비고', kind:'text'}
+];
+
+function renderForm(){
+  const modal = document.getElementById('formModal');
+  if (!state.formData) { modal.style.display = 'none'; return; }
+  modal.style.display = 'flex';
+  document.getElementById('formTitle').textContent = state.editingId ? '수술 일정 수정' : '수술 일정 추가';
+  document.getElementById('deleteFormBtn').style.display = state.editingId ? 'block' : 'none';
+
+  const grid = document.getElementById('formFieldsGrid');
+  grid.innerHTML = FORM_FIELDS.map(f => {
+    const val = state.formData[f.key] || '';
+    let input;
+    if (f.kind === 'select') {
+      input = '<select data-key="'+f.key+'" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;background:#FFFFFF;">' +
+        f.options.map(o => '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>').join('') + '</select>';
+    } else {
+      const type = f.kind === 'number' ? 'number' : (f.kind === 'date' ? 'date' : (f.kind === 'time' ? 'time' : 'text'));
+      input = '<input type="'+type+'" data-key="'+f.key+'" value="'+esc(val)+'"'+(f.list?' list="'+f.list+'"':'')+' style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>';
+    }
+    return '<div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:0.82rem;font-weight:700;color:#6B7280;">'+f.label+'</label>'+input+'</div>';
+  }).join('');
+  grid.querySelectorAll('[data-key]').forEach(el => {
+    el.onchange = (e) => { state.formData[el.getAttribute('data-key')] = e.target.value; };
+  });
+}
+
+function refreshDatalists(){
+  document.getElementById('doctorList').innerHTML = state.doctors.map(d => '<option value="'+esc(d)+'"></option>').join('');
+  document.getElementById('surgeryList').innerHTML = SURGERY_SUGGESTIONS.map(s => '<option value="'+esc(s)+'"></option>').join('');
+  document.getElementById('diagnosisList').innerHTML = DIAGNOSIS_SUGGESTIONS.map(s => '<option value="'+esc(s)+'"></option>').join('');
+}
+
+function openAddForm(){
+  state.editingId = null;
+  state.formData = defaultFormData(state.selectedDate, state.doctors[0]);
+  renderForm();
+}
+function openEditForm(id){
+  const rec = state.surgeries.find(x => x.id === id);
+  if (!rec) return;
+  state.editingId = id;
+  state.formData = Object.assign({}, rec);
+  renderForm();
+}
+function closeForm(){ state.editingId = null; state.formData = null; renderForm(); }
+function saveForm(){
+  const fd = state.formData;
+  if (!fd) return;
+  if (state.editingId) {
+    state.surgeries = state.surgeries.map(x => x.id === state.editingId ? Object.assign({}, fd, {id: state.editingId}) : x);
+  } else {
+    state.surgeries.push(Object.assign({}, fd, {id: uid()}));
+  }
+  if (fd.doctor && state.doctors.indexOf(fd.doctor) === -1) state.doctors.push(fd.doctor);
+  persist();
+  state.editingId = null; state.formData = null;
+  renderAll();
+}
+function deleteFromForm(){
+  if (!confirm('이 수술 일정을 삭제할까요?')) return;
+  state.surgeries = state.surgeries.filter(x => x.id !== state.editingId);
+  persist();
+  state.editingId = null; state.formData = null;
+  renderAll();
+}
+function deleteRecord(id){
+  if (!confirm('이 수술 일정을 삭제할까요?')) return;
+  state.surgeries = state.surgeries.filter(x => x.id !== id);
+  persist();
+  renderAll();
+}
+
+function openMonthReport(){
+  const modal = document.getElementById('monthReportModal');
+  modal.style.display = 'flex';
+  document.getElementById('reportTitle').textContent = (state.monthYear+'년 '+(state.monthMonth+1)+'월 수술현황 리포트');
+  const byDate = {};
+  state.surgeries.forEach(r => { (byDate[r.date] = byDate[r.date]||[]).push(r); });
+  let total = 0, cancelledTotal = 0;
+  const daysInMonth = new Date(state.monthYear, state.monthMonth+1, 0).getDate();
+  const rows = [];
+  for (let day=1; day<=daysInMonth; day++){
+    const dateStr = state.monthYear+'-'+pad2(state.monthMonth+1)+'-'+pad2(day);
+    const recs = byDate[dateStr] || [];
+    const active = recs.filter(r=>r.status!=='취소');
+    const cancelled = recs.filter(r=>r.status==='취소');
+    total += active.length; cancelledTotal += cancelled.length;
+    if (recs.length > 0) {
+      rows.push({ label: (state.monthMonth+1)+'월 '+day+'일 ('+WEEKDAY_LABELS[new Date(state.monthYear,state.monthMonth,day).getDay()]+')', count: active.length, cancelledCount: cancelled.length });
+    }
+  }
+  document.getElementById('reportTotal').textContent = total;
+  document.getElementById('reportCancelled').textContent = cancelledTotal;
+  const rowsEl = document.getElementById('reportRows');
+  if (rows.length === 0) {
+    rowsEl.innerHTML = '<div style="padding:20px 2px;color:#6B7280;font-size:0.9rem;">이 달에 등록된 수술이 없습니다.</div>';
+  } else {
+    rowsEl.innerHTML = rows.map(r => '<div style="display:flex;justify-content:space-between;padding:7px 2px;font-size:0.9rem;border-bottom:1px dashed #E3E7ED;"><span>'+r.label+'</span><span>'+r.count+'건'+(r.cancelledCount>0?' (취소 '+r.cancelledCount+')':'')+'</span></div>').join('');
+  }
+}
+function closeMonthReport(){ document.getElementById('monthReportModal').style.display = 'none'; }
+
+function renderAll(){
+  renderTopActions();
+  renderMonth();
+  renderDay();
+  renderForm();
+  refreshDatalists();
+}
+
+document.getElementById('prevMonthBtn').onclick = () => { state.monthMonth--; if (state.monthMonth<0){state.monthMonth=11; state.monthYear--;} renderAll(); };
+document.getElementById('nextMonthBtn').onclick = () => { state.monthMonth++; if (state.monthMonth>11){state.monthMonth=0; state.monthYear++;} renderAll(); };
+document.getElementById('todayMonthBtn').onclick = () => { const d=new Date(); state.monthYear=d.getFullYear(); state.monthMonth=d.getMonth(); renderAll(); };
+document.getElementById('prevDayBtn').onclick = () => { const d=fromISO(state.selectedDate); d.setDate(d.getDate()-1); state.selectedDate=toISO(d); renderAll(); };
+document.getElementById('nextDayBtn').onclick = () => { const d=fromISO(state.selectedDate); d.setDate(d.getDate()+1); state.selectedDate=toISO(d); renderAll(); };
+document.getElementById('todayDayBtn').onclick = () => { state.selectedDate = toISO(new Date()); renderAll(); };
+document.getElementById('closeFormBtn').onclick = closeForm;
+document.getElementById('saveFormBtn').onclick = saveForm;
+document.getElementById('deleteFormBtn').onclick = deleteFromForm;
+document.getElementById('closeReportBtn').onclick = closeMonthReport;
+document.getElementById('printReportBtn').onclick = () => { document.body.setAttribute('data-print-mode','month-report'); window.print(); };
+window.addEventListener('afterprint', () => document.body.setAttribute('data-print-mode','day-plan'));
+
+loadLocal();
+renderAll();
+pullFromSheet();
 </script>
 </body>
 </html>
