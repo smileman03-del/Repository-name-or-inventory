@@ -1,462 +1,1168 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>천안본정형외과 수술계획표</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>본정형외과 수술계획표</title>
 <style>
-  *{box-sizing:border-box;}
-  body{margin:0;background:#F3F5F8;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard','Malgun Gothic','Segoe UI',sans-serif;color:#1F2430;}
-  button{font-family:inherit;}
-  a{color:#3B6FA8;}
-  a:hover{color:#2C577F;}
-  @page{size:A4 landscape;margin:12mm;}
-  @media print{
-    [data-noprint="true"]{display:none !important;}
-    body[data-print-mode="month-report"] .app-shell{display:none !important;}
-    body[data-print-mode="day-plan"] .month-report-modal{display:none !important;}
-    .month-report-modal,.day-plan-print-wrap{position:static !important;box-shadow:none !important;background:#fff !important;}
-  }
+:root {
+  --primary: #1E40AF;
+  --primary-light: #3B82F6;
+  --primary-dark: #1e3a8a;
+  --bg: #F3F4F6;
+  --card: #ffffff;
+  --shadow: 0 2px 8px rgba(0,0,0,0.10);
+  --radius: 12px;
+  --border: #E5E7EB;
+  --text: #1F2937;
+  --text-muted: #6B7280;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  --success: #10B981;
+  --orange: #F97316;
+  --yellow-bg: #FEFCE8;
+  --orange-bg: #FFF7ED;
+  --red-bg: #FEF2F2;
+  --gray-bg: #F9FAFB;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+button { cursor: pointer; font-family: inherit; font-size: 13px; border: none; border-radius: 8px; transition: all 0.15s; }
+input, select, textarea { font-family: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; outline: none; width: 100%; transition: border 0.15s; background: #fff; }
+input:focus, select:focus, textarea:focus { border-color: var(--primary-light); box-shadow: 0 0 0 2px rgba(59,130,246,0.15); }
+
+/* ─── TOP BAR ─── */
+#topbar {
+  background: var(--primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  height: 54px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+#topbar h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
+#topbar h1 span { opacity: 0.7; font-size: 13px; font-weight: 400; margin-left: 8px; }
+#syncLabel {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+}
+#syncLabel:hover { background: rgba(255,255,255,0.25); }
+
+/* ─── MAIN ─── */
+#main { max-width: 1400px; margin: 0 auto; padding: 20px 16px; }
+
+/* ─── CALENDAR VIEW ─── */
+#calView { display: block; }
+#dayView  { display: none; }
+
+.view-header {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.view-header .left { display: flex; align-items: center; gap: 8px; flex: 1; }
+.view-header .right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.nav-btn {
+  width: 32px; height: 32px;
+  background: var(--bg);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text);
+}
+.nav-btn:hover { background: var(--border); }
+
+#calMonth { font-size: 18px; font-weight: 700; }
+#todayBtn { padding: 5px 14px; background: var(--bg); color: var(--text); border-radius: 8px; font-weight: 600; }
+#todayBtn:hover { background: var(--border); }
+
+.month-stats { font-size: 13px; color: var(--text-muted); }
+.month-stats b { color: var(--primary); }
+
+.btn-blue { background: var(--primary); color: #fff; padding: 7px 16px; border-radius: 8px; font-weight: 600; }
+.btn-blue:hover { background: var(--primary-dark); }
+.btn-outline { background: var(--card); color: var(--text); padding: 7px 14px; border-radius: 8px; font-weight: 500; border: 1px solid var(--border); }
+.btn-outline:hover { background: var(--bg); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+.btn-danger { background: #FEF2F2; color: var(--danger); border: 1px solid #FECACA; }
+.btn-danger:hover { background: #FECACA; }
+
+/* ─── CALENDAR GRID ─── */
+.cal-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.cal-head {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--primary);
+  color: #fff;
+}
+.cal-head div { text-align: center; padding: 10px 4px; font-size: 12px; font-weight: 600; }
+.cal-head div:first-child { color: #FCA5A5; }
+.cal-head div:last-child { color: #93C5FD; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid var(--border);
+}
+.cal-cell {
+  min-height: 100px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 6px;
+  cursor: pointer;
+  transition: background 0.1s;
+  position: relative;
+}
+.cal-cell:hover { background: #EFF6FF; }
+.cal-cell:nth-child(7n) { border-right: none; }
+.cal-cell.other-month .cal-date { color: #D1D5DB; }
+.cal-cell.today .cal-date {
+  background: var(--primary);
+  color: #fff;
+  border-radius: 50%;
+  width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-cell.sunday .cal-date { color: #EF4444; }
+.cal-cell.saturday .cal-date { color: #3B82F6; }
+.cal-date { font-size: 13px; font-weight: 600; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+
+.cal-badges { display: flex; flex-wrap: wrap; gap: 3px; }
+.cal-badge {
+  font-size: 11px; padding: 2px 6px; border-radius: 10px;
+  font-weight: 600; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;
+}
+.cal-badge.all   { background: #DBEAFE; color: var(--primary); }
+.cal-badge.emerg { background: #FEE2E2; color: var(--danger); }
+.cal-badge.cancel{ background: #F3F4F6; color: #9CA3AF; text-decoration: line-through; }
+
+/* ─── DAY VIEW ─── */
+.day-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: var(--card);
+  padding: 14px 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+}
+.day-header .left { display: flex; align-items: center; gap: 8px; flex: 1; }
+.day-header .right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.day-title { font-size: 17px; font-weight: 700; }
+.day-sub { font-size: 13px; color: var(--text-muted); }
+
+/* ─── TABLE ─── */
+.table-wrap {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+  margin-bottom: 14px;
+}
+table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+thead tr { background: #F8FAFF; border-bottom: 2px solid var(--border); }
+th { padding: 10px 8px; font-size: 12px; color: var(--text-muted); font-weight: 600; text-align: center; white-space: nowrap; }
+td { padding: 8px 8px; font-size: 12px; text-align: center; border-bottom: 1px solid #F3F4F6; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #F0F7FF; }
+
+/* Row colors */
+tr.row-emerg  td { background: #FEF2F2 !important; }
+tr.row-orange td { background: #FFF7ED !important; }
+tr.row-yellow td { background: #FEFCE8 !important; }
+tr.row-cancel td { background: #F9FAFB !important; opacity: 0.7; }
+tr.row-emerg:hover  td { background: #FEE2E2 !important; }
+tr.row-orange:hover td { background: #FFEDD5 !important; }
+tr.row-yellow:hover td { background: #FEF9C3 !important; }
+tr.row-cancel:hover td { background: #F3F4F6 !important; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge.emerg  { background: #FEE2E2; color: #DC2626; }
+.badge.plan   { background: #DBEAFE; color: #1D4ED8; }
+.badge.done   { background: #D1FAE5; color: #065F46; }
+.badge.cancel { background: #F3F4F6; color: #9CA3AF; }
+.badge.prog   { background: #FEF9C3; color: #92400E; }
+.badge.infect { background: #FEE2E2; color: #DC2626; }
+.badge.ok     { background: #D1FAE5; color: #065F46; }
+.badge.chk    { background: #FEF9C3; color: #92400E; }
+
+.row-num { color: var(--text-muted); font-size: 11px; }
+.action-btns { display: flex; align-items: center; justify-content: center; gap: 4px; }
+.action-btns button { padding: 3px 8px; font-size: 11px; }
+
+/* ─── LEGEND ─── */
+.legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: var(--card);
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.legend .label { font-weight: 600; color: var(--text); }
+.legend-item { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 12px; height: 12px; border-radius: 3px; }
+
+/* ─── EMPTY STATE ─── */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+.empty-state p { font-size: 15px; margin-bottom: 8px; }
+.empty-state small { font-size: 13px; }
+
+/* ─── MODAL ─── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 780px;
+  margin: auto;
+  animation: modalIn 0.2s ease;
+}
+@keyframes modalIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.modal-header h2 { font-size: 17px; font-weight: 700; }
+.modal-close { background: none; font-size: 20px; color: var(--text-muted); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 20px 24px; max-height: calc(90vh - 130px); overflow-y: auto; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; }
+
+.form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.form-grid .full { grid-column: 1 / -1; }
+.form-grid .half { grid-column: span 2; }
+.form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; }
+.form-group label .req { color: var(--danger); }
+.form-section { font-size: 11px; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; text-transform: uppercase; padding: 8px 0 4px; border-bottom: 1px solid #EFF6FF; margin-bottom: 8px; grid-column: 1 / -1; }
+
+/* ─── PRINT ─── */
+@media print {
+  #topbar, .view-header, .day-header, .legend, #calView { display: none !important; }
+  #dayView { display: block !important; }
+  body { background: #fff; }
+  .table-wrap { box-shadow: none; }
+  .action-btns { display: none !important; }
+  table { min-width: unset; font-size: 10px; }
+  th, td { padding: 5px 4px; }
+}
+
+/* ─── TOAST ─── */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #1F2937;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 13px;
+  z-index: 9999;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s;
+  max-width: 320px;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+
+@media (max-width: 768px) {
+  .form-grid { grid-template-columns: repeat(2, 1fr); }
+  .form-grid .full { grid-column: 1 / -1; }
+}
+@media (max-width: 480px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .half { grid-column: 1; }
+}
 </style>
 </head>
-<body data-print-mode="day-plan">
+<body>
 
-<datalist id="doctorList"></datalist>
-<datalist id="surgeryList"></datalist>
-<datalist id="diagnosisList"></datalist>
+<!-- TOP BAR -->
+<div id="topbar">
+  <div style="display:flex;align-items:center;gap:12px"><img src="data:image/jpeg;base64,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" alt="본정형외과" style="height:38px;border-radius:6px;background:#fff;padding:3px 6px"/><div><div style="font-size:16px;font-weight:700;letter-spacing:-0.3px">수술계획표</div><div style="font-size:11px;opacity:0.75;font-weight:400">Surgery Scheduling System</div></div></div>
+  <div id="syncLabel" onclick="syncNow(https://script.google.com/macros/s/AKfycbxgOxvXqQHjubgEEXVEPv-qDhDMhCgaTV3BgNQkERcrFY6IxRDBTATB5Sxt3xJLDKp24Q/exec)" title="클릭하여 구글시트 동기화">⏳ 초기화 중...</div>
+</div>
 
-<div class="app-shell" style="max-width:1200px;margin:0 auto;padding:20px 20px 60px;">
-
-  <div data-noprint="true" style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:18px 22px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:16px;">
-    <div style="display:flex;align-items:center;min-width:0;">
-      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/6xaJSlACEQAAAAEAABZ/anVtYgAAAB5qdW1kYzJwYQARABCAAACqADibcQNjMnBhAAAAFllqdW1iAAAAR2p1bWRjMm1hABEAEIAAAKoAOJtxA3VybjpjMnBhOmYzMGU3NjY2LTIyNTUtNGZiNi1hZDg2LTRjYzRhZjA5M2VmNwAAAAOUanVtYgAAAClqdW1kYzJhcwARABCAAACqADibcQNjMnBhLmFzc2VydGlvbnMAAAAAuWp1bWIAAABEanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5pbmdyZWRpZW50LnYzAAAAABhjMnNof+YoXDy0w12jQcjLzc0/RAAAAG1jYm9yo2lkYzpmb3JtYXRqaW1hZ2UvanBlZ2ppbnN0YW5jZUlEeCx4bXA6aWlkOjdjOTUxODdiLWY3MmUtNGMxMS1iNDVkLTk3NjlhNDcxN2JhOGxyZWxhdGlvbnNoaXBocGFyZW50T2YAAAHianVtYgAAAEFqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmFjdGlvbnMudjIAAAAAGGMyc2jiNiFPtZkebZ9VE5O0OqIYAAABmWNib3KiZ2FjdGlvbnOComZhY3Rpb25rYzJwYS5vcGVuZWRqcGFyYW1ldGVyc6FraW5ncmVkaWVudHOBomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCCQ/t/3pl1Q96+mOM5Sv05ozFa7dAXmmYsL9XdZF3ElOKRmYWN0aW9ueB1jb20uYW50aHJvcGljLmNsYXVkZS5wcm92aWRlZGpwYXJhbWV0ZXJzoXgfY29tLmFudGhyb3BpYy5vcmlnaW4tY29uZmlkZW5jZWd1bmtub3dua2Rlc2NyaXB0aW9ueGZDbGF1ZGUgcHJvdmlkZWQgdGhpcyBmaWxlIGF0IHRoZSByZXF1ZXN0IG9mIGEgdXNlciBhbmQgbWF5IGhhdmUgY3JlYXRlZCBvciBtb2RpZmllZCB0aGUgZmlsZSBjb250ZW50cy5tc29mdHdhcmVBZ2VudKFkbmFtZWZDbGF1ZGVyYWxsQWN0aW9uc0luY2x1ZGVk9QAAAMhqdW1iAAAAQGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaGFzaC5kYXRhAAAAABhjMnNoOOkYb5xrNofZAijwna1zkgAAAIBjYm9ypWNhbGdmc2hhMjU2Y3BhZE4AAAAAAAAAAAAAAAAAAGRoYXNoWCCHL+xxPJODuLPLfV71fg1bS0mjeEC2kWS8BOMh16hmw2RuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBRmbGVuZ3RoGRaLAAACPmp1bWIAAAAnanVtZGMyY2wAEQAQgAAAqgA4m3EDYzJwYS5jbGFpbS52MgAAAAIPY2JvcqVjYWxnZnNoYTI1NmlzaWduYXR1cmV4TXNlbGYjanVtYmY9L2MycGEvdXJuOmMycGE6ZjMwZTc2NjYtMjI1NS00ZmI2LWFkODYtNGNjNGFmMDkzZWY3L2MycGEuc2lnbmF0dXJlamluc3RhbmNlSUR4LHhtcDppaWQ6YWM1ZmNhYzEtYTk1MS00OTY3LWIxODMtMmQ0ZGQwZjNkYzk5cmNyZWF0ZWRfYXNzZXJ0aW9uc4OiY3VybHgtc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5pbmdyZWRpZW50LnYzZGhhc2hYIJD+3/emXVD3r6Y4zlK/TmjMVrt0BeaZiwv1d1kXcSU4omN1cmx4KnNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuYWN0aW9ucy52MmRoYXNoWCDvLjE/gKDXEUmT6sISlSGajsnNbsVSLJEQA3QcwDhsd6JjdXJseClzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmhhc2guZGF0YWRoYXNoWCCnMZbUlUJPt4A3+zwy+loWnz7qmmrHEpl2Jvf5XaGGuXRjbGFpbV9nZW5lcmF0b3JfaW5mb6NkbmFtZW9BbnRocm9waWMgRmlsZXNndmVyc2lvbmUxLjAuMGtzcGVjVmVyc2lvbmUyLjQuMAAAEDhqdW1iAAAAKGp1bWRjMmNzABEAEIAAAKoAOJtxA2MycGEuc2lnbmF0dXJlAAAAEAhjYm9y0oRZAhKiASYYIVkCCjCCAgYwggGNoAMCAQICFEDloAruwjnQvriD+gZCBT1nVRMAMAoGCCqGSM49BAMDMEkxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMS4wLAYDVQQDEyVBbnRocm9waWMgQ29udGVudCBDcmVkZW50aWFscyBSb290IENBMB4XDTI2MDgwNzE4NDM1NloXDTI4MDgwNjE5NDM1NlowRDEXMBUGA1UEChMOQW50aHJvcGljLCBQQkMxKTAnBgNVBAMTIEFudGhyb3BpYyBDbGF1ZGUgQ29udGVudCBTaWduaW5nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmHoKa8tQGAUU1TS9QqU5W0Tp2N3XsvlK7BfQt6YWKwEzd2R3/dzKPEUDdCjlLjp9fT+KFjRVnuZ9v0oXvTe3k6NYMFYwDgYDVR0PAQH/BAQDAgeAMBUGA1UdJQQOMAwGCisGAQQBg+heAgEwDAYDVR0TAQH/BAIwADAfBgNVHSMEGDAWgBTOUeIEgU5kWyP448TPmj6cwddcwjAKBggqhkjOPQQDAwNnADBkAjAxcx0UngF60stVjs5G4T2eiptsBk5mf9oCtfJPAUBl8qs/PEXa8+gk1/X5QJ2DVcYCMHBfXN31YapiSqYvlIWrDVDJKOvXMl+kkz37Wt0PBI8sw486Mq6JeOhT+lRR4b1HCaFjcGFkWQ2eAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA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" alt="본정형외과 로고" style="height:38px;flex-shrink:0;"/>
-    </div>
-    <h1 style="font-size:1.3rem;line-height:1.25;margin:0;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;">수술계획표</h1>
-    <div id="topRightActions" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;"></div>
-  </div>
-
-  <div id="monthView" style="display:none;">
-    <div data-noprint="true" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <button id="prevMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
-        <div id="monthLabel" style="font-size:1.15rem;font-weight:800;min-width:120px;text-align:center;"></div>
-        <button id="nextMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
-        <button id="todayMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
+<div id="main">
+  <!-- ═══ CALENDAR VIEW ═══ -->
+  <div id="calView">
+    <div class="view-header">
+      <div class="left">
+        <button class="nav-btn" onclick="changeMonth(-1)">&#8249;</button>
+        <div id="calMonth">2026년 10월</div>
+        <button class="nav-btn" onclick="changeMonth(1)">&#8250;</button>
+        <button id="todayBtn" onclick="goToday()">오늘</button>
+        <div class="month-stats"><b id="monthCount">0</b>건 (<span id="monthCancel">0</span>건 취소 제외)</div>
       </div>
-      <div id="monthCountBadge" style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:8px 16px;font-size:0.88rem;font-weight:700;color:#3B6FA8;"></div>
+      <div class="right">
+        <button class="btn-outline btn-sm" onclick="exportMonth()">📄 리포트 내보내기</button>
+      </div>
     </div>
-    <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:16px;overflow:hidden;">
-      <div id="weekDaysRow" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:6px;"></div>
-      <div id="monthGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;"></div>
+    <div class="cal-wrap">
+      <div class="cal-head">
+        <div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
     </div>
   </div>
 
-  <div id="dayView" class="day-plan-print-wrap" style="display:none;">
-    <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-      <button id="prevDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
-      <button id="nextDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
-      <button id="todayDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;">오늘</button>
+  <!-- ═══ DAY VIEW ═══ -->
+  <div id="dayView">
+    <div class="day-header">
+      <div class="left">
+        <button class="btn-outline btn-sm" onclick="showCalView()">← 월별보기</button>
+        <div>
+          <div class="day-title" id="dayTitle">2026년 10월 01일 (목)</div>
+          <div class="day-sub" id="daySub">수술 0건</div>
+        </div>
+      </div>
+      <div class="right">
+        <button class="btn-blue btn-sm" onclick="openAddModal()">+ 수술 추가</button>
+        <button class="btn-outline btn-sm" onclick="syncNow()">🔄 구글시트 동기화</button>
+        <button class="btn-outline btn-sm" onclick="window.print()">🖨️ 인쇄/PDF</button>
+      </div>
     </div>
-    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
-      <h2 id="selectedDateLabel" style="margin:0;font-size:1.4rem;font-weight:800;"></h2>
-      <div id="dayCountLabel" style="font-size:0.9rem;color:#6B7280;font-weight:700;"></div>
+
+    <div class="legend">
+      <span class="label">색 표시:</span>
+      <div class="legend-item"><div class="legend-dot" style="background:#FECACA"></div>응급</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FED7AA"></div>감염/알레르기/항응고제 복용 중</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#FEF08A"></div>금식 미확인</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#E5E7EB"></div>취소</div>
     </div>
-    <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;min-width:1600px;font-size:0.82rem;">
-        <thead><tr id="tableHeadRow" style="background:#F3F5F8;"></tr></thead>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>번호</th>
+            <th>시간</th>
+            <th>집도의</th>
+            <th>차트번호</th>
+            <th>환자명</th>
+            <th>성별</th>
+            <th>나이</th>
+            <th>마취</th>
+            <th>수술명</th>
+            <th>부위</th>
+            <th>진단명</th>
+            <th>응급/예정</th>
+            <th>예상시간</th>
+            <th>병실</th>
+            <th>금식</th>
+            <th>알레르기</th>
+            <th>항응고제</th>
+            <th>감염</th>
+            <th>관리</th>
+          </tr>
+        </thead>
         <tbody id="dayTableBody"></tbody>
       </table>
-      <div id="dayEmptyMsg" style="display:none;padding:40px;text-align:center;color:#6B7280;font-size:0.95rem;">이 날짜에 등록된 수술이 없습니다.</div>
     </div>
-    <div data-noprint="true" style="margin-top:10px;font-size:0.78rem;color:#8A8F98;">색 표시: 응급 빨강 · 감염/알레르기/항응고제 복용 중 주황 · 금식 미확인 노랑 · 취소 회색</div>
-  </div>
 
-</div>
-
-<div id="formModal" style="display:none;position:fixed;inset:0;background:rgba(31,36,48,0.42);align-items:center;justify-content:center;padding:20px;z-index:60;" data-noprint="true">
-  <div style="background:#FFFFFF;border-radius:18px;padding:22px;max-width:720px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-    <h3 id="formTitle" style="margin:0 0 16px;font-size:1.2rem;font-weight:800;"></h3>
-    <div id="formFieldsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;">
-      <button id="deleteFormBtn" style="display:none;border:1px solid #F6C9CE;background:#FDECEE;color:#E0384A;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-right:auto;">삭제</button>
-      <button id="closeFormBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">취소</button>
-      <button id="saveFormBtn" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">저장</button>
+    <div id="dayEmpty" class="empty-state" style="display:none">
+      <div class="icon">📋</div>
+      <p>등록된 수술이 없습니다.</p>
+      <small>+ 수술 추가 버튼으로 새 수술을 등록하세요.</small>
     </div>
   </div>
 </div>
 
-<div id="monthReportModal" style="display:none;position:fixed;inset:0;background:rgba(31,36,48,0.42);align-items:center;justify-content:center;padding:20px;z-index:60;">
-  <div class="month-report-modal" style="background:#FFFFFF;border-radius:18px;padding:26px 28px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-    <h3 id="reportTitle" style="margin:0 0 4px;font-size:1.25rem;font-weight:800;"></h3>
-    <p style="margin:0 0 16px;color:#6B7280;font-size:0.9rem;">천안본정형외과</p>
-    <div style="display:flex;gap:10px;margin-bottom:16px;">
-      <div style="flex:1;background:#E8EFF6;border-radius:12px;padding:12px 14px;">
-        <div id="reportTotal" style="font-size:1.6rem;font-weight:800;color:#3B6FA8;"></div>
-        <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">진행 수술 건수(취소 제외)</div>
-      </div>
-      <div style="flex:1;background:#F1F2F4;border-radius:12px;padding:12px 14px;">
-        <div id="reportCancelled" style="font-size:1.6rem;font-weight:800;color:#6B7280;"></div>
-        <div style="font-size:0.78rem;color:#6B7280;font-weight:700;">취소 건수</div>
-      </div>
+<!-- ═══ ADD/EDIT MODAL ═══ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalIfBg(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle">수술 추가</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
-    <div id="reportRows" style="border-top:1px solid #E3E7ED;padding-top:10px;"></div>
-    <div data-noprint="true" style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
-      <button id="closeReportBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">닫기</button>
-      <button id="printReportBtn" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>
+    <div class="modal-body">
+      <form id="surgForm" onsubmit="saveSurgery(event)">
+        <div class="form-grid">
+          <div class="form-section">기본 정보</div>
+
+          <div class="form-group">
+            <label>수술일자 <span class="req">*</span></label>
+            <input type="date" id="f_date" required>
+          </div>
+          <div class="form-group">
+            <label>수술시간 <span class="req">*</span></label>
+            <input type="time" id="f_time" required>
+          </div>
+          <div class="form-group">
+            <label>집도의 <span class="req">*</span></label>
+            <select id="f_doctor" required></select>
+          </div>
+
+          <div class="form-section">환자 정보</div>
+
+          <div class="form-group">
+            <label>차트번호 <span class="req">*</span></label>
+            <input type="text" id="f_chartNo" placeholder="예: 2024-00001" required>
+          </div>
+          <div class="form-group">
+            <label>환자명 <span class="req">*</span></label>
+            <input type="text" id="f_name" placeholder="이름 입력" required>
+          </div>
+          <div class="form-group">
+            <label>나이</label>
+            <input type="number" id="f_age" placeholder="세" min="0" max="150">
+          </div>
+          <div class="form-group">
+            <label>성별</label>
+            <select id="f_gender">
+              <option value="">선택</option>
+              <option value="남">남</option>
+              <option value="여">여</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>입원병실</label>
+            <input type="text" id="f_room" placeholder="예: 302호">
+          </div>
+
+          <div class="form-section">수술 정보</div>
+
+          <div class="form-group half">
+            <label>수술명 <span class="req">*</span></label>
+            <select id="f_surgeryName" required></select>
+          </div>
+          <div class="form-group">
+            <label>응급/예정</label>
+            <select id="f_urgency">
+              <option value="예정">예정</option>
+              <option value="응급">응급</option>
+            </select>
+          </div>
+          <div class="form-group half">
+            <label>진단명</label>
+            <select id="f_diagnosis"></select>
+          </div>
+          <div class="form-group">
+            <label>수술부위</label>
+            <select id="f_side">
+              <option value="">선택</option>
+              <option value="좌">좌</option>
+              <option value="우">우</option>
+              <option value="양측">양측</option>
+              <option value="해당없음">해당없음</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>마취종류</label>
+            <select id="f_anesthesia">
+              <option value="">선택</option>
+              <option value="전신마취">전신마취</option>
+              <option value="척추마취">척추마취</option>
+              <option value="국소마취">국소마취</option>
+              <option value="신경차단마취">신경차단마취</option>
+              <option value="수면마취">수면마취</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>예상소요시간</label>
+            <input type="text" id="f_duration" placeholder="예: 2시간">
+          </div>
+          <div class="form-group">
+            <label>체위</label>
+            <select id="f_position">
+              <option value="">선택</option>
+              <option value="앙와위">앙와위</option>
+              <option value="복와위">복와위</option>
+              <option value="측와위">측와위</option>
+              <option value="반좌위">반좌위</option>
+              <option value="쇄석위">쇄석위</option>
+            </select>
+          </div>
+
+          <div class="form-section">주의사항</div>
+
+          <div class="form-group">
+            <label>금식(NPO)</label>
+            <select id="f_npo">
+              <option value="확인">확인</option>
+              <option value="미확인">미확인</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>알레르기</label>
+            <input type="text" id="f_allergy" placeholder="없으면 비워두세요">
+          </div>
+          <div class="form-group">
+            <label>항응고제</label>
+            <select id="f_anticoag">
+              <option value="없음">없음</option>
+              <option value="복용 중">복용 중</option>
+              <option value="중단">중단</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>감염여부</label>
+            <select id="f_infection">
+              <option value="없음">없음</option>
+              <option value="MRSA">MRSA</option>
+              <option value="VRE">VRE</option>
+              <option value="CRE">CRE</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+
+          <div class="form-section">기타</div>
+
+          <div class="form-group">
+            <label>임플란트/재료</label>
+            <input type="text" id="f_implant" placeholder="재료명 입력">
+          </div>
+          <div class="form-group">
+            <label>C-arm</label>
+            <select id="f_cArm">
+              <option value="불필요">불필요</option>
+              <option value="필요">필요</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>진행상태</label>
+            <select id="f_status">
+              <option value="예정">예정</option>
+              <option value="진행중">진행중</option>
+              <option value="완료">완료</option>
+              <option value="취소">취소</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label>비고</label>
+            <textarea id="f_note" rows="2" placeholder="추가 메모 입력"></textarea>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal()">취소</button>
+      <button class="btn-blue" onclick="document.getElementById('surgForm').dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}))">저장</button>
     </div>
   </div>
 </div>
+
+<!-- TOAST -->
+<div id="toast"></div>
 
 <script>
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxgOxvXqQHjubgEEXVEPv-qDhDMhCgaTV3BgNQkERcrFY6IxRDBTATB5Sxt3xJLDKp24Q/exec';
-const STORE_KEY = 'cheonan-ortho-surgery-plan-v1';
-const GENDER = ['남','여'];
-const ANESTHESIA = ['전신마취','척추마취','경막외마취','신경차단','국소마취','수면마취'];
-const URGENCY = ['예정','응급'];
-const DURATION = ['30분','1시간','1시간 30분','2시간','2시간 30분','3시간','3시간 이상'];
-const NPO = ['확인','미확인'];
-const ALLERGY = ['없음','있음'];
-const ANTICOAG = ['복용 안 함','복용 중','중단 완료'];
-const INFECTION = ['없음','MRSA','VRE','B형간염','C형간염','기타'];
-const CARM = ['필요','불필요'];
-const POSITION = ['앙와위','측와위','복와위','비치체어','견인대 사용','해당없음'];
-const STATUS = ['예정','진행 중','완료','취소'];
-const SIDE = ['좌','우','양측','해당없음'];
-const WEEKDAY_LABELS = ['일','월','화','수','목','금','토'];
-const SURGERY_SUGGESTIONS = ['ACL · 전방십자인대재건술','ATFL · 발목인대재건술','BPHA · 고관절반치환술','CTR · 수근관감압술','HTO · 근위경골절골술','Meniscectomy · 반월상연골절제술','Meniscus Repair · 반월상연골봉합술','Meniscus Root Repair · 후근봉합술','PEN · 경막외신경성형술','PFNA · 대퇴부근위부골절수술','RCT · 회전근개봉합술','TKRA · 무릎 인공관절수술','Trigger Finger · 방아쇠수지수술','ORIF · 발목골절수술','ORIF · 손목골절수술','ORIF · 어깨골절수술','MUA · 오십견 마취하 도수조작술','VP · 척추체성형술','SUTURE 창상봉합술','E & B 절제생검','INGROWING NAIL 내향성 발톱','CORN REMOVAL 티눈제거','CRIF Foot','CRIF Hand'];
-const DIAGNOSIS_SUGGESTIONS = ['ACL tear','Chronic ankle instability','Femoral neck fracture','Carpal tunnel syndrome','Medial knee osteoarthritis (varus)','Meniscus tear','Meniscus root tear','Lumbar disc herniation','Lumbar spinal stenosis','Intertrochanteric fracture','Rotator cuff tear','Knee osteoarthritis','Trigger finger','Ankle fracture','Distal radius fracture','Proximal humerus fracture','Adhesive capsulitis (frozen shoulder)','Vertebral compression fracture','Laceration','Soft tissue mass','Ingrown toenail','Corn (clavus)','Foot fracture','Hand fracture'];
-const TABLE_HEADERS = ['시간','집도의','차트번호','환자명','성별/나이','마취종류','수술명','부위','진단명','응급/예정','예상시간','병실','금식','알레르기','항응고제','감염','임플란트/재료','C-arm','체위','상태','비고'];
+// =============================================
+// ★ 구글 Apps Script 배포 URL — 새로 배포 후 교체하세요 ★
+// =============================================
+const SHEET_URL = '★새로운_APPS_SCRIPT_URL_입력★';
 
-function pad2(n){ return n < 10 ? '0'+n : ''+n; }
-function toISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
-function fromISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
-function uid(){ return 'sx-'+Date.now()+'-'+Math.random().toString(16).slice(2,8); }
-function timeToMinutes(t){ if(!t) return 0; const [h,m]=t.split(':').map(Number); return h*60+(m||0); }
-function esc(str){ const d=document.createElement('div'); d.textContent = str==null?'':str; return d.innerHTML; }
-
-function defaultFormData(dateStr, doctor){
-  return { date: dateStr, time:'09:00', doctor: doctor||'', chartNo:'', name:'', gender:GENDER[0], age:'',
-    anesthesia:ANESTHESIA[0], surgeryName:'', side:SIDE[3], diagnosis:'', urgency:URGENCY[0], duration:DURATION[0],
-    room:'', npo:NPO[0], allergy:ALLERGY[0], anticoag:ANTICOAG[0], infection:INFECTION[0], implant:'',
-    cArm:CARM[1], position:POSITION[0], status:STATUS[0], note:'' };
-}
-
+// =============================================
+// STATE
+// =============================================
 const state = {
-  view: 'month',
-  monthYear: new Date().getFullYear(),
-  monthMonth: new Date().getMonth(),
-  selectedDate: toISO(new Date()),
   surgeries: [],
   doctors: ['김진일'],
-  editingId: null,
-  formData: null,
-  syncStatus: 'idle'
+  curYear: new Date().getFullYear(),
+  curMonth: new Date().getMonth(),
+  curDate: null,   // YYYY-MM-DD
+  editId: null,
+  syncStatus: 'init',
 };
 
-function loadLocal(){
-  try {
-    const raw = localStorage.getItem(STORE_KEY);
-    if (raw) {
-      const data = JSON.parse(raw);
-      state.surgeries = data.surgeries || [];
-      state.doctors = (data.doctors && data.doctors.length) ? data.doctors : ['김진일'];
-    }
-  } catch(e){}
-}
-function saveLocal(){
-  try { localStorage.setItem(STORE_KEY, JSON.stringify({ surgeries: state.surgeries, doctors: state.doctors })); } catch(e){}
-}
-function setSyncLabel(status){
-  state.syncStatus = status;
-  const el = document.getElementById('syncLabel');
-  if (el) el.textContent = status==='syncing' ? '동기화 중...' : (status==='error' ? '동기화 실패' : (status==='synced' ? '구글시트 동기화됨' : ''));
-}
-function pullFromSheet(){
-  if (!SHEET_URL) return;
-  setSyncLabel('syncing');
-  fetch(SHEET_URL + '?action=get&key=surgeryPlanData')
-    .then(r => r.json())
-    .then(res => {
-      if (res && res.value) {
-        const data = JSON.parse(res.value);
-        state.surgeries = data.surgeries || [];
-        state.doctors = (data.doctors && data.doctors.length) ? data.doctors : ['김진일'];
-        renderAll();
-      }
-      setSyncLabel('synced');
-    })
-    .catch(() => setSyncLabel('error'));
-}
-function pushToSheet(){
-  if (!SHEET_URL) return;
-  setSyncLabel('syncing');
-  fetch(SHEET_URL, { method:'POST', body: JSON.stringify({ action:'set', key:'surgeryPlanData', value: JSON.stringify({ surgeries: state.surgeries, doctors: state.doctors }) }) })
-    .then(() => setSyncLabel('synced'))
-    .catch(() => setSyncLabel('error'));
-}
-function persist(){ saveLocal(); pushToSheet(); }
-
-function rowStyleFor(s){
-  if (s.status === '취소') return 'background:#F1F2F4;border-bottom:1px solid #E3E7ED;color:#8A8F98;';
-  if (s.urgency === '응급') return 'background:#FDECEE;border-bottom:1px solid #F6C9CE;';
-  if ((s.infection && s.infection !== '없음') || s.allergy === '있음' || s.anticoag === '복용 중') return 'background:#FFF3E0;border-bottom:1px solid #FBDDA8;';
-  if (s.npo === '미확인') return 'background:#FFFBE0;border-bottom:1px solid #F5E39C;';
-  return 'background:#FFFFFF;border-bottom:1px solid #E3E7ED;';
-}
-
-function renderTopActions(){
-  const el = document.getElementById('topRightActions');
-  if (state.view === 'month') {
-    el.innerHTML = '<button id="monthReportBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">리포트 내보내기</button>';
-    document.getElementById('monthReportBtn').onclick = openMonthReport;
-  } else {
-    el.innerHTML =
-      '<button id="backToMonthBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">← 월별보기</button>'+
-      '<button id="addSurgeryBtn" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">＋ 수술 추가</button>'+
-      '<span id="syncLabel" style="font-size:0.78rem;color:#6B7280;font-weight:700;"></span>'+
-      '<button id="printDayBtn" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>';
-    document.getElementById('backToMonthBtn').onclick = () => { state.view = 'month'; renderAll(); };
-    document.getElementById('addSurgeryBtn').onclick = openAddForm;
-    document.getElementById('printDayBtn').onclick = () => window.print();
-    setSyncLabel(state.syncStatus);
-  }
-}
-
-function renderMonth(){
-  document.getElementById('monthView').style.display = state.view==='month' ? 'block' : 'none';
-  if (state.view !== 'month') return;
-  document.getElementById('monthLabel').textContent = state.monthYear + '년 ' + (state.monthMonth+1) + '월';
-
-  const weekRow = document.getElementById('weekDaysRow');
-  weekRow.innerHTML = WEEKDAY_LABELS.map((l,i) => '<div style="text-align:center;font-size:0.85rem;font-weight:800;color:'+(i===0?'#E0384A':(i===6?'#3B6FA8':'#6B7280'))+';padding:6px 0;">'+l+'</div>').join('');
-
-  const firstOfMonth = new Date(state.monthYear, state.monthMonth, 1);
-  const startOffset = firstOfMonth.getDay();
-  const gridStart = new Date(state.monthYear, state.monthMonth, 1 - startOffset);
-  const today = toISO(new Date());
-  const byDate = {};
-  state.surgeries.forEach(r => { (byDate[r.date] = byDate[r.date]||[]).push(r); });
-
-  let monthTotalCount = 0, monthCancelledCount = 0;
-  const daysInMonth = new Date(state.monthYear, state.monthMonth+1, 0).getDate();
-  for (let day=1; day<=daysInMonth; day++){
-    const dateStr = state.monthYear+'-'+pad2(state.monthMonth+1)+'-'+pad2(day);
-    const recs = byDate[dateStr] || [];
-    monthTotalCount += recs.filter(r=>r.status!=='취소').length;
-    monthCancelledCount += recs.filter(r=>r.status==='취소').length;
-  }
-  document.getElementById('monthCountBadge').textContent = '이달 수술 ' + monthTotalCount + '건 (취소 ' + monthCancelledCount + '건 제외)';
-
-  const grid = document.getElementById('monthGrid');
-  let html = '';
-  for (let i=0;i<42;i++){
-    const d = new Date(gridStart); d.setDate(gridStart.getDate()+i);
-    const dateStr = toISO(d);
-    const inMonth = d.getMonth() === state.monthMonth;
-    const recs = byDate[dateStr] || [];
-    const active = recs.filter(r=>r.status!=='취소');
-    const cancelled = recs.filter(r=>r.status==='취소');
-    const hasEmergency = active.some(r=>r.urgency==='응급');
-    const isToday = dateStr === today;
-    html += '<div class="monthCell" data-date="'+dateStr+'" style="min-height:86px;border-radius:10px;padding:8px;background:'+(isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA'))+';border:'+(isToday?'1px solid #3B6FA8':'1px solid #EDEFF2')+';cursor:pointer;opacity:'+(inMonth?1:0.5)+';">'
-      + '<div style="font-size:0.9rem;font-weight:'+(isToday?800:700)+';color:'+(isToday?'#3B6FA8':'#1F2430')+';">'+d.getDate()+'</div>'
-      + (active.length>0 ? '<div style="margin-top:4px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:2px 6px;font-size:0.72rem;font-weight:800;display:inline-block;">'+active.length+'건</div>' : '')
-      + (cancelled.length>0 ? '<div style="margin-top:3px;color:#8A8F98;font-size:0.68rem;font-weight:700;">취소 '+cancelled.length+'</div>' : '')
-      + (hasEmergency ? '<div style="margin-top:3px;color:#E0384A;font-size:0.68rem;font-weight:800;">응급 있음</div>' : '')
-      + '</div>';
-  }
-  grid.innerHTML = html;
-  grid.querySelectorAll('.monthCell').forEach(cell => {
-    cell.onclick = () => { state.selectedDate = cell.getAttribute('data-date'); state.view = 'day'; renderAll(); };
-  });
-}
-
-function renderDay(){
-  document.getElementById('dayView').style.display = state.view==='day' ? 'block' : 'none';
-  if (state.view !== 'day') return;
-  const selDate = fromISO(state.selectedDate);
-  document.getElementById('selectedDateLabel').textContent = selDate.getFullYear()+'년 '+(selDate.getMonth()+1)+'월 '+selDate.getDate()+'일 ('+WEEKDAY_LABELS[selDate.getDay()]+')';
-
-  const recs = state.surgeries.filter(r => r.date === state.selectedDate).slice().sort((a,b)=>timeToMinutes(a.time)-timeToMinutes(b.time));
-  const active = recs.filter(r=>r.status!=='취소');
-  const cancelled = recs.filter(r=>r.status==='취소');
-  document.getElementById('dayCountLabel').textContent = '수술 '+active.length+'건 (취소 제외) · 취소 '+cancelled.length+'건';
-
-  document.getElementById('tableHeadRow').innerHTML = TABLE_HEADERS.map(h => '<th style="text-align:center;padding:9px 10px;font-weight:800;color:#6B7280;white-space:nowrap;border-bottom:1px solid #E3E7ED;">'+h+'</th>').join('') + '<th data-noprint="true" style="padding:9px 10px;border-bottom:1px solid #E3E7ED;"></th>';
-
-  const tbody = document.getElementById('dayTableBody');
-  if (recs.length === 0) {
-    tbody.innerHTML = '';
-    document.getElementById('dayEmptyMsg').style.display = 'block';
-  } else {
-    document.getElementById('dayEmptyMsg').style.display = 'none';
-    tbody.innerHTML = recs.map(r => {
-      const cells = [r.time, r.doctor, r.chartNo, r.name, (r.gender||'')+' / '+(r.age||''), r.anesthesia, r.surgeryName, r.side, r.diagnosis, r.urgency, r.duration, r.room, r.npo, r.allergy, r.anticoag, r.infection, r.implant, r.cArm, r.position, r.status, r.note];
-      const boldCols = [0,3,9,19];
-      const tds = cells.map((c,i) => '<td style="padding:9px 10px;white-space:nowrap;'+(boldCols.includes(i)?'font-weight:800;':'')+'">'+esc(c)+'</td>').join('');
-      return '<tr style="'+rowStyleFor(r)+'">'+tds+
-        '<td data-noprint="true" style="padding:9px 10px;white-space:nowrap;">'+
-        '<button class="editBtn" data-id="'+r.id+'" style="border:none;background:transparent;color:#3B6FA8;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>'+
-        '<button class="deleteBtn" data-id="'+r.id+'" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;">삭제</button>'+
-        '</td></tr>';
-    }).join('');
-    tbody.querySelectorAll('.editBtn').forEach(b => b.onclick = () => openEditForm(b.getAttribute('data-id')));
-    tbody.querySelectorAll('.deleteBtn').forEach(b => b.onclick = () => deleteRecord(b.getAttribute('data-id')));
-  }
-}
-
-const FORM_FIELDS = [
-  {key:'date', label:'수술일자', kind:'date'},
-  {key:'time', label:'수술시간', kind:'time'},
-  {key:'doctor', label:'집도의', kind:'text', list:'doctorList'},
-  {key:'chartNo', label:'차트번호', kind:'text'},
-  {key:'name', label:'환자 이름', kind:'text'},
-  {key:'gender', label:'성별', kind:'select', options:GENDER},
-  {key:'age', label:'나이', kind:'number'},
-  {key:'anesthesia', label:'마취종류', kind:'select', options:ANESTHESIA},
-  {key:'surgeryName', label:'수술명', kind:'text', list:'surgeryList'},
-  {key:'side', label:'수술부위', kind:'select', options:SIDE},
-  {key:'diagnosis', label:'진단명', kind:'text', list:'diagnosisList'},
-  {key:'urgency', label:'응급/예정', kind:'select', options:URGENCY},
-  {key:'duration', label:'예상소요시간', kind:'select', options:DURATION},
-  {key:'room', label:'입원병실', kind:'text'},
-  {key:'npo', label:'금식(NPO)', kind:'select', options:NPO},
-  {key:'allergy', label:'알레르기', kind:'select', options:ALLERGY},
-  {key:'anticoag', label:'항응고제', kind:'select', options:ANTICOAG},
-  {key:'infection', label:'감염여부', kind:'select', options:INFECTION},
-  {key:'implant', label:'임플란트/재료', kind:'text'},
-  {key:'cArm', label:'C-arm', kind:'select', options:CARM},
-  {key:'position', label:'체위', kind:'select', options:POSITION},
-  {key:'status', label:'진행상태', kind:'select', options:STATUS},
-  {key:'note', label:'비고', kind:'text'}
+const SURGERY_NAMES = [
+  '무릎인공관절전치환술','고관절인공관절전치환술','척추유합술','추간판절제술',
+  '회전근개봉합술','상완골골절내고정술','요골골절내고정술','경골골절내고정술',
+  '비골골절내고정술','대퇴골골절내고정술','족관절골절내고정술','족지골교정술',
+  '수근관증후군수술','방아쇠수지수술','슬관절경검사','고관절경검사','건봉합술',
+  '사지절단술','족관절경검사','연부조직종양절제술','골종양절제술',
+  '관절경적반월상연골절제술','관절경적반월상연골봉합술','기타'
 ];
 
-function renderForm(){
-  const modal = document.getElementById('formModal');
-  if (!state.formData) { modal.style.display = 'none'; return; }
-  modal.style.display = 'flex';
-  document.getElementById('formTitle').textContent = state.editingId ? '수술 일정 수정' : '수술 일정 추가';
-  document.getElementById('deleteFormBtn').style.display = state.editingId ? 'block' : 'none';
+const DIAGNOSES = [
+  '퇴행성 무릎관절염','퇴행성 고관절염','요추 추간판 탈출증','경추 추간판 탈출증',
+  '척추관 협착증','회전근개 파열','견관절 충돌증후군','상완골 골절','요골 원위부 골절',
+  '경골 골절','비골 골절','대퇴골 골절','족관절 골절','족지 변형','수근관 증후군',
+  '방아쇠 수지','반월상 연골 파열','십자인대 파열','연부조직 종양','골종양','기타'
+];
 
-  const grid = document.getElementById('formFieldsGrid');
-  grid.innerHTML = FORM_FIELDS.map(f => {
-    const val = state.formData[f.key] || '';
-    let input;
-    if (f.kind === 'select') {
-      input = '<select data-key="'+f.key+'" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;background:#FFFFFF;">' +
-        f.options.map(o => '<option value="'+esc(o)+'"'+(o===val?' selected':'')+'>'+esc(o)+'</option>').join('') + '</select>';
-    } else {
-      const type = f.kind === 'number' ? 'number' : (f.kind === 'date' ? 'date' : (f.kind === 'time' ? 'time' : 'text'));
-      input = '<input type="'+type+'" data-key="'+f.key+'" value="'+esc(val)+'"'+(f.list?' list="'+f.list+'"':'')+' style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>';
+// =============================================
+// STORAGE
+// =============================================
+const LS_KEY = 'surgeryPlanData_v2';
+
+function saveLocal() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify({ surgeries: state.surgeries, doctors: state.doctors }));
+  } catch(e) {}
+}
+
+function loadLocal() {
+  try {
+    const d = localStorage.getItem(LS_KEY);
+    if (!d) return false;
+    const parsed = JSON.parse(d);
+    if (parsed.surgeries) state.surgeries = parsed.surgeries;
+    if (parsed.doctors && parsed.doctors.length) state.doctors = parsed.doctors;
+    return true;
+  } catch(e) { return false; }
+}
+
+// =============================================
+// SYNC
+// =============================================
+function setSyncLabel(status) {
+  state.syncStatus = status;
+  const el = document.getElementById('syncLabel');
+  if (!el) return;
+  if (status === 'syncing') {
+    el.textContent = '⏳ 동기화 중...';
+    el.style.color = '#FDE68A';
+  } else if (status === 'error') {
+    el.textContent = '⚠ 동기화 실패 (로컬 저장됨)';
+    el.style.color = '#FCA5A5';
+  } else if (status === 'nourl') {
+    el.textContent = '🔗 URL 미설정 (로컬 저장됨)';
+    el.style.color = '#FDE68A';
+  } else {
+    el.textContent = '✓ 구글시트 동기화됨';
+    el.style.color = '#6EE7B7';
+  }
+}
+
+function isUrlSet() {
+  return SHEET_URL && !SHEET_URL.includes('★');
+}
+
+function pullFromSheet() {
+  if (!isUrlSet()) { setSyncLabel('nourl'); return Promise.resolve(); }
+  setSyncLabel('syncing');
+  return fetch(SHEET_URL + '?action=get', { mode: 'cors' })
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(res => {
+      if (!res.success) throw new Error(res.error || '알 수 없는 오류');
+      if (res.surgeries && res.surgeries.length > 0) state.surgeries = res.surgeries;
+      if (res.doctors && res.doctors.length > 0) state.doctors = res.doctors;
+      saveLocal();
+      renderAll();
+      setSyncLabel('synced');
+    })
+    .catch(err => {
+      console.error('pullFromSheet 오류:', err);
+      setSyncLabel('error');
+    });
+}
+
+function pushToSheet() {
+  if (!isUrlSet()) { setSyncLabel('nourl'); return; }
+  setSyncLabel('syncing');
+  const payload = JSON.stringify({
+    action: 'set',
+    key: 'surgeryPlanData',
+    value: JSON.stringify({ surgeries: state.surgeries, doctors: state.doctors })
+  });
+  fetch(SHEET_URL, { method: 'POST', body: payload })
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(res => {
+      if (!res.success) throw new Error(res.error || '알 수 없는 오류');
+      setSyncLabel('synced');
+      console.log('동기화 완료:', res.count, '건');
+    })
+    .catch(err => {
+      console.error('pushToSheet 오류:', err);
+      setSyncLabel('error');
+    });
+}
+
+function persist() {
+  saveLocal();
+  pushToSheet();
+}
+
+function syncNow() {
+  pullFromSheet();
+}
+
+// =============================================
+// RENDER ALL
+// =============================================
+function renderAll() {
+  renderCalendar();
+  if (state.curDate) renderDayTable(state.curDate);
+}
+
+// =============================================
+// CALENDAR
+// =============================================
+function changeMonth(delta) {
+  state.curMonth += delta;
+  if (state.curMonth > 11) { state.curMonth = 0; state.curYear++; }
+  if (state.curMonth < 0)  { state.curMonth = 11; state.curYear--; }
+  renderCalendar();
+}
+
+function goToday() {
+  const now = new Date();
+  state.curYear = now.getFullYear();
+  state.curMonth = now.getMonth();
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const y = state.curYear, m = state.curMonth;
+  document.getElementById('calMonth').textContent = `${y}년 ${m + 1}월`;
+
+  const todayStr = toDateStr(new Date());
+  const first = new Date(y, m, 1);
+  const last  = new Date(y, m + 1, 0);
+  const startDay = first.getDay();
+
+  // Build map date → surgeries
+  const map = {};
+  state.surgeries.forEach(s => {
+    if (!map[s.date]) map[s.date] = [];
+    map[s.date].push(s);
+  });
+
+  // Month stats
+  const monthSurgs = state.surgeries.filter(s => {
+    if (!s.date) return false;
+    const [sy, sm] = s.date.split('-').map(Number);
+    return sy === y && (sm - 1) === m;
+  });
+  const notCanceled = monthSurgs.filter(s => s.status !== '취소');
+  const canceledCnt = monthSurgs.length - notCanceled.length;
+  document.getElementById('monthCount').textContent = notCanceled.length;
+  document.getElementById('monthCancel').textContent = canceledCnt;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  // Prev month padding
+  for (let i = 0; i < startDay; i++) {
+    const d = new Date(y, m, -(startDay - 1 - i));
+    const cell = makeCellEl(d, true, todayStr, map);
+    grid.appendChild(cell);
+  }
+  // Current month
+  for (let d = 1; d <= last.getDate(); d++) {
+    const dt = new Date(y, m, d);
+    const cell = makeCellEl(dt, false, todayStr, map);
+    grid.appendChild(cell);
+  }
+  // Next month padding
+  const totalCells = startDay + last.getDate();
+  const remaining = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remaining; i++) {
+    const dt = new Date(y, m + 1, i);
+    const cell = makeCellEl(dt, true, todayStr, map);
+    grid.appendChild(cell);
+  }
+}
+
+function makeCellEl(dt, otherMonth, todayStr, map) {
+  const dStr = toDateStr(dt);
+  const dow = dt.getDay();
+  const cell = document.createElement('div');
+  cell.className = 'cal-cell' +
+    (otherMonth ? ' other-month' : '') +
+    (dStr === todayStr ? ' today' : '') +
+    (dow === 0 ? ' sunday' : '') +
+    (dow === 6 ? ' saturday' : '');
+
+  const dateEl = document.createElement('div');
+  dateEl.className = 'cal-date';
+  dateEl.textContent = dt.getDate();
+  cell.appendChild(dateEl);
+
+  if (!otherMonth) {
+    const surgs = map[dStr] || [];
+    if (surgs.length > 0) {
+      const badges = document.createElement('div');
+      badges.className = 'cal-badges';
+      const canceled = surgs.filter(s => s.status === '취소').length;
+      const active = surgs.length - canceled;
+      const emerg = surgs.filter(s => s.urgency === '응급' && s.status !== '취소').length;
+
+      if (active > 0) {
+        const b = document.createElement('div');
+        b.className = 'cal-badge all';
+        b.textContent = `전체 ${active}건`;
+        badges.appendChild(b);
+      }
+      if (emerg > 0) {
+        const b = document.createElement('div');
+        b.className = 'cal-badge emerg';
+        b.textContent = `응급 ${emerg}건`;
+        badges.appendChild(b);
+      }
+      if (canceled > 0) {
+        const b = document.createElement('div');
+        b.className = 'cal-badge cancel';
+        b.textContent = `취소 ${canceled}건`;
+        badges.appendChild(b);
+      }
+      cell.appendChild(badges);
     }
-    return '<div style="display:flex;flex-direction:column;gap:6px;"><label style="font-size:0.82rem;font-weight:700;color:#6B7280;">'+f.label+'</label>'+input+'</div>';
-  }).join('');
-  grid.querySelectorAll('[data-key]').forEach(el => {
-    el.onchange = (e) => { state.formData[el.getAttribute('data-key')] = e.target.value; };
+    cell.addEventListener('click', () => openDayView(dStr));
+  }
+  return cell;
+}
+
+// =============================================
+// DAY VIEW
+// =============================================
+function showCalView() {
+  document.getElementById('calView').style.display = 'block';
+  document.getElementById('dayView').style.display = 'none';
+}
+
+function openDayView(dateStr) {
+  state.curDate = dateStr;
+  document.getElementById('calView').style.display = 'none';
+  document.getElementById('dayView').style.display = 'block';
+  renderDayTable(dateStr);
+}
+
+function renderDayTable(dateStr) {
+  if (!dateStr) return;
+  const dt = new Date(dateStr + 'T00:00:00');
+  const DOW = ['일', '월', '화', '수', '목', '금', '토'];
+  document.getElementById('dayTitle').textContent =
+    `${dt.getFullYear()}년 ${dt.getMonth()+1}월 ${dt.getDate()}일 (${DOW[dt.getDay()]})`;
+
+  const surgs = state.surgeries
+    .filter(s => s.date === dateStr)
+    .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+  document.getElementById('daySub').textContent = `수술 ${surgs.filter(s => s.status !== '취소').length}건` +
+    (surgs.filter(s => s.status === '취소').length ? ` (취소 ${surgs.filter(s => s.status === '취소').length}건 포함)` : '');
+
+  const tbody = document.getElementById('dayTableBody');
+  tbody.innerHTML = '';
+
+  if (surgs.length === 0) {
+    document.getElementById('dayEmpty').style.display = '';
+    return;
+  }
+  document.getElementById('dayEmpty').style.display = 'none';
+
+  surgs.forEach((s, idx) => {
+    const tr = document.createElement('tr');
+
+    // Row color
+    if (s.status === '취소') tr.className = 'row-cancel';
+    else if (s.urgency === '응급') tr.className = 'row-emerg';
+    else if (s.infection !== '없음' || s.allergy || s.anticoag === '복용 중') tr.className = 'row-orange';
+    else if (s.npo === '미확인') tr.className = 'row-yellow';
+
+    const statusBadge = {
+      '예정':'plan','완료':'done','취소':'cancel','진행중':'prog'
+    }[s.status] || 'plan';
+
+    const infectBadge = s.infection && s.infection !== '없음'
+      ? `<span class="badge infect">${esc(s.infection)}</span>` : '<span style="color:#D1D5DB">-</span>';
+
+    const allergyCell = s.allergy
+      ? `<span class="badge infect">${esc(s.allergy)}</span>` : '<span style="color:#D1D5DB">-</span>';
+
+    const anticoagCell = s.anticoag === '복용 중'
+      ? `<span class="badge chk">복용 중</span>` : `<span style="color:#D1D5DB">${esc(s.anticoag||'-')}</span>`;
+
+    const npoBadge = s.npo === '미확인'
+      ? `<span class="badge chk">미확인</span>` : `<span class="badge ok">확인</span>`;
+
+    tr.innerHTML = `
+      <td class="row-num">${idx + 1}</td>
+      <td><b>${esc(s.time||'-')}</b></td>
+      <td>${esc(s.doctor||'-')}</td>
+      <td style="font-family:monospace">${esc(s.chartNo||'-')}</td>
+      <td><b>${esc(s.name||'-')}</b></td>
+      <td>${esc(s.gender||'-')}</td>
+      <td>${esc(s.age||'-')}</td>
+      <td>${esc(s.anesthesia||'-')}</td>
+      <td style="max-width:140px;white-space:normal;text-align:left">${esc(s.surgeryName||'-')}</td>
+      <td>${esc(s.side||'-')}</td>
+      <td style="max-width:120px;white-space:normal;text-align:left;color:var(--text-muted)">${esc(s.diagnosis||'-')}</td>
+      <td>${s.urgency === '응급'
+        ? '<span class="badge emerg">응급</span>'
+        : '<span class="badge plan">예정</span>'}</td>
+      <td>${esc(s.duration||'-')}</td>
+      <td>${esc(s.room||'-')}</td>
+      <td>${npoBadge}</td>
+      <td>${allergyCell}</td>
+      <td>${anticoagCell}</td>
+      <td>${infectBadge}</td>
+      <td>
+        <div class="action-btns">
+          <span class="badge ${statusBadge}">${esc(s.status||'예정')}</span>
+          <button class="btn-outline btn-sm" onclick="openEditModal('${s.id}')">수정</button>
+          <button class="btn-danger btn-sm" onclick="deleteSurgery('${s.id}')">삭제</button>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
   });
 }
 
-function refreshDatalists(){
-  document.getElementById('doctorList').innerHTML = state.doctors.map(d => '<option value="'+esc(d)+'"></option>').join('');
-  document.getElementById('surgeryList').innerHTML = SURGERY_SUGGESTIONS.map(s => '<option value="'+esc(s)+'"></option>').join('');
-  document.getElementById('diagnosisList').innerHTML = DIAGNOSIS_SUGGESTIONS.map(s => '<option value="'+esc(s)+'"></option>').join('');
+// =============================================
+// MODAL
+// =============================================
+function populateDoctorSelect() {
+  const sel = document.getElementById('f_doctor');
+  sel.innerHTML = '';
+  state.doctors.forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d; opt.textContent = d;
+    sel.appendChild(opt);
+  });
 }
 
-function openAddForm(){
-  state.editingId = null;
-  state.formData = defaultFormData(state.selectedDate, state.doctors[0]);
-  renderForm();
+function populateSurgerySelect() {
+  const sel = document.getElementById('f_surgeryName');
+  sel.innerHTML = '<option value="">수술명 선택</option>';
+  SURGERY_NAMES.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n; opt.textContent = n;
+    sel.appendChild(opt);
+  });
+
+  const dSel = document.getElementById('f_diagnosis');
+  dSel.innerHTML = '<option value="">진단명 선택</option>';
+  DIAGNOSES.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = n; opt.textContent = n;
+    dSel.appendChild(opt);
+  });
 }
-function openEditForm(id){
-  const rec = state.surgeries.find(x => x.id === id);
-  if (!rec) return;
-  state.editingId = id;
-  state.formData = Object.assign({}, rec);
-  renderForm();
+
+function openAddModal() {
+  state.editId = null;
+  document.getElementById('modalTitle').textContent = '수술 추가';
+  populateDoctorSelect();
+  populateSurgerySelect();
+  document.getElementById('surgForm').reset();
+  if (state.curDate) document.getElementById('f_date').value = state.curDate;
+  document.getElementById('f_npo').value = '확인';
+  document.getElementById('f_anticoag').value = '없음';
+  document.getElementById('f_infection').value = '없음';
+  document.getElementById('f_cArm').value = '불필요';
+  document.getElementById('f_status').value = '예정';
+  document.getElementById('f_urgency').value = '예정';
+  document.getElementById('modalOverlay').classList.add('open');
 }
-function closeForm(){ state.editingId = null; state.formData = null; renderForm(); }
-function saveForm(){
-  const fd = state.formData;
-  if (!fd) return;
-  if (state.editingId) {
-    state.surgeries = state.surgeries.map(x => x.id === state.editingId ? Object.assign({}, fd, {id: state.editingId}) : x);
+
+function openEditModal(id) {
+  const s = state.surgeries.find(x => x.id === id);
+  if (!s) return;
+  state.editId = id;
+  document.getElementById('modalTitle').textContent = '수술 수정';
+  populateDoctorSelect();
+  populateSurgerySelect();
+
+  const fields = ['date','time','doctor','chartNo','name','gender','age','anesthesia',
+    'surgeryName','side','diagnosis','urgency','duration','room','npo','allergy',
+    'anticoag','infection','implant','cArm','position','status','note'];
+  fields.forEach(f => {
+    const el = document.getElementById('f_' + f);
+    if (el) el.value = s[f] || '';
+  });
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeModalIfBg(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function saveSurgery(e) {
+  e.preventDefault();
+  const fields = ['date','time','doctor','chartNo','name','gender','age','anesthesia',
+    'surgeryName','side','diagnosis','urgency','duration','room','npo','allergy',
+    'anticoag','infection','implant','cArm','position','status','note'];
+
+  const obj = {};
+  fields.forEach(f => {
+    const el = document.getElementById('f_' + f);
+    obj[f] = el ? el.value.trim() : '';
+  });
+
+  if (state.editId) {
+    const idx = state.surgeries.findIndex(x => x.id === state.editId);
+    if (idx !== -1) {
+      state.surgeries[idx] = { ...state.surgeries[idx], ...obj };
+      toast('수술 정보가 수정되었습니다.');
+    }
   } else {
-    state.surgeries.push(Object.assign({}, fd, {id: uid()}));
+    obj.id = 'local_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+    state.surgeries.push(obj);
+    toast('수술이 추가되었습니다.');
   }
-  if (fd.doctor && state.doctors.indexOf(fd.doctor) === -1) state.doctors.push(fd.doctor);
+
+  closeModal();
   persist();
-  state.editingId = null; state.formData = null;
   renderAll();
 }
-function deleteFromForm(){
-  if (!confirm('이 수술 일정을 삭제할까요?')) return;
-  state.surgeries = state.surgeries.filter(x => x.id !== state.editingId);
-  persist();
-  state.editingId = null; state.formData = null;
-  renderAll();
-}
-function deleteRecord(id){
-  if (!confirm('이 수술 일정을 삭제할까요?')) return;
+
+// =============================================
+// DELETE
+// =============================================
+function deleteSurgery(id) {
+  const s = state.surgeries.find(x => x.id === id);
+  if (!s) return;
+  if (!confirm(`[${s.name}] 수술을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
   state.surgeries = state.surgeries.filter(x => x.id !== id);
   persist();
   renderAll();
+  toast('수술이 삭제되었습니다.');
 }
 
-function openMonthReport(){
-  const modal = document.getElementById('monthReportModal');
-  modal.style.display = 'flex';
-  document.getElementById('reportTitle').textContent = (state.monthYear+'년 '+(state.monthMonth+1)+'월 수술현황 리포트');
-  const byDate = {};
-  state.surgeries.forEach(r => { (byDate[r.date] = byDate[r.date]||[]).push(r); });
-  let total = 0, cancelledTotal = 0;
-  const daysInMonth = new Date(state.monthYear, state.monthMonth+1, 0).getDate();
-  const rows = [];
-  for (let day=1; day<=daysInMonth; day++){
-    const dateStr = state.monthYear+'-'+pad2(state.monthMonth+1)+'-'+pad2(day);
-    const recs = byDate[dateStr] || [];
-    const active = recs.filter(r=>r.status!=='취소');
-    const cancelled = recs.filter(r=>r.status==='취소');
-    total += active.length; cancelledTotal += cancelled.length;
-    if (recs.length > 0) {
-      rows.push({ label: (state.monthMonth+1)+'월 '+day+'일 ('+WEEKDAY_LABELS[new Date(state.monthYear,state.monthMonth,day).getDay()]+')', count: active.length, cancelledCount: cancelled.length });
+// =============================================
+// EXPORT / REPORT
+// =============================================
+function exportMonth() {
+  const y = state.curYear, m = state.curMonth;
+  const monthSurgs = state.surgeries
+    .filter(s => {
+      if (!s.date) return false;
+      const [sy, sm] = s.date.split('-').map(Number);
+      return sy === y && (sm - 1) === m;
+    })
+    .sort((a, b) => (a.date + a.time).localeCompare(b.date + b.time));
+
+  if (monthSurgs.length === 0) { alert('이 달에 수술 데이터가 없습니다.'); return; }
+
+  const header = ['수술일자','수술시간','집도의','차트번호','환자명','성별','나이',
+    '마취종류','수술명','수술부위','진단명','응급/예정','예상소요시간','입원병실',
+    '금식','알레르기','항응고제','감염여부','임플란트/재료','C-arm','체위','진행상태','비고'];
+  const keys = ['date','time','doctor','chartNo','name','gender','age','anesthesia',
+    'surgeryName','side','diagnosis','urgency','duration','room','npo','allergy',
+    'anticoag','infection','implant','cArm','position','status','note'];
+
+  const csv = [header.join(','), ...monthSurgs.map(s =>
+    keys.map(k => '"' + (s[k] || '').replace(/"/g, '""') + '"').join(',')
+  )].join('\n');
+
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `수술계획표_${y}년${m+1}월.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast(`${y}년 ${m+1}월 수술 리포트(${monthSurgs.length}건)를 내보냈습니다.`);
+}
+
+// =============================================
+// UTILS
+// =============================================
+function toDateStr(dt) {
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const d = String(dt.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// =============================================
+// INIT
+// =============================================
+function init() {
+  // Load localStorage
+  const hasLocal = loadLocal();
+
+  // Render calendar immediately
+  renderCalendar();
+
+  // Try sync with Google Sheets
+  if (isUrlSet()) {
+    pullFromSheet();
+  } else {
+    setSyncLabel('nourl');
+    if (!hasLocal) {
+      toast('SHEET_URL을 설정하면 구글시트와 동기화됩니다.');
     }
   }
-  document.getElementById('reportTotal').textContent = total;
-  document.getElementById('reportCancelled').textContent = cancelledTotal;
-  const rowsEl = document.getElementById('reportRows');
-  if (rows.length === 0) {
-    rowsEl.innerHTML = '<div style="padding:20px 2px;color:#6B7280;font-size:0.9rem;">이 달에 등록된 수술이 없습니다.</div>';
-  } else {
-    rowsEl.innerHTML = rows.map(r => '<div style="display:flex;justify-content:space-between;padding:7px 2px;font-size:0.9rem;border-bottom:1px dashed #E3E7ED;"><span>'+r.label+'</span><span>'+r.count+'건'+(r.cancelledCount>0?' (취소 '+r.cancelledCount+')':'')+'</span></div>').join('');
-  }
-}
-function closeMonthReport(){ document.getElementById('monthReportModal').style.display = 'none'; }
 
-function renderAll(){
-  renderTopActions();
-  renderMonth();
-  renderDay();
-  renderForm();
-  refreshDatalists();
+  // Keyboard shortcut
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'n' && e.ctrlKey) { e.preventDefault(); openAddModal(); }
+  });
 }
 
-document.getElementById('prevMonthBtn').onclick = () => { state.monthMonth--; if (state.monthMonth<0){state.monthMonth=11; state.monthYear--;} renderAll(); };
-document.getElementById('nextMonthBtn').onclick = () => { state.monthMonth++; if (state.monthMonth>11){state.monthMonth=0; state.monthYear++;} renderAll(); };
-document.getElementById('todayMonthBtn').onclick = () => { const d=new Date(); state.monthYear=d.getFullYear(); state.monthMonth=d.getMonth(); renderAll(); };
-document.getElementById('prevDayBtn').onclick = () => { const d=fromISO(state.selectedDate); d.setDate(d.getDate()-1); state.selectedDate=toISO(d); renderAll(); };
-document.getElementById('nextDayBtn').onclick = () => { const d=fromISO(state.selectedDate); d.setDate(d.getDate()+1); state.selectedDate=toISO(d); renderAll(); };
-document.getElementById('todayDayBtn').onclick = () => { state.selectedDate = toISO(new Date()); renderAll(); };
-document.getElementById('closeFormBtn').onclick = closeForm;
-document.getElementById('saveFormBtn').onclick = saveForm;
-document.getElementById('deleteFormBtn').onclick = deleteFromForm;
-document.getElementById('closeReportBtn').onclick = closeMonthReport;
-document.getElementById('printReportBtn').onclick = () => { document.body.setAttribute('data-print-mode','month-report'); window.print(); };
-window.addEventListener('afterprint', () => document.body.setAttribute('data-print-mode','day-plan'));
-
-loadLocal();
-renderAll();
-pullFromSheet();
+init();
 </script>
 </body>
 </html>
