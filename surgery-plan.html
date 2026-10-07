@@ -280,6 +280,42 @@ function deleteRecord(id){
   render();
 }
 
+function openRecord(id){
+  const r = state.surgeries.find(x => x.id === id);
+  if (!r) return;
+  // 마취방법 매핑: 수술계획표 값 → 수술기록지 select 값
+  const anesMap = {
+    '전신마취':'전신마취', '척추마취':'척추마취',
+    '경막외마취':'부위/신경차단', '신경차단':'부위/신경차단',
+    '국소마취':'국소마취', '수면마취':'전신마취'
+  };
+  // 수술구분 매핑: 예정→정규, 응급→응급
+  const categoryMap = { '예정':'정규', '응급':'응급' };
+  // 체위 매핑
+  const positionMap = {
+    '앙와위':'앙와위(Supine)',
+    '측와위':'측와위-좌(Lateral Lt)',
+    '복와위':'복와위(Prone)',
+    '비치체어':'변형앙와위(Beach chair)',
+    '견인대 사용':'사지견인위(Traction)'
+  };
+  const params = new URLSearchParams();
+  if (r.chartNo)     params.set('p_no', r.chartNo);
+  if (r.name)        params.set('p_name', r.name);
+  if (r.gender)      params.set('p_sex', r.gender);
+  if (r.doctor)      { params.set('p_doctor', r.doctor); params.set('s_surgeon', r.doctor); }
+  if (r.date)        params.set('s_date', r.date);
+  if (r.time)        params.set('s_start', r.time);
+  if (r.surgeryName) params.set('s_name', r.surgeryName);
+  if (r.diagnosis)   params.set('s_diagnosis', r.diagnosis);
+  if (r.side)        params.set('s_side', r.side);
+  if (r.room)        params.set('s_room', r.room);
+  if (r.anesthesia)  params.set('s_anes', anesMap[r.anesthesia] || r.anesthesia);
+  if (r.urgency)     params.set('s_category', categoryMap[r.urgency] || r.urgency);
+  if (r.position)    params.set('n_position', positionMap[r.position] || r.position);
+  window.open('surgery-record.html?' + params.toString(), '_blank');
+}
+
 function renderBody(){
   const container = document.getElementById('bodySlot');
   if (!container) return;
@@ -372,7 +408,8 @@ function renderDayView(){
       <td style="padding:9px 10px;white-space:nowrap;">${esc(r.note)}</td>
       <td data-noprint="true" style="padding:9px 10px;white-space:nowrap;">
         <button class="btnEditRow" data-id="${r.id}" style="border:none;background:transparent;color:#3B6FA8;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>
-        <button class="btnDeleteRow" data-id="${r.id}" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;">삭제</button>
+        <button class="btnDeleteRow" data-id="${r.id}" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;margin-right:6px;">삭제</button>
+        <button class="btnOpenRecord" data-id="${r.id}" style="border:1px solid #2F7A67;background:#E5EFEC;color:#1F5A4B;font-weight:700;cursor:pointer;border-radius:6px;padding:4px 8px;font-size:0.78rem;">기록지</button>
       </td>
     </tr>`).join('');
 
@@ -413,6 +450,7 @@ function attachBodyHandlers(){
     if (q('btnTodayDay')) q('btnTodayDay').onclick = () => { state.selectedDate = toISO(new Date()); renderBody(); };
     document.querySelectorAll('.btnEditRow').forEach(el => { el.onclick = () => openEditForm(el.getAttribute('data-id')); });
     document.querySelectorAll('.btnDeleteRow').forEach(el => { el.onclick = () => deleteRecord(el.getAttribute('data-id')); });
+    document.querySelectorAll('.btnOpenRecord').forEach(el => { el.onclick = () => openRecord(el.getAttribute('data-id')); });
   }
 }
 
