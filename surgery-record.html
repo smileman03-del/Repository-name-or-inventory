@@ -1848,6 +1848,49 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
   }
 
   // ===== Init =====
+  function fillFromUrlParams(){
+    const p = new URLSearchParams(window.location.search);
+    if([...p.keys()].length === 0) return; // URL 파라미터 없으면 건너뜀
+    const setVal = (id, val) => { const el=document.getElementById(id); if(el && val) el.value = val; };
+    const setSelect = (id, val) => {
+      const el=document.getElementById(id);
+      if(!el || !val) return;
+      const opt = [...el.options].find(o => o.value===val || o.text===val);
+      if(opt) el.value = opt.value;
+    };
+    // 환자 정보
+    setVal('p_no',     p.get('p_no'));
+    setVal('p_name',   p.get('p_name'));
+    setVal('p_dob',    p.get('p_dob'));
+    setVal('p_dept',   p.get('p_dept'));
+    setVal('p_doctor', p.get('p_doctor'));
+    // 성별 라디오
+    if(p.get('p_sex')){
+      const radio = document.querySelector(`input[name=p_sex][value="${p.get('p_sex')}"]`);
+      if(radio) radio.checked = true;
+    }
+    // 수술 정보
+    setVal('s_date',      p.get('s_date'));
+    setVal('s_start',     p.get('s_start'));
+    setVal('s_name',      p.get('s_name'));
+    setVal('s_diagnosis', p.get('s_diagnosis'));
+    setVal('s_surgeon',   p.get('s_surgeon'));
+    setVal('s_room',      p.get('s_room'));
+    setSelect('s_anes',     p.get('s_anes'));
+    setSelect('s_side',     p.get('s_side'));
+    setSelect('s_category', p.get('s_category'));
+    // 간호 정보 — 체위
+    setSelect('n_position', p.get('n_position'));
+    // 수술종류 select — 수술명과 비교해 일치하는 코드 자동선택 (선택적)
+    if(p.get('s_name')){
+      const sTypeEl = document.getElementById('s_type');
+      if(sTypeEl){
+        const matched = [...sTypeEl.options].find(o=>o.text.toLowerCase().includes(p.get('s_name').toLowerCase()));
+        if(matched) sTypeEl.value = matched.value;
+      }
+    }
+  }
+
   async function init(){
     updateDocMeta();
     await loadState();
@@ -1856,6 +1899,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     renderTypeSelect();
     renderRecordCatalog();
     for(let i=0;i<5;i++) makeExtraRow();
+    fillFromUrlParams(); // 수술계획표에서 넘어온 데이터 자동입력
   }
   init();
 })();
