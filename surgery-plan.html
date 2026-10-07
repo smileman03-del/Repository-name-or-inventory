@@ -222,12 +222,28 @@ function handleSyncError(e){
   }
 }
 
+// 서버에서 깨진 날짜/시간 형식을 자동 복구
+function normalizeRecord(r){
+  // date: "Wed Oct 07 2026..." → "2026-10-07"
+  if (r.date && r.date.includes('GMT')) {
+    try { r.date = toISO(new Date(r.date)); } catch(e){}
+  }
+  // time: "Sat Dec 30 1899 09:00:00..." → "09:00"
+  if (r.time && r.time.includes('GMT')) {
+    try {
+      const d = new Date(r.time);
+      r.time = pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+    } catch(e){}
+  }
+  return r;
+}
+
 function pullFromSheet(){
   if (!SHEET_URL) return;
   setSyncLabel('syncing');
   callApi({ action:'list' })
     .then(res => {
-      state.surgeries = res.surgeries || [];
+      state.surgeries = (res.surgeries || []).map(normalizeRecord);
       if (res.doctors && res.doctors.length) state.doctors = res.doctors;
       saveLocal();
       if (!state.formData) renderAll();
