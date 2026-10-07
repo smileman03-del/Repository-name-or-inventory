@@ -47,6 +47,15 @@ input{font-family:inherit;font-size:15px;color:var(--ink);background:#fff;border
 .warn{background:#fdf1ee;border:1px solid rgba(193,68,58,.35);border-radius:16px;padding:16px}
 .mini{border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;flex:none}
 .hide{display:none}
+@media print {
+  body { background: #fff !important; display: block !important; }
+  #app { box-shadow: none !important; max-width: 100% !important; height: auto !important; display: block !important; }
+  .hd { display: none !important; }
+  .ft, #explain-ft { display: none !important; }
+  .bd { overflow: visible !important; padding: 0 !important; }
+  .pdf-hide { display: none !important; }
+  @page { margin: 20mm 15mm; size: A4 portrait; }
+}
 </style>
 <style id="claude-agent-animation-styles">
       @keyframes claude-pulse {
@@ -258,8 +267,8 @@ function listView() {
 }
 
 function explainView() {
-  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
-  var h = v.querySelector(".hd"), b = v.querySelector(".bd");
+  var v = el('<div id="app"><div class="hd"></div><div class="bd"></div><div class="ft" id="explain-ft" style="display:none"></div></div>');
+  var h = v.querySelector(".hd"), b = v.querySelector(".bd"), f = v.querySelector("#explain-ft");
   h.appendChild(el('<div class="row"><div class="grow link" data-a="list">← 돌아가기</div></div>'));
   b.appendChild(el('<div style="font-size:12.5px;font-weight:700;color:var(--acc);letter-spacing:.02em;margin-top:6px">비급여 안내</div>'));
   b.appendChild(el('<div style="font-size:25px;font-weight:700;margin-top:6px;letter-spacing:-.02em;line-height:1.3">' + esc(S.title || "이번 수술") + "</div>"));
@@ -288,6 +297,12 @@ function explainView() {
     '<div style="font-size:28px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums">' + won(total()) + "</div></div>"));
   b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-top:20px;line-height:1.7">' + esc(BASIS) +
     ' 단가 기준입니다. 실제 청구 금액은 수술 중 사용량에 따라 달라질 수 있습니다.</div>'));
+
+  /* PDF 내보내기 버튼 */
+  f.style.display = "flex";
+  f.appendChild(el('<div class="btn d" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px" data-a="pdfexport">' +
+    '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>' +
+    'PDF 저장 / 인쇄</div>'));
   return v;
 }
 
@@ -563,14 +578,16 @@ var actions = {
     api("saveSet", { name: S.title, note: "사용 기록", codes: picked() })
       .then(function () { S.msg = "세트를 저장했습니다."; sync(); })
       .catch(function (e) { S.msg = "저장 실패: " + e; render(); });
-  }
+  },
+  pdfexport: function () { printExplain(); return false; }
 };
 
 document.addEventListener("click", function (ev) {
   var t = ev.target.closest("[data-a]"); if (!t) return;
   var a = t.getAttribute("data-a"), v = t.getAttribute("data-v");
   if (!actions[a]) return;
-  actions[a](v, t);
+  var result = actions[a](v, t);
+  if (result === false) return; /* PDF 등 render 불필요한 액션 */
   render();
 });
 document.addEventListener("input", function (ev) {
@@ -580,6 +597,73 @@ document.addEventListener("input", function (ev) {
 document.addEventListener("change", function (ev) {
   if (ev.target.closest('[data-a="amt"]')) render();
 });
+
+function printExplain() {
+  var rows = "";
+  picked().forEach(function (c) {
+    var i = item(c); if (!i) return;
+    var n = S.qty[c];
+    var specTxt = i.e ? '<div style="font-size:11px;color:#888;margin-top:2px">' + esc(i.e) + '</div>' : '';
+    rows += '<tr>' +
+      '<td style="padding:11px 8px;border-bottom:1px solid #e8e8e8;font-size:14px;font-weight:600;line-height:1.4">' +
+        esc(i.n) + (n > 1 ? ' <span style="font-size:12px;color:#888;font-weight:400">×' + n + '</span>' : '') + specTxt +
+      '</td>' +
+      '<td style="padding:11px 8px;border-bottom:1px solid #e8e8e8;font-size:14px;font-weight:700;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums">' +
+        won(unit(i) * n) +
+      '</td>' +
+    '</tr>';
+  });
+  var today = new Date();
+  var dateStr = today.getFullYear() + '.' + String(today.getMonth()+1).padStart(2,'0') + '.' + String(today.getDate()).padStart(2,'0');
+  var html = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<title>비급여 안내 – ' + esc(S.title || '이번 수술') + '</title>' +
+    '<style>' +
+      '@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/packages/pretendard/dist/web/static/pretendard.css");' +
+      'body{margin:0;padding:24px 28px;font-family:Pretendard,-apple-system,sans-serif;color:#17191A;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
+      '.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}' +
+      '.hosp{font-size:13px;font-weight:700;color:#1273a8;letter-spacing:.04em}' +
+      '.date{font-size:12px;color:#9A9FA2}' +
+      '.badge{display:inline-block;background:#EEF6FF;color:#1273a8;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:.04em;margin-bottom:8px}' +
+      '.title{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.3;margin-bottom:6px}' +
+      '.subtitle{font-size:12.5px;color:#6E7375;margin-bottom:20px;line-height:1.5}' +
+      'table{width:100%;border-collapse:collapse;margin-bottom:0}' +
+      '.total-row td{padding:14px 8px;font-size:15px;font-weight:800;border-top:2.5px solid #17191A;font-variant-numeric:tabular-nums}' +
+      '.notice{margin-top:16px;font-size:11px;color:#9A9FA2;line-height:1.7;border-top:1px solid #eee;padding-top:12px}' +
+      '.sign{margin-top:32px;display:flex;gap:40px}' +
+      '.sign-box{display:flex;flex-direction:column;align-items:center;gap:4px}' +
+      '.sign-label{font-size:11px;color:#9A9FA2}' +
+      '.sign-line{width:120px;border-bottom:1.5px solid #ccc;margin-top:28px}' +
+      '@media print{body{padding:16px 18px}@page{margin:15mm 12mm;size:A4 portrait}}' +
+    '</style>' +
+  '</head><body>' +
+    '<div class="header"><div><div class="hosp">천안 본정형외과</div></div><div class="date">' + dateStr + '</div></div>' +
+    '<div class="badge">비급여 안내</div>' +
+    '<div class="title">' + esc(S.title || '이번 수술') + '</div>' +
+    '<div class="subtitle">이 수술에서 사용된 비급여 항목과 예상 금액입니다.</div>' +
+    '<table>' +
+      '<thead><tr>' +
+        '<th style="padding:8px 8px 10px;text-align:left;font-size:11.5px;color:#9A9FA2;font-weight:600;border-bottom:2px solid #17191A">항목명</th>' +
+        '<th style="padding:8px 8px 10px;text-align:right;font-size:11.5px;color:#9A9FA2;font-weight:600;border-bottom:2px solid #17191A">금액</th>' +
+      '</tr></thead>' +
+      '<tbody>' + rows + '</tbody>' +
+      '<tfoot><tr class="total-row">' +
+        '<td>총 비급여 예상 금액</td>' +
+        '<td style="text-align:right;font-size:20px;color:#1273a8">' + won(total()) + '</td>' +
+      '</tr></tfoot>' +
+    '</table>' +
+    '<div class="notice">' + esc(BASIS) + ' 단가 기준입니다. 실제 청구 금액은 수술 중 사용량에 따라 달라질 수 있습니다.<br>비급여 항목은 급여 기준에 해당하지 않아 전액 본인이 부담하는 항목입니다.</div>' +
+    '<div class="sign">' +
+      '<div class="sign-box"><div class="sign-label">환자 서명</div><div class="sign-line"></div></div>' +
+      '<div class="sign-box"><div class="sign-label">담당자</div><div class="sign-line"></div></div>' +
+    '</div>' +
+    '<script>window.onload=function(){window.print();};<\/script>' +
+  '</body></html>';
+  var w = window.open('', '_blank', 'width=600,height=850');
+  if (!w) { alert("팝업이 차단되었습니다. 팝업 차단을 해제한 후 다시 시도해 주세요."); return; }
+  w.document.write(html);
+  w.document.close();
+}
 
 var lastScreen = null;
 function render() {
