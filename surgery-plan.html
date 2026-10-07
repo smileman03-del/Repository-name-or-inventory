@@ -170,7 +170,18 @@ function saveLocal(){
 function setSyncLabel(status){
   state.syncStatus = status;
   const el = document.getElementById('syncLabel');
-  if (el) el.textContent = status==='syncing' ? '동기화 중...' : (status==='error' ? '동기화 실패' : (status==='auth' ? '암호가 필요합니다 (새로고침 후 입력)' : (status==='synced' ? '구글시트 동기화됨' : '')));
+  if (!el) return;
+  if (status === 'syncing') {
+    el.innerHTML = '<span style="color:#6B7280;">⟳ 동기화 중...</span>';
+  } else if (status === 'error') {
+    el.innerHTML = '<span style="color:#E0384A;font-weight:700;">✕ 동기화 실패</span> <button onclick="pullFromSheet()" style="font-size:0.75rem;padding:3px 8px;border:1px solid #E0384A;background:#fff;color:#E0384A;border-radius:6px;cursor:pointer;font-weight:700;margin-left:4px;">재시도</button>';
+  } else if (status === 'auth') {
+    el.innerHTML = '<span style="color:#F59E0B;font-weight:700;">🔒 암호가 필요합니다 (새로고침 후 입력)</span>';
+  } else if (status === 'synced') {
+    el.innerHTML = '<span style="color:#22C55E;font-weight:700;">✓ 구글시트 동기화됨</span>';
+  } else {
+    el.innerHTML = '';
+  }
 }
 const PW_KEY = 'cheonan-ortho-surgery-plan-pw';
 function getPw(msg){
