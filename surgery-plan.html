@@ -86,6 +86,18 @@
   </div>
 </div>
 
+<!-- 커스텀 확인 모달 (브라우저 confirm() 대체) -->
+<div id="customConfirmModal" style="display:none;position:fixed;inset:0;background:rgba(31,36,48,0.42);align-items:center;justify-content:center;padding:20px;z-index:200;">
+  <div style="background:#FFFFFF;border-radius:16px;padding:28px 28px 22px;max-width:340px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.25);text-align:center;">
+    <div style="font-size:1.5rem;margin-bottom:10px;">🗑️</div>
+    <p id="customConfirmMsg" style="margin:0 0 20px;font-size:1rem;font-weight:700;color:#1F2430;line-height:1.5;"></p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="customConfirmCancel" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 22px;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;">아니요</button>
+      <button id="customConfirmOk" style="border:1px solid #E0384A;background:#E0384A;color:#fff;padding:10px 22px;border-radius:10px;font-size:0.95rem;font-weight:700;cursor:pointer;">삭제</button>
+    </div>
+  </div>
+</div>
+
 <div id="monthReportModal" style="display:none;position:fixed;inset:0;background:rgba(31,36,48,0.42);align-items:center;justify-content:center;padding:20px;z-index:60;">
   <div class="month-report-modal" style="background:#FFFFFF;border-radius:18px;padding:26px 28px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
     <h3 id="reportTitle" style="margin:0 0 4px;font-size:1.25rem;font-weight:800;"></h3>
@@ -272,12 +284,37 @@ function pushRecord(rec){
     .catch(afterWriteFailed);
 }
 
+/* ── 커스텀 확인 모달 (window.confirm 대체) ── */
+function showCustomConfirm(msg, onOk) {
+  const modal = document.getElementById('customConfirmModal');
+  document.getElementById('customConfirmMsg').textContent = msg;
+  modal.style.display = 'flex';
+  const okBtn = document.getElementById('customConfirmOk');
+  const cancelBtn = document.getElementById('customConfirmCancel');
+  function cleanup() {
+    modal.style.display = 'none';
+    okBtn.onclick = null;
+    cancelBtn.onclick = null;
+  }
+  okBtn.onclick = function() { cleanup(); onOk(); };
+  cancelBtn.onclick = cleanup;
+}
+
 function deleteRemote(id){
   if (!SHEET_URL) return;
   setSyncLabel('syncing');
   callApi({ action:'delete', id: id })
     .then(() => setSyncLabel('synced'))
-    .catch(afterWriteFailed);
+    .catch(function(e) {
+      /* 삭제 실패 시 pullFromSheet 호출 금지 — 로컬 삭제는 유지 */
+      if (e && e.message === 'auth') {
+        handleSyncError(e);
+        alert('암호가 맞지 않아 서버에서 삭제하지 못했습니다. 다시 새로고침 후 시도해 주세요.');
+      } else {
+        setSyncLabel('error');
+        alert('서버 삭제에 실패했습니다. 인터넷 연결을 확인해 주세요.\n(화면에서는 삭제되었으며, 새로고침 시 다시 나타날 수 있습니다.)');
+      }
+    });
 }
 
 function rowStyleFor(s){
@@ -477,20 +514,22 @@ function saveForm(){
   renderAll();
 }
 function deleteFromForm(){
-  if (!confirm('이 수술 일정을 삭제할까요?')) return;
-  const delId = state.editingId;
-  state.surgeries = state.surgeries.filter(x => x.id !== delId);
-  saveLocal();
-  deleteRemote(delId);
-  state.editingId = null; state.formData = null;
-  renderAll();
+  showCustomConfirm('이 수술 일정을 삭제할까요?', function() {
+    const delId = state.editingId;
+    state.surgeries = state.surgeries.filter(x => x.id !== delId);
+    saveLocal();
+    deleteRemote(delId);
+    state.editingId = null; state.formData = null;
+    renderAll();
+  });
 }
 function deleteRecord(id){
-  if (!confirm('이 수술 일정을 삭제할까요?')) return;
-  state.surgeries = state.surgeries.filter(x => x.id !== id);
-  saveLocal();
-  deleteRemote(id);
-  renderAll();
+  showCustomConfirm('이 수술 일정을 삭제할까요?', function() {
+    state.surgeries = state.surgeries.filter(x => x.id !== id);
+    saveLocal();
+    deleteRemote(id);
+    renderAll();
+  });
 }
 
 function openMonthReport(){
