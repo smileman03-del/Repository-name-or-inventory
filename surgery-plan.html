@@ -777,7 +777,47 @@ function openStatsModal() {
 }
 
 function printStatsAsPDF(d) {
-  const dateStr = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
+  const defaultName = `천안본정형외과_수술통계_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
+
+  // 파일명 입력 다이얼로그
+  const dlg = document.createElement('div');
+  dlg.id = 'pdfFilenameDlg';
+  dlg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:400;';
+  dlg.innerHTML = `
+    <div style="background:#fff;border-radius:18px;padding:30px 32px;width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:800;color:#1e293b;">📄 PDF 저장</h3>
+      <p style="margin:0 0 18px 0;font-size:13px;color:#64748b;">저장할 파일 이름을 입력하세요 <span style="color:#94a3b8;">(.pdf 자동 추가)</span></p>
+      <input id="pdfFilenameInput" type="text" value="${defaultName}"
+        style="width:100%;border:2px solid #e2e8f0;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+      <p style="margin:8px 0 0 2px;font-size:12px;color:#94a3b8;">💡 브라우저 인쇄창에서 "PDF로 저장"을 선택하면 입력한 파일명으로 저장됩니다.</p>
+      <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+        <button onclick="document.getElementById('pdfFilenameDlg').remove()"
+          style="padding:10px 22px;border:2px solid #e2e8f0;background:#fff;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:#64748b;">취소</button>
+        <button id="pdfConfirmBtn"
+          style="padding:10px 28px;background:#6366f1;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 4px 12px rgba(99,102,241,0.3);">📄 저장</button>
+      </div>
+    </div>`;
+  document.body.appendChild(dlg);
+  setTimeout(() => { const inp = document.getElementById('pdfFilenameInput'); if(inp){inp.focus();inp.select();} }, 50);
+
+  // Enter 키로 확인
+  dlg.querySelector('#pdfFilenameInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('pdfConfirmBtn').click();
+    if (e.key === 'Escape') dlg.remove();
+  });
+
+  document.getElementById('pdfConfirmBtn').onclick = () => {
+    const filename = (document.getElementById('pdfFilenameInput').value.trim() || defaultName);
+    dlg.remove();
+    _doPrintStatsPDF(d, filename, dateStr);
+  };
+}
+
+function _doPrintStatsPDF(d, filename, dateStr) {
+  const dowNames = {mon:'월',tue:'화',wed:'수',thu:'목',fri:'금',sat:'토',sun:'일'};
 
   function tableRows(obj) {
     return Object.entries(obj).map(([k,v]) =>
@@ -790,7 +830,10 @@ function printStatsAsPDF(d) {
       ${content}
     </div>`;
   }
-  const dowNames = {mon:'월',tue:'화',wed:'수',thu:'목',fri:'금',sat:'토',sun:'일'};
+
+  // 브라우저는 페이지 타이틀을 PDF 파일명으로 사용
+  const originalTitle = document.title;
+  document.title = filename;
 
   const printDiv = document.createElement('div');
   printDiv.id = 'statsPrintArea';
@@ -840,6 +883,7 @@ function printStatsAsPDF(d) {
   window.print();
 
   function cleanup() {
+    document.title = originalTitle;
     const s = document.getElementById('statsPrintStyle');
     const p = document.getElementById('statsPrintArea');
     if (s) s.remove();
