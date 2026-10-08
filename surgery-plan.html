@@ -216,7 +216,6 @@ function renderChrome(){
         </button>
         <span style="font-size:0.78rem;color:#6B7280;font-weight:700;">${esc(syncLabel)}</span>
         <button id="btnStats" style="border:1px solid #6366f1;background:#6366f1;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">📊 통계</button>
-        ${state.view === 'month' ? `<button id="btnMonthReport" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">리포트 내보내기</button>` : ''}
         ${state.view === 'day' ? `
           <button id="btnBackToMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">← 월별보기</button>
           <button id="btnAddSurgery" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 수술 추가</button>
@@ -236,7 +235,6 @@ function renderChrome(){
 function bindHeaderHandlers(){
   const q = id => document.getElementById(id);
   if (q('btnUsage')) q('btnUsage').onclick = () => { state.backupsOpen = true; renderModals(); loadBackups(); };
-  if (q('btnMonthReport')) q('btnMonthReport').onclick = () => { state.monthReportOpen = true; renderModals(); };
   if (q('btnStats')) q('btnStats').onclick = () => openStatsModal();
   if (q('btnBackToMonth')) q('btnBackToMonth').onclick = () => { state.view = 'month'; render(); };
   if (q('btnAddSurgery')) q('btnAddSurgery').onclick = () => { openAddForm(); };
@@ -582,42 +580,6 @@ function renderModals(){
       </div>`;
   }
 
-  if (state.monthReportOpen) {
-    const map = byDateMap();
-    const daysInMonth = new Date(state.monthYear, state.monthMonth+1, 0).getDate();
-    let monthTotalCount = 0, monthCancelledCount = 0;
-    let rowsHtml = '';
-    for (let day=1; day<=daysInMonth; day++){
-      const dateStr = state.monthYear+'-'+pad2(state.monthMonth+1)+'-'+pad2(day);
-      const recs = map[dateStr] || [];
-      const active = recs.filter(r => r.status !== '취소');
-      const cancelled = recs.filter(r => r.status === '취소');
-      monthTotalCount += active.length; monthCancelledCount += cancelled.length;
-      if (recs.length > 0) {
-        rowsHtml += `<div style="display:flex;justify-content:space-between;padding:7px 2px;font-size:0.9rem;border-bottom:1px dashed #E3E7ED;">
-          <span>${(state.monthMonth+1)}월 ${day}일 (${WEEKDAY_LABELS[new Date(state.monthYear,state.monthMonth,day).getDay()]})</span>
-          <span>${active.length}건${cancelled.length>0?` (취소 ${cancelled.length})`:''}</span>
-        </div>`;
-      }
-    }
-    html += `
-      <div style="position:fixed;inset:0;background:rgba(31,36,48,0.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;">
-        <div class="month-report-modal" style="background:#FFFFFF;border-radius:18px;padding:26px 28px;max-width:520px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-          <h3 style="margin:0 0 4px;font-size:1.25rem;font-weight:800;">${state.monthYear}년 ${state.monthMonth+1}월 수술현황 리포트</h3>
-          <p style="margin:0 0 16px;color:#6B7280;font-size:0.9rem;">천안본정형외과</p>
-          <div style="display:flex;gap:10px;margin-bottom:16px;">
-            <div style="flex:1;background:#E8EFF6;border-radius:12px;padding:12px 14px;"><div style="font-size:1.6rem;font-weight:800;color:#3B6FA8;">${monthTotalCount}</div><div style="font-size:0.78rem;color:#6B7280;font-weight:700;">진행 수술 건수(취소 제외)</div></div>
-            <div style="flex:1;background:#F1F2F4;border-radius:12px;padding:12px 14px;"><div style="font-size:1.6rem;font-weight:800;color:#6B7280;">${monthCancelledCount}</div><div style="font-size:0.78rem;color:#6B7280;font-weight:700;">취소 건수</div></div>
-          </div>
-          <div style="border-top:1px solid #E3E7ED;padding-top:10px;">${rowsHtml || `<div style="padding:20px 2px;color:#6B7280;font-size:0.9rem;">이 달에 등록된 수술이 없습니다.</div>`}</div>
-          <div data-noprint="true" style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
-            <button id="btnCloseMonthReport" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">닫기</button>
-            <button id="btnPrintMonthReport" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">인쇄 / PDF</button>
-          </div>
-        </div>
-      </div>`;
-  }
-
   html += `<datalist id="doctorList">${state.doctors.map(d=>`<option value="${esc(d)}"></option>`).join('')}</datalist>
   <datalist id="surgeryList">${state.surgeryList.map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>
   <datalist id="diagnosisList">${DIAGNOSIS_SUGGESTIONS.map(s=>`<option value="${esc(s)}"></option>`).join('')}</datalist>`;
@@ -654,8 +616,6 @@ function attachModalHandlers(){
   document.querySelectorAll('.btnRestoreBackup').forEach(el => { el.onclick = () => restoreBackup(el.getAttribute('data-key')); });
   if (q('btnCloseBackups')) q('btnCloseBackups').onclick = () => { state.backupsOpen = false; renderModals(); };
 
-  if (q('btnCloseMonthReport')) q('btnCloseMonthReport').onclick = () => { state.monthReportOpen = false; renderModals(); };
-  if (q('btnPrintMonthReport')) q('btnPrintMonthReport').onclick = () => { document.body.setAttribute('data-print-mode','month-report'); window.print(); };
 }
 
 function attachGlobalHandlers(){}
@@ -801,10 +761,93 @@ function openStatsModal() {
         <div style="text-align:center;color:#94a3b8;font-size:12px;padding-top:4px;">
           * 로컬 저장 데이터 기준 | ${new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'})} 기준
         </div>
+
+        <!-- PDF 내보내기 버튼 -->
+        <div style="text-align:center;padding-top:8px;">
+          <button onclick="printStatsAsPDF({total:${total},completed:${completed},scheduled:${scheduled},cancelled:${cancelled},byMonth:${JSON.stringify(Object.fromEntries(monthSorted))},byType:${JSON.stringify(byType)},byAnesthesia:${JSON.stringify(byAnesthesia)},byDow:${JSON.stringify(byDow)},byDoctor:${JSON.stringify(byDoctor)}})"
+            style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+            📄 PDF로 내보내기
+          </button>
+        </div>
+
       </div>
     </div>`;
 
   document.body.appendChild(overlay);
+}
+
+function printStatsAsPDF(d) {
+  const dateStr = new Date().toLocaleDateString('ko-KR', {year:'numeric',month:'long',day:'numeric'});
+
+  function tableRows(obj) {
+    return Object.entries(obj).map(([k,v]) =>
+      `<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">${k||'미기재'}</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">${v}건</td></tr>`
+    ).join('');
+  }
+  function section(title, content) {
+    return `<div style="margin-bottom:22px;">
+      <h3 style="font-size:14px;font-weight:800;color:#1e293b;margin:0 0 8px 0;padding-bottom:6px;border-bottom:2px solid #6366f1;">${title}</h3>
+      ${content}
+    </div>`;
+  }
+  const dowNames = {mon:'월',tue:'화',wed:'수',thu:'목',fri:'금',sat:'토',sun:'일'};
+
+  const printDiv = document.createElement('div');
+  printDiv.id = 'statsPrintArea';
+  printDiv.innerHTML = `
+    <div style="font-family:'Noto Sans KR',sans-serif;max-width:780px;margin:0 auto;padding:28px 32px;color:#1e293b;">
+      <div style="text-align:center;margin-bottom:28px;padding-bottom:20px;border-bottom:3px solid #6366f1;">
+        <div style="font-size:22px;font-weight:900;color:#6366f1;margin-bottom:4px;">📊 수술 통계 보고서</div>
+        <div style="font-size:12px;color:#64748b;">천안본정형외과 | ${dateStr} 기준</div>
+      </div>
+
+      ${section('📋 요약', `
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:8px 12px;background:#f0f0ff;border-radius:8px;text-align:center;width:25%;"><div style="font-size:11px;color:#6366f1;font-weight:700;">총 수술</div><div style="font-size:22px;font-weight:900;color:#1e293b;">${d.total}건</div></td>
+            <td style="width:3%;"></td>
+            <td style="padding:8px 12px;background:#f0fdf4;border-radius:8px;text-align:center;width:25%;"><div style="font-size:11px;color:#22c55e;font-weight:700;">완료</div><div style="font-size:22px;font-weight:900;color:#1e293b;">${d.completed}건</div></td>
+            <td style="width:3%;"></td>
+            <td style="padding:8px 12px;background:#fffbeb;border-radius:8px;text-align:center;width:25%;"><div style="font-size:11px;color:#f59e0b;font-weight:700;">예정</div><div style="font-size:22px;font-weight:900;color:#1e293b;">${d.scheduled}건</div></td>
+            <td style="width:3%;"></td>
+            <td style="padding:8px 12px;background:#fef2f2;border-radius:8px;text-align:center;width:25%;"><div style="font-size:11px;color:#ef4444;font-weight:700;">취소</div><div style="font-size:22px;font-weight:900;color:#1e293b;">${d.cancelled}건</div></td>
+          </tr>
+        </table>`)}
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          ${section('📅 월별 수술 현황', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${tableRows(d.byMonth)}</table>`)}
+          ${section('👨‍⚕️ 담당의별 수술', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${tableRows(d.byDoctor)}</table>`)}
+        </div>
+        <div>
+          ${section('🔪 수술 종류별', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${tableRows(d.byType)}</table>`)}
+          ${section('💉 마취 방법별', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${tableRows(d.byAnesthesia)}</table>`)}
+          ${section('📆 요일별 분포', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${Object.entries(d.byDow).map(([k,v])=>`<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">${dowNames[k]||k}요일</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">${v}건</td></tr>`).join('')}</table>`)}
+        </div>
+      </div>
+
+      <div style="text-align:center;font-size:11px;color:#94a3b8;margin-top:20px;padding-top:12px;border-top:1px solid #e2e8f0;">
+        천안본정형외과 수술계획 시스템 | 로컬 저장 데이터 기준
+      </div>
+    </div>`;
+
+  const styleEl = document.createElement('style');
+  styleEl.id = 'statsPrintStyle';
+  styleEl.textContent = `@media print { body > *:not(#statsPrintArea) { display:none !important; } #statsPrintArea { display:block !important; } }`;
+
+  document.head.appendChild(styleEl);
+  document.body.appendChild(printDiv);
+  window.print();
+
+  function cleanup() {
+    const s = document.getElementById('statsPrintStyle');
+    const p = document.getElementById('statsPrintArea');
+    if (s) s.remove();
+    if (p) p.remove();
+    window.removeEventListener('afterprint', cleanup);
+  }
+  window.addEventListener('afterprint', cleanup);
+  setTimeout(cleanup, 3000);
 }
 </script>
 </body>
