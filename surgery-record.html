@@ -2060,7 +2060,17 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
   }
   async function deleteRecord(key, btn){
     confirmArm(btn, '한번 더 누르면 삭제', async ()=>{
-      try{ await window.storage.delete(key, false); showBanner('banner2', '삭제되었습니다.', true); loadList(); }
+      try{
+        await window.storage.delete(key, false);
+        let msg = '삭제되었습니다.';
+        if(window._cloudEnabled && window._gasUrl && typeof window.cloudDelete === 'function'){
+          const ok = await window.cloudDelete(key);
+          msg = ok ? '삭제되었습니다. ☁️ 구글 시트에도 반영했습니다.'
+                   : '이 기기에서는 삭제했습니다. 구글 시트 반영은 다음 동기화 때 다시 시도합니다.';
+        }
+        showBanner('banner2', msg, true);
+        loadList();
+      }
       catch(e){ console.error(e); showBanner('banner2', '삭제 중 오류가 발생했습니다.', false); }
     });
   }
@@ -3092,6 +3102,47 @@ async function cloudSave(key, jsonStr){
   } catch(e){ console.warn('시트 저장 오류:', e); }
 }
 
+// ── 삭제 동기화 ──
+// 시트의 행을 지우는 대신 "삭제됨" 표시(묘비)를 같은 키에 덮어써서 보냄.
+// 기존 Apps Script(doPost: key/value 저장)를 재배포하지 않아도 동작하고,
+// 다른 기기도 다음 동기화 때 이 표시를 읽고 해당 기록을 자기 기기에서 지움.
+var CLOUD_PENDING_DEL_KEY = 'srCloud::pendingDeletes';
+function _getPendingDeletes(){
+  try { var a = JSON.parse(localStorage.getItem(CLOUD_PENDING_DEL_KEY) || '[]'); return Array.isArray(a) ? a : []; }
+  catch(e){ return []; }
+}
+function _setPendingDeletes(arr){
+  try { localStorage.setItem(CLOUD_PENDING_DEL_KEY, JSON.stringify(arr)); } catch(e){}
+}
+function _isTombstone(v){
+  if(typeof v !== 'string') return false;
+  try { var o = JSON.parse(v); return !!(o && o._deleted === true); } catch(e){ return false; }
+}
+async function _sendTombstone(key){
+  var body = JSON.stringify({ key: key, value: JSON.stringify({ _deleted: true, deletedAt: new Date().toISOString() }) });
+  await fetch(_gasUrl, { method: 'POST', body: body });
+}
+// 삭제 표시를 보내고, 시트에 실제 반영됐는지 다시 읽어서 확인. 확인되면 true.
+async function cloudDelete(key){
+  if(!_cloudEnabled || !_gasUrl) return false;
+  var pending = _getPendingDeletes();
+  if(pending.indexOf(key) === -1){ pending.push(key); _setPendingDeletes(pending); }
+  try {
+    await _sendTombstone(key);
+    var res = await fetch(_gasUrl + '?_=' + Date.now());
+    var json = await res.json();
+    var v = json && json.records ? json.records[key] : undefined;
+    if(v === undefined || _isTombstone(v)){
+      _setPendingDeletes(_getPendingDeletes().filter(function(k){ return k !== key; }));
+      return true;
+    }
+    return false;
+  } catch(e){
+    console.warn('시트 삭제 반영 오류:', e);
+    return false;
+  }
+}
+
 // ── 구글 시트에서 전체 불러오기 ──
 async function gsLoadAll(showMsg){
   if(!_cloudEnabled || !_gasUrl) return;
@@ -3101,9 +3152,30 @@ async function gsLoadAll(showMsg){
     if(!json || !json.records) return;
     var NS = 'srFormStorage::';
     var count = 0;
+    var removed = 0;
+    var pending = _getPendingDeletes();
+    var stillPending = [];
+    var toResend = [];
     Object.keys(json.records).forEach(function(k){
-      try { localStorage.setItem(NS + k, json.records[k]); count++; } catch(e){}
+      var v = json.records[k];
+      if(_isTombstone(v)){
+        // 시트에서 삭제된 기록 → 이 기기에서도 지움
+        try {
+          if(localStorage.getItem(NS + k) !== null){ localStorage.removeItem(NS + k); removed++; }
+        } catch(e){}
+        return;
+      }
+      if(pending.indexOf(k) !== -1){
+        // 이 기기에서 지웠는데 시트에는 아직 남아 있음 → 되살리지 않고 삭제 표시를 다시 보냄
+        stillPending.push(k); toResend.push(k);
+        return;
+      }
+      try { localStorage.setItem(NS + k, v); count++; } catch(e){}
     });
+    _setPendingDeletes(stillPending);
+    for(var i = 0; i < toResend.length; i++){
+      try { await _sendTombstone(toResend[i]); } catch(e){ console.warn('삭제 표시 재전송 오류:', e); }
+    }
     if(count > 0 && typeof loadList === 'function'){
       // 목록 탭이 열려 있으면 즉시 갱신
       var listPanel = document.getElementById('panel-list');
@@ -3111,7 +3183,7 @@ async function gsLoadAll(showMsg){
     }
     if(typeof updateStorageBadge === 'function') updateStorageBadge();
     if(showMsg){
-      _setCloudStatusBox2('✅ ' + count + '개 기록을 불러왔습니다.', true);
+      _setCloudStatusBox2('✅ ' + count + '개 기록을 불러왔습니다.' + (removed ? (' (다른 기기에서 삭제된 ' + removed + '건 반영)') : ''), true);
       setTimeout(function(){ _setCloudStatusBox2('',false); }, 2500);
     }
     console.log('📊 구글 시트에서 ' + count + '개 기록 로드');
