@@ -79,6 +79,7 @@
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;}
   .grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+  .grid.cols-4{grid-template-columns:1fr 1fr 1fr 1fr;}
   .field{display:flex;flex-direction:column;gap:6px;}
   .field.full{grid-column:1/-1;}
   .field label{font-size:12px;color:var(--ink-soft);font-weight:500;}
@@ -197,7 +198,7 @@
   button.action.save-all-btn:disabled{opacity:0.6;cursor:progress;}
 
   @media (max-width:640px){
-    .grid,.grid.cols-3{grid-template-columns:1fr;}
+    .grid,.grid.cols-3,.grid.cols-4{grid-template-columns:1fr 1fr;}
     .letterhead{flex-direction:column;align-items:flex-start;gap:10px;}
     .doc-meta{text-align:left;}
 
@@ -477,6 +478,220 @@
             <option>피부손상이 있음</option>
             <option>이상없음</option>
           </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 05 특수 재료 기록 ===== -->
+    <div class="card" id="card-special-materials">
+      <h2><span class="idx">05</span> 특수 재료 기록</h2>
+
+      <!-- 부위별 Plate -->
+      <div class="grid cols-3" style="margin-bottom:14px;">
+        <div class="field" style="grid-column:span 3;">
+          <label>인체 삽입 부위별 Plate 종류</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <select id="sp_plate_site" style="flex:1;min-width:150px;">
+              <option value="">부위 선택</option>
+              <option>대퇴골 (Femur)</option>
+              <option>경골 (Tibia)</option>
+              <option>비골 (Fibula)</option>
+              <option>요골 (Radius)</option>
+              <option>척골 (Ulna)</option>
+              <option>상완골 (Humerus)</option>
+              <option>쇄골 (Clavicle)</option>
+              <option>견갑골 (Scapula)</option>
+              <option>골반 (Pelvis)</option>
+              <option>종골 (Calcaneus)</option>
+              <option>거골 (Talus)</option>
+              <option>중족골 (Metatarsal)</option>
+              <option>수근골 (Carpal)</option>
+              <option>지골 (Phalanx)</option>
+              <option>기타</option>
+            </select>
+            <select id="sp_plate_type" style="flex:1;min-width:200px;">
+              <option value="">Plate 종류 선택</option>
+              <option>LCP (Locking Compression Plate)</option>
+              <option>DCP (Dynamic Compression Plate)</option>
+              <option>LC-DCP</option>
+              <option>T-Plate</option>
+              <option>L-Plate</option>
+              <option>Y-Plate</option>
+              <option>Buttress Plate</option>
+              <option>Blade Plate</option>
+              <option>Cloverleaf Plate</option>
+              <option>Reconstruction Plate</option>
+              <option>Hook Plate</option>
+              <option>Mini Plate</option>
+              <option>Micro Plate</option>
+              <option>기타</option>
+            </select>
+            <div style="display:flex;align-items:center;gap:6px;flex:0 0 auto;">
+              <label style="margin:0;white-space:nowrap;font-size:13px;font-weight:500;">홀 수</label>
+              <input type="number" id="sp_plate_hole" placeholder="예: 6" min="1" max="20" style="width:80px;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
+              <label style="margin:0;white-space:nowrap;font-size:13px;">홀</label>
+            </div>
+            <input type="text" id="sp_plate_detail" placeholder="상세 입력 (크기·제조사 등)" style="flex:2;min-width:180px;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Screw 행 추가 테이블 -->
+      <div class="field" style="margin-bottom:14px;">
+        <label>각종 Screw 사이즈 &amp; 길이</label>
+        <div id="sp_screw_rows" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+        <button type="button" onclick="spAddScrewRow('screw')" style="margin-top:6px;padding:5px 14px;font-size:13px;border:1px dashed var(--accent);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;">+ 행 추가</button>
+      </div>
+
+      <!-- HTO 블록 -->
+      <div class="field" style="margin-bottom:14px;max-width:220px;">
+        <label>HTO 블록 사이즈</label>
+        <select id="sp_block">
+          <option value="">선택</option>
+          <option>6mm Block</option>
+          <option>8mm Block</option>
+          <option>10mm Block</option>
+          <option>12mm Block</option>
+          <option>14mm Block</option>
+          <option>16mm Block</option>
+          <option>18mm Block</option>
+          <option>20mm Block</option>
+          <option>기타</option>
+        </select>
+      </div>
+
+      <!-- Cannulated Screw 행 추가 테이블 -->
+      <div class="field" style="margin-bottom:14px;">
+        <label>Cannulated Screw 사이즈 &amp; 길이</label>
+        <div id="sp_cannulated_rows" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+        <button type="button" onclick="spAddScrewRow('cannulated')" style="margin-top:6px;padding:5px 14px;font-size:13px;border:1px dashed var(--accent);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;">+ 행 추가</button>
+      </div>
+
+      <!-- Washer / Saw -->
+      <div class="grid cols-3" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Washer 수량</label>
+          <div style="display:flex;gap:8px;align-items:center;padding-top:6px;">
+            <input type="number" id="sp_washer_qty" placeholder="수량" min="0" max="99" style="width:80px;padding:5px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:14px;">
+            <span style="font-size:13px;color:var(--muted);">개</span>
+          </div>
+        </div>
+        <div class="field" style="grid-column:span 2;">
+          <label>Saw 종류</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:6px;">
+            <label style="font-weight:400;font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="sp_saw_sagittal"> Sagittal</label>
+            <label style="font-weight:400;font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="sp_saw_oscillating"> Oscillating</label>
+            <label style="font-weight:400;font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="sp_saw_reciprocating"> Reciprocating</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cannula / Button Cannula -->
+      <div class="grid cols-3" style="margin-bottom:14px;">
+        <div class="field">
+          <label>Cannula 6.5×7</label>
+          <div style="display:flex;gap:8px;align-items:center;padding-top:6px;">
+            <label style="font-weight:400;font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="sp_cannula"> 사용</label>
+            <input type="number" id="sp_cannula_qty" placeholder="수량" min="1" max="99" style="width:70px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
+          </div>
+        </div>
+        <div class="field">
+          <label>Button Cannula 8×3</label>
+          <div style="display:flex;gap:8px;align-items:center;padding-top:6px;">
+            <label style="font-weight:400;font-size:13px;display:flex;align-items:center;gap:4px;cursor:pointer;"><input type="checkbox" id="sp_btn_cannula"> 사용</label>
+            <input type="number" id="sp_btn_cannula_qty" placeholder="수량" min="1" max="99" style="width:70px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Wire 종류 + Steinman Pin 묶음 -->
+      <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.06em;margin-bottom:12px;">WIRE &amp; PIN</div>
+        <div class="grid cols-4" style="gap:12px;">
+          <div class="field">
+            <label>Roll-Wire 사이즈</label>
+            <select id="sp_roll_wire">
+              <option value="">선택</option>
+              <option>0.8mm</option>
+              <option>1.0mm</option>
+              <option>1.2mm</option>
+              <option>1.6mm</option>
+              <option>2.0mm</option>
+              <option>기타</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>K-Wire 사이즈</label>
+            <select id="sp_kwire">
+              <option value="">선택</option>
+              <option>0.8mm K-Wire</option>
+              <option>1.0mm K-Wire</option>
+              <option>1.2mm K-Wire</option>
+              <option>1.4mm K-Wire</option>
+              <option>1.6mm K-Wire</option>
+              <option>1.8mm K-Wire</option>
+              <option>2.0mm K-Wire</option>
+              <option>2.4mm K-Wire</option>
+              <option>2.5mm K-Wire</option>
+              <option>기타</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Ball K-Wire 사이즈</label>
+            <select id="sp_ball_kwire">
+              <option value="">선택</option>
+              <option>0.8mm Ball K-Wire</option>
+              <option>1.0mm Ball K-Wire</option>
+              <option>1.2mm Ball K-Wire</option>
+              <option>1.4mm Ball K-Wire</option>
+              <option>1.6mm Ball K-Wire</option>
+              <option>1.8mm Ball K-Wire</option>
+              <option>2.0mm Ball K-Wire</option>
+              <option>2.4mm Ball K-Wire</option>
+              <option>2.5mm Ball K-Wire</option>
+              <option>기타</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Steinman Pin 사이즈</label>
+            <select id="sp_steinman">
+              <option value="">선택</option>
+              <option>2.0mm Steinman</option>
+              <option>2.5mm Steinman</option>
+              <option>3.0mm Steinman</option>
+              <option>3.5mm Steinman</option>
+              <option>4.0mm Steinman</option>
+              <option>4.5mm Steinman</option>
+              <option>5.0mm Steinman</option>
+              <option>기타</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 메모 -->
+      <div class="field" style="margin-bottom:20px;">
+        <label>특이사항 / 추가 메모</label>
+        <textarea id="sp_memo" rows="2" placeholder="특이사항이나 추가 재료 입력" style="width:100%;resize:vertical;font-size:13px;padding:6px 8px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-family:inherit;box-sizing:border-box;"></textarea>
+      </div>
+
+      <!-- 사진 첨부 영역 -->
+      <div style="border-top:1px solid var(--border);padding-top:16px;">
+        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:10px;">📷 수술 사진 첨부</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+          <button type="button" id="sp_capture_btn" onclick="document.getElementById('sp_camera_input').click()"
+            style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:13px;font-weight:600;">
+            📷 사진 촬영
+          </button>
+          <button type="button" onclick="document.getElementById('sp_file_input').click()"
+            style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:13px;font-weight:600;">
+            🖼 갤러리에서 선택
+          </button>
+          <input type="file" id="sp_camera_input" accept="image/*" capture="environment" style="display:none;" multiple onchange="spHandleFiles(this.files)">
+          <input type="file" id="sp_file_input" accept="image/*" style="display:none;" multiple onchange="spHandleFiles(this.files)">
+        </div>
+        <div id="sp_photo_preview" style="display:flex;flex-wrap:wrap;gap:10px;min-height:70px;padding:12px;border:2px dashed var(--border);border-radius:6px;background:var(--surface);align-items:center;">
+          <span id="sp_photo_placeholder" style="color:var(--muted);font-size:12px;width:100%;text-align:center;">사진을 촬영하거나 선택하면 여기에 표시됩니다</span>
         </div>
       </div>
     </div>
@@ -1155,6 +1370,29 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         biopsy_name: document.getElementById('n_biopsy_name').value.trim(),
         note: document.getElementById('n_note').value.trim()
       },
+      special: {
+        plate_site: document.getElementById('sp_plate_site').value,
+        plate_type: document.getElementById('sp_plate_type').value,
+        plate_hole: document.getElementById('sp_plate_hole').value,
+        plate_detail: document.getElementById('sp_plate_detail').value.trim(),
+        screws: window.spCollectScrewRows('screw'),
+        block: document.getElementById('sp_block').value,
+        cannulated_screws: window.spCollectScrewRows('cannulated'),
+        washer_qty: document.getElementById('sp_washer_qty').value,
+        saw_sagittal: document.getElementById('sp_saw_sagittal').checked,
+        saw_oscillating: document.getElementById('sp_saw_oscillating').checked,
+        saw_reciprocating: document.getElementById('sp_saw_reciprocating').checked,
+        roll_wire: document.getElementById('sp_roll_wire').value,
+        cannula: document.getElementById('sp_cannula').checked,
+        cannula_qty: document.getElementById('sp_cannula_qty').value,
+        btn_cannula: document.getElementById('sp_btn_cannula').checked,
+        btn_cannula_qty: document.getElementById('sp_btn_cannula_qty').value,
+        kwire: document.getElementById('sp_kwire').value,
+        ball_kwire: document.getElementById('sp_ball_kwire').value,
+        steinman: document.getElementById('sp_steinman').value,
+        memo: document.getElementById('sp_memo').value.trim(),
+        photos: window._spPhotos || []
+      },
       savedAt: new Date().toISOString()
     };
   }
@@ -1382,6 +1620,29 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     presetToggle.checked = false;
     presetToggleWrap.classList.remove('active');
     applyFilters();
+    // 05 특수 재료 초기화
+    // 행 방식 초기화
+    var screwCont = document.getElementById('sp_screw_rows');
+    if(screwCont){ screwCont.innerHTML=''; window.spAddScrewRow('screw'); }
+    var cannCont = document.getElementById('sp_cannulated_rows');
+    if(cannCont){ cannCont.innerHTML=''; window.spAddScrewRow('cannulated'); }
+    ['sp_plate_site','sp_plate_type','sp_block','sp_roll_wire','sp_kwire','sp_ball_kwire','sp_steinman'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.value='';
+    });
+    // 길이 드롭다운 초기화
+    ['sp_screw_len','sp_cannulated_screw_len'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el){ el.innerHTML='<option value="">길이 선택</option>'; el.disabled=true; }
+    });
+    ['sp_plate_hole','sp_plate_detail','sp_washer_qty','sp_cannula_qty','sp_btn_cannula_qty','sp_memo'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.value='';
+    });
+    ['sp_saw_sagittal','sp_saw_oscillating','sp_saw_reciprocating','sp_cannula','sp_btn_cannula'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.checked=false;
+    });
+    window._spPhotos = [];
+    const preview = document.getElementById('sp_photo_preview');
+    if(preview){ preview.innerHTML='<span id="sp_photo_placeholder" style="color:var(--muted);font-size:12px;width:100%;text-align:center;">사진을 촬영하거나 선택하면 여기에 표시됩니다</span>'; }
   }
   document.getElementById('saveBtn').addEventListener('click', saveRecord);
   document.getElementById('pdfBtn').addEventListener('click', exportPdf);
@@ -1505,6 +1766,8 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     for(let i=0;i<3;i++) makeExtraRow();
     presetToggle.checked=false; presetToggleWrap.classList.remove('active');
     applyFilters();
+    // 05 특수 재료 복원
+    if(typeof window._fillSpecial === 'function') window._fillSpecial(d.special || {});
     showBanner('banner', '불러온 기록입니다. 수정 후 "저장하기"를 누르면 새 기록으로 저장됩니다.', true);
   }
   async function deleteRecord(key, btn){
@@ -1902,6 +2165,243 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     fillFromUrlParams(); // 수술계획표에서 넘어온 데이터 자동입력
   }
   init();
+})();
+</script>
+
+<!-- ===== 05 특수 재료: Screw 길이 데이터 & 핸들러 ===== -->
+<script>
+(function(){
+  // ── Screw 사이즈별 길이(mm) 목록 ──
+  var SCREW_LENGTHS = {
+    '3.5mm Cortical':       [10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,55,60],
+    '3.5mm Cancellous':     [10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40],
+    'Locking Screw 1.5mm':  [4,5,6,7,8,9,10,11,12,14,16,18,20],
+    'Locking Screw 2.0mm':  [5,6,7,8,9,10,11,12,14,16,18,20,22,24],
+    'Locking Screw 2.7mm':  [10,12,14,16,18,20,22,24,26,28,30,32,34,36],
+    'Locking Screw 3.5mm':  [10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,55,60,65,70],
+    'Locking Screw 4.5mm':  [16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,55,60,65,70,75,80],
+    '4.0mm Cannulated':     [25,30,35,40,45,50,55,60,65,70],
+    '4.5mm Cannulated':     [25,30,35,40,45,50,55,60,65,70],
+    '6.5mm Cannulated':     [30,35,40,45,50,55,60,65,70,75,80,85,90,95,100,105,110,115,120]
+  };
+
+  // ── 행 추가 방식: Screw / Cannulated Screw ──
+  var SCREW_OPTS = {
+    screw: ['3.5mm Cortical','3.5mm Cancellous','Locking Screw 1.5mm','Locking Screw 2.0mm','Locking Screw 2.7mm','Locking Screw 3.5mm','Locking Screw 4.5mm','기타'],
+    cannulated: ['4.0mm Cannulated','4.5mm Cannulated','6.5mm Cannulated','기타']
+  };
+
+  window.spAddScrewRow = function(type, savedSize, savedLen, savedQty) {
+    var container = document.getElementById(type === 'screw' ? 'sp_screw_rows' : 'sp_cannulated_rows');
+    var idx = container.children.length;
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;align-items:center;';
+    var sizeId = 'sp_' + type + '_size_' + idx;
+    var lenId  = 'sp_' + type + '_len_' + idx;
+    var qtyId  = 'sp_' + type + '_qty_' + idx;
+    var opts = SCREW_OPTS[type].map(function(o){ return '<option' + (o === savedSize ? ' selected' : '') + '>' + o + '</option>'; }).join('');
+    row.innerHTML =
+      '<select id="' + sizeId + '" style="flex:2;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;" onchange="spRowUpdateLen(\'' + sizeId + '\',\'' + lenId + '\')">' +
+        '<option value="">사이즈 선택</option>' + opts +
+      '</select>' +
+      '<select id="' + lenId + '" style="flex:1.5;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;" disabled>' +
+        '<option value="">길이 선택</option>' +
+      '</select>' +
+      '<input type="number" id="' + qtyId + '" placeholder="수량" min="1" max="99" style="width:60px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">' +
+      '<span style="font-size:12px;color:var(--muted);">개</span>' +
+      '<button type="button" onclick="this.parentElement.remove()" style="padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;">✕</button>';
+    container.appendChild(row);
+    if(savedSize) {
+      var sizeEl = document.getElementById(sizeId);
+      sizeEl.value = savedSize;
+      spRowUpdateLen(sizeId, lenId, savedLen);
+    }
+    if(savedQty) document.getElementById(qtyId).value = savedQty;
+  };
+
+  window.spRowUpdateLen = function(sizeId, lenId, preselect) {
+    var sizeVal = document.getElementById(sizeId).value;
+    var lenEl   = document.getElementById(lenId);
+    var lengths = SCREW_LENGTHS[sizeVal];
+    lenEl.innerHTML = '<option value="">길이 선택</option>';
+    if(lengths && lengths.length) {
+      lengths.forEach(function(l){
+        var o = document.createElement('option');
+        o.value = l + 'mm'; o.textContent = l + 'mm';
+        if(preselect && o.value === preselect) o.selected = true;
+        lenEl.appendChild(o);
+      });
+      lenEl.disabled = false;
+    } else if(sizeVal === '기타') {
+      var o = document.createElement('option'); o.value='직접입력'; o.textContent='직접입력'; lenEl.appendChild(o);
+      lenEl.disabled = false;
+    } else { lenEl.disabled = true; }
+  };
+
+  // 저장된 행 배열 복원
+  window.spRestoreScrewRows = function(type, rows) {
+    var container = document.getElementById(type === 'screw' ? 'sp_screw_rows' : 'sp_cannulated_rows');
+    container.innerHTML = '';
+    if(!rows || !rows.length) return;
+    rows.forEach(function(r){ spAddScrewRow(type, r.size, r.len, r.qty); });
+  };
+
+  // 행 데이터 수집
+  window.spCollectScrewRows = function(type) {
+    var container = document.getElementById(type === 'screw' ? 'sp_screw_rows' : 'sp_cannulated_rows');
+    var result = [];
+    Array.from(container.children).forEach(function(row, i) {
+      var sizeEl = document.getElementById('sp_' + type + '_size_' + i);
+      var lenEl  = document.getElementById('sp_' + type + '_len_' + i);
+      var qtyEl  = document.getElementById('sp_' + type + '_qty_' + i);
+      if(sizeEl && sizeEl.value) result.push({ size: sizeEl.value, len: lenEl ? lenEl.value : '', qty: qtyEl ? qtyEl.value : '' });
+    });
+    return result;
+  };
+
+  // 초기 빈 행 1개씩
+  document.addEventListener('DOMContentLoaded', function(){
+    spAddScrewRow('screw');
+    spAddScrewRow('cannulated');
+  });
+
+  window.spUpdateScrewLen = function(sizeId, lenId){
+    var sizeEl = document.getElementById(sizeId);
+    var lenEl  = document.getElementById(lenId);
+    if(!sizeEl || !lenEl) return;
+    var sizeVal = sizeEl.value;
+    var lengths = SCREW_LENGTHS[sizeVal];
+    lenEl.innerHTML = '<option value="">길이 선택</option>';
+    if(lengths && lengths.length){
+      lengths.forEach(function(l){
+        var opt = document.createElement('option');
+        opt.value = l + 'mm';
+        opt.textContent = l + 'mm';
+        lenEl.appendChild(opt);
+      });
+      lenEl.disabled = false;
+    } else if(sizeVal === '기타'){
+      var opt = document.createElement('option');
+      opt.value = '직접입력';
+      opt.textContent = '직접입력';
+      lenEl.appendChild(opt);
+      lenEl.disabled = false;
+    } else {
+      lenEl.disabled = true;
+    }
+  };
+
+  // 페이지 로드 시 초기화 (저장된 기록 복원 후 길이 목록 재생성용)
+  window.spRestoreScrewLen = function(sizeId, lenId, savedLen){
+    window.spUpdateScrewLen(sizeId, lenId);
+    var lenEl = document.getElementById(lenId);
+    if(lenEl && savedLen) lenEl.value = savedLen;
+  };
+})();
+</script>
+
+<!-- ===== 05 특수 재료: 사진 핸들러 ===== -->
+<script>
+(function(){
+  window._spPhotos = [];
+  window.spHandleFiles = function(files){
+    if(!files || files.length === 0) return;
+    var preview = document.getElementById('sp_photo_preview');
+    var placeholder = document.getElementById('sp_photo_placeholder');
+    if(placeholder) placeholder.style.display = 'none';
+    Array.from(files).forEach(function(file){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        window._spPhotos.push(e.target.result);
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;display:inline-block;';
+        var img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.cssText = 'width:120px;height:90px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:pointer;display:block;';
+        img.title = '클릭하면 크게 보기';
+        img.onclick = function(){ window.open(e.target.result, '_blank'); };
+        var del = document.createElement('button');
+        del.textContent = '✕';
+        del.type = 'button';
+        del.style.cssText = 'position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;padding:0;';
+        del.onclick = function(){
+          var idx = window._spPhotos.indexOf(e.target.result);
+          if(idx > -1) window._spPhotos.splice(idx, 1);
+          wrapper.remove();
+          if(!document.querySelector('#sp_photo_preview img')){
+            var ph = document.getElementById('sp_photo_placeholder');
+            if(ph) ph.style.display = '';
+          }
+        };
+        wrapper.appendChild(img);
+        wrapper.appendChild(del);
+        preview.appendChild(wrapper);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+  // 저장된 기록에서 특수재료 복원
+  var origFill = window._fillSpecial;
+  window._fillSpecial = function(sp){
+    if(!sp) return;
+    // 행 방식 복원
+    if(typeof window.spRestoreScrewRows === 'function'){
+      window.spRestoreScrewRows('screw', sp.screws || []);
+      window.spRestoreScrewRows('cannulated', sp.cannulated_screws || []);
+    }
+    var map = {
+      sp_plate_site:'plate_site', sp_plate_type:'plate_type',
+      sp_block:'block',
+      sp_roll_wire:'roll_wire', sp_kwire:'kwire', sp_ball_kwire:'ball_kwire', sp_steinman:'steinman'
+    };
+    Object.keys(map).forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && sp[map[id]] != null) el.value = sp[map[id]];
+    });
+    var numMap = {sp_plate_hole:'plate_hole', sp_plate_detail:'plate_detail',
+      sp_cannula_qty:'cannula_qty', sp_btn_cannula_qty:'btn_cannula_qty', sp_memo:'memo'};
+    Object.keys(numMap).forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && sp[numMap[id]] != null) el.value = sp[numMap[id]];
+    });
+    var washerEl = document.getElementById('sp_washer_qty');
+    if(washerEl && sp.washer_qty != null) washerEl.value = sp.washer_qty;
+    var chkMap = {
+      sp_saw_sagittal:'saw_sagittal', sp_saw_oscillating:'saw_oscillating',
+      sp_saw_reciprocating:'saw_reciprocating',
+      sp_cannula:'cannula', sp_btn_cannula:'btn_cannula'};
+    Object.keys(chkMap).forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && sp[chkMap[id]] != null) el.checked = !!sp[chkMap[id]];
+    });
+    // 사진 복원
+    if(sp.photos && sp.photos.length){
+      window._spPhotos = sp.photos.slice();
+      var preview = document.getElementById('sp_photo_preview');
+      var placeholder = document.getElementById('sp_photo_placeholder');
+      if(placeholder) placeholder.style.display = 'none';
+      sp.photos.forEach(function(src){
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = 'position:relative;display:inline-block;';
+        var img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = 'width:120px;height:90px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:pointer;display:block;';
+        img.onclick = function(){ window.open(src, '_blank'); };
+        var del = document.createElement('button');
+        del.textContent = '✕';
+        del.type = 'button';
+        del.style.cssText = 'position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;padding:0;';
+        del.onclick = function(){
+          var idx = window._spPhotos.indexOf(src);
+          if(idx > -1) window._spPhotos.splice(idx, 1);
+          wrapper.remove();
+        };
+        wrapper.appendChild(img);
+        wrapper.appendChild(del);
+        preview.appendChild(wrapper);
+      });
+    }
+  };
 })();
 </script>
 </body></html>
