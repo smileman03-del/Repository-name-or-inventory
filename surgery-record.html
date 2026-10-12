@@ -230,7 +230,8 @@
     .card{border:none;padding:0;margin-bottom:14px;}
     .app{max-width:100%;padding:0;}
   }
-</style></head>
+</style>
+</head>
 <body>
 <div class="app">
 
@@ -256,7 +257,10 @@
     <button class="tab-btn active" data-tab="new">새 재료기록 작성</button>
     <button class="tab-btn" data-tab="list">저장된 기록 목록</button>
     <button class="tab-btn" data-tab="manage">수술종류 · 품목 관리</button>
-    <button onclick="showStorageModal()" title="저장 용량 확인" style="margin-left:auto;padding:6px 14px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;">💾 용량 확인</button>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
+      <span id="cloudIndicator" title="클라우드 동기화 설정" onclick="showCloudModal()" style="cursor:pointer;font-size:12px;color:var(--muted);padding:4px 8px;border-radius:20px;transition:all .2s;user-select:none;" title="동기화 설정">☁️</span>
+      <button onclick="showStorageModal()" title="저장 용량 확인" style="padding:6px 14px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;">💾 용량 확인</button>
+    </div>
   </div>
 
   <!-- ===== NEW RECORD PANEL ===== -->
@@ -748,8 +752,150 @@
         <div id="sm_rec_list" style="display:flex;flex-direction:column;gap:6px;"></div>
       </div>
       <!-- 모달 하단 -->
-      <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;">
-        <button onclick="closeStorageModal()" style="padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:13px;">닫기</button>
+      <div style="padding:14px 20px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">📱 다른 기기에서 보려면 <b>내보내기</b>로 파일 저장 후 <b>가져오기</b>로 불러오세요.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+          <button onclick="exportAllRecords()" style="padding:8px 16px;border:1px solid var(--accent);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;">📤 전체 내보내기</button>
+          <label style="padding:8px 16px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:13px;font-weight:600;">
+            📥 가져오기
+            <input type="file" accept=".json" style="display:none;" onchange="importRecords(this)">
+          </label>
+          <button onclick="closeStorageModal()" style="padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:13px;">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 구글 시트 동기화 모달 ===== -->
+  <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:min(520px,96vw);max-height:92vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;">
+        <span style="font-size:15px;font-weight:700;">📊 구글 시트 동기화 설정</span>
+        <button onclick="closeCloudModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button>
+      </div>
+
+      <!-- 상태 메시지 -->
+      <div id="cloudStatusBox" style="display:none;padding:10px 16px;font-size:13px;border-bottom:1px solid var(--border);"></div>
+
+      <!-- 선택 화면 -->
+      <div id="cloudView_choose" style="padding:22px 20px;">
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px;">저장 버튼 → 모든 기기에서 즉시 확인</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;">구글 시트를 공유 저장소로 사용합니다. 구글 계정만 있으면 됩니다.</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <button onclick="cloudViewShow('url')" style="padding:13px 16px;border:2px solid var(--accent);border-radius:8px;background:var(--accent-soft);color:var(--accent-dark);font-size:14px;font-weight:700;cursor:pointer;text-align:left;">
+            🔗 주소(URL) 붙여넣기
+            <span style="font-size:12px;font-weight:400;display:block;color:var(--muted);margin-top:3px;">이미 다른 기기에서 설정한 경우 — URL 하나만 붙여넣으면 끝</span>
+          </button>
+          <button onclick="cloudViewShow('guide')" style="padding:13px 16px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--ink);font-size:14px;cursor:pointer;text-align:left;">
+            ✨ 처음 설정하기 (5분)
+            <span style="font-size:12px;font-weight:400;display:block;color:var(--muted);margin-top:3px;">구글 시트 + 스크립트 만들기 — 단계별 안내</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- URL 붙여넣기 -->
+      <div id="cloudView_url" style="display:none;padding:20px;">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.6;">다른 기기(또는 아래 설정 화면)에서 복사한 <b>구글 앱스크립트 URL</b>을 붙여넣으세요.</div>
+        <input id="cf_scriptUrl" type="url" placeholder="https://script.google.com/macros/s/..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);font-size:13px;box-sizing:border-box;">
+        <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end;">
+          <button onclick="cloudViewShow('choose')" style="padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;">← 뒤로</button>
+          <button onclick="connectCloudByUrl()" style="padding:8px 22px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:700;">연결하기</button>
+        </div>
+      </div>
+
+      <!-- 처음 설정 가이드 -->
+      <div id="cloudView_guide" style="display:none;padding:20px;">
+        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:16px;">📋 단계별 설정 (한 번만 하면 됩니다)</div>
+
+        <!-- Step 1 -->
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">1</span>
+            <span style="font-size:13px;font-weight:600;">구글 시트 만들기</span>
+          </div>
+          <div style="margin-left:30px;font-size:13px;color:var(--muted);line-height:1.7;">
+            <a href="https://sheets.new" target="_blank" style="color:var(--accent);font-weight:600;">sheets.new</a> 접속 → 새 스프레드시트 생성<br>
+            제목을 <b>수술기록 동기화</b> 등으로 변경
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">2</span>
+            <span style="font-size:13px;font-weight:600;">앱스크립트 열기</span>
+          </div>
+          <div style="margin-left:30px;font-size:13px;color:var(--muted);line-height:1.7;">
+            메뉴 → <b>확장 프로그램</b> → <b>Apps Script</b> 클릭
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">3</span>
+            <span style="font-size:13px;font-weight:600;">아래 코드를 전체 복사 → 붙여넣기 → 저장(💾)</span>
+          </div>
+          <div style="position:relative;margin-left:30px;">
+            <pre id="gasCodeBlock" style="background:#1E1E1E;color:#D4D4D4;border-radius:8px;padding:14px;font-size:11px;overflow-x:auto;line-height:1.6;margin:0;white-space:pre-wrap;word-break:break-all;"></pre>
+            <button onclick="copyGasCode()" id="copyGasBtn" style="position:absolute;top:8px;right:8px;padding:4px 10px;font-size:11px;border:1px solid #555;border-radius:4px;background:#2D2D2D;color:#CCC;cursor:pointer;">복사</button>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">4</span>
+            <span style="font-size:13px;font-weight:600;">웹 앱으로 배포</span>
+          </div>
+          <div style="margin-left:30px;font-size:13px;color:var(--muted);line-height:1.8;">
+            오른쪽 상단 <b>배포</b> → <b>새 배포</b> → 유형: <b>웹 앱</b><br>
+            액세스 권한: <b>모든 사용자</b> 선택 → <b>배포</b> 클릭<br>
+            ※ 권한 허용 팝업이 뜨면 구글 계정 선택 → 허용
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div style="margin-bottom:18px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <span style="background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;">5</span>
+            <span style="font-size:13px;font-weight:600;">웹 앱 URL 복사 → 아래 붙여넣기</span>
+          </div>
+          <div style="margin-left:30px;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px;">배포 완료 화면에서 <b>웹 앱 URL</b>을 복사하세요 (script.google.com/...으로 시작)</div>
+            <input id="cf_scriptUrl2" type="url" placeholder="https://script.google.com/macros/s/..." style="width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--ink);font-size:13px;box-sizing:border-box;">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button onclick="cloudViewShow('choose')" style="padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;">← 뒤로</button>
+          <button onclick="connectCloudByGuide()" style="padding:8px 22px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;font-weight:700;">✅ 연결하기</button>
+        </div>
+      </div>
+
+      <!-- 연결됨 화면 -->
+      <div id="cloudView_connected" style="display:none;padding:20px;">
+        <div style="background:#E5EFEC;border-radius:8px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:#1F5A4B;font-weight:600;">
+          ✅ 구글 시트에 연결되었습니다<br>
+          <span style="font-weight:400;font-size:12px;margin-top:2px;display:block;">저장 버튼을 누르면 모든 기기에서 바로 확인할 수 있습니다.</span>
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:6px;">🔗 다른 기기에 공유할 URL</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">아래 URL을 카카오톡 등으로 공유 → 다른 기기에서 앱 열고 "URL 붙여넣기" 선택</div>
+        <div style="position:relative;">
+          <input id="cf_shareUrl" type="text" readonly style="width:100%;padding:9px 70px 9px 10px;border:1px solid var(--border);border-radius:6px;background:#F6F7F5;color:var(--ink);font-size:12px;box-sizing:border-box;font-family:monospace;">
+          <button onclick="copyShareUrl()" id="copyUrlBtn" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);padding:4px 10px;font-size:11px;border:1px solid var(--border);border-radius:4px;background:var(--surface);cursor:pointer;color:var(--ink);">복사</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+          <button onclick="disconnectCloud()" style="padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;">연결 해제</button>
+          <button onclick="gsLoadAll(true)" style="padding:8px 14px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--accent-dark);cursor:pointer;font-size:13px;font-weight:600;">🔄 지금 동기화</button>
+          <button onclick="closeCloudModal()" style="padding:8px 22px;border:none;border-radius:6px;background:var(--accent);color:#fff;cursor:pointer;font-size:13px;font-weight:700;">닫기</button>
+        </div>
+        <div id="cloudStatusBox2" style="display:none;margin-top:10px;padding:8px 12px;border-radius:6px;font-size:12px;"></div>
+      </div>
+
+      <!-- 건너뛰기 -->
+      <div id="cloudSkipBar" style="display:none;padding:10px 20px;border-top:1px solid var(--border);text-align:center;">
+        <button onclick="skipCloudSetup()" style="background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;text-decoration:underline;">지금은 건너뛰기 (이 기기에서만 저장됩니다)</button>
       </div>
     </div>
   </div>
@@ -1460,9 +1606,16 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     if(missing.length){ showBanner('banner', '다음 항목을 입력해주세요: ' + missing.join(', '), false); return; }
     const key = 'record:' + Date.now();
     try{
-      const res = await window.storage.set(key, JSON.stringify(data), false);
+      const jsonStr = JSON.stringify(data);
+      const res = await window.storage.set(key, jsonStr, false);
       if(!res) throw new Error('no result');
-      showBanner('banner', '저장되었습니다. 새 기록 작성을 위해 화면이 초기화되었습니다.', true);
+      // 클라우드 동기화 (연결된 경우)
+      if(window._cloudEnabled && window._gasUrl){
+        cloudSave(key, jsonStr).catch(function(e){ console.warn('클라우드 저장 실패:', e); });
+        showBanner('banner', '저장되었습니다 ☁️  다른 기기에서도 바로 확인할 수 있습니다.', true);
+      } else {
+        showBanner('banner', '저장되었습니다. 새 기록 작성을 위해 화면이 초기화되었습니다.', true);
+      }
       clearAll();
     }catch(e){ console.error(e); showBanner('banner', '저장 중 오류가 발생했습니다. 다시 시도해주세요.', false); }
   }
@@ -2546,5 +2699,328 @@ function closeStorageModal(){
 document.getElementById('storageModal').addEventListener('click', function(e){
   if(e.target === this) closeStorageModal();
 });
+
+// ── 전체 내보내기 ──
+function exportAllRecords(){
+  var NS = 'srFormStorage::';
+  var data = {};
+  try {
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf(NS) === 0){
+        data[k.slice(NS.length)] = localStorage.getItem(k);
+      }
+    }
+  } catch(e){ alert('내보내기 실패: ' + e.message); return; }
+  var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  var d = new Date();
+  a.download = '수술기록_' + d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2) + '.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+// ── 가져오기 ──
+function importRecords(input){
+  var file = input.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    try {
+      var data = JSON.parse(e.target.result);
+      var NS = 'srFormStorage::';
+      var count = 0;
+      Object.keys(data).forEach(function(k){
+        try {
+          localStorage.setItem(NS + k, data[k]);
+          count++;
+        } catch(err){}
+      });
+      input.value = '';
+      alert('✅ ' + count + '개 항목을 가져왔습니다.\n페이지를 새로고침하면 목록에 반영됩니다.');
+      closeStorageModal();
+      location.reload();
+    } catch(err){
+      alert('가져오기 실패: 올바른 내보내기 파일이 아닙니다.\n(' + err.message + ')');
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📊  구글 시트 동기화 (Apps Script Web App)
+// ═══════════════════════════════════════════════════════════
+var _cloudEnabled  = false;
+var _gasUrl        = '';       // 앱스크립트 웹 앱 URL
+var CLOUD_CFG_KEY  = 'srCloud::gasUrl';
+var CLOUD_SKIP_KEY = 'srCloud::skipOnce';
+
+// ── 인디케이터 업데이트 ──
+function _updateCloudIndicator(){
+  var el = document.getElementById('cloudIndicator');
+  if(!el) return;
+  if(_cloudEnabled){
+    el.textContent = '☁️';
+    el.title = '동기화 연결됨 · 클릭하면 설정';
+    el.style.color = '#2F7A67';
+    el.style.background = '#E5EFEC';
+    el.style.fontWeight = '700';
+    el.style.borderRadius = '20px';
+    el.style.padding = '4px 8px';
+  } else {
+    el.textContent = '☁️';
+    el.title = '동기화 설정 안 됨 · 클릭하면 설정';
+    el.style.color = 'var(--muted)';
+    el.style.background = 'transparent';
+    el.style.fontWeight = '';
+  }
+}
+
+function _setCloudStatusBox(msg, ok){
+  var box = document.getElementById('cloudStatusBox');
+  if(!box) return;
+  if(!msg){ box.style.display='none'; return; }
+  box.textContent = msg;
+  box.style.background = ok ? '#E5EFEC' : '#F7E9E5';
+  box.style.color = ok ? '#1F5A4B' : '#B5482E';
+  box.style.display = 'block';
+}
+
+function _setCloudStatusBox2(msg, ok){
+  var box = document.getElementById('cloudStatusBox2');
+  if(!box) return;
+  if(!msg){ box.style.display='none'; return; }
+  box.textContent = msg;
+  box.style.background = ok ? '#E5EFEC' : '#F7E9E5';
+  box.style.color = ok ? '#1F5A4B' : '#B5482E';
+  box.style.display = 'block';
+}
+
+// ── Apps Script 코드 (모달에 표시할 내용) ──
+var GAS_CODE = [
+'// ── 천안본정형외과 수술기록 동기화 ──',
+'var SHEET = \'수술기록\';',
+'',
+'function doGet() {',
+'  var sh = _sheet();',
+'  var rows = sh.getLastRow() > 1',
+'    ? sh.getRange(2,1,sh.getLastRow()-1,2).getValues() : [];',
+'  var rec = {};',
+'  rows.forEach(function(r){ if(r[0]) rec[r[0]] = r[1]; });',
+'  return _json({ok:true, records:rec});',
+'}',
+'',
+'function doPost(e) {',
+'  var p = JSON.parse(e.postData.contents);',
+'  var sh = _sheet();',
+'  var data = sh.getLastRow() > 1',
+'    ? sh.getRange(2,1,sh.getLastRow()-1,1).getValues() : [];',
+'  var row = -1;',
+'  data.forEach(function(r,i){ if(r[0]===p.key) row=i+2; });',
+'  if(row>0){',
+'    sh.getRange(row,2).setValue(p.value);',
+'    sh.getRange(row,3).setValue(new Date());',
+'  } else {',
+'    sh.appendRow([p.key, p.value, new Date()]);',
+'  }',
+'  return _json({ok:true});',
+'}',
+'',
+'function _sheet() {',
+'  var ss = SpreadsheetApp.getActiveSpreadsheet();',
+'  return ss.getSheetByName(SHEET) || ss.insertSheet(SHEET);',
+'}',
+'function _json(obj) {',
+'  return ContentService',
+'    .createTextOutput(JSON.stringify(obj))',
+'    .setMimeType(ContentService.MimeType.JSON);',
+'}'
+].join('\n');
+
+// ── 앱스크립트 코드 표시 ──
+(function _fillGasCode(){
+  var el = document.getElementById('gasCodeBlock');
+  if(el) el.textContent = GAS_CODE;
+})();
+
+function copyGasCode(){
+  navigator.clipboard.writeText(GAS_CODE).then(function(){
+    var btn = document.getElementById('copyGasBtn');
+    if(btn){ btn.textContent='✅ 복사됨'; setTimeout(function(){btn.textContent='복사';},1800); }
+  }).catch(function(){
+    var ta = document.createElement('textarea');
+    ta.value = GAS_CODE; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    var btn = document.getElementById('copyGasBtn');
+    if(btn){ btn.textContent='✅ 복사됨'; setTimeout(function(){btn.textContent='복사';},1800); }
+  });
+}
+
+// ── 뷰 전환 ──
+function cloudViewShow(name){
+  ['choose','url','guide','connected'].forEach(function(v){
+    var el = document.getElementById('cloudView_' + v);
+    if(el) el.style.display = (v === name) ? 'block' : 'none';
+  });
+  _setCloudStatusBox('', false);
+}
+
+// ── 모달 열기/닫기 ──
+function showCloudModal(isFirstRun){
+  var modal = document.getElementById('cloudModal');
+  modal.style.display = 'flex';
+  var skipBar = document.getElementById('cloudSkipBar');
+  if(skipBar) skipBar.style.display = isFirstRun ? 'block' : 'none';
+
+  if(_cloudEnabled){
+    cloudViewShow('connected');
+    var el = document.getElementById('cf_shareUrl');
+    if(el) el.value = _gasUrl;
+  } else {
+    cloudViewShow('choose');
+  }
+  // 코드 블록 채우기
+  var gc = document.getElementById('gasCodeBlock');
+  if(gc && !gc.textContent) gc.textContent = GAS_CODE;
+}
+
+function closeCloudModal(){
+  document.getElementById('cloudModal').style.display = 'none';
+}
+document.getElementById('cloudModal').addEventListener('click', function(e){
+  if(e.target === this) closeCloudModal();
+});
+
+function skipCloudSetup(){
+  try { localStorage.setItem(CLOUD_SKIP_KEY, '1'); } catch(e){}
+  closeCloudModal();
+}
+
+// ── URL 검증 & 연결 테스트 ──
+async function _testAndConnect(url){
+  _setCloudStatusBox('🔄 연결 확인 중...', true);
+  try {
+    var res = await fetch(url + '?action=ping&_=' + Date.now());
+    var json = await res.json();
+    if(!json || json.ok === false) throw new Error(json.error || '응답 오류');
+  } catch(e){
+    _setCloudStatusBox('❌ 연결 실패: ' + (e.message || e) + '\nURL을 다시 확인하거나 배포 설정(액세스: 모든 사용자)을 확인해주세요.', false);
+    return false;
+  }
+  // 저장 & 상태 업데이트
+  _gasUrl = url;
+  _cloudEnabled = true;
+  try { localStorage.setItem(CLOUD_CFG_KEY, url); } catch(e){}
+  try { localStorage.removeItem(CLOUD_SKIP_KEY); } catch(e){}
+  _updateCloudIndicator();
+  // 기존 기록 불러오기
+  await gsLoadAll(false);
+  // 연결됨 뷰
+  cloudViewShow('connected');
+  var el = document.getElementById('cf_shareUrl');
+  if(el) el.value = url;
+  return true;
+}
+
+// ── URL 붙여넣기로 연결 ──
+async function connectCloudByUrl(){
+  var url = (document.getElementById('cf_scriptUrl').value || '').trim();
+  if(!url || !url.startsWith('http')){
+    _setCloudStatusBox('⚠️ 올바른 URL을 입력해주세요.', false); return;
+  }
+  await _testAndConnect(url);
+}
+
+// ── 가이드에서 연결 ──
+async function connectCloudByGuide(){
+  var url = (document.getElementById('cf_scriptUrl2').value || '').trim();
+  if(!url || !url.startsWith('http')){
+    _setCloudStatusBox('⚠️ 웹 앱 URL을 붙여넣어 주세요.', false); return;
+  }
+  await _testAndConnect(url);
+}
+
+// ── URL 복사 ──
+function copyShareUrl(){
+  var el = document.getElementById('cf_shareUrl');
+  if(!el) return;
+  navigator.clipboard.writeText(el.value).then(function(){
+    var btn = document.getElementById('copyUrlBtn');
+    if(btn){ btn.textContent='✅ 복사됨'; setTimeout(function(){btn.textContent='복사';},1800); }
+  }).catch(function(){
+    el.select(); document.execCommand('copy');
+    var btn = document.getElementById('copyUrlBtn');
+    if(btn){ btn.textContent='✅ 복사됨'; setTimeout(function(){btn.textContent='복사';},1800); }
+  });
+}
+
+// ── 연결 해제 ──
+function disconnectCloud(){
+  _cloudEnabled = false; _gasUrl = '';
+  try { localStorage.removeItem(CLOUD_CFG_KEY); } catch(e){}
+  _updateCloudIndicator();
+  cloudViewShow('choose');
+  _setCloudStatusBox('', false);
+}
+
+// ── 구글 시트에 저장 ──
+async function cloudSave(key, jsonStr){
+  if(!_cloudEnabled || !_gasUrl) return;
+  try {
+    await fetch(_gasUrl, {
+      method: 'POST',
+      body: JSON.stringify({ key: key, value: jsonStr })
+    });
+  } catch(e){ console.warn('시트 저장 오류:', e); }
+}
+
+// ── 구글 시트에서 전체 불러오기 ──
+async function gsLoadAll(showMsg){
+  if(!_cloudEnabled || !_gasUrl) return;
+  try {
+    var res = await fetch(_gasUrl + '?_=' + Date.now());
+    var json = await res.json();
+    if(!json || !json.records) return;
+    var NS = 'srFormStorage::';
+    var count = 0;
+    Object.keys(json.records).forEach(function(k){
+      try { localStorage.setItem(NS + k, json.records[k]); count++; } catch(e){}
+    });
+    if(count > 0 && typeof loadList === 'function'){
+      if(document.getElementById('panel-list') &&
+         document.getElementById('panel-list').classList.contains('active')) loadList();
+    }
+    if(showMsg){
+      _setCloudStatusBox2('✅ ' + count + '개 기록을 불러왔습니다.', true);
+      setTimeout(function(){ _setCloudStatusBox2('',false); }, 2500);
+    }
+    console.log('📊 구글 시트에서 ' + count + '개 기록 로드');
+  } catch(e){ console.warn('시트 불러오기 오류:', e); }
+}
+// 이전 코드와의 호환성
+var cloudLoadAll = function(){ return gsLoadAll(false); };
+
+// ── 페이지 로드 시 자동 연결 ──
+(function autoInitCloud(){
+  try {
+    var savedUrl = localStorage.getItem(CLOUD_CFG_KEY) || '';
+    if(savedUrl && savedUrl.startsWith('http')){
+      _gasUrl = savedUrl;
+      _cloudEnabled = true;
+      _updateCloudIndicator();
+      // 백그라운드에서 최신 기록 불러오기
+      setTimeout(function(){
+        gsLoadAll(false).catch(function(e){ console.warn('자동 로드 오류:', e); });
+      }, 1200);
+    } else {
+      // 설정 안 된 경우: 건너뛴 적 없으면 첫 실행 팝업
+      var skipped = localStorage.getItem(CLOUD_SKIP_KEY);
+      if(!skipped){
+        setTimeout(function(){ showCloudModal(true); }, 1500);
+      }
+    }
+  } catch(e){ console.warn('자동 연결 오류:', e); }
+})();
 </script>
 </body></html>
