@@ -5,14 +5,13 @@
 <text x="100" y="140" font-size="26" fill="#5F7F86">천안본정형외과 건강 정보</text>
 <text x="100" y="212" font-size="52" font-weight="bold" fill="#3D4651">진료를 고려해 볼 신호</text>
 <line x1="100" y1="250" x2="980" y2="250" stroke="#D9D2C5" stroke-width="3"/>
-<g font-size="32" fill="#3D4651">
-<g id="r"></g>
-<rect x="100" y="300" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="335">밤에 손이 저려 자다가 깬다</text>
-<rect x="100" y="410" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="445">엄지 아래가 납작해지거나 쥘 힘이 약해졌다</text>
-<rect x="100" y="520" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="555">손가락이 걸리거나 잘 펴지지 않는다</text>
-<rect x="100" y="630" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="665">엄지 쪽 손목이 쥘 때 더 아프다</text>
-<rect x="100" y="740" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="775">쉬어도 계속되거나 반복된다</text>
-<rect x="100" y="850" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="885">당뇨, 갑상선 질환, 류마티스관절염이 있다</text>
+<g font-size="29" fill="#3D4651">
+<rect x="100" y="298" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="330">밤에 손이 저려서 자다가 깬다</text>
+<rect x="100" y="410" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="432">엄지 아래 두툼한 부분이 납작해진 것 같거나,</text><text x="175" y="472">물건을 쥘 힘이 약해졌다</text>
+<rect x="100" y="522" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="544">손가락이 걸리거나 딸깍거리고,</text><text x="175" y="584">구부러진 채 잘 펴지지 않는다</text>
+<rect x="100" y="634" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="656">엄지 쪽 손목이 아프고,</text><text x="175" y="696">쥐거나 손목을 돌릴 때 더 심해진다</text>
+<rect x="100" y="746" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="778">쉬어도 증상이 계속되거나 반복된다</text>
+<rect x="100" y="858" width="44" height="44" rx="10" fill="none" stroke="#5F7F86" stroke-width="4"/><text x="175" y="880">당뇨, 갑상선 질환, 류마티스관절염이 있는데</text><text x="175" y="920">손 증상이 생겼다</text>
 </g>
 <rect x="100" y="970" width="880" height="130" rx="20" fill="#E4E8E6"/>
 <text x="140" y="1030" font-size="30" fill="#3D4651">해당 항목이 있다면 진료 상담을 받아 보세요.</text>
