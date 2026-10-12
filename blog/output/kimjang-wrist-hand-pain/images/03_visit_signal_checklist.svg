@@ -1,7 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1260" viewBox="0 0 1080 1260" font-family="WenQuanYi Zen Hei, Noto Sans KR, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1148" viewBox="0 0 1080 1148" font-family="WenQuanYi Zen Hei, Noto Sans KR, sans-serif">
 <title>병원 방문을 고려할 신호 체크리스트</title>
-<rect width="1080" height="1260" fill="#F5F3EE"/>
-<rect x="50" y="50" width="980" height="1160" rx="36" fill="#FFFFFF" stroke="#D9D2C5" stroke-width="3"/>
+<rect width="1080" height="1148" fill="#F5F3EE"/>
+<rect x="50" y="50" width="980" height="1048" rx="36" fill="#FFFFFF" stroke="#D9D2C5" stroke-width="3"/>
 <text x="100" y="140" font-size="26" fill="#1F5C82">천안본정형외과의원 건강 정보</text>
 <text x="100" y="212" font-size="52" font-weight="bold" fill="#26292C">진료를 고려해 볼 신호</text>
 <line x1="100" y1="250" x2="980" y2="250" stroke="#D9D2C5" stroke-width="3"/>
@@ -10,11 +10,10 @@
 <rect x="100" y="410" width="44" height="44" rx="10" fill="none" stroke="#1F5C82" stroke-width="4"/><text x="175" y="432">엄지 아래 두툼한 부분이 납작해진 것 같거나,</text><text x="175" y="472">물건을 쥘 힘이 약해졌다</text>
 <rect x="100" y="522" width="44" height="44" rx="10" fill="none" stroke="#1F5C82" stroke-width="4"/><text x="175" y="544">손가락이 걸리거나 딸깍거리고,</text><text x="175" y="584">구부러진 채 잘 펴지지 않는다</text>
 <rect x="100" y="634" width="44" height="44" rx="10" fill="none" stroke="#1F5C82" stroke-width="4"/><text x="175" y="656">엄지 쪽 손목이 아프고,</text><text x="175" y="696">쥐거나 손목을 돌릴 때 더 심해진다</text>
-<rect x="100" y="746" width="44" height="44" rx="10" fill="none" stroke="#1F5C82" stroke-width="4"/><text x="175" y="778">쉬어도 증상이 계속되거나 반복된다</text>
-<rect x="100" y="858" width="44" height="44" rx="10" fill="none" stroke="#1F5C82" stroke-width="4"/><text x="175" y="880">당뇨, 갑상선 질환, 류마티스관절염이 있는데</text><text x="175" y="920">손 증상이 생겼다</text>
+<rect x="100" y="746" width="44" height="44" rx="10" fill="none" stroke="#1F5C82" stroke-width="4"/><text x="175" y="768">당뇨, 갑상선 질환, 류마티스관절염이 있는데</text><text x="175" y="808">손 증상이 생겼다</text>
 </g>
-<rect x="100" y="970" width="880" height="130" rx="20" fill="#E4E8E6"/>
-<text x="140" y="1030" font-size="30" fill="#26292C">해당 항목이 있다면 진료 상담을 받아 보세요.</text>
-<text x="140" y="1075" font-size="24" fill="#6B747C">이 목록만으로 진단할 수 없습니다.</text>
-<text x="100" y="1165" font-size="22" fill="#6B747C">정확한 진단은 진료를 통해 가능합니다.</text>
+<rect x="100" y="858" width="880" height="130" rx="20" fill="#E4E8E6"/>
+<text x="140" y="918" font-size="30" fill="#26292C">해당 항목이 있다면 진료 상담을 받아 보세요.</text>
+<text x="140" y="963" font-size="24" fill="#6B747C">이 목록만으로 진단할 수 없습니다.</text>
+<text x="100" y="1053" font-size="22" fill="#6B747C">정확한 진단은 진료를 통해 가능합니다.</text>
 </svg>
