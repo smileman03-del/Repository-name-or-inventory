@@ -1617,30 +1617,92 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     if(!d.s_name) missing.push('수술명');
     return missing;
   }
+  // 중복 기록 찾기 (차트번호 + 수술일자 기준)
+  async function findDuplicateKey(data){
+    try {
+      const listed = await window.storage.list('record:');
+      for(const k of (listed.keys || [])){
+        const raw = await window.storage.get(k);
+        if(!raw || !raw.value) continue;
+        try {
+          const rec = JSON.parse(raw.value);
+          if(rec.p_no === data.p_no && rec.s_date === data.s_date) return k;
+        } catch(e){}
+      }
+    } catch(e){}
+    return null;
+  }
+
+  async function doSave(key, data){
+    const jsonStr = JSON.stringify(data);
+    const res = await window.storage.set(key, jsonStr, false);
+    if(!res) throw new Error('no result');
+    if(window._cloudEnabled && window._gasUrl){
+      try {
+        await cloudSave(key, jsonStr);
+        showBanner('banner', '저장되었습니다 ☁️  구글 시트에 동기화되었습니다.', true);
+      } catch(e){
+        showBanner('banner', '기기에는 저장됐지만 시트 동기화에 실패했습니다.', true);
+      }
+    } else {
+      showBanner('banner', '저장되었습니다. 새 기록 작성을 위해 화면이 초기화되었습니다.', true);
+    }
+    clearAll();
+    if(typeof updateStorageBadge === 'function') updateStorageBadge();
+  }
+
   async function saveRecord(){
     const data = collectData();
     const missing = validate(data);
     if(missing.length){ showBanner('banner', '다음 항목을 입력해주세요: ' + missing.join(', '), false); return; }
-    const key = 'record:' + Date.now();
+
     try{
-      const jsonStr = JSON.stringify(data);
-      const res = await window.storage.set(key, jsonStr, false);
-      if(!res) throw new Error('no result');
-      // 클라우드 동기화 (연결된 경우)
-      if(window._cloudEnabled && window._gasUrl){
-        try {
-          await cloudSave(key, jsonStr);
-          showBanner('banner', '저장되었습니다 ☁️  구글 시트에 동기화되었습니다.', true);
-        } catch(e){
-          console.warn('클라우드 저장 실패:', e);
-          showBanner('banner', '기기에는 저장됐지만 시트 동기화에 실패했습니다.', true);
-        }
-      } else {
-        showBanner('banner', '저장되었습니다. 새 기록 작성을 위해 화면이 초기화되었습니다.', true);
+      // 중복 확인 (차트번호 + 수술일자)
+      const dupKey = await findDuplicateKey(data);
+      if(dupKey){
+        // 확인 팝업
+        showOverwriteConfirm(data, dupKey);
+        return;
       }
-      clearAll();
-      if(typeof updateStorageBadge === 'function') updateStorageBadge();
+      // 신규 저장
+      await doSave('record:' + Date.now(), data);
     }catch(e){ console.error(e); showBanner('banner', '저장 중 오류가 발생했습니다. 다시 시도해주세요.', false); }
+  }
+
+  // 덮어쓰기 확인 팝업
+  function showOverwriteConfirm(data, existingKey){
+    var overlay = document.getElementById('overwriteOverlay');
+    if(!overlay){
+      overlay = document.createElement('div');
+      overlay.id = 'overwriteOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;';
+      overlay.innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(420px,92vw);padding:28px 24px;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+          <div style="font-size:20px;margin-bottom:10px;">⚠️ 같은 기록이 있습니다</div>
+          <div id="overwriteMsg" style="font-size:14px;color:var(--ink);line-height:1.7;margin-bottom:22px;"></div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;">
+            <button id="owCancelBtn" style="padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--ink);cursor:pointer;font-size:14px;font-weight:600;">취소</button>
+            <button id="owNewBtn" style="padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--accent-dark);cursor:pointer;font-size:14px;font-weight:600;">새 기록으로 추가</button>
+            <button id="owOverBtn" style="padding:10px 20px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:14px;font-weight:700;">덮어쓰기</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+    }
+    document.getElementById('overwriteMsg').innerHTML =
+      '<b>차트번호 ' + data.p_no + ' · ' + data.s_date + '</b> 기록이 이미 존재합니다.<br>덮어쓰기 하시겠습니까?';
+    overlay.style.display = 'flex';
+
+    document.getElementById('owCancelBtn').onclick = function(){ overlay.style.display='none'; };
+    document.getElementById('owNewBtn').onclick = async function(){
+      overlay.style.display='none';
+      try { await doSave('record:' + Date.now(), data); }
+      catch(e){ showBanner('banner','저장 중 오류가 발생했습니다.',false); }
+    };
+    document.getElementById('owOverBtn').onclick = async function(){
+      overlay.style.display='none';
+      try { await doSave(existingKey, data); }
+      catch(e){ showBanner('banner','저장 중 오류가 발생했습니다.',false); }
+    };
   }
   async function exportPdf(){
     const data = collectData();
