@@ -1496,10 +1496,27 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
-      if(btn.dataset.tab==='list') loadList();
+      if(btn.dataset.tab==='list'){
+        // 구글 시트에서 최신 기록 먼저 동기화 후 목록 갱신
+        if(window._cloudEnabled && window._gasUrl){
+          gsLoadAll(false).then(function(){ loadList(); if(typeof updateStorageBadge==='function') updateStorageBadge(); })
+            .catch(function(){ loadList(); });
+        } else {
+          loadList();
+        }
+      }
       if(btn.dataset.tab==='manage') { renderTypeManageList(); renderManageCatalog(); }
     });
   });
+
+  // 30초마다 구글 시트 자동 동기화
+  setInterval(function(){
+    if(window._cloudEnabled && window._gasUrl){
+      gsLoadAll(false).then(function(){
+        if(typeof updateStorageBadge==='function') updateStorageBadge();
+      }).catch(function(){});
+    }
+  }, 30000);
 
   // ===== Collect / validate / save (tab 1) =====
   function collectData(){
@@ -1611,8 +1628,13 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       if(!res) throw new Error('no result');
       // 클라우드 동기화 (연결된 경우)
       if(window._cloudEnabled && window._gasUrl){
-        cloudSave(key, jsonStr).catch(function(e){ console.warn('클라우드 저장 실패:', e); });
-        showBanner('banner', '저장되었습니다 ☁️  다른 기기에서도 바로 확인할 수 있습니다.', true);
+        try {
+          await cloudSave(key, jsonStr);
+          showBanner('banner', '저장되었습니다 ☁️  구글 시트에 동기화되었습니다.', true);
+        } catch(e){
+          console.warn('클라우드 저장 실패:', e);
+          showBanner('banner', '기기에는 저장됐지만 시트 동기화에 실패했습니다.', true);
+        }
       } else {
         showBanner('banner', '저장되었습니다. 새 기록 작성을 위해 화면이 초기화되었습니다.', true);
       }
@@ -3021,9 +3043,11 @@ async function gsLoadAll(showMsg){
       try { localStorage.setItem(NS + k, json.records[k]); count++; } catch(e){}
     });
     if(count > 0 && typeof loadList === 'function'){
-      if(document.getElementById('panel-list') &&
-         document.getElementById('panel-list').classList.contains('active')) loadList();
+      // 목록 탭이 열려 있으면 즉시 갱신
+      var listPanel = document.getElementById('panel-list');
+      if(listPanel && listPanel.classList.contains('active')) loadList();
     }
+    if(typeof updateStorageBadge === 'function') updateStorageBadge();
     if(showMsg){
       _setCloudStatusBox2('✅ ' + count + '개 기록을 불러왔습니다.', true);
       setTimeout(function(){ _setCloudStatusBox2('',false); }, 2500);
