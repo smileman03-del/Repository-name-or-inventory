@@ -2,7 +2,7 @@
 <title>병원 방문을 고려할 신호 체크리스트</title>
 <rect width="1080" height="1260" fill="#F5F3EE"/>
 <rect x="50" y="50" width="980" height="1160" rx="36" fill="#FFFFFF" stroke="#D9D2C5" stroke-width="3"/>
-<text x="100" y="140" font-size="26" fill="#1F5C82">천안본정형외과 건강 정보</text>
+<text x="100" y="140" font-size="26" fill="#1F5C82">천안본정형외과의원 건강 정보</text>
 <text x="100" y="212" font-size="52" font-weight="bold" fill="#26292C">진료를 고려해 볼 신호</text>
 <line x1="100" y1="250" x2="980" y2="250" stroke="#D9D2C5" stroke-width="3"/>
 <g font-size="29" fill="#26292C">
