@@ -252,10 +252,11 @@
     <b>수술종류별 권장품목(★)은 일반적인 임상 지식을 바탕으로 만든 초안입니다.</b> 실제 저희 병원에서 쓰는 품목·규격과 다를 수 있으니 검토해 주세요. "관리" 탭에서 품목/수술종류를 자유롭게 추가·삭제할 수 있고, 재료기록 작성 화면에서 체크 상태를 그대로 새 권장품목으로 저장할 수도 있습니다.
   </div>
 
-  <div class="tabs">
+  <div class="tabs" style="display:flex;align-items:center;">
     <button class="tab-btn active" data-tab="new">새 재료기록 작성</button>
     <button class="tab-btn" data-tab="list">저장된 기록 목록</button>
     <button class="tab-btn" data-tab="manage">수술종류 · 품목 관리</button>
+    <button onclick="showStorageModal()" title="저장 용량 확인" style="margin-left:auto;padding:6px 14px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;">💾 용량 확인</button>
   </div>
 
   <!-- ===== NEW RECORD PANEL ===== -->
@@ -701,6 +702,55 @@
       <button class="action" id="printBtn">인쇄</button>
       <button class="action gold" id="pdfBtn">📄 PDF로 내보내기</button>
       <button class="action primary" id="saveBtn">저장하기</button>
+    </div>
+  </div>
+
+  <!-- ===== 저장 용량 확인 모달 ===== -->
+  <div id="storageModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:min(520px,94vw);max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+      <!-- 모달 헤더 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);">
+        <span style="font-size:15px;font-weight:700;">💾 앱 저장 용량 확인</span>
+        <button onclick="closeStorageModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
+      </div>
+      <!-- 용량 게이지 -->
+      <div style="padding:20px 20px 0;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+          <span style="color:var(--muted);">사용 중</span>
+          <span id="sm_used_label" style="font-weight:600;"></span>
+        </div>
+        <div style="background:var(--border);border-radius:99px;height:10px;overflow:hidden;">
+          <div id="sm_bar" style="height:100%;border-radius:99px;background:var(--accent);transition:width .4s;width:0%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:4px;">
+          <span id="sm_pct"></span>
+          <span id="sm_total_label"></span>
+        </div>
+      </div>
+      <!-- 통계 요약 -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:16px 20px;">
+        <div style="background:var(--bg,#f7f7f7);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div id="sm_rec_count" style="font-size:22px;font-weight:700;color:var(--accent);">-</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">저장된 기록 수</div>
+        </div>
+        <div style="background:var(--bg,#f7f7f7);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div id="sm_rec_size" style="font-size:22px;font-weight:700;color:var(--accent);">-</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">기록 데이터 크기</div>
+        </div>
+        <div style="background:var(--bg,#f7f7f7);border:1px solid var(--border);border-radius:8px;padding:12px;text-align:center;">
+          <div id="sm_other_size" style="font-size:22px;font-weight:700;color:var(--muted);">-</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:2px;">기타 앱 데이터</div>
+        </div>
+      </div>
+      <!-- 기록 목록 -->
+      <div style="flex:1;overflow-y:auto;padding:0 20px 4px;">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.06em;margin-bottom:8px;">기록별 용량</div>
+        <div id="sm_rec_list" style="display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+      <!-- 모달 하단 -->
+      <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;">
+        <button onclick="closeStorageModal()" style="padding:8px 20px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:13px;">닫기</button>
+      </div>
     </div>
   </div>
 
@@ -2403,5 +2453,98 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     }
   };
 })();
+</script>
+
+<script>
+// ── 저장 용량 확인 모달 ──
+function formatBytes(b){
+  if(b < 1024) return b + ' B';
+  if(b < 1024*1024) return (b/1024).toFixed(1) + ' KB';
+  return (b/1024/1024).toFixed(2) + ' MB';
+}
+
+function showStorageModal(){
+  var modal = document.getElementById('storageModal');
+  modal.style.display = 'flex';
+
+  // localStorage 전체 사용량 계산
+  var NS = 'srFormStorage::';
+  var totalBytes = 0;
+  var recBytes = 0;
+  var recKeys = [];
+  var otherBytes = 0;
+
+  try {
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      var v = localStorage.getItem(k) || '';
+      var size = (k.length + v.length) * 2; // UTF-16 bytes
+      totalBytes += size;
+      if(k && k.indexOf(NS) === 0){
+        var realKey = k.slice(NS.length);
+        if(realKey !== 'surgeryTypes' && realKey !== 'itemMaster' && !realKey.startsWith('_')){
+          recBytes += size;
+          recKeys.push({ key: realKey, rawKey: k, size: size, val: v });
+        } else {
+          otherBytes += size;
+        }
+      } else {
+        otherBytes += size;
+      }
+    }
+  } catch(e){}
+
+  // 브라우저 localStorage 한도 ~5MB
+  var LIMIT = 5 * 1024 * 1024;
+  var pct = Math.min((totalBytes / LIMIT) * 100, 100);
+  var bar = document.getElementById('sm_bar');
+  bar.style.width = pct.toFixed(1) + '%';
+  bar.style.background = pct > 80 ? '#e05858' : pct > 60 ? '#e09928' : 'var(--accent)';
+
+  document.getElementById('sm_used_label').textContent = formatBytes(totalBytes);
+  document.getElementById('sm_pct').textContent = pct.toFixed(1) + '% 사용 중';
+  document.getElementById('sm_total_label').textContent = '한도 약 ' + formatBytes(LIMIT);
+  document.getElementById('sm_rec_count').textContent = recKeys.length;
+  document.getElementById('sm_rec_size').textContent = formatBytes(recBytes);
+  document.getElementById('sm_other_size').textContent = formatBytes(otherBytes);
+
+  // 기록별 목록 (크기 내림차순)
+  recKeys.sort(function(a,b){ return b.size - a.size; });
+  var list = document.getElementById('sm_rec_list');
+  list.innerHTML = '';
+  if(recKeys.length === 0){
+    list.innerHTML = '<div style="font-size:13px;color:var(--muted);padding:8px 0;">저장된 기록이 없습니다.</div>';
+    return;
+  }
+  recKeys.forEach(function(r){
+    var label = r.key;
+    try {
+      var obj = JSON.parse(r.val);
+      if(obj && obj.patientName) label = obj.patientName + (obj.chartNo ? ' (' + obj.chartNo + ')' : '');
+      else if(obj && obj.patient_name) label = obj.patient_name;
+    } catch(e){}
+    var pctR = recBytes > 0 ? (r.size / recBytes * 100).toFixed(0) : 0;
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;font-size:13px;';
+    row.innerHTML =
+      '<div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);">' + label + '</div>' +
+      '<div style="min-width:56px;text-align:right;color:var(--muted);">' + formatBytes(r.size) + '</div>' +
+      '<div style="min-width:80px;">' +
+        '<div style="background:var(--border);border-radius:99px;height:6px;overflow:hidden;">' +
+          '<div style="height:100%;border-radius:99px;background:var(--accent);width:' + pctR + '%;"></div>' +
+        '</div>' +
+      '</div>';
+    list.appendChild(row);
+  });
+}
+
+function closeStorageModal(){
+  document.getElementById('storageModal').style.display = 'none';
+}
+
+// 모달 바깥 클릭 시 닫기
+document.getElementById('storageModal').addEventListener('click', function(e){
+  if(e.target === this) closeStorageModal();
+});
 </script>
 </body></html>
