@@ -257,9 +257,9 @@
     <button class="tab-btn active" data-tab="new">새 재료기록 작성</button>
     <button class="tab-btn" data-tab="list">저장된 기록 목록</button>
     <button class="tab-btn" data-tab="manage">수술종류 · 품목 관리</button>
-    <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
-      <span id="cloudIndicator" title="클라우드 동기화 설정" onclick="showCloudModal()" style="cursor:pointer;font-size:12px;color:var(--muted);padding:4px 8px;border-radius:20px;transition:all .2s;user-select:none;" title="동기화 설정">☁️</span>
-      <button onclick="showStorageModal()" title="저장 용량 확인" style="padding:6px 14px;font-size:12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;">💾 용량 확인</button>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <span id="cloudIndicator" style="font-size:12px;color:var(--muted);padding:4px 8px;user-select:none;"></span>
+      <span id="storageBadge" onclick="showStorageModal()" title="저장 용량 확인" style="cursor:pointer;font-size:12px;color:var(--muted);padding:4px 10px;border:1px solid var(--border);border-radius:20px;user-select:none;transition:all .2s;">💾 -</span>
     </div>
   </div>
 
@@ -1617,6 +1617,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         showBanner('banner', '저장되었습니다. 새 기록 작성을 위해 화면이 초기화되었습니다.', true);
       }
       clearAll();
+      if(typeof updateStorageBadge === 'function') updateStorageBadge();
     }catch(e){ console.error(e); showBanner('banner', '저장 중 오류가 발생했습니다. 다시 시도해주세요.', false); }
   }
   async function exportPdf(){
@@ -2616,6 +2617,40 @@ function formatBytes(b){
   return (b/1024/1024).toFixed(2) + ' MB';
 }
 
+// ── 탭바 용량 뱃지 업데이트 ──
+function updateStorageBadge(){
+  try {
+    var NS = 'srFormStorage::';
+    var usedBytes = 0;
+    var recCount = 0;
+    for(var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      var v = localStorage.getItem(k) || '';
+      usedBytes += (k.length + v.length) * 2;
+      if(k && k.indexOf(NS + 'record:') === 0) recCount++;
+    }
+    var badge = document.getElementById('storageBadge');
+    if(!badge) return;
+    var label = formatBytes(usedBytes);
+    // 5MB 기준 경고색 표시
+    var pct = usedBytes / (5 * 1024 * 1024);
+    badge.textContent = '💾 ' + label + ' (' + recCount + '건)';
+    if(pct > 0.8){
+      badge.style.color = '#C0392B';
+      badge.style.borderColor = '#C0392B';
+    } else if(pct > 0.5){
+      badge.style.color = '#E67E22';
+      badge.style.borderColor = '#E67E22';
+    } else {
+      badge.style.color = 'var(--muted)';
+      badge.style.borderColor = 'var(--border)';
+    }
+  } catch(e){}
+}
+// 페이지 로드 후 & 저장 후마다 호출
+document.addEventListener('DOMContentLoaded', updateStorageBadge);
+setTimeout(updateStorageBadge, 500);
+
 function showStorageModal(){
   var modal = document.getElementById('storageModal');
   modal.style.display = 'flex';
@@ -2755,25 +2790,23 @@ var _cloudEnabled  = false;
 var _gasUrl        = '';       // 앱스크립트 웹 앱 URL
 var CLOUD_CFG_KEY  = 'srCloud::gasUrl';
 var CLOUD_SKIP_KEY = 'srCloud::skipOnce';
+// ★ 미리 고정된 구글 앱스크립트 URL (모든 기기 자동 연결)
+var PRESET_GAS_URL = 'https://script.google.com/macros/s/AKfycbwGs8Ls2Tt7iRYsFpKIRa45XEca6YsbK0zvQjFAvT2kioiTVrdeEnJJDGi5fZ8u7h1c/exec';
 
 // ── 인디케이터 업데이트 ──
 function _updateCloudIndicator(){
   var el = document.getElementById('cloudIndicator');
   if(!el) return;
   if(_cloudEnabled){
-    el.textContent = '☁️';
-    el.title = '동기화 연결됨 · 클릭하면 설정';
+    el.textContent = '☁️ 동기화 연결됨';
     el.style.color = '#2F7A67';
     el.style.background = '#E5EFEC';
-    el.style.fontWeight = '700';
+    el.style.fontWeight = '600';
     el.style.borderRadius = '20px';
-    el.style.padding = '4px 8px';
+    el.style.padding = '4px 10px';
   } else {
-    el.textContent = '☁️';
-    el.title = '동기화 설정 안 됨 · 클릭하면 설정';
-    el.style.color = 'var(--muted)';
+    el.textContent = '';
     el.style.background = 'transparent';
-    el.style.fontWeight = '';
   }
 }
 
@@ -3004,21 +3037,19 @@ var cloudLoadAll = function(){ return gsLoadAll(false); };
 // ── 페이지 로드 시 자동 연결 ──
 (function autoInitCloud(){
   try {
+    // 저장된 URL 또는 미리 고정된 URL 사용
     var savedUrl = localStorage.getItem(CLOUD_CFG_KEY) || '';
-    if(savedUrl && savedUrl.startsWith('http')){
-      _gasUrl = savedUrl;
+    var activeUrl = (savedUrl && savedUrl.startsWith('http')) ? savedUrl : PRESET_GAS_URL;
+    if(activeUrl && activeUrl.startsWith('http')){
+      _gasUrl = activeUrl;
       _cloudEnabled = true;
+      // PRESET_GAS_URL을 사용한 경우 localStorage에도 저장 (이후 일관성 유지)
+      if(!savedUrl){ try { localStorage.setItem(CLOUD_CFG_KEY, activeUrl); } catch(e){} }
       _updateCloudIndicator();
       // 백그라운드에서 최신 기록 불러오기
       setTimeout(function(){
         gsLoadAll(false).catch(function(e){ console.warn('자동 로드 오류:', e); });
       }, 1200);
-    } else {
-      // 설정 안 된 경우: 건너뛴 적 없으면 첫 실행 팝업
-      var skipped = localStorage.getItem(CLOUD_SKIP_KEY);
-      if(!skipped){
-        setTimeout(function(){ showCloudModal(true); }, 1500);
-      }
     }
   } catch(e){ console.warn('자동 연결 오류:', e); }
 })();
