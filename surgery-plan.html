@@ -207,19 +207,19 @@ function renderChrome(){
   const headerHtml = `
     <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:18px 22px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:16px;" data-noprint="true">
       <div style="display:flex;align-items:center;min-width:0;">
-        <img src="uploads/KakaoTalk_20260810_171504416.png" alt="본정형외과 로고" style="height:38px;flex-shrink:0;" onerror="this.style.display='none'"/>
+        <img src="uploads/KakaoTalk_20260810_171504416.png" alt="본정형외과 로고" style="height:60px;flex-shrink:0;" onerror="this.style.display='none'"/>
       </div>
-      <h1 style="font-size:1.3rem;line-height:1.25;margin:0;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;">수술계획표</h1>
+      <h1 style="font-size:1.8rem;line-height:1.25;margin:0;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;">수술계획표</h1>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-        <button id="btnUsage" title="클릭해서 백업 관리" style="display:flex;align-items:center;gap:6px;border:1px solid ${usageColor};background:${usageBg};color:${usageColor};padding:8px 12px;border-radius:10px;font-size:0.78rem;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">
-          <span style="width:7px;height:7px;border-radius:50%;background:${usageColor};display:inline-block;"></span><span style="white-space:nowrap;">저장용량 ${usagePercent}%</span>
+        <button id="btnUsage" title="클릭해서 백업 관리" style="display:flex;align-items:center;gap:6px;border:1px solid ${usageColor};background:${usageBg};color:${usageColor};padding:10px 14px;border-radius:10px;font-size:0.92rem;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+          <span style="width:8px;height:8px;border-radius:50%;background:${usageColor};display:inline-block;"></span><span style="white-space:nowrap;">저장용량 ${usagePercent}%</span>
         </button>
-        <span style="font-size:0.78rem;color:#6B7280;font-weight:700;">${esc(syncLabel)}</span>
-        <button id="btnStats" style="border:1px solid #6366f1;background:#6366f1;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">📊 통계</button>
+        <span style="font-size:0.92rem;color:#6B7280;font-weight:700;">${esc(syncLabel)}</span>
+        <button id="btnStats" style="border:1px solid #6366f1;background:#6366f1;color:#fff;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">📊 통계</button>
         ${state.view === 'day' ? `
-          <button id="btnBackToMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">← 월별보기</button>
-          <button id="btnAddSurgery" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 수술 추가</button>
-          <button id="btnPrintDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;white-space:nowrap;">인쇄 / PDF</button>
+          <button id="btnBackToMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">← 월별보기</button>
+          <button id="btnAddSurgery" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 수술 추가</button>
+          <button id="btnPrintDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">인쇄 / PDF</button>
         ` : ''}
       </div>
     </div>`;
@@ -333,7 +333,7 @@ function renderMonthView(){
   const today = toISO(new Date());
   let monthTotalCount = 0, monthCancelledCount = 0;
 
-  const weekDaysHtml = WEEKDAY_LABELS.map((label,i) => `<div style="text-align:center;font-size:0.85rem;font-weight:800;color:${i===0?'#E0384A':(i===6?'#3B6FA8':'#6B7280')};padding:6px 0;">${label}</div>`).join('');
+  const weekDaysHtml = WEEKDAY_LABELS.map((label,i) => `<div style="text-align:center;font-size:1rem;font-weight:800;color:${i===0?'#E0384A':(i===6?'#3B6FA8':'#6B7280')};padding:8px 0;">${label}</div>`).join('');
 
   let cellsHtml = '';
   for (let i=0;i<42;i++){
@@ -347,23 +347,23 @@ function renderMonthView(){
     const isToday = dateStr === today;
     if (inMonth) { monthTotalCount += active.length; monthCancelledCount += cancelled.length; }
     cellsHtml += `
-      <div class="dayCell" data-date="${dateStr}" style="min-height:86px;border-radius:10px;padding:8px;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
-        <div style="font-size:0.9rem;font-weight:${isToday?800:700};color:${isToday?'#3B6FA8':'#1F2430'};">${d.getDate()}</div>
-        ${active.length>0?`<div style="margin-top:4px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:2px 6px;font-size:0.72rem;font-weight:800;display:inline-block;">${active.length}건</div>`:''}
-        ${cancelled.length>0?`<div style="margin-top:3px;color:#8A8F98;font-size:0.68rem;font-weight:700;">취소 ${cancelled.length}</div>`:''}
-        ${hasEmergency?`<div style="margin-top:3px;color:#E0384A;font-size:0.68rem;font-weight:800;">응급 있음</div>`:''}
+      <div class="dayCell" data-date="${dateStr}" style="min-height:100px;border-radius:10px;padding:10px;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
+        <div style="font-size:1.05rem;font-weight:${isToday?800:700};color:${isToday?'#3B6FA8':'#1F2430'};">${d.getDate()}</div>
+        ${active.length>0?`<div style="margin-top:5px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:3px 8px;font-size:0.88rem;font-weight:800;display:inline-block;">${active.length}건</div>`:''}
+        ${cancelled.length>0?`<div style="margin-top:4px;color:#8A8F98;font-size:0.82rem;font-weight:700;">취소 ${cancelled.length}</div>`:''}
+        ${hasEmergency?`<div style="margin-top:4px;color:#E0384A;font-size:0.82rem;font-weight:800;">응급 있음</div>`:''}
       </div>`;
   }
 
   return `
     <div data-noprint="true" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <button id="btnPrevMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
-        <div style="font-size:1.15rem;font-weight:800;min-width:120px;text-align:center;">${monthLabel}</div>
-        <button id="btnNextMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
-        <button id="btnTodayMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
+        <button id="btnPrevMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
+        <div style="font-size:1.4rem;font-weight:800;min-width:140px;text-align:center;">${monthLabel}</div>
+        <button id="btnNextMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
+        <button id="btnTodayMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
       </div>
-      <div style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:8px 16px;font-size:0.88rem;font-weight:700;color:#3B6FA8;">
+      <div style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:10px 18px;font-size:1rem;font-weight:700;color:#3B6FA8;">
         이달 수술 ${monthTotalCount}건 (취소 ${monthCancelledCount}건 제외)
       </div>
     </div>
@@ -381,57 +381,57 @@ function renderDayView(){
   const dayActive = dayRecs.filter(r => r.status !== '취소');
   const dayCancelled = dayRecs.filter(r => r.status === '취소');
 
-  const headerCells = TABLE_HEADERS.map(h => `<th style="text-align:center;padding:9px 10px;font-weight:800;color:#6B7280;white-space:nowrap;border-bottom:1px solid #E3E7ED;">${h}</th>`).join('');
+  const headerCells = TABLE_HEADERS.map(h => `<th style="text-align:center;padding:12px 14px;font-weight:800;font-size:1rem;color:#6B7280;white-space:nowrap;border-bottom:1px solid #E3E7ED;">${h}</th>`).join('');
 
   const rowsHtml = dayRecs.map(r => `
     <tr style="${rowStyleFor(r)}">
-      <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">${esc(r.time)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.doctor)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.chartNo)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">${esc(r.name)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.gender)} / ${esc(r.age)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.anesthesia)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.surgeryName)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.side)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.diagnosis)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">${esc(r.urgency)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.duration)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.room)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.npo)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.allergy)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.anticoag)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.infection)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.implant)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.cArm)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.position)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;font-weight:800;">${esc(r.status)}</td>
-      <td style="padding:9px 10px;white-space:nowrap;">${esc(r.note)}</td>
-      <td data-noprint="true" style="padding:9px 10px;white-space:nowrap;">
-        <button class="btnEditRow" data-id="${r.id}" style="border:none;background:transparent;color:#3B6FA8;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>
-        <button class="btnDeleteRow" data-id="${r.id}" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;margin-right:6px;">삭제</button>
-        <button class="btnOpenRecord" data-id="${r.id}" style="border:1px solid #2F7A67;background:#E5EFEC;color:#1F5A4B;font-weight:700;cursor:pointer;border-radius:6px;padding:4px 8px;font-size:0.78rem;">기록지</button>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.time)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.doctor)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.chartNo)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.name)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.gender)} / ${esc(r.age)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.anesthesia)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.surgeryName)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.side)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.diagnosis)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.urgency)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.duration)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.room)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.npo)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.allergy)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.anticoag)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.infection)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.implant)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.cArm)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.position)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.status)}</td>
+      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.note)}</td>
+      <td data-noprint="true" style="padding:12px 14px;white-space:nowrap;">
+        <button class="btnEditRow" data-id="${r.id}" style="border:none;background:transparent;color:#3B6FA8;font-size:1rem;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>
+        <button class="btnDeleteRow" data-id="${r.id}" style="border:none;background:transparent;color:#E0384A;font-size:1rem;font-weight:700;cursor:pointer;margin-right:6px;">삭제</button>
+        <button class="btnOpenRecord" data-id="${r.id}" style="border:1px solid #2F7A67;background:#E5EFEC;color:#1F5A4B;font-weight:700;cursor:pointer;border-radius:6px;padding:6px 10px;font-size:0.92rem;">기록지</button>
       </td>
     </tr>`).join('');
 
   return `
     <div class="day-plan-print-wrap">
       <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-        <button id="btnPrevDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">‹</button>
-        <button id="btnNextDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:36px;height:36px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;">›</button>
-        <button id="btnTodayDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:9px 14px;border-radius:10px;font-size:0.85rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
+        <button id="btnPrevDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
+        <button id="btnNextDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
+        <button id="btnTodayDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
       </div>
-      <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
-        <h2 style="margin:0;font-size:1.4rem;font-weight:800;">${selectedDateLabel}</h2>
-        <div style="font-size:0.9rem;color:#6B7280;font-weight:700;">수술 ${dayActive.length}건 (취소 제외) · 취소 ${dayCancelled.length}건</div>
+      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
+        <h2 style="margin:0;font-size:1.8rem;font-weight:800;">${selectedDateLabel}</h2>
+        <div style="font-size:1.1rem;color:#6B7280;font-weight:700;">수술 ${dayActive.length}건 (취소 제외) · 취소 ${dayCancelled.length}건</div>
       </div>
       <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;min-width:1600px;font-size:0.82rem;">
+        <table style="width:100%;border-collapse:collapse;min-width:1800px;font-size:1rem;">
           <thead><tr style="background:#F3F5F8;">${headerCells}<th data-noprint="true" style="padding:9px 10px;border-bottom:1px solid #E3E7ED;"></th></tr></thead>
           <tbody>${rowsHtml}</tbody>
         </table>
         ${dayRecs.length===0?`<div style="padding:40px;text-align:center;color:#6B7280;font-size:0.95rem;">이 날짜에 등록된 수술이 없습니다.</div>`:''}
       </div>
-      <div data-noprint="true" style="margin-top:10px;font-size:0.78rem;color:#8A8F98;">색 표시: 응급 빨강 · 감염/알레르기/항응고제 복용 중 주황 · 금식 미확인 노랑 · 취소 회색</div>
+      <div data-noprint="true" style="margin-top:10px;font-size:0.95rem;color:#8A8F98;font-weight:600;">색 표시: 응급 빨강 · 감염/알레르기/항응고제 복용 중 주황 · 금식 미확인 노랑 · 취소 회색</div>
     </div>`;
 }
 
