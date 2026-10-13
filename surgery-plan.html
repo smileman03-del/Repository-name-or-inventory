@@ -327,6 +327,26 @@ function renderBody(){
   attachBodyHandlers();
 }
 
+
+// 한국 공휴일 (2025-2027)
+const KR_HOLIDAYS = new Set([
+  // 2025
+  '2025-01-01','2025-01-28','2025-01-29','2025-01-30',
+  '2025-03-01','2025-05-05','2025-05-05','2025-06-06',
+  '2025-08-15','2025-10-03','2025-10-06','2025-10-07','2025-10-08',
+  '2025-10-09','2025-12-25',
+  // 2026
+  '2026-01-01','2026-02-16','2026-02-17','2026-02-18',
+  '2026-03-01','2026-05-05','2026-05-24','2026-06-06',
+  '2026-08-15','2026-09-24','2026-09-25','2026-09-26',
+  '2026-10-03','2026-10-09','2026-12-25',
+  // 2027
+  '2027-01-01','2027-02-07','2027-02-08','2027-02-09',
+  '2027-03-01','2027-05-05','2027-05-13','2027-06-06',
+  '2027-08-15','2027-09-14','2027-09-15','2027-09-16',
+  '2027-10-03','2027-10-09','2027-12-25'
+]);
+
 function renderMonthView(){
   const monthLabel = state.monthYear + '년 ' + (state.monthMonth+1) + '월';
   const map = byDateMap();
@@ -348,10 +368,13 @@ function renderMonthView(){
     const cancelled = recs.filter(r => r.status === '취소');
     const hasEmergency = active.some(r => r.urgency === '응급');
     const isToday = dateStr === today;
+    const isSunday = d.getDay() === 0;
+    const isHoliday = KR_HOLIDAYS.has(dateStr);
+    const dateColor = isToday ? '#3B6FA8' : (isSunday || isHoliday) ? '#E0384A' : '#1F2430';
     if (inMonth) { monthTotalCount += active.length; monthCancelledCount += cancelled.length; }
     cellsHtml += `
-      <div class="dayCell" data-date="${dateStr}" style="min-height:100px;border-radius:10px;padding:10px;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
-        <div style="font-size:1.05rem;font-weight:${isToday?800:700};color:${isToday?'#3B6FA8':'#1F2430'};">${d.getDate()}</div>
+      <div class="dayCell" data-date="${dateStr}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:140px;border-radius:10px;padding:10px;overflow:hidden;box-sizing:border-box;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
+        <div style="font-size:2.1rem;font-weight:${isToday?900:700};color:${dateColor};line-height:1.2;">${d.getDate()}</div>
         ${active.length>0?`<div style="margin-top:5px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:3px 8px;font-size:0.88rem;font-weight:800;display:inline-block;">${active.length}건</div>`:''}
         ${cancelled.length>0?`<div style="margin-top:4px;color:#8A8F98;font-size:0.82rem;font-weight:700;">취소 ${cancelled.length}</div>`:''}
         ${hasEmergency?`<div style="margin-top:4px;color:#E0384A;font-size:0.82rem;font-weight:800;">응급 있음</div>`:''}
