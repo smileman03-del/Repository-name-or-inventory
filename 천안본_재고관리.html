@@ -62,7 +62,7 @@
   }
   .logo-badge img{ height:34px; width:auto; display:block; }
   .brand-sub{
-    font-weight:700; font-size:14.5px; color:rgba(255,255,255,0.92); letter-spacing:0.02em;
+    font-weight:800; font-size:17px; color:rgba(255,255,255,0.92); letter-spacing:0.02em;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
   .sync-pill{
@@ -80,7 +80,7 @@
   }
   .dept-scroll::-webkit-scrollbar{ display:none; }
   .dept-chip{
-    flex:0 0 auto; padding:7px 14px; border-radius:100px; font-size:13px; font-weight:600;
+    flex:0 0 auto; padding:7px 14px; border-radius:100px; font-size:15px; font-weight:700;
     background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); border:1px solid rgba(255,255,255,0.16);
     cursor:pointer; white-space:nowrap; transition:0.15s;
   }
@@ -106,13 +106,13 @@
   .ring-center{
     position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
   }
-  .ring-center .num{ font-size:20px; font-weight:800; line-height:1; }
-  .ring-center .lbl{ font-size:9.5px; color:var(--ink-faint); margin-top:2px; }
+  .ring-center .num{ font-size:24px; font-weight:900; line-height:1; }
+  .ring-center .lbl{ font-size:12px; color:var(--ink-faint); margin-top:2px; font-weight:600; }
   .ring-stats{ display:flex; flex-direction:column; gap:8px; flex:1; }
-  .ring-stat-line{ display:flex; align-items:center; justify-content:space-between; font-size:13px; }
-  .ring-stat-line .k{ display:flex; align-items:center; gap:7px; color:var(--ink-soft); font-weight:600;}
+  .ring-stat-line{ display:flex; align-items:center; justify-content:space-between; font-size:15px; }
+  .ring-stat-line .k{ display:flex; align-items:center; gap:7px; color:var(--ink-soft); font-weight:700;}
   .swatch{ width:9px; height:9px; border-radius:3px; display:inline-block; }
-  .ring-stat-line .v{ font-weight:800; font-size:15px; }
+  .ring-stat-line .v{ font-weight:900; font-size:18px; }
 
   /* ---------- Search / filter bar ---------- */
   .search-bar{
@@ -125,7 +125,7 @@
   .search-bar input[type=text]:focus{ border-color:var(--teal); }
   .cat-filter{ display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
   .cat-chip{
-    padding:6px 12px; border-radius:100px; font-size:12.5px; font-weight:600;
+    padding:6px 12px; border-radius:100px; font-size:14.5px; font-weight:700;
     background:var(--surface-2); color:var(--ink-soft); border:1px solid transparent; cursor:pointer;
   }
   .cat-chip.active{ background:var(--teal-tint); color:var(--teal-dark); border-color:var(--teal); }
@@ -137,13 +137,13 @@
   }
   .item-row:last-child{ border-bottom:none; }
   .item-main{ min-width:0; flex:1; }
-  .item-name{ font-size:14.5px; font-weight:700; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .item-sub{ font-size:12px; color:var(--ink-faint); margin-top:2px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
-  .tag{ background:var(--surface-2); border-radius:5px; padding:1px 6px; font-size:10.5px; font-weight:600; color:var(--ink-soft); }
+  .item-name{ font-size:17px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .item-sub{ font-size:14px; color:var(--ink-faint); margin-top:2px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .tag{ background:var(--surface-2); border-radius:5px; padding:1px 6px; font-size:13px; font-weight:700; color:var(--ink-soft); }
   .item-stock{ text-align:right; flex-shrink:0; }
-  .item-stock .n{ font-size:17px; font-weight:800; }
-  .item-stock .p{ font-size:11px; color:var(--ink-faint); }
-  .badge{ font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:100px; display:inline-block; margin-top:3px;}
+  .item-stock .n{ font-size:19px; font-weight:900; }
+  .item-stock .p{ font-size:13px; color:var(--ink-faint); font-weight:600; }
+  .badge{ font-size:13px; font-weight:800; padding:2px 7px; border-radius:100px; display:inline-block; margin-top:3px;}
   .badge.low{ background:var(--brick-tint); color:var(--brick); }
   .badge.ok{ background:var(--green-tint); color:var(--green); }
 
