@@ -335,6 +335,18 @@
       </div>
     </div>
 
+    <!-- 비급여 연동 카드 -->
+    <div class="card" id="bgCard" style="border:2px solid rgba(18,115,168,.25);background:#f8fbff">
+      <h2 style="margin-bottom:10px"><span class="idx" style="background:#1273a8">★</span> 비급여 추정금액 <span style="font-size:12px;font-weight:500;color:#1273a8;background:rgba(18,115,168,.1);padding:3px 9px;border-radius:20px;margin-left:8px">비급여 계산기 연동</span></h2>
+      <div id="bgBanner" style="display:none;background:#e8f5e9;border:1.5px solid #43a047;border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13.5px;font-weight:600;color:#2e7d32;line-height:1.5"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="field" style="margin:0"><label>세트명 (수술 구성)</label><input type="text" id="bg_setname" placeholder="자동 입력"></div>
+      </div>
+      <div class="field" style="margin-bottom:12px"><label>비급여 항목 내역</label><textarea id="bg_memo" rows="4" style="font-family:inherit;resize:vertical;font-size:12.5px" placeholder="비급여 계산기에서 불러오면 자동 입력됩니다."></textarea></div>
+      <button type="button" onclick="loadBgData()" style="background:#1273a8;color:#fff;border:none;padding:10px 18px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">📋 비급여 계산기에서 불러오기</button>
+      <span style="font-size:12px;color:#666;margin-left:12px">비급여 계산기에서 "📋 수술기록지에 연동" 버튼을 먼저 눌러주세요</span>
+    </div>
+
     <div class="card">
       <h2><span class="idx">03</span> 사용 재료 목록</h2>
 
@@ -983,6 +995,49 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     setTimeout(()=>{ el.classList.remove('show'); }, 4000);
   }
 
+  // ── 비급여 계산기 연동: localStorage에서 데이터 읽어 입력 ──
+  window.loadBgData = function() {
+    try {
+      var raw = localStorage.getItem('bg_pending_claim');
+      var ban = document.getElementById('bgBanner');
+      if (!raw) {
+        ban.style.display = '';
+        ban.style.background = '#fff3e0';
+        ban.style.borderColor = '#f57c00';
+        ban.style.color = '#e65100';
+        ban.innerHTML = '⚠️ 비급여 계산기에서 먼저 &quot;📋 수술기록지에 연동&quot; 버튼을 눌러주세요.';
+        return;
+      }
+      var d = JSON.parse(raw);
+      // 비급여 합계
+      // 세트명
+      var setnameEl = document.getElementById('bg_setname');
+      if (setnameEl) setnameEl.value = d.setName || '';
+      // 수술명이 비어있으면 세트명으로 자동 채우기
+      var sNameEl = document.getElementById('s_name');
+      if (sNameEl && !sNameEl.value && d.setName) sNameEl.value = d.setName;
+      // 세부 항목 → 메모
+      var lines = d.lines || [];
+      var memo = lines.map(function(l) {
+        var sec = l.section ? '[' + l.section + '] ' : '';
+        return sec + l.name + ' × ' + l.qty + ' = ₩' + (l.amount || 0).toLocaleString('ko-KR');
+      }).join('\n');
+      var memoEl = document.getElementById('bg_memo');
+      if (memoEl) memoEl.value = memo;
+      // 배너 표시
+      ban.style.display = '';
+      ban.style.background = '#e8f5e9';
+      ban.style.borderColor = '#43a047';
+      ban.style.color = '#2e7d32';
+      ban.innerHTML = '✅ 비급여 계산기에서 데이터를 불러왔습니다. &nbsp;|&nbsp; 세트: <b>' +
+        (d.setName || '-') + '</b> &nbsp;|&nbsp; 합계: <b>₩' +
+        (d.total || 0).toLocaleString('ko-KR') + '</b> &nbsp;|&nbsp; 저장일시: ' +
+        (d.savedAt || '').substring(0, 10);
+    } catch(e) {
+      alert('비급여 불러오기 실패: ' + e);
+    }
+  };
+
   // 네이티브 confirm() 창이 미리보기 환경에 따라 차단되어 삭제/초기화가
   // 먹통이 되는 문제를 막기 위한 "한번 더 누르면 실행" 확인 방식.
   // armedLabel이 있으면 버튼 글자를 바꾸고, 없으면(아이콘 버튼 등) 색만 경고색으로 바꿈.
@@ -1583,6 +1638,8 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         biopsy_name: document.getElementById('n_biopsy_name').value.trim(),
         note: document.getElementById('n_note').value.trim()
       },
+      bg_setname: (document.getElementById('bg_setname').value || '').trim(),
+      bg_memo: (document.getElementById('bg_memo').value || '').trim(),
       special: {
         plate_site: document.getElementById('sp_plate_site').value,
         plate_type: document.getElementById('sp_plate_type').value,
@@ -1996,6 +2053,8 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     document.getElementById('s_end').value = d.s_end||'';
     document.getElementById('s_name').value = d.s_name||'';
     document.getElementById('s_diagnosis').value = d.s_diagnosis||'';
+    if(d.bg_setname) document.getElementById('bg_setname').value = d.bg_setname;
+    if(d.bg_memo) document.getElementById('bg_memo').value = d.bg_memo;
     sType.value = d.s_type||'';
     autoCheckedIds.clear();
     document.getElementById('s_surgeon').value = d.s_surgeon||'김진일';
@@ -2557,10 +2616,25 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     return result;
   };
 
-  // 초기 빈 행 1개씩
+  // 초기 빈 행 1개씩 + 비급여 연동 자동 알림
   document.addEventListener('DOMContentLoaded', function(){
     spAddScrewRow('screw');
     spAddScrewRow('cannulated');
+    // 비급여 계산기에서 연동 데이터가 있으면 배너로 안내
+    try {
+      var raw = localStorage.getItem('bg_pending_claim');
+      if (raw) {
+        var d = JSON.parse(raw);
+        var ban = document.getElementById('bgBanner');
+        if (ban) {
+          ban.style.display = '';
+          ban.innerHTML = '📋 비급여 계산기에서 연동된 데이터가 있습니다. &nbsp;'
+            + '<b>아래 "비급여 계산기에서 불러오기" 버튼</b>을 누르면 자동 입력됩니다. &nbsp;|&nbsp; 세트: <b>'
+            + (d.setName || '-') + '</b> &nbsp;|&nbsp; 합계: <b>₩'
+            + (d.total || 0).toLocaleString('ko-KR') + '</b>';
+        }
+      }
+    } catch(e) {}
   });
 
   window.spUpdateScrewLen = function(sizeId, lenId){
