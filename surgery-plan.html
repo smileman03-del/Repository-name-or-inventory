@@ -19,6 +19,46 @@
     body[data-print-mode="day-plan"] .month-report-modal{display:none !important;}
     .month-report-modal, .day-plan-print-wrap{position:static !important;box-shadow:none !important;background:#fff !important;}
   }
+  /* ===== 카드형 일간 레이아웃 ===== */
+  .day-summary-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .dsb-item{background:#fff;border:1px solid #E3E7ED;border-radius:10px;padding:10px 18px;display:flex;flex-direction:column;align-items:center;min-width:70px;}
+  .dsb-n{font-size:2rem;font-weight:900;color:#1e293b;line-height:1.1;}
+  .dsb-l{font-size:0.95rem;color:#6B7280;font-weight:600;margin-top:3px;}
+  .day-card-list{display:flex;flex-direction:column;gap:12px;}
+  .sc-card{background:#fff;border:1px solid #E3E7ED;border-radius:14px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow:hidden;border-left:6px solid #3B6FA8;}
+  .sc-urgent{border-left-color:#E0384A;background:#FDECEE;}
+  .sc-warn{border-left-color:#E08A2B;background:#FFF3E0;}
+  .sc-cancel{border-left-color:#9CA3AF;background:#F1F2F4;color:#8A8F98;}
+  .sc-top{display:flex;align-items:flex-start;}
+  .sc-time{min-width:96px;padding:18px 14px;background:rgba(59,111,168,0.08);text-align:center;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .sc-urgent .sc-time{background:rgba(224,56,74,0.10);}
+  .sc-warn .sc-time{background:rgba(224,138,43,0.10);}
+  .sc-cancel .sc-time{background:rgba(156,163,175,0.12);}
+  .tv{font-size:1.5rem;font-weight:900;color:#1e293b;white-space:nowrap;}
+  .td{font-size:0.95rem;color:#6B7280;margin-top:4px;white-space:nowrap;}
+  .sc-main{flex:1;padding:16px 18px;}
+  .sc-prow{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;}
+  .pn{font-size:1.5rem;font-weight:900;color:#1e293b;}
+  .pm{font-size:1rem;color:#6B7280;}
+  .bdgs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+  .bdg{font-size:0.9rem;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;}
+  .bdg-an{background:#E8EFF6;color:#3B6FA8;}
+  .bdg-em{background:#FDECEE;color:#E0384A;}
+  .bdg-ok{background:#E5EFEC;color:#1F5A4B;}
+  .bdg-done{background:#E5EFEC;color:#1F5A4B;}
+  .bdg-warn{background:#FFF3E0;color:#E08A2B;}
+  .op-name{font-size:1.2rem;font-weight:800;color:#1e293b;margin-bottom:4px;}
+  .op-sub{font-size:1rem;color:#6B7280;margin-bottom:4px;}
+  .sc-det{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));border-top:1px solid #E3E7ED;padding:12px 18px;gap:0;}
+  .det-cell{display:flex;flex-direction:column;padding:8px 10px;}
+  .det-lbl{font-size:0.85rem;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+  .det-val{font-size:1rem;color:#374151;margin-top:2px;}
+  .sc-acts{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid #E3E7ED;}
+  .btn-e,.btn-d,.btn-r{border:none;border-radius:7px;font-size:1rem;font-weight:700;cursor:pointer;padding:9px 18px;}
+  .btn-e{background:#E8EFF6;color:#3B6FA8;}
+  .btn-d{background:#FDECEE;color:#E0384A;}
+  .btn-r{background:#E5EFEC;color:#1F5A4B;border:1px solid #2F7A67;}
+  @media(max-width:600px){.sc-time{min-width:64px;padding:12px 8px;}.tv{font-size:1rem;}.det-cell{padding:4px 6px;}.dsb-item{padding:8px 12px;min-width:56px;}}
 </style>
 </head>
 <body>
@@ -407,58 +447,94 @@ function renderDayView(){
   const dayActive = dayRecs.filter(r => r.status !== '취소');
   const dayCancelled = dayRecs.filter(r => r.status === '취소');
 
-  const headerCells = TABLE_HEADERS.map(h => `<th style="text-align:center;padding:12px 14px;font-weight:800;font-size:1rem;color:#6B7280;white-space:nowrap;border-bottom:1px solid #E3E7ED;">${h}</th>`).join('');
+  // 요약 바
+  const total = dayRecs.length;
+  const scheduled = dayRecs.filter(r => r.urgency === '예정' && r.status !== '취소').length;
+  const emergency = dayRecs.filter(r => r.urgency === '응급' && r.status !== '취소').length;
+  const warnCnt = dayRecs.filter(r => r.status !== '취소' && ((r.infection && r.infection !== '없음') || r.allergy === '있음' || r.anticoag === '복용 중')).length;
+  const cancelCnt = dayCancelled.length;
 
-  const rowsHtml = dayRecs.map(r => `
-    <tr style="${rowStyleFor(r)}">
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.time)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.doctor)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.chartNo)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.name)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.gender)} / ${esc(r.age)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.anesthesia)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.surgeryName)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.side)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.diagnosis)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.urgency)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.duration)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.room)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.npo)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.allergy)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.anticoag)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.infection)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.implant)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.cArm)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.position)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;font-weight:800;">${esc(r.status)}</td>
-      <td style="padding:12px 14px;white-space:nowrap;font-size:1rem;">${esc(r.note)}</td>
-      <td data-noprint="true" style="padding:12px 14px;white-space:nowrap;">
-        <button class="btnEditRow" data-id="${r.id}" style="border:none;background:transparent;color:#3B6FA8;font-size:1rem;font-weight:700;cursor:pointer;margin-right:6px;">수정</button>
-        <button class="btnDeleteRow" data-id="${r.id}" style="border:none;background:transparent;color:#E0384A;font-size:1rem;font-weight:700;cursor:pointer;margin-right:6px;">삭제</button>
-        <button class="btnOpenRecord" data-id="${r.id}" style="border:1px solid #2F7A67;background:#E5EFEC;color:#1F5A4B;font-weight:700;cursor:pointer;border-radius:6px;padding:6px 10px;font-size:0.92rem;">기록지</button>
-      </td>
-    </tr>`).join('');
+  const summaryBar = `<div class="day-summary-bar">
+    <div class="dsb-item"><span class="dsb-n">${total}</span><span class="dsb-l">전체</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#3B6FA8">${scheduled}</span><span class="dsb-l">예정</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#E0384A">${emergency}</span><span class="dsb-l">응급</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#E08A2B">${warnCnt}</span><span class="dsb-l">주의</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#8A8F98">${cancelCnt}</span><span class="dsb-l">취소</span></div>
+  </div>`;
 
-  return `
-    <div class="day-plan-print-wrap">
-      <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-        <button id="btnPrevDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
-        <button id="btnNextDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
-        <button id="btnTodayDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
+  // 카드 빌더
+  function card(r) {
+    const isCancel = r.status === '취소';
+    const isUrgent = !isCancel && r.urgency === '응급';
+    const isWarn = !isCancel && !isUrgent && ((r.infection && r.infection !== '없음') || r.allergy === '있음' || r.anticoag === '복용 중');
+    let cardClass = 'sc-card';
+    if (isCancel) cardClass += ' sc-cancel';
+    else if (isUrgent) cardClass += ' sc-urgent';
+    else if (isWarn) cardClass += ' sc-warn';
+
+    const surParts = (r.surgeryName || '').split('·');
+    const surMain = surParts[0].trim();
+    const surSub = surParts.slice(1).join('·').trim();
+
+    const badges = [];
+    if (r.anesthesia) badges.push(`<span class="bdg bdg-an">${esc(r.anesthesia)}</span>`);
+    if (r.urgency === '응급') badges.push(`<span class="bdg bdg-em">응급</span>`);
+    else if (r.urgency) badges.push(`<span class="bdg bdg-ok">${esc(r.urgency)}</span>`);
+    if (r.status === '완료') badges.push(`<span class="bdg bdg-done">완료</span>`);
+    if (r.npo && r.npo !== '확인') badges.push(`<span class="bdg bdg-warn">금식미확인</span>`);
+    if (r.allergy === '있음') badges.push(`<span class="bdg bdg-warn">알레르기</span>`);
+    if (r.anticoag === '복용 중') badges.push(`<span class="bdg bdg-warn">항응고제</span>`);
+    if (r.infection && r.infection !== '없음') badges.push(`<span class="bdg bdg-warn">감염위험</span>`);
+
+    const detItems = [
+      ['병실', r.room||'—'], ['금식', r.npo||'—'], ['알레르기', r.allergy||'—'],
+      ['항응고제', r.anticoag||'—'], ['C-ARM', r.cArm||'—'], ['체위', r.position||'—'],
+      ['감염', r.infection||'—'], ['임플란트', r.implant||'—']
+    ];
+    const boldDets = ['C-ARM','금식','항응고제','감염'];
+    const detHtml = detItems.map(([lbl,val]) => {
+      const isBold = boldDets.includes(lbl) && val !== '—' && val !== '없음' && val !== '확인' && val !== '불필요' && val !== '복용 안 함';
+      return `<div class="det-cell"><span class="det-lbl">${lbl}</span><span class="det-val"${isBold?' style="font-weight:800;color:#1e293b;"':''}>${esc(val)}</span></div>`;
+    }).join('');
+
+    return `<div class="${cardClass}">
+      <div class="sc-top">
+        <div class="sc-time"><div class="tv">${esc(r.time)}</div><div class="td">${esc(r.duration)}</div></div>
+        <div class="sc-main">
+          <div class="sc-prow"><span class="pn">${esc(r.name)}</span><span class="pm">${esc(r.gender)} · 차트 #${esc(r.chartNo)}</span></div>
+          <div class="bdgs">${badges.join('')}</div>
+          <div class="op-name">${esc(surMain)}</div>
+          ${surSub?`<div class="op-sub">${esc(surSub)}</div>`:''}
+          <div class="op-sub">${r.side?esc(r.side)+'측 · ':''}담당의 ${esc(r.doctor)} · 진단명 ${esc(r.diagnosis)}</div>
+        </div>
       </div>
-      <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
-        <h2 style="margin:0;font-size:1.8rem;font-weight:800;">${selectedDateLabel}</h2>
-        <div style="font-size:1.1rem;color:#6B7280;font-weight:700;">수술 ${dayActive.length}건 (취소 제외) · 취소 ${dayCancelled.length}건</div>
+      <div class="sc-det">${detHtml}</div>
+      <div class="sc-acts" data-noprint="true">
+        <button class="btn-e btnEditRow" data-id="${r.id}">수정</button>
+        <button class="btn-d btnDeleteRow" data-id="${r.id}">삭제</button>
+        <button class="btn-r btnOpenRecord" data-id="${r.id}">기록지</button>
+        ${r.note?`<span style="margin-left:8px;font-size:0.85rem;color:#6B7280;">📝 ${esc(r.note)}</span>`:''}
       </div>
-      <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;min-width:1800px;font-size:1rem;">
-          <thead><tr style="background:#F3F5F8;">${headerCells}<th data-noprint="true" style="padding:9px 10px;border-bottom:1px solid #E3E7ED;"></th></tr></thead>
-          <tbody>${rowsHtml}</tbody>
-        </table>
-        ${dayRecs.length===0?`<div style="padding:40px;text-align:center;color:#6B7280;font-size:0.95rem;">이 날짜에 등록된 수술이 없습니다.</div>`:''}
-      </div>
-      <div data-noprint="true" style="margin-top:10px;font-size:0.95rem;color:#8A8F98;font-weight:600;">색 표시: 응급 빨강 · 감염/알레르기/항응고제 복용 중 주황 · 금식 미확인 노랑 · 취소 회색</div>
     </div>`;
+  }
+
+  const cardsHtml = dayRecs.length === 0
+    ? `<div style="padding:40px;text-align:center;color:#6B7280;font-size:0.95rem;">이 날짜에 등록된 수술이 없습니다.</div>`
+    : dayRecs.map(r => card(r)).join('');
+
+  return `<div class="day-plan-print-wrap">
+    <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+      <button id="btnPrevDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
+      <button id="btnNextDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
+      <button id="btnTodayDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
+    </div>
+    <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
+      <h2 style="margin:0;font-size:1.8rem;font-weight:800;">${selectedDateLabel}</h2>
+      <div style="font-size:1.1rem;color:#6B7280;font-weight:700;">수술 ${dayActive.length}건 (취소 제외) · 취소 ${dayCancelled.length}건</div>
+    </div>
+    ${summaryBar}
+    <div class="day-card-list">${cardsHtml}</div>
+  </div>`;
 }
 
 function attachBodyHandlers(){
