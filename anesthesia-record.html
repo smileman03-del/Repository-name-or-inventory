@@ -196,7 +196,6 @@ input.ul{border:0;border-bottom:.25mm solid #000}
 <!-- ===== 상단 도구줄 ===== -->
 <div class="bar ui" id="bar">
   <button class="btn" id="bNew">＋ 새 기록</button>
-  <button class="btn" id="bImport">수술기록지에서 불러오기</button>
   <button class="btn primary" id="bSave">저장 (구글시트)</button>
   <button class="btn primary" id="bPdf">PDF 저장</button>
   <button class="btn" id="bPrint">인쇄</button>
@@ -582,7 +581,6 @@ function openDrugManager(){
 }
 
 /* ---------- 설정 ---------- */
-var PRESET_SR='';   /* 보안: 시트 주소는 파일에 넣지 않고 설정 화면에서 입력(이 기기에만 저장) */
 var DRUG_DEFAULT=[
 '# 마취 상용약',
 'Propofol | 30 mg, 60 mg, 120 mg',
@@ -617,7 +615,7 @@ var DRUG_DEFAULT=[
 'send to ward'
 ].join('\n');
 var PRESET_GAS='https://script.google.com/macros/s/AKfycbztKwT9RUVQGhPUmSpgdkc6StYTjGw6r5nAGXMbrE6cs_SBH1dyaEW0PeWzI91OFOI-gw/exec';
-var DEF={gasUrl:PRESET_GAS,gasPass:'',srUrl:PRESET_SR,surgeons:['김진일'],anesths:['김진일'],writer:'',sheetOnPdf:true,maskName:true,drugsText:''};
+var DEF={gasUrl:PRESET_GAS,gasPass:'',surgeons:['김진일'],anesths:['김진일'],writer:'',sheetOnPdf:true,maskName:true,drugsText:''};
 var OLD_PEOPLE={surgeons:'김진일|강덕원|권희',anesths:'김진일|최정웅'};
 (function(){ /* 예전 기본 명단(1회만) → 김진일 */
   try{
@@ -1154,60 +1152,7 @@ function fillFromSurgery(r){
   if(r.asa){$$('.pick[data-g=asa]').forEach(function(e){e.classList.toggle('on',e.dataset.v===String(r.asa).toUpperCase())})}
   touch();
 }
-function flatten(x,depth){
-  depth=depth||0;if(!x||depth>5)return [];
-  if(typeof x==='string'){try{return flatten(JSON.parse(x),depth+1)}catch(e){return []}}
-  if(Array.isArray(x)){var o=[];x.forEach(function(i){o=o.concat(flatten(i,depth+1))});return o}
-  if(typeof x==='object'){
-    if(x.p_no||x.p_name)return [x];
-    var keys=['records','data','rows','items','list','result','json','record','payload'];
-    for(var i=0;i<keys.length;i++){if(x[keys[i]]){var r=flatten(x[keys[i]],depth+1);if(r.length)return r}}
-    var out=[];Object.keys(x).forEach(function(k){out=out.concat(flatten(x[k],depth+1))});return out;
-  }
-  return [];
-}
-function fetchSurgery(url){
-  var u=url+(url.indexOf('?')>=0?'&':'?')+'action=list';
-  return fetch(u,{redirect:'follow'}).then(function(r){return r.text()}).then(function(t){
-    var j;try{j=JSON.parse(t)}catch(e){throw new Error('응답 형식을 읽을 수 없습니다')}
-    var a=flatten(j),seen={},out=[];
-    a.forEach(function(r){var k=(r.p_no||'')+'|'+(r.s_date||'')+'|'+(r.p_name||'');if(seen[k])return;seen[k]=1;out.push(r)});
-    out.sort(function(a,b){return String(b.s_date||'').localeCompare(String(a.s_date||''))});
-    return out;
-  },function(){throw new Error('네트워크 연결 실패')});
-}
-function openImport(){
-  var s=getSettings();
-  if(!s.srUrl){toast('설정에서 수술기록지 시트 주소를 먼저 입력해 주세요','err');openSettings();return}
-  var m=modal('<h3>수술기록지에서 불러오기</h3><input type="search" id="iq" placeholder="차트번호·이름·수술명 검색"><div id="il" class="hint" style="margin-top:8px">불러오는 중…</div>',true);
-  var list=[];
-  function render(){
-    var q=(m.$('#iq').value||'').trim().toLowerCase();
-    var arr=list.filter(function(r){return !q||((r.p_no||'')+' '+(r.p_name||'')+' '+(r.s_name||'')).toLowerCase().indexOf(q)>=0});
-    if(!arr.length){m.$('#il').innerHTML='<p>표시할 기록이 없습니다.</p>';return}
-    var h='<table><tr><th>수술일</th><th>차트번호</th><th>성명</th><th>수술명</th><th>집도의</th><th></th></tr>';
-    arr.slice(0,150).forEach(function(r,i){
-      h+='<tr><td>'+esc(String(r.s_date||'').slice(0,10))+'</td><td>'+esc(r.p_no)+'</td><td>'+esc(r.p_name)+'</td><td>'+esc(r.s_name)+'</td><td>'+esc(r.s_surgeon)+'</td><td><button class="btn sm primary" data-i="'+list.indexOf(r)+'">선택</button></td></tr>';
-    });
-    m.$('#il').className='';m.$('#il').innerHTML=h+'</table>';
-  }
-  m.$('#iq').addEventListener('input',render);
-  m.el.addEventListener('click',function(e){
-    var b=e.target.closest('button[data-i]');if(!b)return;
-    var r=list[+b.dataset.i];
-    var go=function(){fillFromSurgery(r);m.close();toast('환자·수술 정보를 불러왔습니다 — 내용을 확인해 주세요','ok')};
-    var cur=collect().f;
-    if(cur.no&&cur.no!==String(r.p_no||''))confirmM('현재 입력된 환자('+(cur.name||cur.no)+')의 정보를 선택한 환자로 바꿉니다. 그래프·시간 기록은 그대로 남습니다.','바꾸기').then(function(y){if(y)go()});
-    else go();
-  });
-  fetchSurgery(s.srUrl).then(function(a){
-    list=a;
-    if(!a.length)m.$('#il').innerHTML='<div class="note">불러온 목록에서 환자 기록을 찾지 못했습니다. 수술기록지 시트의 응답 형식이 다를 수 있습니다. 이 경우 수술기록지 화면에서 "마취기록지 열기" 링크로 연동하거나 직접 입력해 주세요.</div>';
-    else render();
-  },function(e){
-    m.$('#il').innerHTML='<div class="note">수술기록지 시트를 읽지 못했습니다: '+esc(e.message)+'</div>';
-  });
-}
+
 function applyParams(){
   var q=new URLSearchParams(location.search),keys=['p_no','p_name','p_sex','p_dob','s_date','s_name','s_diagnosis','s_surgeon','age','height','weight','blood','asa'];
   var r={},any=false;
@@ -1262,17 +1207,14 @@ function openSettings(){
   '<div class="row" style="margin-top:8px"><label style="margin:0;display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" id="sPdfSheet" '+(s.sheetOnPdf?'checked':'')+'> PDF 저장에 성공하면 구글시트에도 함께 저장</label></div>'+
   '<div class="row" style="margin-top:4px"><label style="margin:0;display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" id="sMask" '+(s.maskName!==false?'checked':'')+'> 구글시트에는 환자 이름을 가려서 저장 (예: 홍*동) — 이 기기와 PDF에는 전체 이름</label></div>'+
   '<div class="note">보안 권장: 접속암호를 꼭 설정하세요(Apps Script의 PASS 값과 동일하게). 암호는 파일에 적히지 않고 이 기기에만 저장됩니다.</div>'+
-  '<h4>② 수술기록지 연동</h4>'+
-  '<label>수술기록지 구글시트 주소 (환자·수술 정보를 읽어올 때 사용, 읽기만 합니다)</label><input type="text" id="sSr" value="'+esc(s.srUrl)+'">'+
-  '<div class="note">수술기록지 화면에서 이 앱을 열 때는 주소 뒤에 <code>?p_no=차트번호&amp;p_name=이름&amp;p_sex=남&amp;p_dob=생년월일&amp;s_date=수술일&amp;s_name=수술명&amp;s_diagnosis=진단명&amp;s_surgeon=집도의</code> 를 붙이면 자동으로 채워집니다.</div>'+
-  '<h4>③ 의사 명단 (한 줄에 한 명)</h4>'+
+  '<h4>② 의사 명단 (한 줄에 한 명)</h4>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label>집도의</label><textarea id="sSur">'+esc((s.surgeons||[]).join('\n'))+'</textarea></div><div style="flex:1;min-width:200px"><label>마취의</label><textarea id="sAne">'+esc((s.anesths||[]).join('\n'))+'</textarea></div></div>'+
   '<label>기본 작성자</label><input type="text" id="sWr" value="'+esc(s.writer)+'" placeholder="새 기록에 자동으로 들어갑니다">'+
   '<div class="row"><button class="btn primary" id="sOk">저장</button><button class="btn" id="sCancel">닫기</button><span class="hint" id="sMsg"></span></div>'
   );
   function readForm(){
     var lines=function(id){return m.$(id).value.split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean)};
-    return {gasUrl:m.$('#sUrl').value.trim(),gasPass:m.$('#sPass').value,srUrl:m.$('#sSr').value.trim(),
+    return {gasUrl:m.$('#sUrl').value.trim(),gasPass:m.$('#sPass').value,
       surgeons:lines('#sSur'),anesths:lines('#sAne'),writer:m.$('#sWr').value.trim(),sheetOnPdf:m.$('#sPdfSheet').checked,maskName:m.$('#sMask').checked};
   }
   m.$('#sOk').onclick=function(){putSettings(Object.assign(getSettings(),readForm()));rebuildPeople();cloudBadge();m.close();toast('설정을 저장했습니다','ok');syncPending()};
@@ -1459,7 +1401,6 @@ $('#bPdf').onclick=exportPdf;
 $('#bPrint').onclick=function(){window.print()};
 $('#bList').onclick=openList;
 $('#bSet').onclick=openSettings;
-$('#bImport').onclick=openImport;
 $('#zIn').onclick=function(){setZoom(zoom*1.12)};
 $('#zOut').onclick=function(){setZoom(zoom/1.12)};
 $('#zFit').onclick=fitZoom;
