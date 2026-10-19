@@ -27,6 +27,9 @@ button{font-family:inherit}
 .sp{flex:1}
 #status{font-size:12px;color:#5a6676}
 #status.dirty{color:#b45a00;font-weight:700}
+#storageInfo{font-size:11px;color:#5a6676;padding:2px 7px;background:#eef1f5;border-radius:9px;white-space:nowrap;cursor:default}
+#storageInfo.warn{color:#b45a00;background:#fff3cd}
+#storageInfo.danger{color:#c00;background:#fdecea}
 #cloud{font-size:12px;padding:3px 8px;border-radius:12px;background:#eef1f5;color:#5a6676}
 #cloud.ok{background:#dff3e4;color:#14703a}
 .ui input[type=text],.ui input[type=number],.ui input[type=time],.ui input[type=password],.ui input[type=search],.ui select,.ui textarea{border:1px solid #b8c1cf;border-radius:6px;padding:4px 6px;font:inherit;font-size:12.5px;background:#fff}
@@ -202,7 +205,7 @@ input.ul{border:0;border-bottom:.25mm solid #000}
   <button class="btn" id="bList">기록 목록</button>
   <button class="btn" id="bSet">설정</button>
   <button class="btn sm" id="bUndo" title="그래프 되돌리기">되돌리기</button>
-  <button class="btn sm" id="bErase" title="그래프 지우개">지우개</button>
+  <button class="btn sm" id="bErase" title="그래프 지우개">지우개</button><span id="storageInfo" title="이 기기 저장공간 사용량"></span>
   <span class="sp"></span>
   <span id="status"></span>
   <span id="cloud">☁ 시트 미설정</span>
@@ -1441,6 +1444,26 @@ fillQty();buildTables();buildLegend();rebuildPeople();cloudBadge();rebuildRx();
 
 /* 테스트/점검용으로 노출 */
 window.__anes={renderRx:renderRx,beforePrint:beforePrint,afterPrint:afterPrint,collect:collect,apply:apply,state:state,exportPdf:exportPdf,saveRecord:saveRecord,buildClone:buildClone};
+
+// ===== 저장공간 표시 =====
+function updateStorageInfo(){
+  try{
+    var used=0;
+    for(var k in localStorage){
+      if(!Object.prototype.hasOwnProperty.call(localStorage,k))continue;
+      var v=localStorage.getItem(k)||'';
+      used+=(k.length+v.length)*2;
+    }
+    var usedKB=used/1024,totalKB=5120,pct=usedKB/totalKB*100;
+    var el=document.getElementById('storageInfo');if(!el)return;
+    var disp=usedKB<1024?usedKB.toFixed(1)+' KB':(usedKB/1024).toFixed(2)+' MB';
+    el.textContent='💾 '+disp+' / 5 MB';
+    el.className=pct>90?'danger':pct>70?'warn':'';
+    el.title='저장공간: '+disp+' 사용 중 (5 MB 중 '+pct.toFixed(1)+'%)';
+  }catch(e){}
+}
+updateStorageInfo();
+setInterval(updateStorageInfo,3000);
 })();
 </script>
 </body>
