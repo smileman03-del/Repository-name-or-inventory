@@ -28,8 +28,10 @@ button{font-family:inherit}
 #status{font-size:12px;color:#5a6676}
 #status.dirty{color:#b45a00;font-weight:700}
 #storageInfo{font-size:11px;color:#5a6676;padding:2px 7px;background:#eef1f5;border-radius:9px;white-space:nowrap;cursor:default}
-#storageInfo.warn{color:#b45a00;background:#fff3cd}
-#storageInfo.danger{color:#c00;background:#fdecea}
+#storageInfo.warn{color:#b45a00;background:#fff3cd;cursor:pointer}
+#storageInfo.danger{color:#c00;background:#fdecea;cursor:pointer}
+#storageInfo.warn:hover{background:#ffe69c}
+#storageInfo.danger:hover{background:#f5c6c6}
 #cloud{font-size:12px;padding:3px 8px;border-radius:12px;background:#eef1f5;color:#5a6676}
 #cloud.ok{background:#dff3e4;color:#14703a}
 .ui input[type=text],.ui input[type=number],.ui input[type=time],.ui input[type=password],.ui input[type=search],.ui select,.ui textarea{border:1px solid #b8c1cf;border-radius:6px;padding:4px 6px;font:inherit;font-size:12.5px;background:#fff}
@@ -1077,10 +1079,19 @@ function localRecords(){
   return a;
 }
 function openList(){
-  var m=modal('<h3>저장된 기록</h3><div class="row" style="margin-top:0"><input type="search" id="lq" placeholder="차트번호·이름·수술명 검색" style="flex:1"></div><div id="ll" class="hint" style="margin-top:8px">불러오는 중…</div>',true);
+  // 저장공간 사용률 계산
+  function calcStorePct(){var used=0;try{for(var k in localStorage){if(!Object.prototype.hasOwnProperty.call(localStorage,k))continue;var v=localStorage.getItem(k)||'';used+=(k.length+v.length)*2;}}catch(e){}return used/1024/5120*100;}
+  var pct=calcStorePct();
+  var storeBanner=pct>=70?'<div id="storeBanner" style="background:'+(pct>90?'#fdecea':'#fff3cd')+';border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:'+(pct>90?'#c00':'#7a5000')+'">⚠️ 저장공간 <b>'+pct.toFixed(0)+'%</b> 사용 중 — 불필요한 기록을 체크해서 한번에 삭제하세요.</div>':'';
+  var m=modal('<h3>저장된 기록</h3>'+storeBanner+'<div class="row" style="margin-top:0;gap:6px"><input type="search" id="lq" placeholder="차트번호·이름·수술명 검색" style="flex:1"><button class="btn sm warn" id="bDelSel" disabled style="white-space:nowrap">선택 삭제 (0)</button></div><div id="ll" class="hint" style="margin-top:8px">불러오는 중…</div>',true);
   var map={};
   localRecords().forEach(function(d){map[d.key||(d.f.no+'__'+d.f.date)]={d:d,where:'기기'}});
   var s=getSettings(),note='';
+  function updateDelBtn(){
+    var n=m.el.querySelectorAll('.rec-chk:checked').length;
+    var btn=m.$('#bDelSel');if(!btn)return;
+    btn.textContent='선택 삭제 ('+n+')';btn.disabled=n===0;
+  }
   function render(){
     var q=(m.$('#lq').value||'').trim().toLowerCase();
     var arr=Object.keys(map).map(function(k){return {k:k,o:map[k]}});
@@ -1088,15 +1099,29 @@ function openList(){
     arr=arr.filter(function(x){var f=x.o.d.f;return !q||(f.no+' '+f.name+' '+f.surgery+' '+f.dx).toLowerCase().indexOf(q)>=0});
     var h=note?'<div class="note">'+esc(note)+'</div>':'';
     if(!arr.length){m.$('#ll').innerHTML=h+'<p>저장된 기록이 없습니다.</p>';return}
-    h+='<table><tr><th>날짜</th><th>차트번호</th><th>성명</th><th>수술명</th><th>마취의</th><th>위치</th><th></th></tr>';
+    h+='<table><tr><th><input type="checkbox" id="chkAll" title="전체 선택/해제"></th><th>날짜</th><th>차트번호</th><th>성명</th><th>수술명</th><th>마취의</th><th>위치</th><th></th></tr>';
     arr.slice(0,200).forEach(function(x){
       var f=x.o.d.f;
-      h+='<tr><td>'+esc(f.date)+'</td><td>'+esc(f.no)+'</td><td>'+esc(f.name)+'</td><td>'+esc(f.surgery)+'</td><td>'+esc(f.anesth)+'</td><td>'+x.o.where+'</td><td style="white-space:nowrap"><button class="btn sm" data-open="'+esc(x.k)+'">열기</button> <button class="btn sm warn" data-del="'+esc(x.k)+'">삭제</button></td></tr>';
+      h+='<tr><td><input type="checkbox" class="rec-chk" data-key="'+esc(x.k)+'"></td><td>'+esc(f.date)+'</td><td>'+esc(f.no)+'</td><td>'+esc(f.name)+'</td><td>'+esc(f.surgery)+'</td><td>'+esc(f.anesth)+'</td><td>'+x.o.where+'</td><td style="white-space:nowrap"><button class="btn sm" data-open="'+esc(x.k)+'">열기</button> <button class="btn sm warn" data-del="'+esc(x.k)+'">삭제</button></td></tr>';
     });
     h+='</table>';
     m.$('#ll').className='';m.$('#ll').innerHTML=h;
+    updateDelBtn();
   }
   m.$('#lq').addEventListener('input',render);
+  m.el.addEventListener('change',function(e){
+    if(e.target.id==='chkAll'){m.el.querySelectorAll('.rec-chk').forEach(function(c){c.checked=e.target.checked;});}
+    updateDelBtn();
+  });
+  m.$('#bDelSel').addEventListener('click',function(){
+    var keys=Array.from(m.el.querySelectorAll('.rec-chk:checked')).map(function(c){return c.dataset.key;});
+    if(!keys.length)return;
+    confirmM(keys.length+'개 기록을 삭제하시겠습니까?','삭제').then(function(y){
+      if(!y)return;
+      keys.forEach(function(k){store.del('anes:rec:'+k);pendDel('pend',k);delete map[k];if(s.gasUrl)cloud('delete',{key:k}).catch(function(er){pendAdd('pendDel',k);});});
+      toast(keys.length+'개 기록을 삭제했습니다','ok');render();
+    });
+  });
   m.el.addEventListener('click',function(e){
     var b=e.target.closest('button');if(!b)return;
     if(b.dataset.open){
@@ -1459,7 +1484,8 @@ function updateStorageInfo(){
     var disp=usedKB<1024?usedKB.toFixed(1)+' KB':(usedKB/1024).toFixed(2)+' MB';
     el.textContent='💾 '+disp+' / 5 MB';
     el.className=pct>90?'danger':pct>70?'warn':'';
-    el.title='저장공간: '+disp+' 사용 중 (5 MB 중 '+pct.toFixed(1)+'%)';
+    el.title=pct>=70?'저장공간 '+pct.toFixed(0)+'% — 클릭해서 기록 정리':'저장공간: '+disp+' 사용 중 (5 MB 중 '+pct.toFixed(1)+'%)';
+    el.onclick=pct>=70?function(){openList();}:null;
   }catch(e){}
 }
 updateStorageInfo();
