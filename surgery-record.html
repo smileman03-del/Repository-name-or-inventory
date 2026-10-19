@@ -717,6 +717,8 @@
       <button class="action ghost" id="clearBtn">전체 지우기</button>
       <button class="action" id="printBtn">인쇄</button>
       <button class="action gold" id="pdfBtn">📄 PDF로 내보내기</button>
+      <!-- 마취기록지 내보내기 버튼 -->
+      <button class="action" id="toAnesBtn" onclick="exportToAnesthesia()">💉 마취기록지로 내보내기</button>
       <button class="action primary" id="saveBtn">저장하기</button>
     </div>
   </div>
@@ -3285,5 +3287,30 @@ var cloudLoadAll = function(){ return gsLoadAll(false); };
     }
   } catch(e){ console.warn('자동 연결 오류:', e); }
 })();
+
+  // === 마취기록지로 내보내기 ===
+  function exportToAnesthesia() {
+    var no = (document.getElementById('p_no')||{value:''}).value.trim();
+    var name = (document.getElementById('p_name')||{value:''}).value.trim();
+    var dob = (document.getElementById('p_dob')||{value:''}).value.trim();
+    var sex = (document.querySelector('input[name=\"p_sex\"]:checked')||{value:''}).value;
+    var date = (document.getElementById('s_date')||{value:''}).value.trim();
+    var sname = (document.getElementById('s_name')||{value:''}).value.trim();
+    var diag = (document.getElementById('s_diagnosis')||{value:''}).value.trim();
+    var surgeon = (document.getElementById('s_surgeon')||{value:''}).value.trim();
+    var anes = (document.getElementById('s_anes')||{value:''}).value.trim();
+    var params = new URLSearchParams();
+    if (no) params.set('p_no', no);
+    if (name) params.set('p_name', name);
+    if (dob) params.set('p_dob', dob);
+    if (sex) params.set('p_sex', sex);
+    if (date) params.set('s_date', date);
+    if (sname) params.set('s_name', sname);
+    if (diag) params.set('s_diagnosis', diag);
+    if (surgeon) params.set('s_surgeon', surgeon);
+    if (anes) params.set('s_anes', anes);
+    var url = 'anesthesia-record.html?' + params.toString();
+    window.open(url, '_blank');
+  }
 </script>
 </body></html>
