@@ -504,7 +504,7 @@ function renderDayView(){
       ['감염', r.infection||'—'], ['임플란트', r.implant||'—'],
       ['수술동의서', r.surgeryConsent||'—'], ['마취동의서', r.anesthConsent||'—'],
       ['혈액검사', r.labTest||'—'], ['심전도', r.ekg||'—'], ['흉부X선', r.cxr||'—'],
-      ['보조 의사', r.assistantDoc||'—'], ['수술방', r.opRoom||'—'],
+      ['수술방', r.opRoom||'—'],
       ['스크럽간호사', r.scrubNurse||'—'], ['순환간호사', r.circNurse||'—'],
       ['Foley', r.foley||'—'], ['지혈대', r.tourniquet||'—'],
       ['압박스타킹', r.compStocking||'—'], ['낙상위험', r.fallRisk||'—'], ['조직검사', r.biopsy||'—']
@@ -586,7 +586,6 @@ function renderModals(){
       {key:'date', label:'수술일자', kind:'date'},
       {key:'time', label:'수술시간', kind:'time'},
       {key:'doctor', label:'집도의', kind:'text', list:'doctorList'},
-      {key:'assistantDoc', label:'보조 의사', kind:'text'},
       {key:'chartNo', label:'차트번호', kind:'text'},
       {key:'name', label:'환자 이름', kind:'text'},
       {key:'gender', label:'성별', kind:'select', options:GENDER},
