@@ -78,6 +78,12 @@ const STATUS = ['예정','진행 중','완료','취소'];
 const SIDE = ['좌','우','양측','해당없음'];
 const CONSENT = ['서명완료','미서명'];
 const CHECK3 = ['확인','미확인','해당없음'];
+const OPROOM = ['1방','2방'];
+const FOLEY = ['불필요','필요'];
+const TOURNIQUET = ['해당없음','사용','미사용'];
+const COMPSTOCKING = ['해당없음','적용','미적용'];
+const FALLRISK = ['일반','고위험'];
+const BIOPSY = ['없음','있음'];
 const WEEKDAY_LABELS = ['일','월','화','수','목','금','토'];
 const SURGERY_SUGGESTIONS_DEFAULT = ['ACL · 전방십자인대재건술','ATFL · 발목인대재건술','BPHA · 고관절반치환술','CTR · 수근관감압술','HTO · 근위경골절골술','Meniscectomy · 반월상연골절제술','Meniscus Repair · 반월상연골봉합술','Meniscus Root Repair · 후근봉합술','PEN · 경막외신경성형술','PFNA · 대퇴부근위부골절수술','RCT · 회전근개봉합술','TKRA · 무릎 인공관절수술','Trigger Finger · 방아쇠수지수술','ORIF · 발목골절수술','ORIF · 손목골절수술','ORIF · 어깨골절수술','MUA · 오십견 마취하 도수조작술','VP · 척추체성형술','SUTURE 창상봉합술','E & B 절제생검','INGROWING NAIL 내향성 발톱','CORN REMOVAL 티눈제거','CRIF Foot','CRIF Hand'];
 const DIAGNOSIS_SUGGESTIONS = ['ACL tear','Chronic ankle instability','Femoral neck fracture','Carpal tunnel syndrome','Medial knee osteoarthritis (varus)','Meniscus tear','Meniscus root tear','Lumbar disc herniation','Lumbar spinal stenosis','Intertrochanteric fracture','Rotator cuff tear','Knee osteoarthritis','Trigger finger','Ankle fracture','Distal radius fracture','Proximal humerus fracture','Adhesive capsulitis (frozen shoulder)','Vertebral compression fracture','Laceration','Soft tissue mass','Ingrown toenail','Corn (clavus)','Foot fracture','Hand fracture'];
@@ -489,6 +495,8 @@ function renderDayView(){
     if (r.infection && r.infection !== '없음') badges.push(`<span class="bdg bdg-warn">감염위험</span>`);
     if (r.surgeryConsent === '미서명') badges.push(`<span class="bdg bdg-warn">수술동의서미서명</span>`);
     if (r.anesthConsent === '미서명') badges.push(`<span class="bdg bdg-warn">마취동의서미서명</span>`);
+    if (r.fallRisk === '고위험') badges.push(`<span class="bdg bdg-warn">낙상고위험</span>`);
+    if (r.biopsy === '있음') badges.push(`<span class="bdg bdg-warn">조직검사</span>`);
 
     const detItems = [
       ['병실', r.room||'—'], ['금식', r.npo||'—'], ['알레르기', r.allergy||'—'],
@@ -496,11 +504,14 @@ function renderDayView(){
       ['감염', r.infection||'—'], ['임플란트', r.implant||'—'],
       ['수술동의서', r.surgeryConsent||'—'], ['마취동의서', r.anesthConsent||'—'],
       ['혈액검사', r.labTest||'—'], ['심전도', r.ekg||'—'], ['흉부X선', r.cxr||'—'],
-      ['보조 의사', r.assistantDoc||'—']
+      ['보조 의사', r.assistantDoc||'—'], ['수술방', r.opRoom||'—'],
+      ['스크럽간호사', r.scrubNurse||'—'], ['순환간호사', r.circNurse||'—'],
+      ['Foley', r.foley||'—'], ['지혈대', r.tourniquet||'—'],
+      ['압박스타킹', r.compStocking||'—'], ['낙상위험', r.fallRisk||'—'], ['조직검사', r.biopsy||'—']
     ];
-    const boldDets = ['C-ARM','금식','항응고제','감염','수술동의서','마취동의서'];
+    const boldDets = ['C-ARM','금식','항응고제','감염','수술동의서','마취동의서','낙상위험','조직검사'];
     const detHtml = detItems.map(([lbl,val]) => {
-      const isBold = boldDets.includes(lbl) && val !== '—' && val !== '없음' && val !== '확인' && val !== '불필요' && val !== '복용 안 함' && val !== '서명완료';
+      const isBold = boldDets.includes(lbl) && val !== '—' && val !== '없음' && val !== '확인' && val !== '불필요' && val !== '복용 안 함' && val !== '서명완료' && val !== '일반' && val !== '해당없음';
       return `<div class="det-cell"><span class="det-lbl">${lbl}</span><span class="det-val"${isBold?' style="font-weight:800;color:#1e293b;"':''}>${esc(val)}</span></div>`;
     }).join('');
 
@@ -599,6 +610,14 @@ function renderModals(){
       {key:'implant', label:'임플란트/재료', kind:'text'},
       {key:'cArm', label:'C-arm', kind:'select', options:CARM},
       {key:'position', label:'체위', kind:'select', options:POSITION},
+      {key:'opRoom', label:'수술방', kind:'select', options:OPROOM},
+      {key:'scrubNurse', label:'스크럽 간호사', kind:'text'},
+      {key:'circNurse', label:'순환 간호사', kind:'text'},
+      {key:'foley', label:'폴리카테터(Foley)', kind:'select', options:FOLEY},
+      {key:'tourniquet', label:'지혈대(Tourniquet)', kind:'select', options:TOURNIQUET},
+      {key:'compStocking', label:'압박스타킹', kind:'select', options:COMPSTOCKING},
+      {key:'fallRisk', label:'낙상위험', kind:'select', options:FALLRISK},
+      {key:'biopsy', label:'조직검사', kind:'select', options:BIOPSY},
       {key:'status', label:'진행상태', kind:'select', options:STATUS},
       {key:'note', label:'비고', kind:'text'}
     ];
