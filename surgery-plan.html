@@ -76,6 +76,8 @@ const CARM = ['필요','불필요'];
 const POSITION = ['앙와위','측와위','복와위','비치체어','견인대 사용','해당없음'];
 const STATUS = ['예정','진행 중','완료','취소'];
 const SIDE = ['좌','우','양측','해당없음'];
+const CONSENT = ['서명완료','미서명'];
+const CHECK3 = ['확인','미확인','해당없음'];
 const WEEKDAY_LABELS = ['일','월','화','수','목','금','토'];
 const SURGERY_SUGGESTIONS_DEFAULT = ['ACL · 전방십자인대재건술','ATFL · 발목인대재건술','BPHA · 고관절반치환술','CTR · 수근관감압술','HTO · 근위경골절골술','Meniscectomy · 반월상연골절제술','Meniscus Repair · 반월상연골봉합술','Meniscus Root Repair · 후근봉합술','PEN · 경막외신경성형술','PFNA · 대퇴부근위부골절수술','RCT · 회전근개봉합술','TKRA · 무릎 인공관절수술','Trigger Finger · 방아쇠수지수술','ORIF · 발목골절수술','ORIF · 손목골절수술','ORIF · 어깨골절수술','MUA · 오십견 마취하 도수조작술','VP · 척추체성형술','SUTURE 창상봉합술','E & B 절제생검','INGROWING NAIL 내향성 발톱','CORN REMOVAL 티눈제거','CRIF Foot','CRIF Hand'];
 const DIAGNOSIS_SUGGESTIONS = ['ACL tear','Chronic ankle instability','Femoral neck fracture','Carpal tunnel syndrome','Medial knee osteoarthritis (varus)','Meniscus tear','Meniscus root tear','Lumbar disc herniation','Lumbar spinal stenosis','Intertrochanteric fracture','Rotator cuff tear','Knee osteoarthritis','Trigger finger','Ankle fracture','Distal radius fracture','Proximal humerus fracture','Adhesive capsulitis (frozen shoulder)','Vertebral compression fracture','Laceration','Soft tissue mass','Ingrown toenail','Corn (clavus)','Foot fracture','Hand fracture'];
@@ -485,15 +487,20 @@ function renderDayView(){
     if (r.allergy === '있음') badges.push(`<span class="bdg bdg-warn">알레르기</span>`);
     if (r.anticoag === '복용 중') badges.push(`<span class="bdg bdg-warn">항응고제</span>`);
     if (r.infection && r.infection !== '없음') badges.push(`<span class="bdg bdg-warn">감염위험</span>`);
+    if (r.surgeryConsent === '미서명') badges.push(`<span class="bdg bdg-warn">수술동의서미서명</span>`);
+    if (r.anesthConsent === '미서명') badges.push(`<span class="bdg bdg-warn">마취동의서미서명</span>`);
 
     const detItems = [
       ['병실', r.room||'—'], ['금식', r.npo||'—'], ['알레르기', r.allergy||'—'],
       ['항응고제', r.anticoag||'—'], ['C-ARM', r.cArm||'—'], ['체위', r.position||'—'],
-      ['감염', r.infection||'—'], ['임플란트', r.implant||'—']
+      ['감염', r.infection||'—'], ['임플란트', r.implant||'—'],
+      ['수술동의서', r.surgeryConsent||'—'], ['마취동의서', r.anesthConsent||'—'],
+      ['혈액검사', r.labTest||'—'], ['심전도', r.ekg||'—'], ['흉부X선', r.cxr||'—'],
+      ['보조 의사', r.assistantDoc||'—']
     ];
-    const boldDets = ['C-ARM','금식','항응고제','감염'];
+    const boldDets = ['C-ARM','금식','항응고제','감염','수술동의서','마취동의서'];
     const detHtml = detItems.map(([lbl,val]) => {
-      const isBold = boldDets.includes(lbl) && val !== '—' && val !== '없음' && val !== '확인' && val !== '불필요' && val !== '복용 안 함';
+      const isBold = boldDets.includes(lbl) && val !== '—' && val !== '없음' && val !== '확인' && val !== '불필요' && val !== '복용 안 함' && val !== '서명완료';
       return `<div class="det-cell"><span class="det-lbl">${lbl}</span><span class="det-val"${isBold?' style="font-weight:800;color:#1e293b;"':''}>${esc(val)}</span></div>`;
     }).join('');
 
@@ -568,6 +575,7 @@ function renderModals(){
       {key:'date', label:'수술일자', kind:'date'},
       {key:'time', label:'수술시간', kind:'time'},
       {key:'doctor', label:'집도의', kind:'text', list:'doctorList'},
+      {key:'assistantDoc', label:'보조 의사', kind:'text'},
       {key:'chartNo', label:'차트번호', kind:'text'},
       {key:'name', label:'환자 이름', kind:'text'},
       {key:'gender', label:'성별', kind:'select', options:GENDER},
@@ -577,9 +585,14 @@ function renderModals(){
       {key:'side', label:'수술부위', kind:'select', options:SIDE},
       {key:'diagnosis', label:'진단명', kind:'text', list:'diagnosisList'},
       {key:'urgency', label:'응급/예정', kind:'select', options:URGENCY},
+      {key:'surgeryConsent', label:'수술동의서', kind:'select', options:CONSENT},
+      {key:'anesthConsent', label:'마취동의서', kind:'select', options:CONSENT},
       {key:'duration', label:'예상소요시간', kind:'select', options:DURATION},
       {key:'room', label:'입원병실', kind:'text'},
       {key:'npo', label:'금식(NPO)', kind:'select', options:NPO},
+      {key:'labTest', label:'혈액검사', kind:'select', options:CHECK3},
+      {key:'ekg', label:'심전도(EKG)', kind:'select', options:CHECK3},
+      {key:'cxr', label:'흉부X선', kind:'select', options:CHECK3},
       {key:'allergy', label:'알레르기', kind:'select', options:ALLERGY},
       {key:'anticoag', label:'항응고제', kind:'select', options:ANTICOAG},
       {key:'infection', label:'감염여부', kind:'select', options:INFECTION},
