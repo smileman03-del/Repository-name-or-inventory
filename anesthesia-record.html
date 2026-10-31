@@ -51,6 +51,9 @@ button{font-family:inherit}
 /* 입력 공통 (화면 input 과 PDF용 span 모두 적용) */
 .fld{display:block;width:100%;min-width:0;border:0;background:transparent;font:inherit;color:inherit;padding:0 .5mm;margin:0;outline:none;border-radius:0;-webkit-appearance:none;appearance:none;text-align:left}
 input.fld:hover,input.fld:focus,select.fld:hover,select.fld:focus,textarea.fld:focus{background:#fff8cf}
+input.fld:focus-visible,select.fld:focus-visible,textarea.fld:focus-visible{box-shadow:inset 0 0 0 .35mm #2b71b9}
+button:focus-visible,input:not(.fld):focus-visible,select:not(.fld):focus-visible,textarea:not(.fld):focus-visible,[data-a11y]:focus-visible,#sigBox:focus-visible{outline:3px solid #2b71b9;outline-offset:2px}
+[data-a11y]{cursor:pointer}
 input.fld::placeholder{color:#c3c8d0}
 select.fld.sa{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='%23999'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 1mm center;padding-right:3mm}
 .pv{white-space:nowrap;overflow:hidden}
@@ -164,8 +167,8 @@ input.ul{border:0;border-bottom:.25mm solid #000}
 .foot .lg2 img{height:7.4mm;display:block}
 
 /* 모달 / 알림 */
-.ov{position:fixed;inset:0;background:rgba(18,28,44,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:12px}
-.md{background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:92vh;overflow:auto;padding:16px 18px;font-size:13.5px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.ov{position:fixed;inset:0;background:rgba(18,28,44,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:12px;overscroll-behavior:contain}
+.md{background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:92vh;overflow:auto;overscroll-behavior:contain;padding:16px 18px;font-size:13.5px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
 .md h3{margin:0 0 10px;font-size:17px}
 .md h4{margin:14px 0 6px;font-size:14px}
 .md label{display:block;margin:8px 0 3px;font-weight:700;font-size:12.5px}
@@ -209,20 +212,20 @@ input.ul{border:0;border-bottom:.25mm solid #000}
   <button class="btn sm" id="bUndo" title="그래프 되돌리기">되돌리기</button>
   <button class="btn sm" id="bErase" title="그래프 지우개">지우개</button><span id="storageInfo" title="이 기기 저장공간 사용량"></span>
   <span class="sp"></span>
-  <span id="status"></span>
+  <span id="status" role="status" aria-live="polite"></span>
   <span id="cloud">☁ 시트 미설정</span>
   <span class="grp">
-    <button class="btn sm" id="zOut" title="축소">－</button>
+    <button class="btn sm" id="zOut" title="축소" aria-label="축소">－</button>
     <button class="btn sm" id="zFit" title="화면 폭에 맞춤">폭맞춤</button>
-    <button class="btn sm" id="zIn" title="확대">＋</button>
+    <button class="btn sm" id="zIn" title="확대" aria-label="확대">＋</button>
   </span>
 </div>
 <div class="bar2 ui" id="bar3">
   <span class="grp"><b>약·기록 입력</b>
-    <select id="rxItem"></select>
-    <select id="rxDose"></select>
-    <input type="text" id="rxTxt" style="display:none;width:170px" autocomplete="off">
-    칸 <select id="rxCol"></select>
+    <select id="rxItem" aria-label="품목"></select>
+    <select id="rxDose" aria-label="용량"></select>
+    <input type="text" id="rxTxt" aria-label="내용 또는 용량 직접 입력" style="display:none;width:170px" autocomplete="off">
+    칸 <select id="rxCol" aria-label="기록할 칸"></select>
     <button class="btn sm primary" id="rxAdd">추가</button>
     <button class="btn sm" id="rxManage">약 목록 편집</button>
   </span>
@@ -534,7 +537,7 @@ function addRx(){
 function renderRx(){
   var h='';
   state.rx.forEach(function(r,i){
-    h+='<div class="rxl"><span class="rn">'+(i+2)+')</span><span class="rt">'+esc(r.x)+'</span><button class="rxx noprint" data-i="'+i+'" title="이 줄 삭제">×</button></div>';
+    h+='<div class="rxl"><span class="rn">'+(i+2)+')</span><span class="rt">'+esc(r.x)+'</span><button class="rxx noprint" data-i="'+i+'" title="이 줄 삭제" aria-label="이 줄 삭제">×</button></div>';
   });
   $('#rxList').innerHTML=h;
   var by={};
@@ -547,9 +550,9 @@ function renderRx(){
 function openNewDrug(){
   var opts='';state.groups.forEach(function(g,gi){if(!g.memo)opts+='<option value="'+gi+'">'+esc(g.g)+'</option>'});
   if(!opts)opts='<option value="-1">마취 상용약</option>';
-  var m=modal('<h3>새 약 추가</h3><label>약 이름</label><input type="text" id="ndName" placeholder="예: Rocuronium" autocomplete="off">'+
-    '<label>용량 목록 (쉼표로 구분)</label><input type="text" id="ndDoses" placeholder="예: 20 mg, 50 mg" autocomplete="off">'+
-    '<label>넣을 묶음</label><select id="ndGroup">'+opts+'</select>'+
+  var m=modal('<h3>새 약 추가</h3><label for="ndName">약 이름</label><input type="text" id="ndName" placeholder="예: Rocuronium" autocomplete="off">'+
+    '<label for="ndDoses">용량 목록 (쉼표로 구분)</label><input type="text" id="ndDoses" placeholder="예: 20 mg, 50 mg" autocomplete="off">'+
+    '<label for="ndGroup">넣을 묶음</label><select id="ndGroup">'+opts+'</select>'+
     '<div class="row"><button class="btn primary" id="ndOk">추가</button><button class="btn" id="ndCancel">취소</button></div>');
   m.$('#ndName').focus();
   m.$('#ndCancel').onclick=m.close;
@@ -572,7 +575,7 @@ function openDrugManager(){
   var s=getSettings();
   var m=modal('<h3>약 목록 편집</h3>'+
     '<p class="hint">한 줄에 한 품목: <b>품목명 | 용량1, 용량2</b> 형식입니다. <b># 묶음이름</b> 줄로 묶음을 나누고, 묶음 이름에 "문구"가 들어가면 용량 없이 문장만 고르는 목록이 됩니다. 필요 없는 줄은 지우세요.</p>'+
-    '<textarea class="mono" id="dmText" spellcheck="false"></textarea>'+
+    '<textarea class="mono" id="dmText" aria-label="약 목록" spellcheck="false"></textarea>'+
     '<div class="row"><button class="btn primary" id="dmOk">저장</button><button class="btn" id="dmReset">기본 목록으로 되돌리기</button><button class="btn" id="dmClose">닫기</button><span class="hint" id="dmMsg"></span></div>',true);
   var ta=m.$('#dmText');ta.value=s.drugsText||DRUG_DEFAULT;
   m.$('#dmClose').onclick=m.close;
@@ -919,7 +922,7 @@ function cloudBadge(){
 var toastT=null;
 function toast(msg,kind){
   var old=$('.toast');if(old)old.remove();
-  var t=document.createElement('div');t.className='toast '+(kind||'');t.textContent=msg;document.body.appendChild(t);
+  var t=document.createElement('div');t.className='toast '+(kind||'');t.setAttribute('role',kind==='err'?'alert':'status');t.textContent=msg;document.body.appendChild(t);
   clearTimeout(toastT);toastT=setTimeout(function(){t.remove()},kind==='err'?8000:4200);
 }
 var PCA_UNITS={iv_anapo:'AV',iv_kerora:'A',iv_fent:'A',iv_nalox:'A',iv_otron:'A',iv_ns:'',nv_naro:'A',nv_fent:'A',nv_ns:''};
@@ -945,7 +948,7 @@ function renderSig(){
 }
 function openSign(){
   var saved=store.get('anes:sig')||'';
-  var m=modal('<h3>마취의 서명</h3><p style="margin:0 0 8px;color:#55627a">아래 칸에 손가락·펜·마우스로 서명해 주세요.</p><canvas class="sigcv" id="sgCv" width="900" height="300"></canvas>'+
+  var m=modal('<h3>마취의 서명</h3><p style="margin:0 0 8px;color:#55627a">아래 칸에 손가락·펜·마우스로 서명해 주세요.</p><canvas class="sigcv" id="sgCv" role="img" aria-label="서명 입력 칸" width="900" height="300"></canvas>'+
     '<label style="display:flex;gap:6px;align-items:center;margin:8px 0"><input type="checkbox" id="sgKeep" checked> 이 서명을 이 기기에 저장해 다음에 불러오기</label>'+
     '<div class="row"><button class="btn primary" id="sgOk">서명 적용</button><button class="btn" id="sgClr">지우기</button>'+
     (saved?'<button class="btn" id="sgLoad">저장된 서명 불러오기</button>':'')+
@@ -976,13 +979,27 @@ function openSign(){
     m.close();toast('서명을 적용했습니다','ok');
   };
 }
+var modalSeq=0,FOCUSABLE='button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 function modal(html,wide){
   var ov=document.createElement('div');ov.className='ov ui';
-  ov.innerHTML='<div class="md" style="'+(wide?'max-width:900px':'')+'">'+html+'</div>';
+  ov.innerHTML='<div class="md" role="dialog" aria-modal="true" style="'+(wide?'max-width:900px':'')+'">'+html+'</div>';
+  var md=ov.firstChild,hd=md.querySelector('h3'),prevFocus=document.activeElement;
+  if(hd){hd.id='mt'+(++modalSeq);md.setAttribute('aria-labelledby',hd.id)}
   document.body.appendChild(ov);
-  function close(){ov.remove();document.removeEventListener('keydown',onKey)}
-  function onKey(e){if(e.key!=='Escape')return;var all=document.querySelectorAll('.ov');if(all[all.length-1]===ov)close()}
+  function close(){ov.remove();document.removeEventListener('keydown',onKey);if(prevFocus&&document.contains(prevFocus)&&prevFocus.focus)prevFocus.focus()}
+  function focusables(){return Array.prototype.filter.call(md.querySelectorAll(FOCUSABLE),function(x){return x.offsetParent!==null})}
+  function onKey(e){
+    var all=document.querySelectorAll('.ov');if(all[all.length-1]!==ov)return;
+    if(e.key==='Escape'){close();return}
+    if(e.key!=='Tab')return;
+    var f=focusables();if(!f.length)return;
+    var a=f[0],z=f[f.length-1];
+    if(!md.contains(document.activeElement)){e.preventDefault();a.focus()}
+    else if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}
+    else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}
+  }
   document.addEventListener('keydown',onKey);
+  var f0=focusables()[0];if(f0)f0.focus();
   ov.addEventListener('mousedown',function(e){if(e.target===ov)close()});
   return {el:ov,close:close,$:function(s){return ov.querySelector(s)},$$:function(s){return $$(s,ov)}};
 }
@@ -991,6 +1008,7 @@ function confirmM(msg,okLabel){
     var m=modal('<h3>확인</h3><p style="white-space:pre-wrap">'+esc(msg)+'</p><div class="row"><button class="btn primary" id="cy">'+esc(okLabel||'확인')+'</button><button class="btn" id="cn">취소</button></div>');
     m.$('#cy').onclick=function(){m.close();res(true)};
     m.$('#cn').onclick=function(){m.close();res(false)};
+    m.$('#cn').focus();
     m.el.addEventListener('mousedown',function(e){if(e.target===m.el)res(false)});
   });
 }
@@ -1083,7 +1101,7 @@ function openList(){
   function calcStorePct(){var used=0;try{for(var k in localStorage){if(!Object.prototype.hasOwnProperty.call(localStorage,k))continue;var v=localStorage.getItem(k)||'';used+=(k.length+v.length)*2;}}catch(e){}return used/1024/5120*100;}
   var pct=calcStorePct();
   var storeBanner=pct>=70?'<div id="storeBanner" style="background:'+(pct>90?'#fdecea':'#fff3cd')+';border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;color:'+(pct>90?'#c00':'#7a5000')+'">⚠️ 저장공간 <b>'+pct.toFixed(0)+'%</b> 사용 중 — 불필요한 기록을 체크해서 한번에 삭제하세요.</div>':'';
-  var m=modal('<h3>저장된 기록</h3>'+storeBanner+'<div class="row" style="margin-top:0;gap:6px"><input type="search" id="lq" placeholder="차트번호·이름·수술명 검색" style="flex:1"><button class="btn sm warn" id="bDelSel" disabled style="white-space:nowrap">선택 삭제 (0)</button></div><div id="ll" class="hint" style="margin-top:8px">불러오는 중…</div>',true);
+  var m=modal('<h3>저장된 기록</h3>'+storeBanner+'<div class="row" style="margin-top:0;gap:6px"><input type="search" id="lq" aria-label="기록 검색" placeholder="차트번호·이름·수술명 검색" style="flex:1"><button class="btn sm warn" id="bDelSel" disabled style="white-space:nowrap">선택 삭제 (0)</button></div><div id="ll" class="hint" style="margin-top:8px">불러오는 중…</div>',true);
   var map={};
   localRecords().forEach(function(d){map[d.key||(d.f.no+'__'+d.f.date)]={d:d,where:'기기'}});
   var s=getSettings(),note='';
@@ -1099,10 +1117,10 @@ function openList(){
     arr=arr.filter(function(x){var f=x.o.d.f;return !q||(f.no+' '+f.name+' '+f.surgery+' '+f.dx).toLowerCase().indexOf(q)>=0});
     var h=note?'<div class="note">'+esc(note)+'</div>':'';
     if(!arr.length){m.$('#ll').innerHTML=h+'<p>저장된 기록이 없습니다.</p>';return}
-    h+='<table><tr><th><input type="checkbox" id="chkAll" title="전체 선택/해제"></th><th>날짜</th><th>차트번호</th><th>성명</th><th>수술명</th><th>마취의</th><th>위치</th><th></th></tr>';
+    h+='<table><tr><th><input type="checkbox" id="chkAll" title="전체 선택/해제" aria-label="전체 선택/해제"></th><th>날짜</th><th>차트번호</th><th>성명</th><th>수술명</th><th>마취의</th><th>위치</th><th></th></tr>';
     arr.slice(0,200).forEach(function(x){
       var f=x.o.d.f;
-      h+='<tr><td><input type="checkbox" class="rec-chk" data-key="'+esc(x.k)+'"></td><td>'+esc(f.date)+'</td><td>'+esc(f.no)+'</td><td>'+esc(f.name)+'</td><td>'+esc(f.surgery)+'</td><td>'+esc(f.anesth)+'</td><td>'+x.o.where+'</td><td style="white-space:nowrap"><button class="btn sm" data-open="'+esc(x.k)+'">열기</button> <button class="btn sm warn" data-del="'+esc(x.k)+'">삭제</button></td></tr>';
+      h+='<tr><td><input type="checkbox" class="rec-chk" data-key="'+esc(x.k)+'" aria-label="'+esc(f.name)+' 기록 선택"></td><td>'+esc(f.date)+'</td><td>'+esc(f.no)+'</td><td>'+esc(f.name)+'</td><td>'+esc(f.surgery)+'</td><td>'+esc(f.anesth)+'</td><td>'+x.o.where+'</td><td style="white-space:nowrap"><button class="btn sm" data-open="'+esc(x.k)+'" aria-label="'+esc(f.name)+' 기록 열기">열기</button> <button class="btn sm warn" data-del="'+esc(x.k)+'" aria-label="'+esc(f.name)+' 기록 삭제">삭제</button></td></tr>';
     });
     h+='</table>';
     m.$('#ll').className='';m.$('#ll').innerHTML=h;
@@ -1129,7 +1147,7 @@ function openList(){
       var go=function(){apply(o.d);state.key=b.dataset.open;state.dirty=false;setStatus();m.close();toast('기록을 열었습니다','ok')};
       if(state.dirty)confirmM('저장하지 않은 변경이 있습니다. 이 기록을 열면 현재 화면 내용이 사라집니다.','열기').then(function(y){if(y)go()});else go();
     }else if(b.dataset.del){
-      if(!b.classList.contains('armed')){b.classList.add('armed');b.textContent='한 번 더 누르면 삭제';setTimeout(function(){b.classList.remove('armed');b.textContent='삭제'},3500);return}
+      if(!b.classList.contains('armed')){var al=b.getAttribute('aria-label');b.classList.add('armed');b.textContent='한 번 더 누르면 삭제';b.setAttribute('aria-label',(al||'기록 삭제')+' — 한 번 더 누르면 삭제됩니다');setTimeout(function(){b.classList.remove('armed');b.textContent='삭제';if(al)b.setAttribute('aria-label',al)},3500);return}
       var k=b.dataset.del;
       store.del('anes:rec:'+k);pendDel('pend',k);delete map[k];render();
       if(s.gasUrl)cloud('delete',{key:k}).then(function(){toast('삭제했습니다 (시트 포함)','ok')},function(er){pendAdd('pendDel',k);toast('이 기기에서는 삭제됨 — 시트 삭제는 연결되면 자동 재시도 ('+er.message+')','err')});
@@ -1205,7 +1223,7 @@ function rebuildPeople(){
 function addPerson(sel){
   var isS=sel.id==='selSurgeon',title=isS?'집도의사 추가':'마취의사 추가',key=isS?'surgeons':'anesths';
   var prev=sel.dataset.prev||((getSettings()[key]||[])[0]||'');
-  var m=modal('<h3>'+title+'</h3><p style="margin:0 0 8px;color:#55627a">이름을 입력하면 목록에 추가되고 다음에도 계속 나옵니다.</p><input type="text" id="apn" placeholder="이름" autocomplete="off" style="width:100%"><div class="row"><button class="btn primary" id="apOk">추가</button><button class="btn" id="apNo">취소</button></div>');
+  var m=modal('<h3>'+title+'</h3><p style="margin:0 0 8px;color:#55627a">이름을 입력하면 목록에 추가되고 다음에도 계속 나옵니다.</p><input type="text" id="apn" aria-label="이름" placeholder="이름" autocomplete="off" style="width:100%"><div class="row"><button class="btn primary" id="apOk">추가</button><button class="btn" id="apNo">취소</button></div>');
   var done=false;
   function back(){sel.value=prev}
   back();
@@ -1228,16 +1246,16 @@ function openSettings(){
   var m=modal(
   '<h3>설정</h3>'+
   '<h4>① 마취기록 구글시트 연결</h4>'+
-  '<label>웹 앱 주소 (Apps Script 배포 후 받은 주소)</label><input type="text" id="sUrl" placeholder="https://script.google.com/macros/s/.../exec" value="'+esc(s.gasUrl)+'">'+
-  '<label>접속암호 (선택 — 코드의 PASS 와 같은 값)</label><input type="password" id="sPass" value="'+esc(s.gasPass)+'" autocomplete="new-password">'+
+  '<label for="sUrl">웹 앱 주소 (Apps Script 배포 후 받은 주소)</label><input type="text" id="sUrl" placeholder="https://script.google.com/macros/s/.../exec" value="'+esc(s.gasUrl)+'">'+
+  '<label for="sPass">접속암호 (선택 — 코드의 PASS 와 같은 값)</label><input type="password" id="sPass" value="'+esc(s.gasPass)+'" autocomplete="new-password">'+
   '<div class="row"><button class="btn" id="sTest">연결 테스트</button><button class="btn" id="sCode">Apps Script 코드 보기·복사</button></div>'+
   '<div class="note">처음 한 번만 만들면 됩니다. ① 새 구글 시트 만들기 → ② 확장 프로그램 › Apps Script → ③ 기본 코드를 지우고 위 버튼으로 복사한 코드를 붙여넣고 저장 → ④ 배포 › 새 배포 › 유형 <b>웹 앱</b>, 실행 사용자 <b>나</b>, 액세스 <b>모든 사용자</b> → 배포 후 권한 승인 → ⑤ 나온 웹 앱 주소를 위 칸에 붙여넣기. (수술기록지 시트와는 <b>별도 시트</b>로 만드는 것을 권장합니다.)</div>'+
   '<div class="row" style="margin-top:8px"><label style="margin:0;display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" id="sPdfSheet" '+(s.sheetOnPdf?'checked':'')+'> PDF 저장에 성공하면 구글시트에도 함께 저장</label></div>'+
   '<div class="row" style="margin-top:4px"><label style="margin:0;display:flex;gap:6px;align-items:center;font-weight:400"><input type="checkbox" id="sMask" '+(s.maskName!==false?'checked':'')+'> 구글시트에는 환자 이름을 가려서 저장 (예: 홍*동) — 이 기기와 PDF에는 전체 이름</label></div>'+
   '<div class="note">보안 권장: 접속암호를 꼭 설정하세요(Apps Script의 PASS 값과 동일하게). 암호는 파일에 적히지 않고 이 기기에만 저장됩니다.</div>'+
   '<h4>② 의사 명단 (한 줄에 한 명)</h4>'+
-  '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label>집도의</label><textarea id="sSur">'+esc((s.surgeons||[]).join('\n'))+'</textarea></div><div style="flex:1;min-width:200px"><label>마취의</label><textarea id="sAne">'+esc((s.anesths||[]).join('\n'))+'</textarea></div></div>'+
-  '<label>기본 작성자</label><input type="text" id="sWr" value="'+esc(s.writer)+'" placeholder="새 기록에 자동으로 들어갑니다">'+
+  '<div style="display:flex;gap:10px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><label for="sSur">집도의</label><textarea id="sSur">'+esc((s.surgeons||[]).join('\n'))+'</textarea></div><div style="flex:1;min-width:200px"><label for="sAne">마취의</label><textarea id="sAne">'+esc((s.anesths||[]).join('\n'))+'</textarea></div></div>'+
+  '<label for="sWr">기본 작성자</label><input type="text" id="sWr" value="'+esc(s.writer)+'" placeholder="새 기록에 자동으로 들어갑니다">'+
   '<div class="row"><button class="btn primary" id="sOk">저장</button><button class="btn" id="sCancel">닫기</button><span class="hint" id="sMsg"></span></div>'
   );
   function readForm(){
@@ -1424,6 +1442,34 @@ $('#rxList').addEventListener('click',function(e){
   state.rx.splice(+b.dataset.i,1);renderRx();touch();
 });
 $('#sigBox').addEventListener('click',openSign);
+/* ---------- 접근성: 라벨, 키보드 조작, 눌림 상태 ---------- */
+var FIELD_LABELS={writer:'작성자',no:'차트번호',name:'성명',date:'날짜',age:'나이',sex:'성별',height:'키',weight:'체중',blood:'혈액형',dx:'진단명',surgery:'수술명',t_as:'마취 시작 시각',t_ss:'수술 시작 시각',t_se:'수술 종료 시각',t_ae:'마취 종료 시각',dur:'마취 시간',fl_in:'수액량(ml)',fl_urine:'소변량(ml)',fl_blood:'출혈량(ml)',hs_ml:'H/S 용량(ml)',notes:'비고',ett_size:'기관튜브 크기',ett_fix:'고정 길이',level:'마취 레벨',surgeon:'집도의사',anesth:'마취의사'};
+function syncPressed(){
+  $$('.cb,.tok,.pick').forEach(function(el){el.setAttribute('aria-pressed',el.classList.contains('on')?'true':'false')});
+  $$('.leg').forEach(function(el){el.setAttribute('aria-pressed',el.classList.contains('active')?'true':'false')});
+  var er=$('#bErase');if(er)er.setAttribute('aria-pressed',er.classList.contains('on')?'true':'false');
+}
+function a11yInit(){
+  $$('[data-f]').forEach(function(el){var l=FIELD_LABELS[el.dataset.f];if(l&&!el.getAttribute('aria-label'))el.setAttribute('aria-label',l)});
+  var rowLabel={num:'번호'};
+  GRID_ROWS.forEach(function(r){rowLabel[r.k]=r.iv!=null?('정맥 iv '+(r.iv+1)):r.label});
+  $$('[data-r][data-c]').forEach(function(el){el.setAttribute('aria-label',(rowLabel[el.dataset.r]||el.dataset.r)+' '+(+el.dataset.c+1)+'번째 칸')});
+  $$('[data-iv]').forEach(function(el){el.setAttribute('aria-label','정맥 약 이름 '+(+el.dataset.iv+1))});
+  var t0=$('#t0f');if(t0)t0.setAttribute('aria-label','그래프 시작 시각');
+  $$('select[data-q]').forEach(function(el){var tk=$('.tok[data-k="'+el.dataset.q+'"]');el.setAttribute('aria-label',(tk?tk.textContent.trim()+' ':'')+'개수')});
+  var svg=$('#chartSvg');if(svg){svg.setAttribute('role','img');svg.setAttribute('aria-label','마취 기록 그래프 (마우스나 터치로 칸을 눌러 기호를 기록합니다)')}
+  $$('.cb,.tok,.pick,.leg,[data-now]').forEach(function(el){
+    el.tabIndex=0;el.setAttribute('role','button');el.setAttribute('data-a11y','1');
+    if(el.dataset.now)el.setAttribute('aria-label',el.textContent.replace('⏱','').trim()+' 현재 시각 입력');
+  });
+  var sb=$('#sigBox');if(sb){sb.tabIndex=0;sb.setAttribute('role','button');sb.setAttribute('aria-label','마취의사 서명');sb.setAttribute('data-a11y','1')}
+  syncPressed();
+  if(window.MutationObserver)new MutationObserver(syncPressed).observe(page,{subtree:true,attributes:true,attributeFilter:['class']});
+  var bar=$('#bErase');if(bar&&window.MutationObserver)new MutationObserver(syncPressed).observe(bar,{attributes:true,attributeFilter:['class']});
+}
+page.addEventListener('keydown',function(e){
+  if((e.key==='Enter'||e.key===' ')&&e.target.matches&&e.target.matches('[data-a11y]')){e.preventDefault();e.target.click()}
+});
 $('#bSave').onclick=saveRecord;
 $('#bPdf').onclick=exportPdf;
 $('#bPrint').onclick=function(){window.print()};
@@ -1457,7 +1503,7 @@ setInterval(function(){if(!state.savedAt)updateStamp()},30000);
 setInterval(syncPending,60000);
 
 /* ---------- 시작 ---------- */
-fillQty();buildTables();buildLegend();rebuildPeople();cloudBadge();rebuildRx();
+fillQty();buildTables();buildLegend();rebuildPeople();cloudBadge();rebuildRx();a11yInit();
 (function init(){
   var z=parseFloat(store.get('anes:zoom'));
   if(window.innerWidth<900)fitZoom();else setZoom(z>0?z:Math.min(1.25,clamp((window.innerWidth-16)/793.7,0.3,1.25)));
