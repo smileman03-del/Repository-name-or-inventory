@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F5F3EF">
 <title>비급여 수술 체크리스트</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/pretendard.min.css">
 <style>
-:root{--ink:#17191A;--mut:#6E7375;--dim:#9A9FA2;--line:rgba(0,0,0,.07);--acc:#1273a8;--bg:#F5F3EF}
+:root{--ink:#17191A;--mut:#5B6064;--dim:#6A6F72;--line:rgba(0,0,0,.07);--acc:#1273a8;--bg:#F5F3EF}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;height:100%;background:#D8D5D0;font-family:Pretendard,-apple-system,system-ui,sans-serif;color:var(--ink)}
 body{display:flex;justify-content:center;align-items:flex-start}
@@ -31,14 +31,14 @@ body{display:flex;justify-content:center;align-items:flex-start}
 .tab.on{background:var(--ink);color:#fff;font-weight:600}
 .box{width:21px;height:21px;border-radius:7px;border:1.5px solid #C9CDCF;flex:none;display:flex;align-items:center;justify-content:center;color:transparent;font-size:12px;font-weight:700}
 .box.on{background:var(--acc);border-color:var(--acc);color:#fff}
-.stp{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.045);border-radius:8px;padding:5px 9px;font-weight:600;font-size:13px}
+.stp{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.045);border-radius:8px;padding:2px 3px;font-weight:600;font-size:13px}
 .stp b{min-width:14px;text-align:center;font-variant-numeric:tabular-nums}
 .btn{border-radius:12px;padding:14px 18px;font-size:15px;font-weight:600;text-align:center}
 .btn.p{background:var(--acc);color:#fff}
 .btn.d{background:var(--ink);color:#fff}
 .btn.g{background:rgba(0,0,0,.05);color:#3D4245}
 .dash{border:1.5px dashed #CFD3D5;border-radius:14px;padding:14px;text-align:center;font-size:14px;font-weight:600;color:var(--mut);margin-top:12px}
-input{font-family:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid rgba(0,0,0,.09);border-radius:11px;padding:11px 13px;width:100%;outline:none}
+input{font-family:inherit;font-size:15px;color:var(--ink);background:#fff;border:1px solid rgba(0,0,0,.09);border-radius:11px;padding:11px 13px;width:100%}
 .st{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:500;color:var(--mut);margin-top:9px}
 .dot{width:6px;height:6px;border-radius:50%;background:#c1443a}
 .dot.ok{background:#3f9c5f}
@@ -46,6 +46,18 @@ input{font-family:inherit;font-size:15px;color:var(--ink);background:#fff;border
 .warn{background:#fdf1ee;border:1px solid rgba(193,68,58,.35);border-radius:16px;padding:16px}
 .mini{border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;flex:none}
 .hide{display:none}
+/* 접근성: 터치 영역 · 포커스 표시 · 보조 클래스 */
+.stp span{display:inline-flex;align-items:center;justify-content:center;min-width:38px;min-height:38px;border-radius:8px;font-size:18px}
+.box{position:relative}
+.box::after{content:"";position:absolute;inset:-11px}
+.link{display:inline-block;padding:10px 6px;margin:-10px -6px}
+.tab{padding:11px 14px}
+.mini{padding:12px 14px}
+[data-a]{touch-action:manipulation}
+[data-a]:focus-visible,input:focus-visible{outline:3px solid #1273a8;outline-offset:2px}
+#app:focus{outline:none}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important}}
 @media print {
   body { background: #fff !important; display: block !important; }
   #app { box-shadow: none !important; max-width: 100% !important; height: auto !important; display: block !important; }
@@ -197,7 +209,7 @@ function homeView() {
       '<div style="font-size:12px;font-family:ui-monospace,Menlo,monospace;color:#a5382e;margin-top:9px;font-weight:600">' + S.dup.map(esc).join(", ") + "</div></div>"));
   }
 
-  var srch = el('<div class="card row" style="margin-top:16px" data-a="catalog"><span style="width:15px;height:15px;border-radius:50%;border:2px solid #A9AEB1"></span><span style="color:#9A9FA2;font-size:15px">항목 · 관리코드 검색</span></div>');
+  var srch = el('<div class="card row" style="margin-top:16px" data-a="catalog"><span style="width:15px;height:15px;border-radius:50%;border:2px solid #A9AEB1"></span><span style="color:#6A6F72;font-size:15px">항목 · 관리코드 검색</span></div>');
   b.appendChild(srch);
 
   b.appendChild(el('<div class="row" style="margin:26px 0 12px"><div class="grow" style="font-size:17px;font-weight:700">수술 세트</div>' +
@@ -213,7 +225,7 @@ function homeView() {
       '<div class="grow"><div class="name" style="font-size:20px;font-weight:700">' + esc(s.name) + '</div>' +
       '<div style="font-size:12.5px;color:var(--dim);margin-top:4px">' + esc(s.note) + ' · ' + s.codes.length + '개 항목</div></div>' +
       '<div style="text-align:right"><div class="amt" style="color:#0f5f8c;font-size:20px;font-weight:800">' + won(sum) + '</div>' +
-      '<div style="font-size:11px;color:#A9AEB1;margin-top:3px">전체 사용 시</div></div></div>');
+      '<div style="font-size:11px;color:#6A6F72;margin-top:3px">전체 사용 시</div></div></div>');
     list.appendChild(card);
   });
   b.appendChild(list);
@@ -241,20 +253,20 @@ function listView() {
     var n = S.qty[c] || 0, rng = i.lo && i.hi;
     var card = el('<div class="card">' +
       '<div class="row" style="align-items:flex-start">' +
-        '<div class="box ' + (n > 0 ? "on" : "") + '" data-a="toggle" data-v="' + c + '">✓</div>' +
-        (S.edit ? '<div class="mini" style="background:#fdf1ee;color:#a5382e" data-a="remove" data-v="' + c + '">삭제</div>' : "") +
-        '<div class="grow" data-a="toggle" data-v="' + c + '"><div class="name">' + esc(i.n) + '</div>' +
+        '<div class="box ' + (n > 0 ? "on" : "") + '" data-a="toggle" data-v="' + esc(c) + '">✓</div>' +
+        (S.edit ? '<div class="mini" style="background:#fdf1ee;color:#a5382e" data-a="remove" data-v="' + esc(c) + '">삭제</div>' : "") +
+        '<div class="grow" data-a="toggle" data-v="' + esc(c) + '"><div class="name">' + esc(i.n) + '</div>' +
           '<div class="meta">' + esc([i.s, i.e, i.c].filter(Boolean).join("  ·  ")) + "</div>" +
-          (rng ? '<div style="font-size:11.5px;font-weight:500;color:#b06a1f;margin-top:5px">범위 ' + won(i.lo) + "–" + won(i.hi) + " · 실제 금액 입력</div>" : "") +
+          (rng ? '<div style="font-size:11.5px;font-weight:500;color:#955a14;margin-top:5px">범위 ' + won(i.lo) + "–" + won(i.hi) + " · 실제 금액 입력</div>" : "") +
         "</div>" +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">' +
           '<div class="amt">' + won(unit(i) * (n || 1)) + "</div>" +
-          (n > 0 ? '<div class="stp"><span data-a="dec" data-v="' + c + '">−</span><b>' + n + '</b><span data-a="inc" data-v="' + c + '">＋</span></div>' : "") +
+          (n > 0 ? '<div class="stp"><span data-a="dec" data-v="' + esc(c) + '">−</span><b>' + n + '</b><span data-a="inc" data-v="' + esc(c) + '">＋</span></div>' : "") +
         "</div>" +
       "</div>" +
       (rng && n > 0 ? '<div class="row" style="margin-top:11px;padding-top:11px;border-top:1px solid rgba(0,0,0,.06)">' +
         '<span style="font-size:12px;color:var(--mut)">단가</span>' +
-        '<input inputmode="numeric" data-a="amt" data-v="' + c + '" value="' + esc(S.amt[c] === undefined ? i.p : S.amt[c]) + '" style="text-align:right;font-weight:600">' +
+        '<input inputmode="numeric" data-a="amt" data-v="' + esc(c) + '" aria-label="' + esc(i.n) + ' 단가(원)" value="' + esc(S.amt[c] === undefined ? i.p : S.amt[c]) + '" style="text-align:right;font-weight:600">' +
         '<span style="font-size:12px;color:var(--mut)">원</span></div>' : "") +
       "</div>");
     list.appendChild(card);
@@ -313,7 +325,7 @@ function catalogView() {
   var v = el('<div id="app"><div class="hd"></div><div class="bd"></div></div>');
   var h = v.querySelector(".hd"), b = v.querySelector(".bd");
   h.appendChild(el('<div class="row"><div class="grow" style="font-size:20px;font-weight:700">항목 추가</div><div class="link" data-a="list">완료</div></div>'));
-  var inp = el('<input placeholder="항목명 · 영문 · 관리코드" style="margin-top:12px" value="' + esc(S.q) + '">');
+  var inp = el('<input aria-label="항목 검색" placeholder="항목명 · 영문 · 관리코드" style="margin-top:12px" value="' + esc(S.q) + '">');
   inp.addEventListener("input", function (e) { S.q = e.target.value; renderResults(b); });
   h.appendChild(inp);
   var tabs = el('<div class="tabs"></div>');
@@ -335,7 +347,7 @@ function renderResults(b) {
   var list = el('<div class="list"></div>');
   res.forEach(function (i) {
     var on = S.qty[i.c] > 0;
-    list.appendChild(el('<div class="card row" data-a="add" data-v="' + i.c + '">' +
+    list.appendChild(el('<div class="card row" data-a="add" data-v="' + esc(i.c) + '">' +
       '<div class="grow"><div class="name">' + esc(i.n) + '</div><div class="meta">' + esc([i.g, i.e, i.c].filter(Boolean).join("  ·  ")) + "</div></div>" +
       '<div class="amt" style="font-size:14px;text-align:right">' + ((i.lo && i.hi) ? won(i.lo) + "–" + won(i.hi) : won(i.p)) + "</div>" +
       '<div class="box ' + (on ? "on" : "") + '" style="border-radius:8px">' + (on ? "✓" : "") + "</div></div>"));
@@ -357,8 +369,8 @@ function reviewView() {
       var i = item(c); if (!i) return;
       wl.appendChild(el('<div class="row" style="background:#fff;border-radius:12px;padding:12px 13px">' +
         '<div class="grow"><div class="name" style="font-size:14px">' + esc(i.n) + '</div><div class="meta">' + esc([i.s, won(i.p), i.c].join("  ·  ")) + "</div></div>" +
-        '<div class="mini" style="background:var(--acc);color:#fff" data-a="use" data-v="' + c + '">사용함</div>' +
-        '<div class="mini" style="background:rgba(0,0,0,.05);color:var(--mut)" data-a="skip" data-v="' + c + '">미사용</div></div>'));
+        '<div class="mini" style="background:var(--acc);color:#fff" data-a="use" data-v="' + esc(c) + '">사용함</div>' +
+        '<div class="mini" style="background:rgba(0,0,0,.05);color:var(--mut)" data-a="skip" data-v="' + esc(c) + '">미사용</div></div>'));
     });
     b.appendChild(w);
   } else {
@@ -366,9 +378,9 @@ function reviewView() {
       '<div style="font-size:12.5px;color:var(--mut);margin-top:5px">' + picked().length + "건 · " + won(total()) + "</div></div>"));
   }
   var pi = el('<div class="card" style="margin-top:12px"><div style="font-size:13px;font-weight:600">케이스 정보</div></div>');
-  var p1 = el('<input placeholder="환자 ID / 등록번호" value="' + esc(S.patient) + '" style="margin-top:10px">');
+  var p1 = el('<input aria-label="환자 ID / 등록번호" placeholder="환자 ID / 등록번호" value="' + esc(S.patient) + '" style="margin-top:10px">');
   p1.addEventListener("input", function (e) { S.patient = e.target.value; });
-  var p2 = el('<input placeholder="작성자" value="' + esc(S.staff) + '" style="margin-top:8px">');
+  var p2 = el('<input aria-label="작성자" placeholder="작성자" value="' + esc(S.staff) + '" style="margin-top:8px">');
   p2.addEventListener("input", function (e) { S.staff = e.target.value; localStorage.setItem("bg_staff", e.target.value); });
   pi.appendChild(p1); pi.appendChild(p2);
   b.appendChild(pi);
@@ -395,8 +407,8 @@ function claimView() {
     lines.forEach(function (i) {
       gl.appendChild(el('<div class="row" style="align-items:baseline;gap:10px">' +
         '<div class="grow"><div style="font-size:13.5px;color:#3D4245;line-height:1.4">' + esc(i.n) + '</div>' +
-        '<div style="font-size:10.5px;font-family:ui-monospace,Menlo,monospace;color:#B0B4B7;margin-top:3px">' + esc(i.c) + "</div></div>" +
-        '<div style="font-size:12px;color:#A9AEB1">×' + S.qty[i.c] + "</div>" +
+        '<div style="font-size:10.5px;font-family:ui-monospace,Menlo,monospace;color:#6A6F72;margin-top:3px">' + esc(i.c) + "</div></div>" +
+        '<div style="font-size:12px;color:#6A6F72">×' + S.qty[i.c] + "</div>" +
         '<div class="amt" style="font-size:13.5px;min-width:74px;text-align:right">' + won(unit(i) * S.qty[i.c]) + "</div></div>"));
     });
     card.appendChild(g);
@@ -425,14 +437,14 @@ function setFormView() {
 
   /* 이름 */
   var nameWrap = el('<div style="margin-top:14px"><div style="font-size:11.5px;font-weight:600;color:var(--mut);margin-bottom:5px">세트 이름</div></div>');
-  var nameInp = el('<input placeholder="예: ACL 전방십자인대재건술" value="' + esc(S.form.name || "") + '">');
+  var nameInp = el('<input aria-label="세트 이름" placeholder="예: ACL 전방십자인대재건술" value="' + esc(S.form.name || "") + '">');
   nameInp.addEventListener("input", function(e){ S.form.name = e.target.value; });
   nameWrap.appendChild(nameInp);
   b.appendChild(nameWrap);
 
   /* 메모 */
   var noteWrap = el('<div style="margin-top:10px"><div style="font-size:11.5px;font-weight:600;color:var(--mut);margin-bottom:5px">메모 (선택)</div></div>');
-  var noteInp = el('<input placeholder="예: 전신마취 · 입원 (추정)" value="' + esc(S.form.note || "") + '">');
+  var noteInp = el('<input aria-label="세트 메모" placeholder="예: 전신마취 · 입원 (추정)" value="' + esc(S.form.note || "") + '">');
   noteInp.addEventListener("input", function(e){ S.form.note = e.target.value; });
   noteWrap.appendChild(noteInp);
   b.appendChild(noteWrap);
@@ -462,7 +474,7 @@ function adminView() {
   var h = v.querySelector(".hd"), b = v.querySelector(".bd");
   h.appendChild(el('<div class="row"><div class="grow" style="font-size:20px;font-weight:700">항목 관리</div><div class="link" data-a="home">닫기</div></div>'));
   h.appendChild(el('<div class="sub">구글 시트 · 비급여 단가표에 직접 반영됩니다</div>'));
-  var inp = el('<input placeholder="항목명 · 관리코드 검색" style="margin-top:12px" value="' + esc(S.aq) + '">');
+  var inp = el('<input aria-label="항목 검색" placeholder="항목명 · 관리코드 검색" style="margin-top:12px" value="' + esc(S.aq) + '">');
   inp.addEventListener("input", function (e) { S.aq = e.target.value; renderAdminList(b); });
   h.appendChild(inp);
   renderAdminList(b);
@@ -487,7 +499,7 @@ function renderAdminList(b) {
 
 function fieldRow(label, key, ph) {
   var w = el('<div style="margin-top:10px"><div style="font-size:11.5px;font-weight:600;color:var(--mut);margin-bottom:5px">' + label + "</div></div>");
-  var i = el('<input data-f="' + key + '" placeholder="' + esc(ph || "") + '" value="' + esc(S.form[key] == null ? "" : S.form[key]) + '">');
+  var i = el('<input data-f="' + key + '" aria-label="' + esc(label) + '" placeholder="' + esc(ph || "") + '" value="' + esc(S.form[key] == null ? "" : S.form[key]) + '">');
   i.addEventListener("input", function (e) { S.form[key] = e.target.value; });
   w.appendChild(i);
   return w;
@@ -555,7 +567,7 @@ var actions = {
     if (!f.c || !String(f.c).trim()) { S.msg = "관리코드를 입력하세요."; return; }
     var p = Object.assign({}, f, { pin: S.pin, p: Number(String(f.p).replace(/[^\d]/g, "")) || 0,
       lo: Number(String(f.lo).replace(/[^\d]/g, "")) || 0, hi: Number(String(f.hi).replace(/[^\d]/g, "")) || 0 });
-    S.msg = "저장 중...";
+    S.msg = "저장 중…";
     api(f.orig ? "updateItem" : "addItem", p).then(function () {
       S.msg = f.orig ? "수정되었습니다." : "추가되었습니다.";
       S.screen = "admin"; sync();
@@ -563,7 +575,7 @@ var actions = {
   },
   delitem: function () {
     if (!confirm('"' + S.form.n + '" 항목을 단가표에서 삭제할까요?')) return;
-    S.msg = "삭제 중...";
+    S.msg = "삭제 중…";
     api("deleteItem", { pin: S.pin, c: S.form.orig }).then(function () {
       S.msg = "삭제되었습니다."; S.screen = "admin"; sync();
     }).catch(function (e) { S.msg = "실패: " + e; render(); });
@@ -634,17 +646,18 @@ var actions = {
   },
   copy: function () {
     var t = claimLines().map(function (l) { return [l.code, l.name, l.qty, l.unit * l.qty].join("\t"); }).join("\n") + "\n합계\t\t\t" + total();
-    if (navigator.clipboard) navigator.clipboard.writeText(t);
     S.msg = "청구 목록을 복사했습니다.";
+    if (navigator.clipboard) navigator.clipboard.writeText(t).catch(function () { S.msg = "복사에 실패했습니다. 브라우저의 클립보드 권한을 확인해 주세요."; render(); });
+    else S.msg = "이 브라우저에서는 복사할 수 없습니다.";
   },
   save: function () {
-    S.msg = "기록 중...";
+    S.msg = "기록 중…";
     api("saveCase", { setName: S.title, patient: S.patient, staff: S.staff, lines: claimLines() })
       .then(function (d) { S.msg = "구글 시트에 " + d.saved + "행 기록됨."; render(); })
       .catch(function (e) { S.msg = "기록 실패: " + e; render(); });
   },
   saveset: function () {
-    S.msg = "저장 중...";
+    S.msg = "저장 중…";
     api("saveSet", { name: S.title, note: "사용 기록", codes: picked() })
       .then(function () { S.msg = "세트를 저장했습니다."; sync(); })
       .catch(function (e) { S.msg = "저장 실패: " + e; render(); });
@@ -677,12 +690,19 @@ document.addEventListener("click", function (ev) {
   if (result === false) return; /* PDF 등 render 불필요한 액션 */
   render();
 });
+document.addEventListener("keydown", function (ev) {
+  if (ev.key !== "Enter" && ev.key !== " ") return;
+  var t = ev.target;
+  if (!t || !t.matches || !t.matches("[data-a]") || t.tagName === "INPUT") return;
+  ev.preventDefault(); t.click();
+});
 document.addEventListener("input", function (ev) {
   var t = ev.target.closest('[data-a="amt"]'); if (!t) return;
   S.amt[t.getAttribute("data-v")] = t.value.replace(/[^\d]/g, "");
 });
 document.addEventListener("change", function (ev) {
-  if (ev.target.closest('[data-a="amt"]')) render();
+  /* 탭 키로 다음 칸으로 넘어간 뒤에 다시 그려야 포커스를 잃지 않습니다 */
+  if (ev.target.closest('[data-a="amt"]')) setTimeout(render, 0);
 });
 
 function printExplain() {
@@ -690,10 +710,10 @@ function printExplain() {
   picked().forEach(function (c) {
     var i = item(c); if (!i) return;
     var n = S.qty[c];
-    var specTxt = i.e ? '<div style="font-size:11px;color:#888;margin-top:2px">' + esc(i.e) + '</div>' : '';
+    var specTxt = i.e ? '<div style="font-size:11px;color:#6A6F72;margin-top:2px">' + esc(i.e) + '</div>' : '';
     rows += '<tr>' +
       '<td style="padding:11px 8px;border-bottom:1px solid #e8e8e8;font-size:14px;font-weight:600;line-height:1.4">' +
-        esc(i.n) + (n > 1 ? ' <span style="font-size:12px;color:#888;font-weight:400">×' + n + '</span>' : '') + specTxt +
+        esc(i.n) + (n > 1 ? ' <span style="font-size:12px;color:#6A6F72;font-weight:400">×' + n + '</span>' : '') + specTxt +
       '</td>' +
       '<td style="padding:11px 8px;border-bottom:1px solid #e8e8e8;font-size:14px;font-weight:700;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums">' +
         won(unit(i) * n) +
@@ -710,16 +730,16 @@ function printExplain() {
       'body{margin:0;padding:24px 28px;font-family:Pretendard,-apple-system,sans-serif;color:#17191A;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}' +
       '.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}' +
       '.hosp{font-size:13px;font-weight:700;color:#1273a8;letter-spacing:.04em}' +
-      '.date{font-size:12px;color:#9A9FA2}' +
+      '.date{font-size:12px;color:#6A6F72}' +
       '.badge{display:inline-block;background:#EEF6FF;color:#1273a8;font-size:11px;font-weight:700;padding:3px 8px;border-radius:5px;letter-spacing:.04em;margin-bottom:8px}' +
       '.title{font-size:22px;font-weight:800;letter-spacing:-.02em;line-height:1.3;margin-bottom:6px}' +
       '.subtitle{font-size:12.5px;color:#6E7375;margin-bottom:20px;line-height:1.5}' +
       'table{width:100%;border-collapse:collapse;margin-bottom:0}' +
       '.total-row td{padding:14px 8px;font-size:15px;font-weight:800;border-top:2.5px solid #17191A;font-variant-numeric:tabular-nums}' +
-      '.notice{margin-top:16px;font-size:11px;color:#9A9FA2;line-height:1.7;border-top:1px solid #eee;padding-top:12px}' +
+      '.notice{margin-top:16px;font-size:11px;color:#6A6F72;line-height:1.7;border-top:1px solid #eee;padding-top:12px}' +
       '.sign{margin-top:32px;display:flex;gap:40px}' +
       '.sign-box{display:flex;flex-direction:column;align-items:center;gap:4px}' +
-      '.sign-label{font-size:11px;color:#9A9FA2}' +
+      '.sign-label{font-size:11px;color:#6A6F72}' +
       '.sign-line{width:120px;border-bottom:1.5px solid #ccc;margin-top:28px}' +
       '@media print{body{padding:16px 18px}@page{margin:15mm 12mm;size:A4 portrait}}' +
     '</style>' +
@@ -730,8 +750,8 @@ function printExplain() {
     '<div class="subtitle">이 수술에서 사용된 비급여 항목과 예상 금액입니다.</div>' +
     '<table>' +
       '<thead><tr>' +
-        '<th style="padding:8px 8px 10px;text-align:left;font-size:11.5px;color:#9A9FA2;font-weight:600;border-bottom:2px solid #17191A">항목명</th>' +
-        '<th style="padding:8px 8px 10px;text-align:right;font-size:11.5px;color:#9A9FA2;font-weight:600;border-bottom:2px solid #17191A">금액</th>' +
+        '<th style="padding:8px 8px 10px;text-align:left;font-size:11.5px;color:#6A6F72;font-weight:600;border-bottom:2px solid #17191A">항목명</th>' +
+        '<th style="padding:8px 8px 10px;text-align:right;font-size:11.5px;color:#6A6F72;font-weight:600;border-bottom:2px solid #17191A">금액</th>' +
       '</tr></thead>' +
       '<tbody>' + rows + '</tbody>' +
       '<tfoot><tr class="total-row">' +
@@ -752,15 +772,81 @@ function printExplain() {
   w.document.close();
 }
 
-var lastScreen = null;
+/* ---------- 접근성: 이름 · 역할 · 포커스 · 안내 ---------- */
+var SCREEN_NAMES = { home: "비급여 계산기 홈", list: "체크리스트", catalog: "항목 추가", review: "누락 확인", claim: "청구 목록", admin: "항목 관리", itemform: "항목 편집", explain: "환자 설명", setform: "세트 수정" };
+function a11yAnnounce(msg) {
+  var e = document.getElementById("srLive");
+  if (!e) {
+    e = document.createElement("div"); e.id = "srLive"; e.className = "sr-only";
+    e.setAttribute("role", "status"); e.setAttribute("aria-live", "polite");
+    document.body.appendChild(e);
+  }
+  e.textContent = ""; setTimeout(function () { e.textContent = msg; }, 30);
+}
+function ctxName(e) {
+  var c = e.closest(".card, .row"), n = c && c.querySelector(".name");
+  return n ? n.textContent.trim() : "";
+}
+function a11yEnhance(app) {
+  app.setAttribute("role", "main");
+  app.querySelectorAll("[data-a]").forEach(function (e) {
+    if (e.tagName === "INPUT") return;
+    var a = e.getAttribute("data-a"), nm = ctxName(e);
+    if (a === "toggle" && !e.classList.contains("box")) return; /* 글자 영역은 마우스용, 키보드는 체크박스로 */
+    e.setAttribute("role", "button"); e.tabIndex = 0;
+    if (a === "toggle") { e.setAttribute("role", "checkbox"); e.setAttribute("aria-checked", e.classList.contains("on") ? "true" : "false"); e.setAttribute("aria-label", nm || "항목 선택"); }
+    else if (a === "inc") e.setAttribute("aria-label", "수량 늘리기 " + nm);
+    else if (a === "dec") e.setAttribute("aria-label", "수량 줄이기 " + nm);
+    else if (a === "remove") e.setAttribute("aria-label", nm + " 삭제");
+    else if (a === "use") e.setAttribute("aria-label", nm + " 사용함");
+    else if (a === "skip") e.setAttribute("aria-label", nm + " 미사용");
+    else if (a === "editset") e.setAttribute("aria-label", nm + " 세트 수정");
+    else if (a === "delset") e.setAttribute("aria-label", nm + " 세트 삭제");
+    else if (a === "removesetitem") e.setAttribute("aria-label", nm + " 항목 제거");
+    else if (a === "tab" || a === "fsec") e.setAttribute("aria-pressed", e.classList.contains("on") ? "true" : "false");
+    else if (a === "add") e.setAttribute("aria-pressed", e.querySelector(".box.on") ? "true" : "false");
+  });
+  app.querySelectorAll(".card.row[data-a=add] .box").forEach(function (b) { b.setAttribute("aria-hidden", "true"); });
+  app.querySelectorAll(".h1").forEach(function (h) { h.setAttribute("role", "heading"); h.setAttribute("aria-level", "1"); });
+  app.querySelectorAll(".h2").forEach(function (h) { h.setAttribute("role", "heading"); h.setAttribute("aria-level", "2"); });
+}
+function focusKeyOf(e) {
+  if (!e || !e.getAttribute) return null;
+  var a = e.getAttribute("data-a"), f = e.getAttribute("data-f");
+  if (!a && !f) return null;
+  return { a: a, v: e.getAttribute("data-v"), i: e.getAttribute("data-i"), f: f };
+}
+function findByKey(app, k) {
+  if (!k) return null;
+  var q = function (x) { return String(x).replace(/(["\\])/g, "\\$1"); };
+  var sel = k.f ? '[data-f="' + q(k.f) + '"]' : '[data-a="' + q(k.a) + '"]' + (k.v != null ? '[data-v="' + q(k.v) + '"]' : "") + (k.i != null ? '[data-i="' + q(k.i) + '"]' : "");
+  var nodes = app.querySelectorAll(sel);
+  for (var n = 0; n < nodes.length; n++) if (nodes[n].tabIndex >= 0) return nodes[n];
+  return null;
+}
+var lastScreen = null, lastMsg = "";
 function render() {
   var views = { home: homeView, list: listView, catalog: catalogView, review: reviewView, claim: claimView, admin: adminView, itemform: itemFormView, explain: explainView, setform: setFormView };
   var next = views[S.screen]();
   var cur = document.getElementById("app");
   var sameScreen = S.screen === lastScreen;
   var scroll = (sameScreen && cur && cur.querySelector(".bd")) ? cur.querySelector(".bd").scrollTop : 0;
+  var key = (cur && cur.contains(document.activeElement)) ? focusKeyOf(document.activeElement) : null;
+  var appHadFocus = (document.activeElement === cur);
   cur.replaceWith(next);
   if (sameScreen && next.querySelector(".bd")) next.querySelector(".bd").scrollTop = scroll;
+  a11yEnhance(next);
+  if (sameScreen) {
+    var t = findByKey(next, key);
+    if (!t && key && (key.a === "inc" || key.a === "dec")) t = findByKey(next, { a: "toggle", v: key.v });
+    if (t) t.focus({ preventScroll: true });
+    else if (appHadFocus) { next.tabIndex = -1; next.focus({ preventScroll: true }); }
+  } else if (lastScreen !== null) {
+    next.tabIndex = -1; next.focus({ preventScroll: true });
+    a11yAnnounce(S.screen === "list" && S.title ? S.title : (SCREEN_NAMES[S.screen] || ""));
+  }
+  if (S.msg && S.msg !== lastMsg) a11yAnnounce(S.msg);
+  lastMsg = S.msg;
   lastScreen = S.screen;
 }
 render();
@@ -799,7 +885,7 @@ sync();
     var b=document.createElement('div');
     b.id='sx-badge';
     b.innerHTML='<span style="color:#6B7280;font-size:12px;font-weight:500">수술 세트<\/span>'
-      +'<span style="font-weight:700;color:#1D4ED8;font-size:15px;margin-left:4px">▸ '+nm+'<\/span>';
+      +'<span style="font-weight:700;color:#1D4ED8;font-size:15px;margin-left:4px">▸ '+esc(nm)+'<\/span>';
     var inp=hd.querySelector('input');
     hd.insertBefore(b,inp);
   }
