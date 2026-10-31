@@ -12,7 +12,7 @@
   a:hover{color:#2C577F;}
   button{font-family:inherit;}
   input,select{font-family:inherit;}
-  @page{size:A4 landscape;margin:12mm;}h
+  @page{size:A4 landscape;margin:12mm;}
   @media print{
     [data-noprint="true"]{display:none !important;}
     body[data-print-mode="month-report"] .app-shell{display:none !important;}
@@ -28,7 +28,7 @@
   .sc-card{background:#fff;border:1px solid #E3E7ED;border-radius:14px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow:hidden;border-left:6px solid #3B6FA8;}
   .sc-urgent{border-left-color:#E0384A;background:#FDECEE;}
   .sc-warn{border-left-color:#E08A2B;background:#FFF3E0;}
-  .sc-cancel{border-left-color:#9CA3AF;background:#F1F2F4;color:#8A8F98;}
+  .sc-cancel{border-left-color:#9CA3AF;background:#F1F2F4;color:#6B7280;}
   .sc-top{display:flex;align-items:flex-start;}
   .sc-time{min-width:96px;padding:18px 14px;background:rgba(59,111,168,0.08);text-align:center;align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .sc-urgent .sc-time{background:rgba(224,56,74,0.10);}
@@ -42,22 +42,28 @@
   .pm{font-size:1rem;color:#6B7280;}
   .bdgs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
   .bdg{font-size:0.9rem;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;}
-  .bdg-an{background:#E8EFF6;color:#3B6FA8;}
-  .bdg-em{background:#FDECEE;color:#E0384A;}
+  .bdg-an{background:#E8EFF6;color:#2F5F96;}
+  .bdg-em{background:#FDECEE;color:#C42B3E;}
   .bdg-ok{background:#E5EFEC;color:#1F5A4B;}
   .bdg-done{background:#E5EFEC;color:#1F5A4B;}
-  .bdg-warn{background:#FFF3E0;color:#E08A2B;}
+  .bdg-warn{background:#FFF3E0;color:#9A5A00;}
   .op-name{font-size:1.2rem;font-weight:800;color:#1e293b;margin-bottom:4px;}
   .op-sub{font-size:1rem;color:#6B7280;margin-bottom:4px;}
   .sc-det{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));border-top:1px solid #E3E7ED;padding:12px 18px;gap:0;}
   .det-cell{display:flex;flex-direction:column;padding:8px 10px;}
-  .det-lbl{font-size:0.85rem;color:#9CA3AF;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+  .det-lbl{font-size:0.85rem;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
   .det-val{font-size:1rem;color:#374151;margin-top:2px;}
   .sc-acts{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid #E3E7ED;}
   .btn-e,.btn-d,.btn-r{border:none;border-radius:7px;font-size:1rem;font-weight:700;cursor:pointer;padding:9px 18px;}
-  .btn-e{background:#E8EFF6;color:#3B6FA8;}
-  .btn-d{background:#FDECEE;color:#E0384A;}
+  .btn-e{background:#E8EFF6;color:#2F5F96;}
+  .btn-d{background:#FDECEE;color:#C42B3E;}
   .btn-r{background:#E5EFEC;color:#1F5A4B;border:1px solid #2F7A67;}
+  button,[role=button]{touch-action:manipulation;}
+  button:focus-visible,[role=button]:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #2F5F96;outline-offset:2px;}
+  h2[tabindex="-1"]:focus{outline:none;}
+  .dayCell{cursor:pointer;}
+  .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
   @media(max-width:600px){.sc-time{min-width:64px;padding:12px 8px;}.tv{font-size:1rem;}.det-cell{padding:4px 6px;}.dsb-item{padding:8px 12px;min-width:56px;}}
 </style>
 </head>
@@ -96,6 +102,71 @@ const STORAGE_LIMIT_CHARS = 50000;
 const AUTO_BACKUP_THRESHOLD = 0.7;
 const AUTO_BACKUP_MIN_INTERVAL_MS = 6 * 60 * 60 * 1000;
 
+/* ---------- 접근성 도우미 ---------- */
+function a11yAnnounce(msg){
+  let el = document.getElementById('srLive');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'srLive'; el.className = 'sr-only';
+    el.setAttribute('role','status'); el.setAttribute('aria-live','polite');
+    document.body.appendChild(el);
+  }
+  el.textContent = '';
+  setTimeout(() => { el.textContent = msg; }, 30);
+}
+function a11yCaptureFocus(el){
+  if (!el || el === document.body) return null;
+  return { el: el, id: el.id || '', cls: (el.classList && el.classList[el.classList.length-1]) || '', dataId: el.getAttribute ? el.getAttribute('data-id') : null };
+}
+function a11yRestoreFocus(info){
+  if (!info) return;
+  let t = null;
+  if (info.el && document.contains(info.el)) t = info.el;
+  else if (info.id) t = document.getElementById(info.id);
+  if (!t && info.cls && info.dataId) {
+    const nodes = document.querySelectorAll('.' + info.cls);
+    for (const n of nodes) { if (n.getAttribute('data-id') === info.dataId) { t = n; break; } }
+  }
+  if (t && t.focus) t.focus();
+}
+const A11Y_FOCUSABLE = 'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function a11yTopDialog(){
+  const pdf = document.getElementById('pdfFilenameDlg'); if (pdf) return pdf;
+  const st = document.getElementById('statsModalOverlay'); if (st) return st;
+  const slot = document.getElementById('modalSlot'); if (!slot) return null;
+  const ws = Array.from(slot.children).filter(c => c.hasAttribute && c.hasAttribute('data-noprint'));
+  if (!ws.length) return null;
+  return ws.reduce((a, b) => (parseInt(getComputedStyle(b).zIndex)||0) >= (parseInt(getComputedStyle(a).zIndex)||0) ? b : a);
+}
+function closeStatsModal(){
+  const o = document.getElementById('statsModalOverlay');
+  if (o) o.remove();
+  a11yRestoreFocus(window._statsPrev); window._statsPrev = null;
+}
+function closePdfDlg(){
+  const d = document.getElementById('pdfFilenameDlg');
+  if (d) d.remove();
+  a11yRestoreFocus(window._pdfPrev); window._pdfPrev = null;
+}
+document.addEventListener('keydown', function(e){
+  const top = a11yTopDialog(); if (!top) return;
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    if (top.id === 'pdfFilenameDlg') closePdfDlg();
+    else if (top.id === 'statsModalOverlay') closeStatsModal();
+    else if (state.surgeryListOpen) { state.surgeryListOpen = false; renderModals(); }
+    else if (state.backupsOpen) { state.backupsOpen = false; renderModals(); }
+    else if (state.formOpen) closeForm();
+    return;
+  }
+  if (e.key !== 'Tab') return;
+  const f = Array.prototype.filter.call(top.querySelectorAll(A11Y_FOCUSABLE), x => !x.disabled && x.offsetParent !== null);
+  if (!f.length) return;
+  const a = f[0], z = f[f.length-1];
+  if (!top.contains(document.activeElement)) { e.preventDefault(); a.focus(); }
+  else if (e.shiftKey && document.activeElement === a) { e.preventDefault(); z.focus(); }
+  else if (!e.shiftKey && document.activeElement === z) { e.preventDefault(); a.focus(); }
+});
 function pad2(n){ return n < 10 ? '0'+n : ''+n; }
 function toISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
 function fromISO(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
@@ -250,8 +321,11 @@ function renderChrome(){
   const usagePercent = Math.round(usageRatio * 100);
   const usageColor = usageRatio >= 0.9 ? '#E0384A' : (usageRatio >= 0.7 ? '#E08A2B' : '#3B6FA8');
   const usageBg = usageRatio >= 0.9 ? '#FDECEE' : (usageRatio >= 0.7 ? '#FFF3E0' : '#E8EFF6');
-  const syncLabel = state.syncStatus === 'syncing' ? '동기화 중...' : (state.syncStatus === 'error' ? '동기화 실패' : (state.syncStatus === 'synced' ? '구글시트 동기화됨' : ''));
+  const usageText = usageRatio >= 0.9 ? '#C42B3E' : (usageRatio >= 0.7 ? '#9A5A00' : '#2F5F96');
+  const syncLabel = state.syncStatus === 'syncing' ? '동기화 중…' : (state.syncStatus === 'error' ? '동기화 실패' : (state.syncStatus === 'synced' ? '구글시트 동기화됨' : ''));
 
+  if (syncLabel && syncLabel !== window._lastSyncLabel) a11yAnnounce(syncLabel);
+  window._lastSyncLabel = syncLabel;
   const headerHtml = `
     <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:18px 22px;display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;margin-bottom:16px;" data-noprint="true">
       <div style="display:flex;align-items:center;min-width:0;">
@@ -259,7 +333,7 @@ function renderChrome(){
       </div>
       <h1 style="font-size:1.8rem;line-height:1.25;margin:0;font-weight:800;letter-spacing:-0.01em;white-space:nowrap;">수술계획표</h1>
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-        <button id="btnUsage" title="클릭해서 백업 관리" style="display:flex;align-items:center;gap:6px;border:1px solid ${usageColor};background:${usageBg};color:${usageColor};padding:10px 14px;border-radius:10px;font-size:0.92rem;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+        <button id="btnUsage" title="클릭해서 백업 관리" style="display:flex;align-items:center;gap:6px;border:1px solid ${usageColor};background:${usageBg};color:${usageText};padding:10px 14px;border-radius:10px;font-size:0.92rem;font-weight:800;cursor:pointer;white-space:nowrap;flex-shrink:0;">
           <span style="width:8px;height:8px;border-radius:50%;background:${usageColor};display:inline-block;"></span><span style="white-space:nowrap;">저장용량 ${usagePercent}%</span>
         </button>
         <span style="font-size:0.92rem;color:#6B7280;font-weight:700;">${esc(syncLabel)}</span>
@@ -275,7 +349,11 @@ function renderChrome(){
       </div>
     </div>`;
   const el = document.getElementById('headerSlot');
-  if (el) el.innerHTML = headerHtml;
+  if (el) {
+    const keepId = (document.activeElement && el.contains(document.activeElement)) ? document.activeElement.id : '';
+    el.innerHTML = headerHtml;
+    if (keepId) { const k = document.getElementById(keepId); if (k) k.focus(); }
+  }
   else {
     let shell = document.getElementById('appShell');
     if (!shell) return;
@@ -287,7 +365,7 @@ function bindHeaderHandlers(){
   const q = id => document.getElementById(id);
   if (q('btnUsage')) q('btnUsage').onclick = () => { state.backupsOpen = true; renderModals(); loadBackups(); };
   if (q('btnStats')) q('btnStats').onclick = () => openStatsModal();
-  if (q('btnBackToMonth')) q('btnBackToMonth').onclick = () => { state.view = 'month'; render(); };
+  if (q('btnBackToMonth')) q('btnBackToMonth').onclick = () => { state.view = 'month'; render(); const c = document.querySelector('.dayCell[data-date="' + state.selectedDate + '"]'); if (c) c.focus(); };
   if (q('btnAddSurgery')) q('btnAddSurgery').onclick = () => { openAddForm(); };
   if (q('btnPrintDay')) q('btnPrintDay').onclick = () => { document.body.setAttribute('data-print-mode','day-plan'); window.print(); };
 }
@@ -421,7 +499,7 @@ function renderMonthView(){
     const dateColor = isToday ? '#3B6FA8' : (isSunday || isHoliday) ? '#E0384A' : '#1F2430';
     if (inMonth) { monthTotalCount += active.length; monthCancelledCount += cancelled.length; }
     cellsHtml += `
-      <div class="dayCell" data-date="${dateStr}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:140px;border-radius:10px;padding:10px;overflow:hidden;box-sizing:border-box;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
+      <div class="dayCell" data-date="${dateStr}" role="button" tabindex="0" aria-label="${d.getMonth()+1}월 ${d.getDate()}일${isToday?' (오늘)':''}${active.length>0?', 수술 '+active.length+'건':', 수술 없음'}${hasEmergency?', 응급 있음':''}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:140px;border-radius:10px;padding:10px;overflow:hidden;box-sizing:border-box;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
         <div style="font-size:2.1rem;font-weight:${isToday?900:700};color:${dateColor};line-height:1.2;">${d.getDate()}</div>
         ${active.length>0?`<div style="margin-top:5px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:3px 8px;font-size:0.88rem;font-weight:800;display:inline-block;">${active.length}건</div>`:''}
         ${cancelled.length>0?`<div style="margin-top:4px;color:#8A8F98;font-size:0.82rem;font-weight:700;">취소 ${cancelled.length}</div>`:''}
@@ -432,9 +510,9 @@ function renderMonthView(){
   return `
     <div data-noprint="true" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;margin-bottom:14px;">
       <div style="display:flex;align-items:center;gap:10px;">
-        <button id="btnPrevMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
+        <button id="btnPrevMonth" aria-label="이전 달" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
         <div style="font-size:1.4rem;font-weight:800;min-width:140px;text-align:center;">${monthLabel}</div>
-        <button id="btnNextMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
+        <button id="btnNextMonth" aria-label="다음 달" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
         <button id="btnTodayMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
       </div>
       <div style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:10px 18px;font-size:1rem;font-weight:700;color:#3B6FA8;">
@@ -466,8 +544,8 @@ function renderDayView(){
     <div class="dsb-item"><span class="dsb-n">${total}</span><span class="dsb-l">전체</span></div>
     <div class="dsb-item"><span class="dsb-n" style="color:#3B6FA8">${scheduled}</span><span class="dsb-l">예정</span></div>
     <div class="dsb-item"><span class="dsb-n" style="color:#E0384A">${emergency}</span><span class="dsb-l">응급</span></div>
-    <div class="dsb-item"><span class="dsb-n" style="color:#E08A2B">${warnCnt}</span><span class="dsb-l">주의</span></div>
-    <div class="dsb-item"><span class="dsb-n" style="color:#8A8F98">${cancelCnt}</span><span class="dsb-l">취소</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#B45F06">${warnCnt}</span><span class="dsb-l">주의</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#6B7280">${cancelCnt}</span><span class="dsb-l">취소</span></div>
   </div>`;
 
   // 카드 빌더
@@ -528,9 +606,9 @@ function renderDayView(){
       </div>
       <div class="sc-det">${detHtml}</div>
       <div class="sc-acts" data-noprint="true">
-        <button class="btn-e btnEditRow" data-id="${r.id}">수정</button>
-        <button class="btn-d btnDeleteRow" data-id="${r.id}">삭제</button>
-        <button class="btn-r btnOpenRecord" data-id="${r.id}">기록지</button>
+        <button class="btn-e btnEditRow" data-id="${esc(r.id)}" aria-label="${esc(r.name)} 수술 일정 수정">수정</button>
+        <button class="btn-d btnDeleteRow" data-id="${esc(r.id)}" aria-label="${esc(r.name)} 수술 일정 삭제">삭제</button>
+        <button class="btn-r btnOpenRecord" data-id="${esc(r.id)}" aria-label="${esc(r.name)} 수술기록지 열기">기록지</button>
         ${r.note?`<span style="margin-left:8px;font-size:0.85rem;color:#6B7280;">📝 ${esc(r.note)}</span>`:''}
       </div>
     </div>`;
@@ -542,8 +620,8 @@ function renderDayView(){
 
   return `<div class="day-plan-print-wrap">
     <div data-noprint="true" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
-      <button id="btnPrevDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
-      <button id="btnNextDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
+      <button id="btnPrevDay" aria-label="전날" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">‹</button>
+      <button id="btnNextDay" aria-label="다음 날" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
       <button id="btnTodayDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
     </div>
     <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
@@ -562,7 +640,11 @@ function attachBodyHandlers(){
     if (q('btnNextMonth')) q('btnNextMonth').onclick = () => { let m=state.monthMonth+1,y=state.monthYear; if(m>11){m=0;y++;} state.monthMonth=m; state.monthYear=y; renderBody(); };
     if (q('btnTodayMonth')) q('btnTodayMonth').onclick = () => { const d=new Date(); state.monthYear=d.getFullYear(); state.monthMonth=d.getMonth(); renderBody(); };
     document.querySelectorAll('.dayCell').forEach(el => {
-      el.onclick = () => { state.selectedDate = el.getAttribute('data-date'); state.view = 'day'; render(); };
+      el.onclick = () => {
+        state.selectedDate = el.getAttribute('data-date'); state.view = 'day'; render();
+        const h = document.querySelector('.day-plan-print-wrap h2'); if (h) { h.tabIndex = -1; h.focus(); }
+      };
+      el.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); } };
     });
   } else {
     if (q('btnPrevDay')) q('btnPrevDay').onclick = () => { const d=fromISO(state.selectedDate); d.setDate(d.getDate()-1); state.selectedDate=toISO(d); renderBody(); };
@@ -578,6 +660,8 @@ function attachBodyHandlers(){
 function renderModals(){
   const container = document.getElementById('modalSlot');
   if (!container) return;
+  const _prevActive = document.activeElement;
+  const _keepId = (_prevActive && container.contains(_prevActive)) ? _prevActive.id : '';
   let html = '';
 
   if (state.formOpen && state.formData) {
@@ -624,20 +708,20 @@ function renderModals(){
       const val = esc(fd[f.key]);
       let input = '';
       if (f.kind === 'select') {
-        input = `<select class="formField" data-key="${f.key}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;background:#FFFFFF;">${f.options.map(o=>`<option value="${esc(o)}" ${o===fd[f.key]?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+        input = `<select class="formField" id="ff_${f.key}" data-key="${f.key}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;background:#FFFFFF;">${f.options.map(o=>`<option value="${esc(o)}" ${o===fd[f.key]?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
       } else if (f.kind === 'number') {
-        input = `<input type="number" class="formField" data-key="${f.key}" value="${val}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
+        input = `<input type="number" class="formField" id="ff_${f.key}" data-key="${f.key}" value="${val}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
       } else if (f.kind === 'date') {
-        input = `<input type="date" class="formField" data-key="${f.key}" value="${val}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
+        input = `<input type="date" class="formField" id="ff_${f.key}" data-key="${f.key}" value="${val}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
       } else if (f.kind === 'time') {
-        input = `<input type="time" class="formField" data-key="${f.key}" value="${val}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
+        input = `<input type="time" class="formField" id="ff_${f.key}" data-key="${f.key}" value="${val}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
       } else {
-        input = `<input type="text" class="formField" data-key="${f.key}" value="${val}" ${f.list?`list="${f.list}"`:''} style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
+        input = `<input type="text" class="formField" id="ff_${f.key}" data-key="${f.key}" value="${val}" ${f.list?`list="${f.list}"`:''} style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
       }
       return `<div style="display:flex;flex-direction:column;gap:6px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
-          <label style="font-size:0.82rem;font-weight:700;color:#6B7280;">${f.label}</label>
-          ${f.surgery?`<button id="btnOpenSurgeryList" type="button" style="border:none;background:transparent;color:#3B6FA8;font-size:0.76rem;font-weight:700;cursor:pointer;padding:0;">목록 관리</button>`:''}
+          <label for="ff_${f.key}" style="font-size:0.82rem;font-weight:700;color:#6B7280;">${f.label}</label>
+          ${f.surgery?`<button id="btnOpenSurgeryList" type="button" style="border:none;background:transparent;color:#3B6FA8;font-size:0.76rem;font-weight:700;cursor:pointer;padding:8px 4px;">목록 관리</button>`:''}
         </div>
         ${input}
       </div>`;
@@ -661,7 +745,7 @@ function renderModals(){
     const rows = state.surgeryList.map(name => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 2px;font-size:0.88rem;border-bottom:1px dashed #E3E7ED;">
         <span>${esc(name)}</span>
-        <button class="btnRemoveSurgeryItem" data-name="${esc(name)}" style="border:none;background:transparent;color:#E0384A;font-weight:700;cursor:pointer;font-size:0.8rem;">삭제</button>
+        <button class="btnRemoveSurgeryItem" data-name="${esc(name)}" aria-label="${esc(name)} 삭제" style="border:none;background:transparent;color:#C42B3E;font-weight:700;cursor:pointer;font-size:0.8rem;padding:8px 10px;">삭제</button>
       </div>`).join('');
     html += `
       <div data-noprint="true" style="position:fixed;inset:0;background:rgba(31,36,48,0.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:70;">
@@ -669,7 +753,7 @@ function renderModals(){
           <h3 style="margin:0 0 6px;font-size:1.15rem;font-weight:800;">수술명 목록 관리</h3>
           <p style="margin:0 0 14px;color:#6B7280;font-size:0.85rem;line-height:1.5;">여기서 추가/삭제한 항목은 수술명 입력 시 자동완성 목록에 반영됩니다.</p>
           <div style="display:flex;gap:8px;margin-bottom:14px;">
-            <input id="newSurgeryNameInput" type="text" value="${esc(state.newSurgeryName)}" placeholder="예: TKRA · 무릎 인공관절수술" style="flex:1;padding:9px 10px;font-size:0.9rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
+            <input id="newSurgeryNameInput" type="text" aria-label="새 수술명" value="${esc(state.newSurgeryName)}" placeholder="예: TKRA · 무릎 인공관절수술" style="flex:1;padding:9px 10px;font-size:0.9rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
             <button id="btnAddSurgeryItem" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:9px 16px;border-radius:9px;font-size:0.88rem;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
           </div>
           <div style="border-top:1px solid #E3E7ED;padding-top:4px;max-height:360px;overflow-y:auto;">
@@ -690,7 +774,7 @@ function renderModals(){
     const backupRows = state.backups.map(b => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 2px;font-size:0.86rem;border-bottom:1px dashed #E3E7ED;">
         <div><div style="font-weight:700;">${esc(formatBackupTime(b.timestamp))}</div><div style="font-size:0.76rem;color:#8A8F98;">${b.size}자</div></div>
-        <button class="btnRestoreBackup" data-key="${esc(b.key)}" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:7px 12px;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;">복원</button>
+        <button class="btnRestoreBackup" data-key="${esc(b.key)}" aria-label="${esc(formatBackupTime(b.timestamp))} 백업으로 복원" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 14px;border-radius:8px;font-size:0.82rem;font-weight:700;cursor:pointer;">복원</button>
       </div>`).join('');
     html += `
       <div data-noprint="true" style="position:fixed;inset:0;background:rgba(31,36,48,0.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:60;">
@@ -704,7 +788,7 @@ function renderModals(){
           </div>
           <button id="btnManualBackup" style="width:100%;border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:11px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-bottom:16px;">${state.backupStatus==='backing-up'?'백업 중...':(state.backupStatus==='error'?'백업 실패 · 다시 시도':'지금 백업하기')}</button>
           <div style="border-top:1px solid #E3E7ED;padding-top:10px;">
-            ${backupRows || `<div style="padding:16px 2px;color:#6B7280;font-size:0.86rem;">${state.backupsLoading?'불러오는 중...':'아직 백업이 없습니다.'}</div>`}
+            ${backupRows || `<div style="padding:16px 2px;color:#6B7280;font-size:0.86rem;">${state.backupsLoading?'불러오는 중…':'아직 백업이 없습니다.'}</div>`}
           </div>
           <div style="display:flex;justify-content:flex-end;margin-top:16px;">
             <button id="btnCloseBackups" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">닫기</button>
@@ -719,6 +803,38 @@ function renderModals(){
 
   container.innerHTML = html;
   attachModalHandlers();
+  a11yModalRefresh(container, _keepId, _prevActive);
+}
+
+// 모달은 렌더링할 때마다 통째로 다시 그려지므로, 다이얼로그 의미·포커스를 매번 다시 붙입니다.
+function a11yModalRefresh(container, keepId, prevActive){
+  const wrappers = Array.from(container.children).filter(c => c.hasAttribute && c.hasAttribute('data-noprint'));
+  const top = wrappers.length ? wrappers.reduce((a, b) => (parseInt(getComputedStyle(b).zIndex)||0) >= (parseInt(getComputedStyle(a).zIndex)||0) ? b : a) : null;
+  wrappers.forEach((w, i) => {
+    const dlg = w.firstElementChild; if (!dlg) return;
+    dlg.setAttribute('role', 'dialog');
+    dlg.setAttribute('aria-modal', w === top ? 'true' : 'false');
+    const h = dlg.querySelector('h3');
+    if (h) { h.id = 'dlgTitle_' + i; dlg.setAttribute('aria-labelledby', h.id); }
+  });
+  const key = top ? ((top.querySelector('h3') || {}).textContent || 'dlg') : '';
+  if (top) {
+    if (window._dlgKey !== key) {
+      const prevKey = window._dlgKey;
+      if (!prevKey) window._dlgPrev = a11yCaptureFocus(prevActive);
+      window._dlgKey = key;
+      const dlg = top.firstElementChild;
+      const back = (prevKey && prevKey.indexOf('수술명 목록') >= 0) ? document.getElementById('btnOpenSurgeryList') : null;
+      const first = back || dlg.querySelector('input,select,textarea');
+      if (first) first.focus();
+      else { dlg.setAttribute('tabindex', '-1'); dlg.focus({ preventScroll: true }); }
+    } else if (keepId) {
+      const el = document.getElementById(keepId); if (el) el.focus();
+    }
+  } else if (window._dlgKey) {
+    window._dlgKey = '';
+    a11yRestoreFocus(window._dlgPrev); window._dlgPrev = null;
+  }
 }
 
 function attachModalHandlers(){
@@ -819,7 +935,7 @@ function openStatsModal() {
     if (entries.length === 0) return '<p style="color:#94a3b8;font-size:13px;">데이터 없음</p>';
     return entries.map(([k, v]) => `
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <div style="width:130px;font-size:13px;color:#374151;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${k}">${k}</div>
+        <div style="width:130px;font-size:13px;color:#374151;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${esc(k)}">${esc(k)}</div>
         <div style="flex:1;background:#e2e8f0;border-radius:4px;height:26px;overflow:hidden;">
           <div style="width:${Math.round(v/max*100)}%;background:${color};height:100%;border-radius:4px;display:flex;align-items:center;padding-left:8px;box-sizing:border-box;min-width:32px;transition:width 0.4s;">
             <span style="color:white;font-size:12px;font-weight:700;">${v}건</span>
@@ -855,16 +971,18 @@ function openStatsModal() {
     </div>`;
   }).join('');
 
+  window._statsPdfData = { total, completed, scheduled, cancelled, byMonth: Object.fromEntries(monthSorted), byType, byAnesthesia, byDow, byDoctor };
+  window._statsPrev = a11yCaptureFocus(document.activeElement);
   const overlay = document.createElement('div');
   overlay.id = 'statsModalOverlay';
   overlay.setAttribute('data-noprint', 'true');
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(31,36,48,0.48);display:flex;align-items:center;justify-content:center;padding:20px;z-index:200;';
-  overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+  overlay.onclick = e => { if (e.target === overlay) closeStatsModal(); };
 
   overlay.innerHTML = `
     <div style="background:#fff;border-radius:18px;width:100%;max-width:820px;max-height:90vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
-      <button onclick="document.getElementById('statsModalOverlay').remove()"
-        style="position:absolute;top:16px;right:16px;background:#f1f5f9;border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#64748b;">✕</button>
+      <button type="button" aria-label="닫기" onclick="closeStatsModal()"
+        style="position:absolute;top:16px;right:16px;background:#f1f5f9;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#64748b;">✕</button>
       <h2 style="margin:0 0 24px 0;font-size:22px;font-weight:800;color:#1e293b;">📊 수술 통계</h2>
       <div style="display:grid;gap:18px;">
 
@@ -897,7 +1015,7 @@ function openStatsModal() {
 
         <!-- PDF 내보내기 버튼 -->
         <div style="text-align:center;padding-top:8px;">
-          <button onclick="printStatsAsPDF({total:${total},completed:${completed},scheduled:${scheduled},cancelled:${cancelled},byMonth:${JSON.stringify(Object.fromEntries(monthSorted))},byType:${JSON.stringify(byType)},byAnesthesia:${JSON.stringify(byAnesthesia)},byDow:${JSON.stringify(byDow)},byDoctor:${JSON.stringify(byDoctor)}})"
+          <button onclick="printStatsAsPDF(window._statsPdfData)"
             style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(99,102,241,0.3);">
             📄 PDF로 내보내기
           </button>
@@ -907,6 +1025,9 @@ function openStatsModal() {
     </div>`;
 
   document.body.appendChild(overlay);
+  const sdlg = overlay.firstElementChild;
+  sdlg.setAttribute('role', 'dialog'); sdlg.setAttribute('aria-modal', 'true'); sdlg.setAttribute('aria-label', '수술 통계');
+  const sclose = sdlg.querySelector('button'); if (sclose) sclose.focus();
 }
 
 function printStatsAsPDF(d) {
@@ -915,6 +1036,7 @@ function printStatsAsPDF(d) {
   const defaultName = `천안본정형외과_수술통계_${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}`;
 
   // 파일명 입력 다이얼로그
+  window._pdfPrev = a11yCaptureFocus(document.activeElement);
   const dlg = document.createElement('div');
   dlg.id = 'pdfFilenameDlg';
   dlg.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:400;';
@@ -922,29 +1044,31 @@ function printStatsAsPDF(d) {
     <div style="background:#fff;border-radius:18px;padding:30px 32px;width:440px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
       <h3 style="margin:0 0 6px 0;font-size:18px;font-weight:800;color:#1e293b;">📄 PDF 저장</h3>
       <p style="margin:0 0 18px 0;font-size:13px;color:#64748b;">저장할 파일 이름을 입력하세요 <span style="color:#94a3b8;">(.pdf 자동 추가)</span></p>
-      <input id="pdfFilenameInput" type="text" value="${defaultName}"
-        style="width:100%;border:2px solid #e2e8f0;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s;"
+      <input id="pdfFilenameInput" type="text" aria-label="PDF 파일 이름" value="${defaultName}"
+        style="width:100%;border:2px solid #e2e8f0;border-radius:10px;padding:11px 14px;font-size:14px;box-sizing:border-box;transition:border-color .15s;"
         onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
       <p style="margin:8px 0 0 2px;font-size:12px;color:#94a3b8;">💡 브라우저 인쇄창에서 "PDF로 저장"을 선택하면 입력한 파일명으로 저장됩니다.</p>
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
-        <button onclick="document.getElementById('pdfFilenameDlg').remove()"
+        <button type="button" onclick="closePdfDlg()"
           style="padding:10px 22px;border:2px solid #e2e8f0;background:#fff;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:#64748b;">취소</button>
         <button id="pdfConfirmBtn"
           style="padding:10px 28px;background:#6366f1;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 4px 12px rgba(99,102,241,0.3);">📄 저장</button>
       </div>
     </div>`;
   document.body.appendChild(dlg);
+  const pdlg = dlg.firstElementChild;
+  pdlg.setAttribute('role', 'dialog'); pdlg.setAttribute('aria-modal', 'true'); pdlg.setAttribute('aria-label', 'PDF 저장');
   setTimeout(() => { const inp = document.getElementById('pdfFilenameInput'); if(inp){inp.focus();inp.select();} }, 50);
 
   // Enter 키로 확인
   dlg.querySelector('#pdfFilenameInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') document.getElementById('pdfConfirmBtn').click();
-    if (e.key === 'Escape') dlg.remove();
+    if (e.key === 'Escape') closePdfDlg();
   });
 
   document.getElementById('pdfConfirmBtn').onclick = () => {
     const filename = (document.getElementById('pdfFilenameInput').value.trim() || defaultName);
-    dlg.remove();
+    closePdfDlg();
     _doPrintStatsPDF(d, filename, dateStr);
   };
 }
@@ -954,7 +1078,7 @@ function _doPrintStatsPDF(d, filename, dateStr) {
 
   function tableRows(obj) {
     return Object.entries(obj).map(([k,v]) =>
-      `<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">${k||'미기재'}</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">${v}건</td></tr>`
+      `<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">${esc(k||'미기재')}</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">${v}건</td></tr>`
     ).join('');
   }
   function section(title, content) {
@@ -998,7 +1122,7 @@ function _doPrintStatsPDF(d, filename, dateStr) {
         <div>
           ${section('🔪 수술 종류별', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${tableRows(d.byType)}</table>`)}
           ${section('💉 마취 방법별', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${tableRows(d.byAnesthesia)}</table>`)}
-          ${section('📆 요일별 분포', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${Object.entries(d.byDow).map(([k,v])=>`<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">${dowNames[k]||k}요일</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">${v}건</td></tr>`).join('')}</table>`)}
+          ${section('📆 요일별 분포', `<table style="width:100%;border-collapse:collapse;font-size:13px;">${Object.entries(d.byDow).map(([k,v])=>`<tr><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;">${esc(dowNames[k]||k)}요일</td><td style="padding:6px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-weight:700;">${v}건</td></tr>`).join('')}</table>`)}
         </div>
       </div>
 
