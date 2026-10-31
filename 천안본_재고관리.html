@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>천안 본 정형외과 · 재고 관리</title>
 <style>
   @font-face {
@@ -16,7 +16,7 @@
     --line:#E1E7E3;
     --ink:#1A2422;
     --ink-soft:#5C6B66;
-    --ink-faint:#8B9791;
+    --ink-faint:#66726D;
     --teal:#0E5C56;
     --teal-dark:#093F3B;
     --teal-tint:#E4EFED;
@@ -120,7 +120,7 @@
   }
   .search-bar input[type=text]{
     flex:1; border:1px solid var(--line); background:var(--surface); border-radius:10px;
-    padding:10px 12px; font-size:14px; color:var(--ink); outline:none;
+    padding:10px 12px; font-size:14px; color:var(--ink);
   }
   .search-bar input[type=text]:focus{ border-color:var(--teal); }
   .cat-filter{ display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
@@ -170,7 +170,7 @@
   label.field-label:first-child{ margin-top:0; }
   input[type=text], input[type=number], select, textarea{
     width:100%; border:1px solid var(--line); background:var(--surface); border-radius:10px;
-    padding:10px 12px; font-size:14.5px; color:var(--ink); outline:none; font-family:inherit;
+    padding:10px 12px; font-size:14.5px; color:var(--ink); font-family:inherit;
   }
   input:focus, select:focus, textarea:focus{ border-color:var(--teal); }
   .qty-stepper{ display:flex; align-items:center; gap:10px; }
@@ -297,6 +297,30 @@
 
   ::-webkit-scrollbar{ width:6px; height:6px; }
   ::-webkit-scrollbar-thumb{ background:#D3DAD6; border-radius:10px; }
+
+  /* ---------- 접근성: 포커스 · 터치 영역 · 글자 크기 ---------- */
+  button:focus-visible, [data-a11y]:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible{
+    outline:3px solid var(--teal); outline-offset:2px;
+  }
+  header.app-header [data-a11y]:focus-visible{ outline-color:#fff; }
+  .modal-sheet:focus{ outline:none; }
+  [data-a11y], button{ touch-action:manipulation; }
+  .sr-only{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  .dept-chip{ padding:10px 15px; }
+  .cat-chip{ padding:10px 15px; }
+  .btn-sm{ padding:10px 14px; }
+  .icon-btn{ width:44px; height:44px; }
+  .qty-stepper button{ width:44px; height:44px; }
+  .req-item .qty-stepper button{ width:40px; height:40px; }
+  .req-item input[type=checkbox]{ width:24px; height:24px; }
+  .modal-close{ padding:10px 14px; margin:-8px -8px -8px 0; }
+  .manage-item .edit-row input{ padding:10px 4px; }
+  .nav-btn{ font-size:12px; }
+  .sync-pill{ font-size:12px; }
+  .audit-row .old{ font-size:12px; }
+  .audit-row .spec, .req-item .spec, .manage-item .spec, .history-item .row2{ font-size:12.5px; }
+  .req-item .shortage, .audit-banner .t1{ font-size:12.5px; }
+  @media (prefers-reduced-motion:reduce){ *{ animation-duration:.001ms !important; transition-duration:.001ms !important; } }
 </style>
 </head>
 <body>
@@ -307,14 +331,14 @@
       <div class="logo-badge"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAXMAAACKCAYAAABYUKr3AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAABhCSURBVHhe7Z1NrCXXVYU9AccZMUFiiMSMKZgBDCIkIiGBxK+sRAySQeRgJAaR4oQfRQoKxkAkB5Q2AYwSHBL3ANqxIWrkNo5I0o6DwfFfsOU2jiV3O00nvG5M2q/b3cYXrUvv1n7r7n3q1K2/W/XWJy29926dOufUfXXXObXPrro3rIQQQsyeG/gFIYQQ80NmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0BmLoQQC0Bm3hNPfOve1Ylnbp9MZ/ae5C4JIQ4RMvOeOPYvv7D6zJe/bzJ957UXuEtCiEOEzLwn2FzH1pWr+9wlIcQhQmbeA5gVs7mOqfsevZm7JIQ4ZMjMe+Dlcyc3DHZMIWYuhDjcyMx74NlXjm0Y7JjC4qsQ4nAjM+8BzIzZYMfUC68+xF0SQhwyZOY9gJg1G+yYUiaLEEJm3hFkkbC5ji1lsgghZOYdUSaLEGIXkJl3BPFqNtgxpUwWIQSQmXcEmSRssGMKmTRCCCEz78jUmSzIcRdCiMnN/OrpJ1dvXZnvAp4yWYQQu8CkZv7muRdW3/vzG1aXHrmDN82C1y/vbZjr2BJCCDCpme8fv31t5vg5R6bOZMGTGoUQAkxm5m9d3Fsb+VzN/Pze3ur4V46sPn7fjdf1lyc2DXdIzTmTBaE1XJkdFuF8F2JIJjPzK88/dN3ML37m5vUJD+znrvHqmdOro39z7+r3fudDq59/x0+sbv7ht4f62Xe+ffX+D75tdcenb9ww374150wW/J/t/38YdPUlLVSLYZnMzF//wvsOnOz4cL/x1LH1LB0/pwYz7y89/NDqrj+6Y/XeW35xw7Rr9I4f/39jx6ydjbgPzTmTxQ/mh0G7OkkRy2ESM8clNp/smJ3b71OaOUz8nk8d2TDmrnr3e27q3dTnnMly+auf3DgHliwhhmaSswzpiHyye2HWNiZm4KXwCYQZOmbq//CFY6t/PP5312PlH/2zG1cf/IO3rd57203r2Tjvd6CO227qLbY+Z2zx+zDo4lEtVIvhmcTMLz9+78YJ7zXWJeml/f11HJwN1wvm/fWvnVwbvqeUyfInx75/HV7hukwwfJTh/dpo7pks/D+P9Oa5U6G4XJ/itvpoM1vg/9NPfGL17ltuWevDt9++/vv5557jYqv/vnBhdfS++66XtfIPnzixunTp0oGy2Pb7H/vYxusGtqMd8PLLLx+o02TbM7Af2vD74O9vPPEEF20F6sEx7TLoH/pp4L3YFSYx86ZZ2Rgr/8889WQ6EzcDh9ln1Hwhxd1fzE0dho4ZPe9Tq1lnsrhMppIyuFyfyuBybZSFDc3MYRB/dc89q1+/9db132fPnr1eBr/b6zDMBx94YG3sMPPIuJsM2W8zM8ff6IOpZMrY5tuwvttr6Nu2zM3MMfDi92gAnoL87B0QPtlZQwKDhlmzudYYuOfLz92xYbCZEIrJwi/bGvphyGTJ4HJ9KoPLtVGWyWJmbpg5mKHBpM3I2WCxzWbr3rjNVDNjjcy81kCtPPrkBxyAqwebrT96Mj5eD/rP7bbpy1R4M7djyK6CxiY/ewfif8+f3jjZvYaML/7HqRcOZKZgZo74d62Be774jfdtGGxJiJP/0i/ftGHm0DYLo3POZMFMlf/vkTK4XJ/K4HJtlIUN2cxhgt7QbBZcMjibocNMgZl1ZqxdzNxm4FloAX3AdvTJ/kbd+Il+QDA+CP2zUJENVNYX2y9qBwMetqEuO2Zg+5hQjk0W7WAbD0Sg1CbqsX39/8wfX1QWP7kPQ5KfvQPRlJKWxRe7EMXGtzVxg821VlHYZZsY+mHIZMngcn0qg8u1UYYPs5j5+rAJQip4LTIfwwYAu9Q3s0YdZvR+Vh+ZOYdZIkMDqA+z8hLe7Kx+H1/HgMDxdusPfkcb1o4/Ll+3l22P4v+ox947ey9MOE7DrnCsTZS1/wHqt9ftJ+TbtPcL77Mv47eNQX6mDUTTBxnb+wQ3+3CeOF7rwoWLpzfMtY0iQ8esvU2Wy5xpWjNpMkEu16cyuFytSleakTnBSMygbHtpdmehGZuB43czR4u3+7CI3x4ZIOSNzoNtMOISZozA6scxYfYKs7N+oA/WD8P6ZrN3/A3z93VhgENdOG4zfr8dP+1KwO9v76td7Vjb9v6hXv+3vZ92BWH9xnvDx4ef1l+Utb/Rlp+1D01+9g5E0wc5WyzaBsTAvWEiLs5ZKdtwZu/JDXNtq8jQ8RqXi3QYMlmgXYL7VqvSlaafxQIfd7ZLePxeWmCz2bvNAL1RATMcGLqFQdjMM/NmrG+lwcVmwMDq51APyMzc98WXwSDBVwVmzGiHZ8kgen/xfqEeq9feYxybtWfvkb1fZvS+PPBt+sFmKgb5xNjzKBBSgTljto2TusnIIaQtYp9IqBMx9xr8jT+IjSN7pS9qMlmalMXQax4DMOdMlqY1E69dgvtWq9LkhM0GmEHBAM0gOGPF8DNvw4zIY3WaGW9r5mZk0cIqsHZ4Nu0N1mhr5pbt47H28DNqy44X+L6bcQO/TmGmDOG9jQajRZs5Ppy1Rt2n8NhcZAlEz0LH81PMHPF7l9h4RJtMlpJg6Jzlgme7cDnWnDNZmm4Y89oluG+1yjJZgDdzmDUMwQzITMkWHfG6vWaX8FGmC/5mkwQ2g/fb25q5j8OjXxZC8FcRPqQTGayBPlhZyMIUmZn7cAjKYh8LgQBuy/72M2yr29eLenw5C9HY4iX66GPomZn7MItdSdlxjUXnTwzMlJ+zMqbQtjd0v9CJRc4haJvJUhJm4jw75zKsw5DJAu0S3LdaZZkswMyc5We+MAOfx+0Fo/FGDsyYIjiV0cyIle0PzER5H8jHlgEbrIdvgooGFm+69je3aeX9sdgg5/tjpmx9x992BcF98fXi/bUBzMu3acdnRu8VHftQ9PKJGdPMsaCEsM16Vh7cXIS4OGbjXRc5S7C5dhVu8Tcjx++83etzD//A6txTj6zeePGlyfTW/vazDVxR8f800y7BfatVCRgFDMDkFwgZvO7LWpofY/VEoLzfbjNqVra/x1IES/tY/dEioF1d2L7WN29+eJ3r9X32Zc1YYczYxusM2G6v23vp9/fHw23ydghEx2ft+OMai/LZVkFTqmFXYaBAHH399XKBeS8F5MDjKY1NISGY6X/+2M9Mqi60Gfgz9o9/aDBlcN9qVMpkEf3Cs+TDSP6JqQDhDf+0w65C3B2zbgwQpcvTw8zrj/zzhrmOqe++5zbuUiv4f15SBpfrUxlcrkalTBbRLzLzjmbeJv6JWQq/tn7dfTGFaOZ/jv7thsGOqQt3HeEuVdMmkwXK4HJ9KoPL1aiUySL6RWbewcwti8WnDiKObWmJnEKYGf/Yj7udO+c/eueGwY6pi39/nLtUTZtMFiiDy/WpDC5Xo1ImixB9k5+9PROlLuoytD3nfu5dGwY7pi4/803uUjXZgJ4pg8v1qQwuVyOe0AgxJPnZ2zORmWOmNhX+C4XnArJI2FzH1tVXv83dqiY6B0rKeOPp+wdTBvetRnPhzJnTq1OnTjVK7DajnXF8oiNW3kTpUamIwa8XTB+/tzrLBYMHUuOiRVtkWWQhH1wuc3lTRNZv30/elslnRMw9kyVbN8m0S3DfmoTzaSoeuP/+1Y/80A9e1+/+1oe5yAGw3ZfPVAPX1dR233D7eC/GYKp2PaN9YvhkrwmxZKYYqRSftPg+7xOJb0IyMiOKri6ifvMDxHh7Jn/lMHUmC+L1XeBja9IuwX1rEiYNTXzt0UfXH/pthf0jsK2NobIRZaqB62pqm8EVAB8ncrZx9VADt4/9x2Cqdj2jfGIic6s52dvEWLOZfmlWnSmaVWX1sEmDKPeewzm8PRLXPXUmy2v3/PWB/rQhOgeatEtw35pUk8nCBtBWmVHO0cxh2O/61V/ZaNML259qeMYStz+WqU7VrmeUT0z0QS7NpI3ou0JLN52wYWYGXKOof1wGigYR7jeXqUnRwz58hTDrTJYt/he7BPetSdEVG8MG0FaZUbY18z5j5nxMTW3v7+9v7NOkT919N1dzHa4rMlWU6UNcZ1O7QzPKJ4Zn2LV3xkWhEZB9h6TPHojS4DiEAoOJ4ucQh4GyNiE2fh5w+CqkZGzoN8QDE5g6kwUx+23hc6BG/KXKtXrrSnwLNV7nsrXivjWpJpOFDaCt2FCMkplHYYxtFYV5+JiyPhq/8f5bN46rRpmhc/voJ8N1bSP021PT7tBMYuY1sxbAHxBvsGyYfoCI7kxdz3SDhdLSLNkTDQ4m3y+0zdt5YTX7go7SpfkuZLK8ef48d6uaaGAeSjDfiG1MeVvVkMXMOdzw0z/1kxtlMjMF2Ob394bK27ooMmo2taiMEfXFjtVfESAEg9e5bHT83H5kqlzPNuLjqml3aOrOuo74DzLPUjOi0IyZXRST9rPjyCxLRhmVhw6UCUI+XjZQRP3mWVq0mNr0vkydyYKrgi5ExzyUpjbzaM2lDWzmEMIRTBYewaw1M57IQIcUm56B42GDxnFHxwnwOr8v2J+pMVXu4zbi46ppd2hGNfMoDpzBs3nIvuSCX2+aGTe1m4U9PHwlwLLBgvvN8fKsfxZaMfEAMOdMluiYh9TUZt40MJfY29vbMA4oWvhjA8nkjQezWfzdh2pCJCgXgePhsk1xeWznffh9QXt+e1+myvXycfH2vtptwyhmbic5G1SJyLQjYcbsiYyZs0KYaDYNGTVmZGEe7jfH3kvhGi8OzSCThA12TCGTZluy93coTW3mpavAJj732c9uGBYE4+RZKxtIJjaeDAwkPMsvpQRG5srK2o6uEGrg2TmbJr8nvH1bmupt2j4Go5k5LxI2wTHvTLyoGT0vm42RiQYAb8KRGUX9i8rxB7spXANFM7upM1lwZbAtUVjMC4+e5TsxuyhaGwF4nct20eWTRzaOBapdE2KazBFG72EDyZQZKsBM/Y/vvHMj5MHCYILYtR9QYP4wLS8226xtNnPsVwNfDbBp8nvC27eFj4vrHardNgxu5jC4ppkxU1qUjORn55nJlogM1pswh05sO78WxYW57aZwTRYSYnMdW10yWaL31wvGOEeymX6bK1AjiglH8oaeLaCysUSGivbYGGsE0y/N1mvaBhgYuG4MDiXQZ97HvijC4Pb7MlVulxdfh2q3DYOb+TZEMzmLKXMYA/Jxad4GsaEykQn7DyS3ib9LqYpeDG+HuWNgsCuKqK/IImFzHVtd4PePtTQzbwvMMTLybLYMEy4ZH896I0PdxshN6FfWPpta1DaI1gZwhVCCF3Yh7ge334epRoMIx/eHaLct7c+8EYhCJTZbjUIZ/gPEr0OlMEtUH8e5ebvN2ptMiuuJ2uIwTMTUmSxdv5Aiulo68B4syMzbZLLAJNh4TTBMbI8MzLZjls5mBrhONlTMKqP6eDERYKCJjN+uAFg8AHHbHjZACIbOx4S/8TqXjermOmtMla9s2Kij8Bf3kdvF/43XH4ZmJ82cZ8o+hzyKbzfNzLF/FLoAUdjDz44jA7btUV+8eHE2Cs1EM3EGd16ywY6poTNZlmTm0XoHYybOxmfiUEZm6FaWF0abzJy3Qxw28KAvXD4y10jctgeGmL0HGECwbzSQQPweGWyqNWbOdfM+0eDHcLuRhmbnzDwKX1jMfX0zUBAS8R+gaDvEC6UgiuWyAUchH09p1skLYdFMnlkv0uGLPty+U2eydLmNPxoMWVhI5Dsu56Arz5/YOJamK60ovOAF84pMCoYSGR/HjAGbNRtqFK/mOxo90WDCbWTithkca3RcJWVGDthU2ZgjuH7eh481eq+43UhDs+kmExPNdtdf6PzSyXAWDfnZbTT7NcF4MTCgTGTkkeFzyIdDJ9kNRxDXxdsx8MC0rT/X8/HpSmLqTJZLX3/8wHG0IRoMlywewCOimR6EsAnPsj3Y5mfEWYyZzYcNNbphB0LcHnVauAEmHsXyIYQNUC+L6+W2I2DMNWZo9WVGDrgeNuYIboP34auQ6H3ndiMNzc6ZeckcI3GmzHr2XpgtZ4qMHHBdPHPPMm/4+TM1M1QTGwKb69jq8oUUbf+fc1dtJos3XBhBm5gqZvcw2sz4m8wcZDP9GpVCMmxqUdsZMGkMaNwvWx+oeY+4fTbmCD4+3odDPbwdcLsYBHmgG5qdMvOa+KoXG7lRe2OOrycy8qie6DKaDR/amMEHVwKReL+lZ7KUhPAL53ZDyEvnsruiNiDcUWNQbakxc5AtLGba5hG0WdslutTB+0bGy/Bx8j68PXoPtmm3b9qdfQNTCpF4YRbddBMSZsJZ/NzXU1qAjIwoMnMOxUDelNtcLfANL1NnsvzXB377QH/awsfXRohLR8DQuewuqE0mS1t8VgQGAcyO/Wt+lo6/LVQClWbSAPtazjrM3c8m8VqXL4doY8RGlzp43xpTZbOu2YfZpt2+2SkzxyUqzLWkaAZdAvtYTNri5Yjj1lwOc9vr9oO7C/Eal/P1o8+8PVLUp6kzWS7cdYS7VE20mN1GczPzmkyWWjD7K8WsI6Es9olmjl3hNDuI0/MA38jUNJBEsDHKzOvYKTMXmyw9k6WkuZl5dNXWFphkGwPPVBMSibBZOgYFjhVnQkzbZvG1M/gSbIwy8zpk5jvO1JksXW7jrw2bZZqbmfPCdVuyLJcu4ue5ZDTlvrcRBoFsLSB6mBeLBxGrD0LIx2b9ODaYKIR+Y3vJVLNHBnP/7YYff4UB4XVrz7fT1O5YyMx3HDbXsdXlCym6ZrLMzcyjMFkt0SNhTZYuyCZkwrbSQmbTDD27y7Orom8DQl+5XF9qMlXe1pea2h0LmfkOc5gzWaC5mXkXotBKdGt7iSw7pemJhJmR43XLuInSIDEIWGw/m9GzqcnMh6PbGSgGZepMli638QM2u7aak5l3zWRhg2gy4BKROWdkVwRtFy6zpzDC5D1Dmnl089GQZm7hlqZ2x0JmXmDvtUurF1+5MJm+/fn7Nwx2TGHxdVuym6naaE5m3jWThY1iLDOPzBXGtA1R/JnbxiDh484mzO4tNl1SKSUTlEyVM21qhMHOt5dRancsZOYFPn706dWPfuChyYT250p0w1VbZWY+FaVBpGsmSxRmKd3lGZE9ZbE0MESLrqVnn5SI2obGZCpTnapdj8y8wK/94Vc3DHZMPfiVb3GXZkPXTBZoTmbeNZMleviVGStM0makbO54rSluHT2My8ie0wIhW6TG1NE+m5kpWgQdEu7HWKY6VbsemXkBNtex9fSL3+UuzYborti2mpOZd8lkMbKZbRfVmGkWNzdZHjkrCud4YTsPPkMzlalO1a5HZp6AmDWb69g6853vcbdmQ/aEyzaak5n3BYw1Crm0VdubhvpOT2x6AuRQTGWqU7Xr6e8sXBiPPXt2w1zH1pxhs9tGczHzrpksEQir1HzRshfKYp+2mSgehG1KIZuSMBjAxNqkU/bNVKY6VbsemXkC4tVsrmPqNz/5GHdpNvSRyQJlT02cStnTGrtmsjSBGa5lU/iMDJ/ZMcQs2O7W9HddsizbQ0yPzDzhI5/+tw2DHVOHPZNlTuqaySJEH8jME5TJsj19ZLLMSXigmBBTIzNPYHMdW3POZOl6G//cFD0WWYixkZkHKJOlG01fCrI0CbEL6EwM+Kd/fWXDXMfWnGGzW7L4a/6EmAqZecDnT5zaMNcxNfdMFhjcYZEWP8WuIDMPUCaLEGJuyMwD3vmRL20Y7JiacyaLEGIaZObE/uWrG+Y6tuacySKEmAaZOaFMFiHEHJGZE8pkEULMEZk5MXUmCxZfhRCiLTJzYupMlr948N+5S0II0YjMnGBzHVvKZBFCbIPM3IEvcGZzHVtYgBVCiLbIzB27kMmCAUUIIdoiM3dM/YUUkBBCbIPM3IHFRzbXMaVMFiHEtsjMHcpkEULMFZm5g811bCmTRQixLTLzayiTRQgxZ2Tm18DDrdhcx5YyWYQQ2yIzv4YyWYQQc0Zmfg18IQSb65hSJosQogsy82vgq9rYYMeUMlmEEF2QmV8DM+Mp9dizZ7lLQghRjcxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWgMxcCCEWwP8BwkuykSBWGDQAAAAASUVORK5CYII=" alt="본 정형외과 로고"></div>
       <div class="brand-sub">재고 관리</div>
     </div>
-    <div class="sync-pill" id="syncPill"><span class="sync-dot" id="syncDot"></span><span id="syncText">동기화됨</span></div>
+    <div class="sync-pill" id="syncPill" role="status" aria-live="polite"><span class="sync-dot" id="syncDot"></span><span id="syncText">동기화됨</span></div>
   </div>
   <div class="dept-scroll" id="deptScroll"></div>
 </header>
 
 <main id="main"></main>
 
-<nav class="bottom-nav">
+<nav class="bottom-nav" aria-label="하단 메뉴">
   <div class="nav-btn" data-screen="dashboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
     <span>재고현황</span>
@@ -333,7 +357,7 @@
   </div>
 </nav>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 const DEPTS = ["수술실", "처치실", "병동", "물리치료실"];
@@ -503,18 +527,20 @@ function renderDeptChips(){
 function renderNav(){
   document.querySelectorAll('.nav-btn').forEach(el=>{
     el.classList.toggle('active', el.dataset.screen === STATE.screen);
+    if(el.dataset.screen === STATE.screen) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current');
   });
 }
 document.querySelectorAll('.nav-btn').forEach(el=>{
   el.addEventListener('click', ()=>{
     STATE.screen = el.dataset.screen;
     if(STATE.screen === 'audit' && !STATE.auditDept && STATE.dept !== '전체') STATE.auditDept = STATE.dept;
+    a11yAnnounce(el.textContent.trim() + ' 화면');
     render();
   });
 });
 
 // ---------- MAIN RENDER ----------
-function render(){
+function _renderCore(){
   renderDeptChips();
   renderNav();
   const main = document.getElementById('main');
@@ -591,7 +617,7 @@ function renderDashboard(main){
     </div>
 
     <div class="search-bar">
-      <input type="text" id="searchInput" placeholder="품목명 또는 규격 검색" value="${esc(STATE.search)}">
+      <input type="text" id="searchInput" aria-label="품목 검색" placeholder="품목명 또는 규격 검색" value="${esc(STATE.search)}">
     </div>
     <div class="cat-filter" id="catFilter"></div>
 
@@ -665,7 +691,7 @@ function renderAudit(main){
             <div class="spec">${esc(i.cat)} ${i.spec?('· '+esc(i.spec)):''}</div>
             <div class="old">현재고 ${i.stock} · 적정 ${i.par}</div>
           </div>
-          <input type="number" min="0" class="mono audit-input" data-id="${i.id}" value="${STATE.auditDraft[i.id] !== undefined ? STATE.auditDraft[i.id] : i.stock}">
+          <input type="number" min="0" class="mono audit-input" data-id="${esc(i.id)}" aria-label="${esc(i.name)} 실사 수량" value="${STATE.auditDraft[i.id] !== undefined ? STATE.auditDraft[i.id] : i.stock}">
         </div>
       `).join('')}
     </div>
@@ -735,16 +761,16 @@ function renderRequest(main){
         STATE.reqQty[i.id] = qty;
         return `
         <div class="req-item">
-          <input type="checkbox" data-id="${i.id}" class="reqChk" ${checked?'checked':''}>
+          <input type="checkbox" data-id="${esc(i.id)}" class="reqChk" aria-label="${esc(i.name)} 청구 선택" ${checked?'checked':''}>
           <div class="info">
             <div class="name">${esc(i.name)}</div>
             <div class="spec">${esc(i.dept)} · ${esc(i.cat)} ${i.spec?('· '+esc(i.spec)):''}</div>
             <div class="shortage">현재 ${i.stock} / 적정 ${i.par}</div>
           </div>
           <div class="qty-stepper">
-            <button class="reqMinus" data-id="${i.id}">−</button>
-            <input type="number" class="mono reqQty" data-id="${i.id}" value="${qty}" min="1">
-            <button class="reqPlus" data-id="${i.id}">+</button>
+            <button class="reqMinus" data-id="${esc(i.id)}" aria-label="${esc(i.name)} 청구 수량 줄이기">−</button>
+            <input type="number" class="mono reqQty" data-id="${esc(i.id)}" aria-label="${esc(i.name)} 청구 수량" value="${qty}" min="1">
+            <button class="reqPlus" data-id="${esc(i.id)}" aria-label="${esc(i.name)} 청구 수량 늘리기">+</button>
           </div>
         </div>`;
       }).join('')}
@@ -755,7 +781,7 @@ function renderRequest(main){
     <div class="card" style="padding:4px 12px;">
       ${pastRequests.length===0 ? `<div class="empty-state" style="padding:24px;"><div class="glyph">📄</div>생성된 청구서가 없어요</div>` :
         pastRequests.map(r=>`
-        <div class="history-item" data-rid="${r.id}">
+        <div class="history-item" data-rid="${esc(r.id)}">
           <div class="row1"><span>${esc(r.dept)} 청구서</span><span>${fmtDate(r.date)}</span></div>
           <div class="row2">${r.items.length}개 품목</div>
         </div>`).join('')}
@@ -763,7 +789,7 @@ function renderRequest(main){
   `;
 
   const rs = document.getElementById('reqDeptScroll');
-  rs.innerHTML = ['전체', ...DEPTS].map(d=>`<div class="dept-chip" style="background:${d===dept?'var(--teal)':'var(--surface-2)'};color:${d===dept?'#fff':'var(--ink-soft)'};border-color:transparent;" data-d="${esc(d)}">${esc(d)}</div>`).join('');
+  rs.innerHTML = ['전체', ...DEPTS].map(d=>`<div class="dept-chip" aria-pressed="${d===dept}" style="background:${d===dept?'var(--teal)':'var(--surface-2)'};color:${d===dept?'#fff':'var(--ink-soft)'};border-color:transparent;" data-d="${esc(d)}">${esc(d)}</div>`).join('');
   rs.querySelectorAll('[data-d]').forEach(el=> el.addEventListener('click', ()=>{ STATE.reqDept = el.dataset.d; render(); }));
 
   main.querySelectorAll('.reqChk').forEach(el=> el.addEventListener('change', e=>{ STATE.reqSel[e.target.dataset.id] = e.target.checked; }));
@@ -819,6 +845,7 @@ function showRequestModal(req){
       </div>
     </div>`;
   document.body.appendChild(backdrop);
+  a11yModal(backdrop);
   backdrop.addEventListener('click', e=>{ if(e.target===backdrop) backdrop.remove(); });
   document.getElementById('closeModal').addEventListener('click', ()=> backdrop.remove());
   document.getElementById('printReq').addEventListener('click', ()=> window.print());
@@ -830,27 +857,27 @@ function manageListHtml(){
     .filter(i=> !STATE.search || i.name.includes(STATE.search) || i.spec.includes(STATE.search));
   return list.length===0 ? `<div class="empty-state"><div class="glyph">🗂️</div>등록된 품목이 없어요</div>` :
     list.map(i=>`
-      <div class="manage-item" data-id="${i.id}">
+      <div class="manage-item" data-id="${esc(i.id)}">
         <div class="top">
           <div>
             <div class="name">${esc(i.name)}</div>
             <div class="spec">${esc(i.dept)} · ${esc(i.cat)} ${i.spec?('· '+esc(i.spec)):''}</div>
           </div>
           <div style="display:flex;gap:6px;">
-            <div class="icon-btn editBtn" data-id="${i.id}" title="수정">
+            <div class="icon-btn editBtn" data-id="${esc(i.id)}" title="수정">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
             </div>
-            <div class="icon-btn danger delBtn" data-id="${i.id}" title="삭제">
+            <div class="icon-btn danger delBtn" data-id="${esc(i.id)}" title="삭제">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
             </div>
           </div>
         </div>
         <div class="edit-row">
           <div class="par-field">적정재고
-            <input type="number" min="0" class="mono parInput" data-id="${i.id}" value="${i.par}">
+            <input type="number" min="0" class="mono parInput" data-id="${esc(i.id)}" aria-label="${esc(i.name)} 적정재고" value="${i.par}">
           </div>
           <div class="par-field">현재고
-            <input type="number" min="0" class="mono stockInput" data-id="${i.id}" value="${i.stock}">
+            <input type="number" min="0" class="mono stockInput" data-id="${esc(i.id)}" aria-label="${esc(i.name)} 현재고" value="${i.stock}">
           </div>
         </div>
       </div>
@@ -903,7 +930,7 @@ function renderManage(main){
       <button class="btn btn-primary" id="addItemBtn" style="flex:1;">+ 새 품목 추가</button>
       <button class="btn btn-secondary" id="bulkCatBtn" style="flex:1;">소분류 일괄 변경</button>
     </div>
-    <div class="search-bar"><input type="text" id="searchInput" placeholder="품목명 검색" value="${esc(STATE.search)}"></div>
+    <div class="search-bar"><input type="text" id="searchInput" aria-label="품목 검색" placeholder="품목명 검색" value="${esc(STATE.search)}"></div>
     <div class="cat-filter" id="catFilter"></div>
     <div class="card" style="padding:4px 12px;" id="itemListCard">
       ${manageListHtml()}
@@ -990,6 +1017,7 @@ function openBulkCatModal(){
       </div>
     </div>`;
   document.body.appendChild(backdrop);
+  a11yModal(backdrop);
   const close = ()=> backdrop.remove();
   backdrop.addEventListener('click', e=>{ if(e.target===backdrop) close(); });
   document.getElementById('closeModal').addEventListener('click', close);
@@ -1064,6 +1092,7 @@ function openItemModal(item){
       </div>
     </div>`;
   document.body.appendChild(backdrop);
+  a11yModal(backdrop);
   const close = ()=> backdrop.remove();
   backdrop.addEventListener('click', e=>{ if(e.target===backdrop) close(); });
   document.getElementById('closeModal').addEventListener('click', close);
@@ -1100,6 +1129,109 @@ function openItemModal(item){
     render();
   });
 }
+
+// ================= 접근성 도우미 =================
+function a11yAnnounce(msg){
+  let e = document.getElementById('srLive');
+  if(!e){
+    e = document.createElement('div'); e.id = 'srLive'; e.className = 'sr-only';
+    e.setAttribute('role','status'); e.setAttribute('aria-live','polite');
+    document.body.appendChild(e);
+  }
+  e.textContent = ''; setTimeout(()=>{ e.textContent = msg; }, 30);
+}
+// 화면을 다시 그려도 키보드 포커스가 사라지지 않도록 같은 요소를 찾아 돌려줍니다.
+function focusSnapshot(){
+  const a = document.activeElement;
+  if(!a || a === document.body || !(a.closest('main') || a.closest('#deptScroll'))) return null;
+  const ds = {}; for(const k in a.dataset){ if(k !== 'a11y') ds[k] = a.dataset[k]; }
+  return { tag: a.tagName.toLowerCase(), id: a.id, cls: a.classList[0] || '', ds };
+}
+function focusRestore(sn){
+  if(!sn) return;
+  let el = sn.id ? document.getElementById(sn.id) : null;
+  if(!el && sn.cls){
+    const q = document.querySelectorAll(sn.tag + '.' + CSS.escape(sn.cls));
+    for(const c of q){
+      let ok = true;
+      for(const k in sn.ds){ if(c.dataset[k] !== sn.ds[k]){ ok = false; break; } }
+      if(ok){ el = c; break; }
+    }
+  }
+  if(el) el.focus({ preventScroll: true });
+}
+function render(){
+  const sn = focusSnapshot();
+  _renderCore();
+  a11yEnhanceAll(); // 포커스를 돌려주기 전에 tabindex·role을 먼저 붙입니다
+  focusRestore(sn);
+}
+let _mSeq = 0;
+const A11Y_FOCUSABLE = 'button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function a11yModal(bd){
+  const sheet = bd.firstElementChild, prev = document.activeElement;
+  sheet.setAttribute('role','dialog'); sheet.setAttribute('aria-modal','true'); sheet.setAttribute('tabindex','-1');
+  const t = sheet.querySelector('.modal-title > span:first-child');
+  if(t){ t.id = 'mt' + (++_mSeq); sheet.setAttribute('aria-labelledby', t.id); }
+  sheet.querySelectorAll('label.field-label').forEach(l=>{
+    if(l.htmlFor) return;
+    let n = l.nextElementSibling;
+    while(n && n.tagName !== 'LABEL'){
+      if(/^(INPUT|SELECT|TEXTAREA)$/.test(n.tagName) && n.id){ l.htmlFor = n.id; break; }
+      n = n.nextElementSibling;
+    }
+  });
+  function onKey(e){
+    if(!document.body.contains(bd)) return;
+    if(e.key === 'Escape'){ e.preventDefault(); bd.remove(); return; }
+    if(e.key !== 'Tab') return;
+    const f = Array.prototype.filter.call(sheet.querySelectorAll(A11Y_FOCUSABLE), x => x.offsetParent !== null);
+    if(!f.length) return;
+    const a = f[0], z = f[f.length-1];
+    if(!sheet.contains(document.activeElement)){ e.preventDefault(); a.focus(); }
+    else if(e.shiftKey && document.activeElement === a){ e.preventDefault(); z.focus(); }
+    else if(!e.shiftKey && document.activeElement === z){ e.preventDefault(); a.focus(); }
+  }
+  document.addEventListener('keydown', onKey);
+  const origRemove = bd.remove.bind(bd);
+  bd.remove = function(){
+    document.removeEventListener('keydown', onKey);
+    origRemove();
+    if(prev && document.contains(prev) && prev.focus) prev.focus();
+  };
+  const first = sheet.querySelector('input:not([type=hidden]),select,textarea');
+  (first || sheet).focus({ preventScroll: true });
+}
+function a11yEnhanceAll(){
+  document.querySelectorAll('.dept-chip,.cat-chip,.nav-btn,.history-item,.icon-btn,.modal-close').forEach(el=>{
+    if(!el.hasAttribute('data-a11y')){ el.setAttribute('data-a11y','1'); el.setAttribute('role','button'); el.tabIndex = 0; }
+    if(el.classList.contains('dept-chip') || el.classList.contains('cat-chip')){
+      if(el.classList.contains('active')) el.setAttribute('aria-pressed','true');
+      else if(!el.hasAttribute('aria-pressed')) el.setAttribute('aria-pressed','false');
+    }
+    if(el.classList.contains('modal-close')) el.setAttribute('aria-label','닫기');
+    if(el.classList.contains('icon-btn')){
+      const m = el.closest('.manage-item'), n = m && m.querySelector('.name');
+      el.setAttribute('aria-label', (n ? n.textContent.trim() + ' ' : '') + (el.classList.contains('danger') ? '삭제' : '수정'));
+    }
+  });
+  document.querySelectorAll('svg:not([aria-hidden]),.glyph').forEach(el=> el.setAttribute('aria-hidden','true'));
+  const set = (sel, role, extra)=> document.querySelectorAll(sel).forEach(el=>{ el.setAttribute('role', role); if(extra) Object.keys(extra).forEach(k=> el.setAttribute(k, extra[k])); });
+  set('.brand-sub', 'heading', { 'aria-level': '1' });
+  set('.section-title', 'heading', { 'aria-level': '2' });
+  set('.modal-title > span:first-child', 'heading', { 'aria-level': '2' });
+  set('#deptScroll,#reqDeptScroll', 'group', { 'aria-label': '부서 선택' });
+  set('#catFilter', 'group', { 'aria-label': '분류 선택' });
+}
+let _enhT = 0;
+new MutationObserver(()=>{ cancelAnimationFrame(_enhT); _enhT = requestAnimationFrame(a11yEnhanceAll); }).observe(document.body, { childList: true, subtree: true });
+document.addEventListener('keydown', e=>{
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const t = e.target;
+  if(!t || !t.matches || !t.matches('[data-a11y]')) return;
+  e.preventDefault(); t.click();
+});
+a11yEnhanceAll();
 
 // ---------- init ----------
 loadAll();

@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>본정형외과 처치실 보조기 카운트</title>
 <style>
   :root{
@@ -88,7 +88,7 @@
     text-align:center;
     min-width:96px;
   }
-  .total-badge .num{display:block;font-size:1.7rem;font-weight:800;color:var(--orange);line-height:1;}
+  .total-badge .num{display:block;font-size:1.7rem;font-weight:800;color:#935700;line-height:1;}
   .total-badge .lbl{display:block;font-size:0.72rem;color:var(--text-soft);margin-top:3px;font-weight:700;}
   button.total-badge{font:inherit;appearance:none;}
   .btn{
@@ -104,15 +104,18 @@
   }
   .btn:hover{background:#F7F7F5;}
   .btn:active{transform:translateY(1px);}
-  .btn.danger{color:var(--red);border-color:#F6C9CE;}
+  .btn.danger{color:#C41E30;border-color:#F6C9CE;}
   .btn.danger:hover{background:var(--red-tint);}
-  .btn.primary{background:var(--orange);color:#fff;border-color:var(--orange);}
+  .btn.primary{background:var(--orange);color:var(--text);border-color:var(--orange);}
   .btn.primary:hover{background:#DE8900;}
   .btn.active{background:var(--red);color:#fff;border-color:var(--red);}
   .btn.active:hover{background:#CE2938;}
-  .btn:focus-visible, .icon-btn:focus-visible, input:focus-visible, .count-btn:focus-visible{
+  .btn:focus-visible, .icon-btn:focus-visible, input:focus-visible, .count-btn:focus-visible,
+  .history-row:focus-visible, .add-item-btn:focus-visible, .add-category-card:focus-visible{
     outline:3px solid #2B71B9;outline-offset:2px;
   }
+
+  .btn, .icon-btn, .count-btn, .add-item-btn, .add-category-card, .history-row{touch-action:manipulation;}
 
   /* ---------- Toolbar ---------- */
   .toolbar{
@@ -129,7 +132,7 @@
     background:var(--panel);
     color:var(--text);
   }
-  .search-wrap input:focus{outline:none;border-color:var(--blue);}
+  .search-wrap input:focus{border-color:var(--blue);}
   .search-wrap svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:0.45;}
   .date-line{
     font-size:0.85rem;color:var(--text-soft);font-weight:600;margin:2px 2px 12px;
@@ -158,7 +161,7 @@
   .chip{
     width:34px;height:34px;border-radius:9px;
     background:var(--accent-tint, var(--orange-tint));
-    color:var(--accent, var(--orange));
+    color:var(--accent-text, #935700);
     display:flex;align-items:center;justify-content:center;
     font-weight:800;font-size:0.95rem;flex-shrink:0;
   }
@@ -170,12 +173,12 @@
   .head-actions{display:flex;gap:2px;flex-shrink:0;}
   .icon-btn{
     border:none;background:transparent;cursor:pointer;
-    width:32px;height:32px;border-radius:8px;
+    width:40px;height:40px;border-radius:8px;
     display:flex;align-items:center;justify-content:center;
     color:var(--text-soft);font-size:1rem;
   }
   .icon-btn:hover{background:#F1F1EF;color:var(--text);}
-  .icon-btn.del:hover{background:var(--red-tint);color:var(--red);}
+  .icon-btn.del:hover{background:var(--red-tint);color:#C41E30;}
   .collapse-btn{transition:transform .15s ease;}
   .category.collapsed .collapse-btn{transform:rotate(-90deg);}
   .category.collapsed .items{display:none;}
@@ -188,28 +191,28 @@
     border-bottom:1px dashed var(--border);
   }
   .item-row:last-of-type{border-bottom:none;}
-  .item-main{display:flex;align-items:center;justify-content:space-between;gap:10px;}
-  .item-label{display:flex;align-items:center;gap:4px;min-width:0;flex:1;}
+  .item-main{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;}
+  .item-label{display:flex;align-items:center;gap:6px;min-width:0;flex:1 1 auto;}
   .size-badge{
     font-size:1.08rem;font-weight:700;
     background:var(--accent-tint, var(--orange-tint));
-    color:var(--accent, var(--orange));
+    color:var(--accent-text, #935700);
     padding:5px 11px;border-radius:8px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;
   }
-  .item-row .icon-btn{width:28px;height:28px;font-size:0.85rem;}
+  .item-row .icon-btn{width:36px;height:36px;font-size:0.95rem;}
 
 
-  .counter{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .counter{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto;}
   .count-btn{
-    width:40px;height:40px;border-radius:10px;
+    width:44px;height:44px;border-radius:10px;
     border:1px solid var(--border);background:var(--panel);
     font-size:1.35rem;font-weight:700;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
     color:var(--text);line-height:1;
     user-select:none;
   }
-  .count-btn.plus{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .count-btn.plus{background:var(--orange);border-color:var(--orange);color:var(--text);}
   .count-btn.plus:hover{background:#DE8900;}
   .count-btn.minus:hover{background:var(--red-tint);color:var(--red);border-color:#F6C9CE;}
   .count-btn:active{transform:scale(0.94);}
@@ -227,7 +230,7 @@
     padding:9px;border-radius:10px;
     font-weight:700;font-size:0.9rem;cursor:pointer;
   }
-  .add-item-btn:hover{border-color:var(--accent, var(--orange));color:var(--accent, var(--orange));background:var(--accent-tint, var(--orange-tint));}
+  .add-item-btn:hover{border-color:var(--accent, var(--orange));color:var(--accent-text, #935700);background:var(--accent-tint, var(--orange-tint));}
 
   .add-category-card{
     border:1.5px dashed var(--border);
@@ -238,7 +241,7 @@
     color:var(--text-soft);
     font-weight:800;font-size:1rem;cursor:pointer;
   }
-  .add-category-card:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-tint);}
+  .add-category-card:hover{border-color:var(--blue);color:#1F5A9A;background:var(--blue-tint);}
 
   .empty-state{
     grid-column:1/-1;
@@ -252,11 +255,12 @@
   .modal-backdrop{
     position:fixed;inset:0;background:rgba(34,24,22,0.42);
     display:flex;align-items:center;justify-content:center;
-    padding:20px;z-index:50;
+    padding:20px;z-index:50;overscroll-behavior:contain;
   }
   .modal{
     background:var(--panel);border-radius:18px;
     padding:22px;max-width:420px;width:100%;
+    max-height:calc(100vh - 40px);overflow-y:auto;overscroll-behavior:contain;
     box-shadow:0 20px 60px rgba(0,0,0,0.25);
   }
   .modal.wide{max-width:640px;}
@@ -266,22 +270,24 @@
     width:100%;padding:11px 13px;font-size:1.05rem;
     border-radius:10px;border:1px solid var(--border);margin-bottom:16px;
   }
-  .modal input:focus{outline:none;border-color:var(--blue);}
+  .modal input:focus{border-color:var(--blue);}
   .modal .field-label{display:block;font-size:0.85rem;font-weight:700;color:var(--text-soft);margin:14px 0 6px;}
   .modal .field-label:first-of-type{margin-top:0;}
   .modal-actions{display:flex;gap:8px;justify-content:flex-end;}
   .modal-actions .btn{padding:10px 18px;}
 
-  .history-list{max-height:340px;overflow-y:auto;margin:-4px 0 16px;}
+  .history-list{max-height:340px;overflow-y:auto;overscroll-behavior:contain;margin:-4px 0 16px;}
   .history-row{
     display:flex;justify-content:space-between;align-items:center;
-    padding:12px 4px;border-bottom:1px solid var(--border);
+    width:100%;padding:12px 4px;margin:0;
+    background:none;border:0;border-bottom:1px solid var(--border);
+    font:inherit;color:inherit;text-align:left;
     cursor:pointer;
   }
   .history-row:hover{background:#F7F7F5;}
   .history-row .d{font-weight:700;}
   .history-row .t{color:var(--text-soft);font-size:0.88rem;}
-  .history-detail{max-height:360px;overflow-y:auto;}
+  .history-detail{max-height:360px;overflow-y:auto;overscroll-behavior:contain;}
   .history-detail .row{display:flex;justify-content:space-between;padding:7px 2px;font-size:0.95rem;border-bottom:1px dashed var(--border);}
   .history-detail .cat{color:var(--text-soft);font-size:0.8rem;}
 
@@ -326,7 +332,7 @@
       </div>
     </div>
     <div class="summary">
-      <div class="total-badge">
+      <div class="total-badge" aria-live="polite">
         <span class="num" id="totalCount">0</span>
         <span class="lbl">오늘 총 사용</span>
       </div>
@@ -340,33 +346,34 @@
 
   <div class="toolbar">
     <div class="search-wrap">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="searchInput" placeholder="품목 검색 (예: wrist, 좌L, 깁스신발)">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="searchInput" type="search" name="search" autocomplete="off" aria-label="품목 검색" placeholder="품목 검색 (예: wrist, 좌L, 깁스신발)">
     </div>
     <button class="btn" id="expandAllBtn">전체 펼치기</button>
     <button class="btn" id="collapseAllBtn">전체 접기</button>
   </div>
 
   <div id="categoryList">
-    <div class="loading-wrap">불러오는 중...</div>
+    <div class="loading-wrap">불러오는 중…</div>
   </div>
 
   <footer class="note">이 카운트는 처치실 전체 선생님이 함께 보고 기록하는 공용 데이터입니다 · 날짜가 바뀌면 사용 카운트는 자동으로 0부터 다시 시작됩니다</footer>
 </div>
 
 <div id="modalRoot"></div>
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 (function(){
   "use strict";
 
   var CATALOG = [["복대", [""]], ["팔걸이 (파랑)", [""]], ["팔걸이 (분홍)", [""]], ["깁스신발", ["S", "M", "L", "XL"]], ["M-splint (thumb)", ["좌 S", "좌 M", "좌 L", "우 S", "우 M", "우 L"]], ["M-splint (wrist)", ["좌 S", "좌 M", "좌 L", "좌 XL", "우 S", "우 M", "우 L", "우 XL"]], ["M-splint (finger)", ["S", "M", "L"]], ["M-splint Leg (ankle)", ["S", "M", "L", "XL", "XXL"]], ["M-splint (long leg)", ["M", "L", "XL"]], ["JS-Tap EB (elbow)", ["S", "M", "L", "XL"]], ["JS-Tap KB (knee)", ["S", "M", "L", "XL"]], ["Q-splint (Ulnar)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (wrist)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (thumb)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (long arm)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (short leg)", ["소", "플러스 소", "중", "대"]], ["Q-splint (cylinder)", ["좌M", "좌L", "우M", "우L"]], ["Q-splint (long leg)", ["소", "플러스 소", "중", "대"]]];
+  // c: 포인트 색(테두리/배경), t: 연한 배경, x: 글자색(대비 4.5:1 이상)
   var ACCENTS = [
-    {c:'#F59701', t:'#FFF3E0'},
-    {c:'#2B71B9', t:'#E9F1FA'},
-    {c:'#8FB60A', t:'#F3F8E4'},
-    {c:'#E83344', t:'#FDECEE'}
+    {c:'#F59701', t:'#FFF3E0', x:'#935700'},
+    {c:'#2B71B9', t:'#E9F1FA', x:'#1F5A9A'},
+    {c:'#8FB60A', t:'#F3F8E4', x:'#587300'},
+    {c:'#E83344', t:'#FDECEE', x:'#C41E30'}
   ];
 
   var items = [];        // {id, category, size, stock}
@@ -562,27 +569,50 @@
   }
 
   /* ---------- Modal helpers ---------- */
+  var lastFocus = null; // 모달을 열기 전에 포커스가 있던 요소
+  var FOCUSABLE = 'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])';
   function openModal(html, onMount, extraClass){
     var root = document.getElementById('modalRoot');
     var cls = 'modal' + (extraClass ? ' '+extraClass : '');
-    root.innerHTML = '<div class="modal-backdrop" id="mb"><div class="'+cls+'">'+html+'</div></div>';
+    if (!root.firstChild) lastFocus = document.activeElement;
+    root.innerHTML = '<div class="modal-backdrop" id="mb"><div class="'+cls+'" role="dialog" aria-modal="true">'+html+'</div></div>';
     var bd = document.getElementById('mb');
+    var dlg = bd.firstChild;
+    var heading = dlg.querySelector('h3');
+    if (heading){ heading.id = 'mTitle'; dlg.setAttribute('aria-labelledby', 'mTitle'); }
     bd.addEventListener('click', function(e){ if (e.target === bd) closeModal(); });
     document.addEventListener('keydown', escHandler);
     if (onMount) onMount(root);
+    if (!dlg.contains(document.activeElement)){
+      var first = dlg.querySelector(FOCUSABLE);
+      if (first) first.focus();
+    }
   }
-  function escHandler(e){ if (e.key === 'Escape') closeModal(); }
+  function escHandler(e){
+    if (e.key === 'Escape'){ closeModal(); return; }
+    if (e.key !== 'Tab') return;
+    var dlg = document.querySelector('#modalRoot .modal');
+    if (!dlg) return;
+    var f = dlg.querySelectorAll(FOCUSABLE);
+    if (!f.length) return;
+    var first = f[0], last = f[f.length-1];
+    if (!dlg.contains(document.activeElement)){ e.preventDefault(); first.focus(); }
+    else if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  }
   function closeModal(){
     document.getElementById('modalRoot').innerHTML = '';
     document.removeEventListener('keydown', escHandler);
+    if (lastFocus && document.contains(lastFocus) && lastFocus.focus) lastFocus.focus();
+    lastFocus = null;
   }
 
   function confirmModal(title, desc, confirmLabel, onConfirm){
     openModal(
-      '<h3>'+title+'</h3><p>'+desc+'</p>'+
+      '<h3>'+esc(title)+'</h3><p>'+esc(desc)+'</p>'+
       '<div class="modal-actions">'+
         '<button class="btn" id="mCancel">취소</button>'+
-        '<button class="btn danger" id="mOk">'+confirmLabel+'</button>'+
+        '<button class="btn danger" id="mOk">'+esc(confirmLabel)+'</button>'+
       '</div>',
       function(){
         document.getElementById('mCancel').onclick = closeModal;
@@ -595,11 +625,11 @@
     var type = inputType || 'text';
     var extraAttrs = type === 'number' ? ' inputmode="numeric" min="0"' : '';
     openModal(
-      '<h3>'+title+'</h3>'+(desc ? '<p>'+desc+'</p>' : '')+
-      '<input id="mInput" type="'+type+'"'+extraAttrs+' placeholder="'+placeholder+'" value="'+(initial||'').replace(/"/g,'&quot;')+'">'+
+      '<h3>'+esc(title)+'</h3>'+(desc ? '<p>'+esc(desc)+'</p>' : '')+
+      '<input id="mInput" type="'+type+'"'+extraAttrs+' aria-label="'+esc(title)+'" placeholder="'+esc(placeholder)+'" value="'+esc(initial||'')+'">'+
       '<div class="modal-actions">'+
         '<button class="btn" id="mCancel">취소</button>'+
-        '<button class="btn primary" id="mOk">'+confirmLabel+'</button>'+
+        '<button class="btn primary" id="mOk">'+esc(confirmLabel)+'</button>'+
       '</div>',
       function(){
         var input = document.getElementById('mInput');
@@ -747,7 +777,7 @@
   }
 
   async function openBiweekStats(){
-    openModal('<h3>2주 단위 통계</h3><p>불러오는 중...</p>', function(){});
+    openModal('<h3>2주 단위 통계</h3><p>불러오는 중…</p>', function(){});
     var keys = await listKeys('counts:', true);
     var buckets = {};
     for (var i=0;i<keys.length;i++){
@@ -776,7 +806,7 @@
 
     var html = '<h3>2주 단위 통계</h3><p>14일씩 묶어서 품목 사용량을 합산했어요. 기간을 눌러 품목별 내역을 보세요.</p><div class="history-list">'+
       bucketList.map(function(b,i){
-        return '<div class="history-row" data-idx="'+i+'"><span class="d">'+friendlyRange(b.data.startStr,b.data.endStr)+'</span><span class="t">총 '+b.data.total+'개</span></div>';
+        return '<button type="button" class="history-row" data-idx="'+i+'"><span class="d">'+friendlyRange(b.data.startStr,b.data.endStr)+'</span><span class="t">총 '+b.data.total+'개</span></button>';
       }).join('')+
       '</div><div class="modal-actions"><button class="btn" id="mClose">닫기</button></div>';
 
@@ -801,7 +831,7 @@
     var rowsHtml = entries.length === 0
       ? '<p>이 기간엔 기록된 사용량이 없어요.</p>'
       : '<div class="history-detail">'+ entries.map(function(e){
-          return '<div class="row"><span>'+esc(e.label)+'</span><span><b>'+e.v+'</b></span></div>';
+          return '<div class="row"><span>'+esc(e.label)+'</span><span><b>'+esc(e.v)+'</b></span></div>';
         }).join('') + '</div>';
 
     openModal(
@@ -816,7 +846,7 @@
 
   /* ---------- History ---------- */
   async function openHistory(){
-    openModal('<h3>지난 기록</h3><p>불러오는 중...</p>', function(){});
+    openModal('<h3>지난 기록</h3><p>불러오는 중…</p>', function(){});
     var keys = await listKeys('counts:', true);
     keys = keys.filter(function(k){ return k !== todayKey; });
     keys.sort().reverse();
@@ -840,7 +870,7 @@
 
     var html = '<h3>지난 기록</h3><div class="history-list">'+
       rows.map(function(r,i){
-        return '<div class="history-row" data-idx="'+i+'"><span class="d">'+friendlyDate(r.date)+'</span><span class="t">총 '+r.total+'개</span></div>';
+        return '<button type="button" class="history-row" data-idx="'+i+'"><span class="d">'+esc(friendlyDate(r.date))+'</span><span class="t">총 '+r.total+'개</span></button>';
       }).join('')+
       '</div><div class="modal-actions"><button class="btn" id="mClose">닫기</button></div>';
 
@@ -864,11 +894,11 @@
       rowsHtml = '<div class="history-detail">'+ nonzero.map(function(id){
         var it = items.find(function(x){ return x.id === id; });
         var label = it ? (it.category+' · '+it.size) : '(삭제된 품목)';
-        return '<div class="row"><span>'+label+'</span><span><b>'+r.data[id]+'</b></span></div>';
+        return '<div class="row"><span>'+esc(label)+'</span><span><b>'+esc(r.data[id])+'</b></span></div>';
       }).join('') + '</div>';
     }
     openModal(
-      '<h3>'+friendlyDate(r.date)+'</h3><p>총 '+r.total+'개 사용</p>'+rowsHtml+
+      '<h3>'+esc(friendlyDate(r.date))+'</h3><p>총 '+r.total+'개 사용</p>'+rowsHtml+
       '<div class="modal-actions"><button class="btn" id="mBack">뒤로</button><button class="btn primary" id="mClose">닫기</button></div>',
       function(){
         document.getElementById('mClose').onclick = closeModal;
@@ -905,17 +935,17 @@
       var itemsHtml = filteredItems.map(function(it){
         var c = counts[it.id] || 0;
         return (
-          '<div class="item-row" data-id="'+it.id+'">'+
+          '<div class="item-row" data-id="'+esc(it.id)+'">'+
             '<div class="item-main">'+
               '<div class="item-label">'+
-                '<span class="size-badge" style="--accent:'+accent.c+';--accent-tint:'+accent.t+'">'+esc(it.size)+'</span>'+
-                '<button class="icon-btn edit-item" data-id="'+it.id+'" aria-label="수정" title="수정">&#9998;</button>'+
-                '<button class="icon-btn del del-item" data-id="'+it.id+'" aria-label="삭제" title="삭제">&#128465;</button>'+
+                '<span class="size-badge" title="'+esc(it.size)+'" style="--accent:'+accent.c+';--accent-tint:'+accent.t+';--accent-text:'+accent.x+'">'+esc(it.size)+'</span>'+
+                '<button class="icon-btn edit-item" data-id="'+esc(it.id)+'" aria-label="수정" title="수정">&#9998;</button>'+
+                '<button class="icon-btn del del-item" data-id="'+esc(it.id)+'" aria-label="삭제" title="삭제">&#128465;</button>'+
               '</div>'+
               '<div class="counter">'+
-                '<button class="count-btn minus" data-id="'+it.id+'" data-d="-1" aria-label="'+esc(it.size)+' 감소">&minus;</button>'+
-                '<span class="count-value" id="cv-'+it.id+'">'+c+'</span>'+
-                '<button class="count-btn plus" data-id="'+it.id+'" data-d="1" aria-label="'+esc(it.size)+' 증가">+</button>'+
+                '<button class="count-btn minus" data-id="'+esc(it.id)+'" data-d="-1" aria-label="'+esc(it.size)+' 감소">&minus;</button>'+
+                '<span class="count-value" id="cv-'+esc(it.id)+'">'+c+'</span>'+
+                '<button class="count-btn plus" data-id="'+esc(it.id)+'" data-d="1" aria-label="'+esc(it.size)+' 증가">+</button>'+
               '</div>'+
             '</div>'+
           '</div>'
@@ -923,14 +953,14 @@
       }).join('');
 
       htmlParts.push(
-        '<section class="category'+(collapsed?' collapsed':'')+'" style="--accent:'+accent.c+';--accent-tint:'+accent.t+'" data-cat="'+esc(catName)+'">'+
+        '<section class="category'+(collapsed?' collapsed':'')+'" style="--accent:'+accent.c+';--accent-tint:'+accent.t+';--accent-text:'+accent.x+'" data-cat="'+esc(catName)+'">'+
           '<div class="category-head">'+
             '<span class="chip">'+esc(chipChar)+'</span>'+
             '<h2>'+esc(catName)+'</h2>'+
             '<div class="head-actions">'+
               '<button class="icon-btn edit-cat" data-cat="'+esc(catName)+'" aria-label="그룹명 수정" title="그룹명 수정">&#9998;</button>'+
               '<button class="icon-btn del del-cat" data-cat="'+esc(catName)+'" aria-label="그룹 삭제" title="그룹 삭제">&#128465;</button>'+
-              '<button class="icon-btn collapse-btn" data-cat="'+esc(catName)+'" aria-label="접기/펼치기" title="접기/펼치기">&#9660;</button>'+
+              '<button class="icon-btn collapse-btn" data-cat="'+esc(catName)+'" aria-label="접기/펼치기" aria-expanded="'+(!collapsed)+'" title="접기/펼치기">&#9660;</button>'+
             '</div>'+
           '</div>'+
           '<div class="items">'+itemsHtml+

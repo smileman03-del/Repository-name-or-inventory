@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>조인성의 그림그리기</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
@@ -18,15 +18,15 @@
   }
   .app{ width:100%; max-width:560px; }
   header{ text-align:center; margin-bottom:10px; }
-  header h1{ font-size:1.4rem; font-weight:800; margin:4px 0 2px; color:#E8703A; }
-  header p{ margin:0; font-size:0.85rem; color:#7a7a7a; font-weight:500; }
+  header h1{ font-size:1.4rem; font-weight:800; margin:4px 0 2px; color:#C85A22; }
+  header p{ margin:0; font-size:0.85rem; color:#5f5f5f; font-weight:500; }
 
   .topnav{ display:flex; gap:8px; margin-bottom:10px; }
   .topnav button{
     flex:1; border:none; border-radius:16px; padding:10px; font-family:inherit; font-weight:800;
-    font-size:0.95rem; background:#fff; box-shadow:var(--shadow); color:#999; cursor:pointer;
+    font-size:0.95rem; background:#fff; box-shadow:var(--shadow); color:#666; cursor:pointer;
   }
-  .topnav button.active{ background:#5B8DEF; color:#fff; transform:translateY(2px); box-shadow:0 4px 0 rgba(0,0,0,0.1); }
+  .topnav button.active{ background:#3C6FD1; color:#fff; transform:translateY(2px); box-shadow:0 4px 0 rgba(0,0,0,0.1); }
 
   .view{ display:none; }
   .view.active{ display:block; }
@@ -35,19 +35,19 @@
   .tab-btn{
     flex:1; border:none; border-radius:16px; padding:8px 4px; font-family:inherit; font-weight:700;
     font-size:0.8rem; background:var(--card); box-shadow:var(--shadow); cursor:pointer;
-    display:flex; flex-direction:column; align-items:center; gap:2px; color:#999;
+    display:flex; flex-direction:column; align-items:center; gap:2px; color:#666;
   }
   .tab-btn span.emoji{ font-size:1.3rem; }
   .tab-btn.active{ color:#fff; transform:translateY(2px); box-shadow:0 4px 0 rgba(0,0,0,0.1); }
-  .tab-btn[data-cat="dino"].active{ background:#5EA36A; }
-  .tab-btn[data-cat="sea"].active{ background:#4DA6E0; }
-  .tab-btn[data-cat="land"].active{ background:#D08A3E; }
-  .tab-btn[data-cat="bug"].active{ background:#D97BB0; }
+  .tab-btn[data-cat="dino"].active{ background:#357A42; }
+  .tab-btn[data-cat="sea"].active{ background:#1F7AB8; }
+  .tab-btn[data-cat="land"].active{ background:#A8641A; }
+  .tab-btn[data-cat="bug"].active{ background:#B04585; }
 
   .species-row{ display:flex; gap:8px; margin-bottom:10px; overflow-x:auto; padding-bottom:2px; }
   .species-chip{
-    flex:0 0 auto; border:none; border-radius:14px; padding:7px 11px; font-family:inherit; font-weight:700;
-    font-size:0.78rem; background:#fff; box-shadow:0 3px 0 rgba(0,0,0,0.08); color:#888; cursor:pointer;
+    flex:0 0 auto; border:none; border-radius:14px; padding:11px 13px; font-family:inherit; font-weight:700;
+    font-size:0.78rem; background:#fff; box-shadow:0 3px 0 rgba(0,0,0,0.08); color:#666; cursor:pointer;
     white-space:nowrap; display:flex; align-items:center; gap:4px;
   }
   .species-chip.active{ background:#FFDE9E; color:#8a5a1a; box-shadow:0 3px 0 rgba(0,0,0,0.12); }
@@ -83,22 +83,22 @@
     display:flex; align-items:center; justify-content:center; gap:4px;
   }
   .action-btn:active{ transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,0.15); }
-  #undoBtn{ background:#8C93A6; }
-  #clearBtn{ background:#E0704F; }
-  #sendBtn{ background:#4DA0A0; }
-  .hint{ text-align:center; font-size:0.78rem; color:#a3a3a3; margin-top:8px; }
+  #undoBtn{ background:#6A7185; }
+  #clearBtn{ background:#C2492A; }
+  #sendBtn{ background:#2F7F7F; }
+  .hint{ text-align:center; font-size:0.78rem; color:#666; margin-top:8px; }
   .toast{
     position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(20px); opacity:0;
     background:#333; color:#fff; padding:12px 22px; border-radius:20px; font-weight:700; font-size:0.9rem;
-    transition:all .25s ease; pointer-events:none; z-index:50;
+    transition:opacity .25s ease, transform .25s ease; pointer-events:none; z-index:50;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
 
   /* board */
   .board-filter{ display:flex; gap:6px; margin-bottom:10px; }
   .board-filter button{
-    flex:1; border:none; border-radius:14px; padding:8px 4px; font-family:inherit; font-weight:700;
-    font-size:0.78rem; background:#fff; box-shadow:0 3px 0 rgba(0,0,0,0.08); color:#888; cursor:pointer;
+    flex:1; border:none; border-radius:14px; padding:12px 4px; font-family:inherit; font-weight:700;
+    font-size:0.78rem; background:#fff; box-shadow:0 3px 0 rgba(0,0,0,0.08); color:#666; cursor:pointer;
   }
   .board-filter button.active{ background:#FFDE9E; color:#8a5a1a; }
   .board-grid{
@@ -109,8 +109,8 @@
     display:flex; flex-direction:column; align-items:center; gap:4px;
   }
   .board-card img{ width:100%; aspect-ratio:1/1; object-fit:contain; border-radius:10px; background:#fafafa; }
-  .board-card span{ font-size:0.72rem; font-weight:700; color:#777; }
-  .board-empty{ text-align:center; color:#aaa; font-size:0.9rem; padding:40px 10px; }
+  .board-card span{ font-size:0.8rem; font-weight:700; color:#666; }
+  .board-empty{ text-align:center; color:#666; font-size:0.9rem; padding:40px 10px; }
 
   .board-scene-wrap{ position:relative; border-radius:20px; overflow:hidden; box-shadow:var(--shadow); margin-bottom:12px; }
   .walk-scene{ height:260px; position:relative; overflow:hidden; }
@@ -123,83 +123,95 @@
   .walk-actor{ position:absolute; width:78px; height:78px; will-change:transform; }
   .walk-actor img{ width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 6px 6px rgba(0,0,0,.15)); }
   #fullscreenBtn{
-    position:absolute; right:10px; bottom:10px; z-index:2; border:none; border-radius:12px; padding:8px 12px;
+    position:absolute; right:10px; bottom:10px; z-index:2; border:none; border-radius:12px; padding:12px 14px;
     font-family:inherit; font-weight:700; font-size:0.78rem; background:rgba(255,255,255,.92); color:#333; cursor:pointer;
     box-shadow:0 3px 0 rgba(0,0,0,0.1);
   }
   .board-scene-wrap:fullscreen .walk-scene{ height:100vh; }
+
+  /* ---------- 접근성: 움직임 멈춤 · 포커스 · 터치 ---------- */
+  #walkToggleBtn{
+    position:absolute; left:10px; bottom:10px; z-index:2; border:none; border-radius:12px; padding:12px 14px;
+    font-family:inherit; font-weight:700; font-size:0.78rem; background:rgba(255,255,255,.92); color:#333; cursor:pointer;
+    box-shadow:0 3px 0 rgba(0,0,0,0.1);
+  }
+  button{ touch-action:manipulation; }
+  button:focus-visible{ outline:3px solid #3C6FD1; outline-offset:2px; }
+  .species-chip:focus-visible, .swatch:focus-visible{ outline-offset:-3px; }
+  @media (prefers-reduced-motion:reduce){ *{ transition-duration:.001ms !important; animation-duration:.001ms !important; } }
 </style>
 </head>
 <body>
 
 <div class="app">
   <header>
-    <h1>🖍️ 조인성의 그림그리기</h1>
+    <h1><span aria-hidden="true">🖍️</span> 조인성의 그림그리기</h1>
     <p>손으로 직접 그리듯 색칠하고, 완성하면 게시판으로 보내보세요!</p>
   </header>
 
   <div class="topnav">
-    <button id="navDraw" class="active">✏️ 그리기</button>
-    <button id="navBoard">🖼️ 게시판</button>
+    <button id="navDraw" class="active"><span aria-hidden="true">✏️</span> 그리기</button>
+    <button id="navBoard"><span aria-hidden="true">🖼️</span> 게시판</button>
   </div>
 
   <!-- ===================== 그리기 화면 ===================== -->
   <div class="view active" id="viewDraw">
     <div class="tabs">
-      <button class="tab-btn active" data-cat="dino"><span class="emoji">🦖</span>공룡</button>
-      <button class="tab-btn" data-cat="sea"><span class="emoji">🐋</span>바다동물</button>
-      <button class="tab-btn" data-cat="land"><span class="emoji">🦁</span>육상동물</button>
-      <button class="tab-btn" data-cat="bug"><span class="emoji">🦋</span>곤충</button>
+      <button class="tab-btn active" data-cat="dino"><span class="emoji" aria-hidden="true">🦖</span>공룡</button>
+      <button class="tab-btn" data-cat="sea"><span class="emoji" aria-hidden="true">🐋</span>바다동물</button>
+      <button class="tab-btn" data-cat="land"><span class="emoji" aria-hidden="true">🦁</span>육상동물</button>
+      <button class="tab-btn" data-cat="bug"><span class="emoji" aria-hidden="true">🦋</span>곤충</button>
     </div>
     <div class="species-row" id="speciesRow"></div>
 
     <div class="canvas-outer">
       <div class="canvas-wrap" id="canvasWrap">
-        <img class="layer" id="tmplImg2" src="">
-        <canvas class="layer" id="drawCanvas"></canvas>
+        <img class="layer" id="tmplImg2" src="" alt="" aria-hidden="true">
+        <canvas class="layer" id="drawCanvas" role="img" aria-label="그림 그리기 칸" aria-describedby="drawHint"></canvas>
       </div>
     </div>
 
     <div class="toolbar">
       <div class="row">
-        <button class="pen-btn" data-w="4"><div class="dot" style="width:5px;height:5px;"></div></button>
-        <button class="pen-btn active" data-w="10"><div class="dot" style="width:11px;height:11px;"></div></button>
-        <button class="pen-btn" data-w="20"><div class="dot" style="width:18px;height:18px;"></div></button>
-        <button class="eraser-btn" id="eraserBtn">🧽 지우개</button>
+        <button class="pen-btn" data-w="4" aria-label="가는 펜"><div class="dot" style="width:5px;height:5px;"></div></button>
+        <button class="pen-btn active" data-w="10" aria-label="보통 펜"><div class="dot" style="width:11px;height:11px;"></div></button>
+        <button class="pen-btn" data-w="20" aria-label="굵은 펜"><div class="dot" style="width:18px;height:18px;"></div></button>
+        <button class="eraser-btn" id="eraserBtn"><span aria-hidden="true">🧽</span> 지우개</button>
       </div>
       <div class="row">
         <div class="palette" id="palette"></div>
       </div>
       <div class="row actions">
-        <button class="action-btn" id="undoBtn">↩️ 되돌리기</button>
-        <button class="action-btn" id="clearBtn">🔄 전체지우기</button>
-        <button class="action-btn" id="sendBtn">🖼️ 게시판으로</button>
+        <button class="action-btn" id="undoBtn"><span aria-hidden="true">↩️</span> 되돌리기</button>
+        <button class="action-btn" id="clearBtn"><span aria-hidden="true">🔄</span> 전체지우기</button>
+        <button class="action-btn" id="sendBtn"><span aria-hidden="true">🖼️</span> 게시판으로</button>
       </div>
     </div>
-    <p class="hint">연한 선을 따라 손가락이나 펜으로 자유롭게 그려보세요, 인성아!</p>
+    <p class="hint" id="drawHint">연한 선을 따라 손가락이나 펜으로 자유롭게 그려보세요, 인성아!</p>
   </div>
 
   <!-- ===================== 게시판 화면 ===================== -->
   <div class="view" id="viewBoard">
     <div class="board-filter" id="boardFilter">
       <button class="active" data-f="all">전체</button>
-      <button data-f="dino">🦖 공룡</button>
-      <button data-f="sea">🐋 바다</button>
-      <button data-f="land">🦁 육상</button>
-      <button data-f="bug">🦋 곤충</button>
+      <button data-f="dino"><span aria-hidden="true">🦖</span> 공룡</button>
+      <button data-f="sea"><span aria-hidden="true">🐋</span> 바다</button>
+      <button data-f="land"><span aria-hidden="true">🦁</span> 육상</button>
+      <button data-f="bug"><span aria-hidden="true">🦋</span> 곤충</button>
     </div>
     <div class="board-scene-wrap" id="boardSceneWrap">
-      <div class="walk-scene" id="walkScene">
+      <div class="walk-scene" id="walkScene" aria-hidden="true">
         <svg class="walk-deco" id="walkDeco" viewBox="0 0 800 500" preserveAspectRatio="none"></svg>
       </div>
-      <button id="fullscreenBtn">⛶ 전체화면(TV연결용)</button>
+      <button id="walkToggleBtn" type="button" aria-pressed="false">⏸ 움직임 멈추기</button>
+      <button id="fullscreenBtn"><span aria-hidden="true">⛶</span> 전체화면(TV연결용)</button>
     </div>
     <div class="board-grid" id="boardGrid"></div>
     <div class="board-empty" id="boardEmpty">아직 게시판에 보낸 그림이 없어요.<br>그림을 완성하고 "게시판으로" 버튼을 눌러보세요!</div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- ===================== 도안 템플릿 (연한 안내선) ===================== -->
 <div style="display:none">
@@ -376,18 +388,23 @@ tmplImg.addEventListener('load', ()=>{ maskCanvas = computeMask(tmplImg); });
 /* ---------- species chips ---------- */
 function renderSpeciesRow(){
   const row = document.getElementById('speciesRow');
+  const hadFocus = row.contains(document.activeElement);
   row.innerHTML = '';
   categories[currentCat].species.forEach(sp => {
     const chip = document.createElement('button');
     chip.className = 'species-chip' + (sp.id===currentSpecies ? ' active':'');
-    chip.innerHTML = `<span>${sp.emoji}</span><span>${sp.name}</span>`;
+    chip.innerHTML = `<span aria-hidden="true">${sp.emoji}</span><span>${sp.name}</span>`;
     chip.addEventListener('click', () => { currentSpecies = sp.id; renderSpeciesRow(); showTmpl(); clearStrokes(); });
     row.appendChild(chip);
   });
+  if(hadFocus){ const a = row.querySelector('.active'); if(a) a.focus(); } // 키보드로 고른 뒤에도 포커스 유지
 }
 function showTmpl(){
   const key = `${currentCat}-${currentSpecies}`;
   tmplImg.src = TEMPLATE_IMAGES[key] || '';
+  const sp = categories[currentCat].species.find(x=>x.id===currentSpecies);
+  const cv = document.getElementById('drawCanvas');
+  if(cv && sp) cv.setAttribute('aria-label', `그림 그리기 칸: ${sp.name} 도안 위에 손가락이나 펜으로 색칠해요`);
 }
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -496,8 +513,10 @@ document.getElementById('eraserBtn').addEventListener('click', function(){
 /* palette */
 const COLORS = ['#FF6B6B','#FFA94D','#FFD43B','#A9E34B','#51CF66','#38D9A9','#22B8CF','#4DABF7','#748FFC','#9775FA','#F783AC','#A9784B','#E8C39E','#ADB5BD','#495057','#000000'];
 const palette = document.getElementById('palette');
+const COLOR_NAMES = ['빨강','주황','노랑','연두','초록','청록','하늘','파랑','남색','보라','분홍','갈색','살구','회색','진회색','검정'];
 COLORS.forEach((c,i)=>{
   const b = document.createElement('button');
+  b.type='button'; b.setAttribute('aria-label', (COLOR_NAMES[i]||c)+' 색');
   b.className='swatch'; b.style.background=c; b.style.setProperty('--sel-color',c);
   if(i===0) b.classList.add('selected');
   b.addEventListener('click', ()=>{
@@ -588,7 +607,7 @@ function renderBoard(){
   items.forEach(item=>{
     const card = document.createElement('div');
     card.className='board-card';
-    card.innerHTML = `<img src="${item.dataUrl}"><span>${item.emoji} ${item.name}</span>`;
+    card.innerHTML = `<img src="${item.dataUrl}" alt="${item.name} 그림"><span><span aria-hidden="true">${item.emoji}</span> ${item.name}</span>`;
     grid.appendChild(card);
   });
   startWalk(items.slice(0,12));
@@ -600,6 +619,16 @@ const walkDeco = document.getElementById('walkDeco');
 let walkRAF = null;
 let lastTickTime = 0;
 let actors = [];
+let walkPaused = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+function setWalkPaused(p){
+  walkPaused = p;
+  const btn = document.getElementById('walkToggleBtn');
+  btn.textContent = p ? '▶ 다시 움직이기' : '⏸ 움직임 멈추기';
+  btn.setAttribute('aria-pressed', p ? 'true' : 'false');
+  if(walkRAF){ cancelAnimationFrame(walkRAF); walkRAF = null; }
+  if(actors.length){ lastTickTime = performance.now(); tick(); }
+}
+document.getElementById('walkToggleBtn').addEventListener('click', ()=> setWalkPaused(!walkPaused));
 
 const SCENES = {
   dino:{cls:'scene-dino', deco:`
@@ -655,7 +684,7 @@ function startWalk(items){
     el.style.width = actorSize+'px';
     el.style.height = actorSize+'px';
     const img = document.createElement('img');
-    img.src = item.dataUrl;
+    img.src = item.dataUrl; img.alt = '';
     el.appendChild(img);
     walkScene.appendChild(el);
     const speed = 35 + Math.random()*35; // px/sec
@@ -684,7 +713,7 @@ document.getElementById('fullscreenBtn').addEventListener('click', ()=>{
 
 function tick(now){
   now = now || performance.now();
-  const dt = Math.min(0.05, (now - lastTickTime)/1000);
+  const dt = walkPaused ? 0 : Math.min(0.05, (now - lastTickTime)/1000);
   lastTickTime = now;
 
   const sceneW = walkScene.clientWidth || 400;
@@ -697,15 +726,24 @@ function tick(now){
     if(a.x >= sceneW - a.w){ a.x = sceneW - a.w; a.vx = -Math.abs(a.vx); }
     if(a.y <= 0){ a.y = 0; a.vy = Math.abs(a.vy); }
     if(a.y >= sceneH - a.h){ a.y = sceneH - a.h; a.vy = -Math.abs(a.vy); }
-    const bob = Math.sin((now + a.bobPhase)/260) * 5;
+    const bob = walkPaused ? 0 : Math.sin((now + a.bobPhase)/260) * 5;
     const dir = a.vx >= 0 ? 1 : -1;
     a.el.style.transform = `translate(${a.x}px, ${a.y + bob}px) scaleX(${dir})`;
   });
 
-  walkRAF = requestAnimationFrame(tick);
+  walkRAF = walkPaused ? null : requestAnimationFrame(tick);
 }
 
+/* ---------- 접근성: 선택 상태를 보조기기에 알림 ---------- */
+function syncPressed(){
+  document.querySelectorAll('.topnav button, .tab-btn, .species-chip, .pen-btn, .eraser-btn, #boardFilter button').forEach(b=> b.setAttribute('aria-pressed', b.classList.contains('active') ? 'true' : 'false'));
+  document.querySelectorAll('.swatch').forEach(b=> b.setAttribute('aria-pressed', b.classList.contains('selected') ? 'true' : 'false'));
+}
+new MutationObserver(syncPressed).observe(document.querySelector('.app'), { subtree:true, attributes:true, attributeFilter:['class'], childList:true });
+
 /* ---------- init ---------- */
+setWalkPaused(walkPaused);
+syncPressed();
 renderSpeciesRow();
 showTmpl();
 resizeCanvas();
