@@ -1,0 +1,18 @@
+# 본정형외과의원 프로필 (원장님 제공 정보, 2026-10-31 기준)
+hospital_name: 본정형외과의원
+specialty: 정형외과
+location: 충남 천안시 서북구 불당대로 272 (쌍용동 220-42)
+phone: 041-575-6000
+hours:
+  평일(월·화·수·금): "09:00 - 18:00"
+  점심시간: "13:00 - 14:00"
+  목요일: "09:00 - 13:00"
+  토요일: "09:00 - 12:00"
+  일요일·공휴일: 휴진
+# 아래는 미확인 - 제공받으면 채우기
+departments: []
+facilities: []
+brand_color: ""
+logo_use: false
+tone: 차분하고 신뢰감 있는
+doctor_info_allowed: false
