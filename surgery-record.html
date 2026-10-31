@@ -69,6 +69,9 @@
   .tab-btn{appearance:none;border:none;background:none;cursor:pointer;padding:10px 18px;font-family:'Noto Sans KR',sans-serif;font-size:16px;font-weight:600;color:var(--ink-faint);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s ease,border-color .15s ease;}
   .tab-btn.active{color:var(--accent-dark);border-bottom-color:var(--accent);font-weight:700;}
   .tab-btn:hover{color:var(--ink);}
+  button,[role=button],.tab-btn,.cat-header,.del-btn,.mini-btn{touch-action:manipulation;}
+  .sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;scroll-behavior:auto !important;}}
 
   .panel{display:none;}
   .panel.active{display:block;}
@@ -137,7 +140,7 @@
   table.mat td.col-qty,table.mat th.col-qty,table.mat td.col-del,table.mat th.col-del{overflow:visible;}
   td.col-del .mini-btn{flex:none;width:auto;white-space:nowrap;font-size:11px;padding:5px 7px;}
   input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;}
-  .del-btn{border:1px solid var(--alert);color:var(--alert);background:var(--alert-soft);border-radius:4px;width:26px;height:26px;font-size:14px;line-height:1;cursor:pointer;}
+  .del-btn{border:1px solid var(--alert);color:var(--alert);background:var(--alert-soft);border-radius:4px;width:36px;height:36px;font-size:15px;line-height:1;cursor:pointer;}
   .del-btn:hover{background:var(--alert);color:#fff;}
 
   .extra-hint{font-size:11.5px;color:var(--ink-faint);margin:16px 0 8px;}
@@ -177,9 +180,9 @@
   /* Manage tab */
   .type-chip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border-strong);border-radius:20px;padding:6px 8px 6px 14px;margin:0 8px 8px 0;font-size:12.5px;font-weight:600;}
   .type-chip .code{color:var(--accent-dark);font-family:'IBM Plex Mono',monospace;}
-  .type-chip .del-x{width:20px;height:20px;border-radius:50%;border:none;background:var(--alert-soft);color:var(--alert);font-size:12px;cursor:pointer;line-height:1;}
+  .type-chip .del-x{width:28px;height:28px;border-radius:50%;border:none;background:var(--alert-soft);color:var(--alert);font-size:12px;cursor:pointer;line-height:1;}
   .type-chip .del-x:hover{background:var(--alert);color:#fff;}
-  .type-chip .edit-x{width:20px;height:20px;border-radius:50%;border:none;background:var(--accent-soft);color:var(--accent-dark);font-size:11px;cursor:pointer;line-height:1;}
+  .type-chip .edit-x{width:28px;height:28px;border-radius:50%;border:none;background:var(--accent-soft);color:var(--accent-dark);font-size:11px;cursor:pointer;line-height:1;}
   .type-chip .edit-x:hover{background:var(--accent);color:#fff;}
   .type-chip.editing{flex-direction:column;align-items:stretch;border-radius:8px;padding:10px;gap:6px;background:var(--bg);}
   .type-chip.editing input{border:1px solid var(--border-strong);border-radius:4px;padding:6px 8px;font-size:12.5px;}
@@ -259,7 +262,7 @@
     <button class="tab-btn" data-tab="manage">수술종류 · 품목 관리</button>
     <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
       <span id="cloudIndicator" style="font-size:12px;color:var(--muted);padding:4px 8px;user-select:none;"></span>
-      <span id="storageBadge" onclick="showStorageModal()" title="저장 용량 확인" style="cursor:pointer;font-size:12px;color:var(--muted);padding:4px 10px;border:1px solid var(--border);border-radius:20px;user-select:none;transition:all .2s;">💾 -</span>
+      <button type="button" id="storageBadge" onclick="showStorageModal()" title="저장 용량 확인" style="cursor:pointer;font:inherit;font-size:12px;background:none;color:var(--muted);padding:4px 10px;border:1px solid var(--border);border-radius:20px;user-select:none;transition:border-color .2s,color .2s;">💾 -</button>
     </div>
   </div>
 
@@ -725,11 +728,11 @@
 
   <!-- ===== 저장 용량 확인 모달 ===== -->
   <div id="storageModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:min(520px,94vw);max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+    <div role="dialog" aria-modal="true" aria-label="앱 저장 용량 확인" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:min(520px,94vw);max-height:80vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.3);">
       <!-- 모달 헤더 -->
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);">
         <span style="font-size:15px;font-weight:700;">💾 앱 저장 용량 확인</span>
-        <button onclick="closeStorageModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
+        <button type="button" aria-label="닫기" onclick="closeStorageModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1;">✕</button>
       </div>
       <!-- 용량 게이지 -->
       <div style="padding:20px 20px 0;">
@@ -782,10 +785,10 @@
 
   <!-- ===== 구글 시트 동기화 모달 ===== -->
   <div id="cloudModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:min(520px,96vw);max-height:92vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+    <div role="dialog" aria-modal="true" aria-label="구글 시트 동기화 설정" style="background:var(--surface);border:1px solid var(--border);border-radius:12px;width:min(520px,96vw);max-height:92vh;overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,.3);">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1;">
         <span style="font-size:15px;font-weight:700;">📊 구글 시트 동기화 설정</span>
-        <button onclick="closeCloudModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button>
+        <button type="button" aria-label="닫기" onclick="closeCloudModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);">✕</button>
       </div>
 
       <!-- 상태 메시지 -->
@@ -969,6 +972,72 @@ const DEFAULT_CATALOG = {"마취과-소모품":[{"name":"Angio Catheter","spec":
 const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술"},{"code":"ATFL","label":"ATFL · 발목인대재건술"},{"code":"BPHA","label":"BPHA · 고관절반치환술"},{"code":"CTR","label":"CTR · 수근관감압술"},{"code":"HTO","label":"HTO · 근위경골절골술"},{"code":"MENISCECTOMY","label":"Meniscectomy · 반월상연골절제술"},{"code":"MENISCUS_REPAIR","label":"Meniscus Repair · 반월상연골봉합술"},{"code":"MENISCUS_ROOT","label":"Meniscus Root Repair · 후근봉합술"},{"code":"PEN","label":"PEN · 경막외신경성형술"},{"code":"PFNA","label":"PFNA · 대퇴부근위부골절수술"},{"code":"RCT","label":"RCT · 회전근개봉합술"},{"code":"TKRA","label":"TKRA · 무릎 인공관절수술"},{"code":"TRIGGER","label":"Trigger Finger · 방아쇠수지수술"},{"code":"ORIF_ANKLE","label":"ORIF · 발목골절수술"},{"code":"ORIF_WRIST","label":"ORIF · 손목골절수술"},{"code":"ORIF_SHOULDER","label":"ORIF · 어깨골절수술"},{"code":"MUA","label":"MUA · 오십견 마취하 도수조작술"},{"code":"VP","label":"VP · 척추체성형술"},{"code":"SUTURE","label":"SUTURE 창상봉합술"},{"code":"EXCISIONAL_&_BIOPSY","label":"E & B 절제생검"},{"code":"INGROWING_NAIL","label":"INGROWING NAIL 내향성 발톱"},{"code":"CORN_REMOVAL","label":"CORN REMOVAL 티눈제거"},{"code":"CRIF","label":"CRIF Foot & HAND"},{"code":"REMOVER","label":"Plate Remover"}];
 </script>
 <script>
+/* ---------- 공통 보안/접근성 도우미 ---------- */
+function escHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+function a11yAnnounce(msg){
+  var el = document.getElementById('srLive');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'srLive'; el.className = 'sr-only';
+    el.setAttribute('role','status'); el.setAttribute('aria-live','polite');
+    document.body.appendChild(el);
+  }
+  el.textContent = '';
+  setTimeout(function(){ el.textContent = msg; }, 30);
+}
+var _dlgPrev = {};
+function a11yDialogOpen(id, closeFn){
+  var ov = document.getElementById(id); if(!ov) return;
+  _dlgPrev[id] = document.activeElement;
+  if(ov._keyh) document.removeEventListener('keydown', ov._keyh);
+  ov._keyh = function(e){
+    if(ov.style.display === 'none') return;
+    if(e.key === 'Escape'){ e.preventDefault(); closeFn(); return; }
+    if(e.key !== 'Tab') return;
+    var f = Array.prototype.filter.call(
+      ov.querySelectorAll('button,input,select,textarea,a[href],[tabindex]:not([tabindex="-1"])'),
+      function(x){ return !x.disabled && x.offsetParent !== null; });
+    if(!f.length) return;
+    var a = f[0], z = f[f.length-1];
+    if(!ov.contains(document.activeElement)){ e.preventDefault(); a.focus(); }
+    else if(e.shiftKey && document.activeElement === a){ e.preventDefault(); z.focus(); }
+    else if(!e.shiftKey && document.activeElement === z){ e.preventDefault(); a.focus(); }
+  };
+  document.addEventListener('keydown', ov._keyh);
+  var dlg = ov.firstElementChild || ov;
+  dlg.setAttribute('tabindex','-1');
+  try{ dlg.focus({preventScroll:true}); }catch(e){ dlg.focus(); }
+}
+function a11yDialogClose(id){
+  var ov = document.getElementById(id); if(!ov) return;
+  if(ov._keyh){ document.removeEventListener('keydown', ov._keyh); ov._keyh = null; }
+  var p = _dlgPrev[id]; delete _dlgPrev[id];
+  if(p && document.contains(p) && p.focus) p.focus();
+}
+document.addEventListener('DOMContentLoaded', function(){
+  // 라벨 ↔ 입력칸 연결 (.field > label)
+  document.querySelectorAll('.field').forEach(function(f, i){
+    var lab = f.querySelector(':scope > label');
+    if(!lab || lab.htmlFor) return;
+    var ctl = f.querySelector(':scope > input,:scope > select,:scope > textarea');
+    if(ctl){ if(!ctl.id) ctl.id = 'fld_auto_' + i; lab.htmlFor = ctl.id; return; }
+    var grp = f.querySelector(':scope > .radio-row');
+    if(grp){
+      if(!lab.id) lab.id = 'lbl_auto_' + i;
+      grp.setAttribute('role','radiogroup'); grp.setAttribute('aria-labelledby', lab.id);
+    }
+  });
+  var AL = {packPicker:'수술 PACK 선택', catSearch:'품목 검색', presetToggle:'권장품목만 보기', s_type:'수술종류', sp_plate_site:'플레이트 부위', sp_plate_type:'플레이트 종류', sp_plate_hole:'플레이트 홀 수', sp_plate_detail:'플레이트 상세', sp_washer_qty:'Washer 수량', sp_cannula_qty:'Cannula 수량', sp_btn_cannula_qty:'Button cannula 수량', sp_camera_input:'카메라로 사진 촬영', sp_file_input:'사진 파일 선택', cf_scriptUrl:'구글 앱스크립트 URL', cf_scriptUrl2:'구글 앱스크립트 URL', cf_shareUrl:'공유 URL', searchInput:'기록 검색', manageSearch:'품목 검색'};
+  Object.keys(AL).forEach(function(k){ var e = document.getElementById(k); if(e && !e.labels.length && !e.getAttribute('aria-label')) e.setAttribute('aria-label', AL[k]); });
+  document.querySelectorAll('.banner').forEach(function(b){ b.setAttribute('role','status'); b.setAttribute('aria-live','polite'); });
+  var ci = document.getElementById('cloudIndicator'); if(ci) ci.setAttribute('role','status');
+});
+</script>
+<script>
 (function(){
   const STORAGE_CATALOG_KEY = 'app:catalog:v1';
   const STORAGE_TYPES_KEY = 'app:types:v1';
@@ -1032,9 +1101,9 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       ban.style.borderColor = '#43a047';
       ban.style.color = '#2e7d32';
       ban.innerHTML = '✅ 비급여 계산기에서 데이터를 불러왔습니다. &nbsp;|&nbsp; 세트: <b>' +
-        (d.setName || '-') + '</b> &nbsp;|&nbsp; 합계: <b>₩' +
-        (d.total || 0).toLocaleString('ko-KR') + '</b> &nbsp;|&nbsp; 저장일시: ' +
-        (d.savedAt || '').substring(0, 10);
+        escHtml(d.setName || '-') + '</b> &nbsp;|&nbsp; 합계: <b>₩' +
+        escHtml((d.total || 0).toLocaleString('ko-KR')) + '</b> &nbsp;|&nbsp; 저장일시: ' +
+        escHtml((d.savedAt || '').substring(0, 10));
     } catch(e) {
       alert('비급여 불러오기 실패: ' + e);
     }
@@ -1047,6 +1116,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     if(btn.dataset.armed === '1'){
       clearTimeout(Number(btn.dataset.armTimer || 0));
       delete btn.dataset.armed;
+      if(btn.dataset.originalAria) btn.setAttribute('aria-label', btn.dataset.originalAria); else btn.removeAttribute('aria-label');
       if(armedLabel) btn.textContent = btn.dataset.originalLabel;
       btn.style.background = btn.dataset.originalBg || '';
       btn.style.color = btn.dataset.originalColor || '';
@@ -1055,6 +1125,9 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       return;
     }
     btn.dataset.armed = '1';
+    btn.dataset.originalAria = btn.getAttribute('aria-label') || '';
+    btn.setAttribute('aria-label', (btn.dataset.originalAria || btn.textContent || '삭제') + ' — 한 번 더 누르면 삭제됩니다');
+    a11yAnnounce('한 번 더 누르면 삭제됩니다');
     btn.dataset.originalLabel = btn.textContent;
     btn.dataset.originalBg = btn.style.background;
     btn.dataset.originalColor = btn.style.color;
@@ -1065,6 +1138,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     btn.style.borderColor = 'var(--alert)';
     const t = setTimeout(()=>{
       delete btn.dataset.armed;
+      if(btn.dataset.originalAria) btn.setAttribute('aria-label', btn.dataset.originalAria); else btn.removeAttribute('aria-label');
       if(armedLabel) btn.textContent = btn.dataset.originalLabel;
       btn.style.background = btn.dataset.originalBg;
       btn.style.color = btn.dataset.originalColor;
@@ -1367,7 +1441,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       const presetCount = items.filter(it=>it.presets.length).length;
       block.innerHTML = `
         <button type="button" class="cat-header">
-          <span>${catName}</span>
+          <span>${escHtml(catName)}</span>
           <span class="cnt">${items.length}개 품목${presetCount?(' · 권장 '+presetCount+'개'):''} <span class="chev">▾</span></span>
         </button>
         <div class="cat-body">
@@ -1385,14 +1459,14 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         tr.dataset.cat = catName;
         tr.dataset.presets = JSON.stringify(it.presets);
         const presetTag = it.presets.length
-          ? `<span class="preset-chips">★ ` + it.presets.map(code=>`<span class="preset-chip" data-code="${code}">${code}</span>`).join('') + `</span>`
+          ? `<span class="preset-chips">★ ` + it.presets.map(code=>`<span class="preset-chip" data-code="${escHtml(code)}">${escHtml(code)}</span>`).join('') + `</span>`
           : '';
         const prior = prevState[it.id];
         tr.innerHTML = `
-          <td class="col-check"><input type="checkbox" class="chk" ${prior&&prior.chk?'checked':''}></td>
-          <td><span style="font-size:13px;">${it.name}${presetTag}</span></td>
-          <td class="col-spec"><input type="text" class="spec" value="${(it.spec||'').replace(/"/g,'&quot;')}" placeholder="규격"></td>
-          <td class="col-qty"><input type="number" class="qty" min="0" placeholder="0" value="${prior?prior.qty:''}"></td>
+          <td class="col-check"><input type="checkbox" class="chk" aria-label="${escHtml(it.name)} 선택" ${prior&&prior.chk?'checked':''}></td>
+          <td><span style="font-size:13px;">${escHtml(it.name)}${presetTag}</span></td>
+          <td class="col-spec"><input type="text" class="spec" value="${escHtml(it.spec||'')}" aria-label="${escHtml(it.name)} 규격" placeholder="규격"></td>
+          <td class="col-qty"><input type="number" class="qty" min="0" placeholder="0" aria-label="${escHtml(it.name)} 사용수량" value="${prior?escHtml(prior.qty):''}"></td>
         `;
         tbody.appendChild(tr);
         wireRow(tr);
@@ -1454,7 +1528,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
   function renderTypeSelect(){
     const cur = sType.value;
     sType.innerHTML = '<option value="">직접 선택 (자동체크 없음)</option>' +
-      surgeryTypes.map(t=>`<option value="${t.code}">${t.label}</option>`).join('');
+      surgeryTypes.map(t=>`<option value="${escHtml(t.code)}">${escHtml(t.label)}</option>`).join('');
     if(surgeryTypes.some(t=>t.code===cur)) sType.value = cur;
   }
   sType.addEventListener('change', ()=>{
@@ -1517,9 +1591,9 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td class="col-check"></td>
-      <td><input type="text" class="item-name" placeholder="품목명 직접 입력"></td>
-      <td class="col-spec"><input type="text" class="spec" placeholder="규격"></td>
-      <td class="col-qty"><input type="number" class="qty" min="0" placeholder="0"></td>
+      <td><input type="text" class="item-name" aria-label="직접 입력 품목명" placeholder="품목명 직접 입력"></td>
+      <td class="col-spec"><input type="text" class="spec" aria-label="직접 입력 품목 규격" placeholder="규격"></td>
+      <td class="col-qty"><input type="number" class="qty" min="0" aria-label="직접 입력 품목 사용수량" placeholder="0"></td>
     `;
     extraBody.appendChild(tr);
     wireRow(tr);
@@ -1736,8 +1810,8 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       overlay.id = 'overwriteOverlay';
       overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:10000;display:flex;align-items:center;justify-content:center;';
       overlay.innerHTML = `
-        <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(420px,92vw);padding:28px 24px;box-shadow:0 12px 40px rgba(0,0,0,.3);">
-          <div style="font-size:20px;margin-bottom:10px;">⚠️ 같은 기록이 있습니다</div>
+        <div role="dialog" aria-modal="true" aria-labelledby="owTitle" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;width:min(420px,92vw);padding:28px 24px;box-shadow:0 12px 40px rgba(0,0,0,.3);">
+          <div id="owTitle" style="font-size:20px;margin-bottom:10px;">⚠️ 같은 기록이 있습니다</div>
           <div id="overwriteMsg" style="font-size:14px;color:var(--ink);line-height:1.7;margin-bottom:22px;"></div>
           <div style="display:flex;gap:10px;justify-content:flex-end;">
             <button id="owCancelBtn" style="padding:10px 20px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--ink);cursor:pointer;font-size:14px;font-weight:600;">취소</button>
@@ -1748,17 +1822,19 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       document.body.appendChild(overlay);
     }
     document.getElementById('overwriteMsg').innerHTML =
-      '<b>차트번호 ' + data.p_no + ' · ' + data.s_date + '</b> 기록이 이미 존재합니다.<br>덮어쓰기 하시겠습니까?';
+      '<b>차트번호 ' + escHtml(data.p_no) + ' · ' + escHtml(data.s_date) + '</b> 기록이 이미 존재합니다.<br>덮어쓰기 하시겠습니까?';
     overlay.style.display = 'flex';
+    a11yDialogOpen('overwriteOverlay', function(){ overlay.style.display='none'; a11yDialogClose('overwriteOverlay'); });
+    document.getElementById('owCancelBtn').focus();
 
-    document.getElementById('owCancelBtn').onclick = function(){ overlay.style.display='none'; };
+    document.getElementById('owCancelBtn').onclick = function(){ overlay.style.display='none'; a11yDialogClose('overwriteOverlay'); };
     document.getElementById('owNewBtn').onclick = async function(){
-      overlay.style.display='none';
+      overlay.style.display='none'; a11yDialogClose('overwriteOverlay');
       try { await doSave('record:' + Date.now(), data); }
       catch(e){ showBanner('banner','저장 중 오류가 발생했습니다.',false); }
     };
     document.getElementById('owOverBtn').onclick = async function(){
-      overlay.style.display='none';
+      overlay.style.display='none'; a11yDialogClose('overwriteOverlay');
       try { await doSave(existingKey, data); }
       catch(e){ showBanner('banner','저장 중 오류가 발생했습니다.',false); }
     };
@@ -1868,7 +1944,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
             ${sectionRow('■ 수술 사진')}
             <tr><td colspan="4" style="${cellBase}">
               <div style="display:flex;flex-wrap:wrap;gap:12px;padding:8px;justify-content:center;align-items:center;">
-                ${data.special.photos.map(src => `<img src="${src}" style="width:500px;height:400px;object-fit:cover;border:1px solid ${C.border};border-radius:4px;" crossorigin="anonymous">`).join('')}
+                ${data.special.photos.map(src => `<img src="${src}" alt="수술 사진" style="width:500px;height:400px;object-fit:cover;border:1px solid ${C.border};border-radius:4px;" crossorigin="anonymous">`).join('')}
               </div>
             </td></tr>
           </table>` : ''}
@@ -2014,7 +2090,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
   let allRecords = [];
   async function loadList(){
     const listBody = document.getElementById('listBody');
-    listBody.innerHTML = '<div class="empty-state">불러오는 중...</div>';
+    listBody.innerHTML = '<div class="empty-state">불러오는 중…</div>';
     try{
       const listRes = await window.storage.list('record:', false);
       const keys = (listRes && listRes.keys) ? listRes.keys : [];
@@ -2043,10 +2119,10 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       div.className = 'rec-item';
       div.innerHTML = `
         <div class="info">
-          <b>${d.p_name||'(이름없음)'} · ${d.s_name||'(수술명없음)'} ${d.s_type?('<span class="preset-tag">'+d.s_type+'</span>'):''}</b>
-          <div>${d.p_no||''} ${d.s_date?(' · '+d.s_date):''} ${d.s_side?(' · '+d.s_side):''} · 사용품목 ${(d.rows||[]).length}건</div>
+          <b>${escHtml(d.p_name||'(이름없음)')} · ${escHtml(d.s_name||'(수술명없음)')} ${d.s_type?('<span class="preset-tag">'+escHtml(d.s_type)+'</span>'):''}</b>
+          <div>${escHtml(d.p_no||'')} ${d.s_date?(' · '+escHtml(d.s_date)):''} ${d.s_side?(' · '+escHtml(d.s_side)):''} · 사용품목 ${(d.rows||[]).length}건</div>
         </div>
-        <div class="btns"><button class="view">보기</button><button class="del">삭제</button></div>`;
+        <div class="btns"><button class="view" aria-label="${escHtml(d.p_name||'')} 기록 보기">보기</button><button class="del" aria-label="${escHtml(d.p_name||'')} 기록 삭제">삭제</button></div>`;
       div.querySelector('.view').addEventListener('click', ()=>viewRecord(d));
       div.querySelector('.del').addEventListener('click', (e)=>deleteRecord(d._key, e.currentTarget));
       listBody.appendChild(div);
@@ -2156,9 +2232,9 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     typeList.innerHTML = surgeryTypes.map(t=>{
       if(editingTypeCode === t.code){
         return `
-        <span class="type-chip editing" data-code="${t.code}">
-          <input type="text" class="edit-code" value="${t.code}" placeholder="코드">
-          <input type="text" class="edit-label" value="${t.label}" placeholder="수술명">
+        <span class="type-chip editing" data-code="${escHtml(t.code)}">
+          <input type="text" class="edit-code" value="${escHtml(t.code)}" aria-label="수술종류 코드" placeholder="코드">
+          <input type="text" class="edit-label" value="${escHtml(t.label)}" aria-label="수술명" placeholder="수술명">
           <div class="edit-actions">
             <button class="cancel" type="button">취소</button>
             <button class="save" type="button">저장</button>
@@ -2166,10 +2242,10 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         </span>`;
       }
       return `
-      <span class="type-chip" data-code="${t.code}">
-        <span class="code">${t.code}</span> ${t.label.split('·')[1]||t.label}
-        <button class="edit-x" title="수정">✎</button>
-        <button class="del-x" title="삭제">✕</button>
+      <span class="type-chip" data-code="${escHtml(t.code)}">
+        <span class="code">${escHtml(t.code)}</span> ${escHtml(t.label.split('·')[1]||t.label)}
+        <button class="edit-x" title="수정" aria-label="${escHtml(t.code)} 수정">✎</button>
+        <button class="del-x" title="삭제" aria-label="${escHtml(t.code)} 삭제">✕</button>
       </span>`;
     }).join('') || '<div class="empty-state">등록된 수술종류가 없습니다.</div>';
 
@@ -2269,7 +2345,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       block.dataset.cat = catName;
       block.className = 'cat-block' + ((q || prevOpen.has(catName)) ? ' open':'');
       block.innerHTML = `
-        <button type="button" class="cat-header"><span>${catName}</span><span class="cnt">${items.length}/${catalog[catName].length}개 <span class="chev">▾</span></span></button>
+        <button type="button" class="cat-header"><span>${escHtml(catName)}</span><span class="cnt">${items.length}/${catalog[catName].length}개 <span class="chev">▾</span></span></button>
         <div class="cat-body"><table class="mat"><thead><tr><th class="col-check">선택</th><th>품목명</th><th class="col-spec">규격</th><th>권장 수술종류</th><th class="col-del">관리</th></tr></thead><tbody></tbody></table></div>`;
       const tbody = block.querySelector('tbody');
       items.forEach(it=>{
@@ -2280,9 +2356,9 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         if(isEditing){
           tr.innerHTML = `
             <td class="col-check"></td>
-            <td><input type="text" class="edit-item-name" value="${(it.name||'').replace(/"/g,'&quot;')}"></td>
-            <td class="col-spec"><input type="text" class="edit-item-spec" value="${(it.spec||'').replace(/"/g,'&quot;')}"></td>
-            <td style="font-size:11.5px;color:var(--ink-soft);">${it.presets.length? it.presets.join(', ') : '—'}</td>
+            <td><input type="text" class="edit-item-name" aria-label="품목명" value="${escHtml(it.name||'')}"></td>
+            <td class="col-spec"><input type="text" class="edit-item-spec" aria-label="규격" value="${escHtml(it.spec||'')}"></td>
+            <td style="font-size:11.5px;color:var(--ink-soft);">${it.presets.length? escHtml(it.presets.join(', ')) : '—'}</td>
             <td class="col-del" style="display:flex;gap:4px;">
               <button class="mini-btn save-item" style="padding:5px 8px;">저장</button>
               <button class="mini-btn cancel-item" style="padding:5px 8px;">취소</button>
@@ -2303,13 +2379,13 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
           });
         }else{
           tr.innerHTML = `
-            <td class="col-check"><input type="checkbox" class="mng-chk" ${selectedForDelete.has(it.id)?'checked':''}></td>
-            <td>${it.name}</td>
-            <td class="col-spec">${it.spec||''}</td>
-            <td style="font-size:11.5px;color:var(--ink-soft);">${it.presets.length? it.presets.join(', ') : '—'}</td>
+            <td class="col-check"><input type="checkbox" class="mng-chk" aria-label="${escHtml(it.name)} 선택" ${selectedForDelete.has(it.id)?'checked':''}></td>
+            <td>${escHtml(it.name)}</td>
+            <td class="col-spec">${escHtml(it.spec||'')}</td>
+            <td style="font-size:11.5px;color:var(--ink-soft);">${it.presets.length? escHtml(it.presets.join(', ')) : '—'}</td>
             <td class="col-del" style="display:flex;gap:4px;">
-              <button class="del-btn edit-btn" title="수정" style="border-color:var(--accent);color:var(--accent-dark);background:var(--accent-soft);">✎</button>
-              <button class="del-btn" title="삭제">✕</button>
+              <button class="del-btn edit-btn" title="수정" aria-label="${escHtml(it.name)} 수정" style="border-color:var(--accent);color:var(--accent-dark);background:var(--accent-soft);">✎</button>
+              <button class="del-btn" title="삭제" aria-label="${escHtml(it.name)} 삭제">✕</button>
             </td>`;
           tr.querySelector('.mng-chk').addEventListener('change', (e)=>{
             if(e.target.checked) selectedForDelete.add(it.id);
@@ -2526,7 +2602,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     updateDocMeta();
     await loadState();
     await ensurePackItemsInCatalog();
-    newItemCat.innerHTML = Object.keys(catalog).map(c=>`<option value="${c}">${c}</option>`).join('');
+    newItemCat.innerHTML = Object.keys(catalog).map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join('');
     renderTypeSelect();
     renderRecordCatalog();
     for(let i=0;i<5;i++) makeExtraRow();
@@ -2569,15 +2645,15 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     var qtyId  = 'sp_' + type + '_qty_' + idx;
     var opts = SCREW_OPTS[type].map(function(o){ return '<option' + (o === savedSize ? ' selected' : '') + '>' + o + '</option>'; }).join('');
     row.innerHTML =
-      '<select id="' + sizeId + '" style="flex:2;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;" onchange="spRowUpdateLen(\'' + sizeId + '\',\'' + lenId + '\')">' +
+      '<select id="' + sizeId + '" aria-label="사이즈" style="flex:2;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;" onchange="spRowUpdateLen(\'' + sizeId + '\',\'' + lenId + '\')">' +
         '<option value="">사이즈 선택</option>' + opts +
       '</select>' +
-      '<select id="' + lenId + '" style="flex:1.5;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;" disabled>' +
+      '<select id="' + lenId + '" aria-label="길이" style="flex:1.5;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;" disabled>' +
         '<option value="">길이 선택</option>' +
       '</select>' +
-      '<input type="number" id="' + qtyId + '" placeholder="수량" min="1" max="99" style="width:60px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">' +
+      '<input type="number" id="' + qtyId + '" aria-label="수량" placeholder="수량" min="1" max="99" style="width:60px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">' +
       '<span style="font-size:12px;color:var(--muted);">개</span>' +
-      '<button type="button" onclick="this.parentElement.remove()" style="padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;">✕</button>';
+      '<button type="button" aria-label="행 삭제" onclick="this.parentElement.remove()" style="padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;">✕</button>';
     container.appendChild(row);
     if(savedSize) {
       var sizeEl = document.getElementById(sizeId);
@@ -2641,8 +2717,8 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
           ban.style.display = '';
           ban.innerHTML = '📋 비급여 계산기에서 연동된 데이터가 있습니다. &nbsp;'
             + '<b>아래 "비급여 계산기에서 불러오기" 버튼</b>을 누르면 자동 입력됩니다. &nbsp;|&nbsp; 세트: <b>'
-            + (d.setName || '-') + '</b> &nbsp;|&nbsp; 합계: <b>₩'
-            + (d.total || 0).toLocaleString('ko-KR') + '</b>';
+            + escHtml(d.setName || '-') + '</b> &nbsp;|&nbsp; 합계: <b>₩'
+            + escHtml((d.total || 0).toLocaleString('ko-KR')) + '</b>';
         }
       }
     } catch(e) {}
@@ -2699,11 +2775,11 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         var wrapper = document.createElement('div');
         wrapper.style.cssText = 'position:relative;display:inline-block;';
         var img = document.createElement('img');
-        img.src = e.target.result;
+        img.src = e.target.result; img.alt = '수술 사진';
         img.style.cssText = 'width:120px;height:90px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:pointer;display:block;';
         img.title = '클릭하면 크게 보기';
         img.onclick = function(){ window.open(e.target.result, '_blank'); };
-        var del = document.createElement('button');
+        var del = document.createElement('button'); del.setAttribute('aria-label','사진 삭제');
         del.textContent = '✕';
         del.type = 'button';
         del.style.cssText = 'position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;padding:0;';
@@ -2767,10 +2843,10 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
         var wrapper = document.createElement('div');
         wrapper.style.cssText = 'position:relative;display:inline-block;';
         var img = document.createElement('img');
-        img.src = src;
+        img.src = src; img.alt = '수술 사진';
         img.style.cssText = 'width:120px;height:90px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:pointer;display:block;';
         img.onclick = function(){ window.open(src, '_blank'); };
-        var del = document.createElement('button');
+        var del = document.createElement('button'); del.setAttribute('aria-label','사진 삭제');
         del.textContent = '✕';
         del.type = 'button';
         del.style.cssText = 'position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;line-height:1;padding:0;';
@@ -2833,6 +2909,7 @@ setTimeout(updateStorageBadge, 500);
 function showStorageModal(){
   var modal = document.getElementById('storageModal');
   modal.style.display = 'flex';
+  a11yDialogOpen('storageModal', closeStorageModal);
 
   // localStorage 전체 사용량 계산
   var NS = 'srFormStorage::';
@@ -2894,7 +2971,7 @@ function showStorageModal(){
     var row = document.createElement('div');
     row.style.cssText = 'display:flex;align-items:center;gap:10px;font-size:13px;';
     row.innerHTML =
-      '<div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);">' + label + '</div>' +
+      '<div style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);">' + escHtml(label) + '</div>' +
       '<div style="min-width:56px;text-align:right;color:var(--muted);">' + formatBytes(r.size) + '</div>' +
       '<div style="min-width:80px;">' +
         '<div style="background:var(--border);border-radius:99px;height:6px;overflow:hidden;">' +
@@ -2907,6 +2984,7 @@ function showStorageModal(){
 
 function closeStorageModal(){
   document.getElementById('storageModal').style.display = 'none';
+  a11yDialogClose('storageModal');
 }
 
 // 모달 바깥 클릭 시 닫기
@@ -3082,6 +3160,7 @@ function cloudViewShow(name){
 function showCloudModal(isFirstRun){
   var modal = document.getElementById('cloudModal');
   modal.style.display = 'flex';
+  a11yDialogOpen('cloudModal', closeCloudModal);
   var skipBar = document.getElementById('cloudSkipBar');
   if(skipBar) skipBar.style.display = isFirstRun ? 'block' : 'none';
 
@@ -3099,6 +3178,7 @@ function showCloudModal(isFirstRun){
 
 function closeCloudModal(){
   document.getElementById('cloudModal').style.display = 'none';
+  a11yDialogClose('cloudModal');
 }
 document.getElementById('cloudModal').addEventListener('click', function(e){
   if(e.target === this) closeCloudModal();
