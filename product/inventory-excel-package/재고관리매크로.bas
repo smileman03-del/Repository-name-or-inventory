@@ -1,44 +1,44 @@
 Option Explicit
 
 ' ============================================================
-' º´¿ø ¼Ò¸ðÇ° Àç°í°ü¸® ¸ÅÅ©·Î
-'  - Weekly_Input     : Ç°¸ñ ¸¶½ºÅÍÀÇ ÀüÃ¼ Ç°¸ñÀ» [ÁÖ°£ Àç°í ÆÄ¾Ç]¿¡ ¿À´Ã ³¯Â¥·Î ÀÔ·Â
-'  - Request_Generate : Àç°íºÎÁ· Ç°¸ñÀ» [¹°Ç° Ã»±¸¼­]¿¡ ÀÚµ¿ ±â·Ï
-' ÁÖÀÇ: ÇÔ¼ö ÀÌ¸§Àº ¹Ýµå½Ã ¿µ¹®ÀÌ¾î¾ß ÇÕ´Ï´Ù (ÇÑ±Û ÇÔ¼ö¸íÀº ÀÎÄÚµù ¿À·ùÀÇ ¿øÀÎ).
-' ½ÃÆ® ÀÌ¸§Àº ¶ç¾î¾²±â±îÁö Á¤È®ÇØ¾ß ÇÕ´Ï´Ù.
+' ë³‘ì› ì†Œëª¨í’ˆ ìž¬ê³ ê´€ë¦¬ ë§¤í¬ë¡œ
+'  - Weekly_Input     : í’ˆëª© ë§ˆìŠ¤í„°ì˜ ì „ì²´ í’ˆëª©ì„ [ì£¼ê°„ ìž¬ê³  íŒŒì•…]ì— ì˜¤ëŠ˜ ë‚ ì§œë¡œ ìž…ë ¥
+'  - Request_Generate : ìž¬ê³ ë¶€ì¡± í’ˆëª©ì„ [ë¬¼í’ˆ ì²­êµ¬ì„œ]ì— ìžë™ ê¸°ë¡
+' ì£¼ì˜: í•¨ìˆ˜ ì´ë¦„ì€ ë°˜ë“œì‹œ ì˜ë¬¸ì´ì–´ì•¼ í•©ë‹ˆë‹¤ (í•œê¸€ í•¨ìˆ˜ëª…ì€ ì¸ì½”ë”© ì˜¤ë¥˜ì˜ ì›ì¸).
+' ì‹œíŠ¸ ì´ë¦„ì€ ë„ì–´ì“°ê¸°ê¹Œì§€ ì •í™•í•´ì•¼ í•©ë‹ˆë‹¤.
 ' ============================================================
 
-Private Const SH_MASTER As String = "Ç°¸ñ ¸¶½ºÅÍ"
-Private Const SH_WEEKLY As String = "ÁÖ°£ Àç°í ÆÄ¾Ç"
-Private Const SH_REQUEST As String = "¹°Ç° Ã»±¸¼­"
+Private Const SH_MASTER As String = "í’ˆëª© ë§ˆìŠ¤í„°"
+Private Const SH_WEEKLY As String = "ì£¼ê°„ ìž¬ê³  íŒŒì•…"
+Private Const SH_REQUEST As String = "ë¬¼í’ˆ ì²­êµ¬ì„œ"
 
-' ÁöÁ¤ÇÑ ¿­¿¡¼­ µ¥ÀÌÅÍ°¡ ÀÖ´Â ¸¶Áö¸· Çà ¹øÈ£ (¾øÀ¸¸é 1 = ¸Ó¸®±Û Çà)
+' ì§€ì •í•œ ì—´ì—ì„œ ë°ì´í„°ê°€ ìžˆëŠ” ë§ˆì§€ë§‰ í–‰ ë²ˆí˜¸ (ì—†ìœ¼ë©´ 1 = ë¨¸ë¦¬ê¸€ í–‰)
 Private Function LastRowOf(ws As Worksheet, ByVal col As Long) As Long
     LastRowOf = ws.Cells(ws.Rows.Count, col).End(xlUp).Row
 End Function
 
-' »óÅÂ ¼ö½Ä (ÇöÀçÀç°í < ÀûÁ¤Àç°í ÀÌ¸é Àç°íºÎÁ·)
+' ìƒíƒœ ìˆ˜ì‹ (í˜„ìž¬ìž¬ê³  < ì ì •ìž¬ê³  ì´ë©´ ìž¬ê³ ë¶€ì¡±)
 Private Function StatusFormula(ByVal r As Long) As String
     Dim bad As String, good As String
-    bad = ChrW(&H274C) & " Àç°íºÎÁ·"
-    good = ChrW(&H2705) & " ¾ÈÁ¤"
+    bad = ChrW(&H274C) & " ìž¬ê³ ë¶€ì¡±"
+    good = ChrW(&H2705) & " ì•ˆì •"
     StatusFormula = "=IF(E" & r & "="""","""",IF(E" & r & "<D" & r & ",""" & bad & """,""" & good & """))"
 End Function
 
 Private Function SheetByName(ByVal nm As String) As Worksheet
-    ' ÁÖÀÇ: VBA¿¡¼­´Â ÇÔ¼ö ¾È¿¡¼­ ÇÔ¼ö ÀÌ¸§À» °ªÃ³·³ ÀÐÀ¸¸é ÀçÈ£Ãâ·Î ÇØ¼®µÇ¾î ¿À·ù°¡ ³­´Ù.
-    ' ±×·¡¼­ Áö¿ª º¯¼ö(ws)¿¡ ´ã¾Æ °Ë»çÇÑ µÚ °á°ú¸¦ µ¹·ÁÁØ´Ù.
+    ' ì£¼ì˜: VBAì—ì„œëŠ” í•¨ìˆ˜ ì•ˆì—ì„œ í•¨ìˆ˜ ì´ë¦„ì„ ê°’ì²˜ëŸ¼ ì½ìœ¼ë©´ ìž¬í˜¸ì¶œë¡œ í•´ì„ë˜ì–´ ì˜¤ë¥˜ê°€ ë‚œë‹¤.
+    ' ê·¸ëž˜ì„œ ì§€ì—­ ë³€ìˆ˜(ws)ì— ë‹´ì•„ ê²€ì‚¬í•œ ë’¤ ê²°ê³¼ë¥¼ ëŒë ¤ì¤€ë‹¤.
     Dim ws As Worksheet
     On Error Resume Next
     Set ws = ThisWorkbook.Worksheets(nm)
     On Error GoTo 0
     If ws Is Nothing Then
-        MsgBox """" & nm & """ ½ÃÆ®¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù." & vbCrLf & "½ÃÆ® ÀÌ¸§(¶ç¾î¾²±â Æ÷ÇÔ)À» È®ÀÎÇÏ¼¼¿ä.", vbExclamation
+        MsgBox """" & nm & """ ì‹œíŠ¸ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤." & vbCrLf & "ì‹œíŠ¸ ì´ë¦„(ë„ì–´ì“°ê¸° í¬í•¨)ì„ í™•ì¸í•˜ì„¸ìš”.", vbExclamation
     End If
     Set SheetByName = ws
 End Function
 
-' ---------- ÁÖ°£ ½Ç»ç ÀÚµ¿ ÀÔ·Â ----------
+' ---------- ì£¼ê°„ ì‹¤ì‚¬ ìžë™ ìž…ë ¥ ----------
 Sub Weekly_Input()
     Dim wsM As Worksheet, wsW As Worksheet
     Dim lastM As Long, r As Long, nextW As Long, n As Long
@@ -50,12 +50,12 @@ Sub Weekly_Input()
 
     lastM = LastRowOf(wsM, 1)
     If lastM < 2 Then
-        MsgBox "Ç°¸ñ ¸¶½ºÅÍ¿¡ Ç°¸ñÀÌ ¾ø½À´Ï´Ù.", vbExclamation
+        MsgBox "í’ˆëª© ë§ˆìŠ¤í„°ì— í’ˆëª©ì´ ì—†ìŠµë‹ˆë‹¤.", vbExclamation
         Exit Sub
     End If
 
-    If MsgBox("¿À´Ã(" & Format(Date, "yyyy-mm-dd") & ") ³¯Â¥·Î ÀüÃ¼ Ç°¸ñÀ» ÁÖ°£ Àç°í ÆÄ¾Ç¿¡ ÀÔ·ÂÇÒ±î¿ä?" & vbCrLf & _
-              "ÀÔ·Â ÈÄ ½Ç»ç¼ö·®(E¿­)À» È®ÀÎ¡¤¼öÁ¤ÇÏ¼¼¿ä.", vbYesNo + vbQuestion, "ÁÖ°£ ½Ç»ç") <> vbYes Then Exit Sub
+    If MsgBox("ì˜¤ëŠ˜(" & Format(Date, "yyyy-mm-dd") & ") ë‚ ì§œë¡œ ì „ì²´ í’ˆëª©ì„ ì£¼ê°„ ìž¬ê³  íŒŒì•…ì— ìž…ë ¥í• ê¹Œìš”?" & vbCrLf & _
+              "ìž…ë ¥ í›„ ì‹¤ì‚¬ìˆ˜ëŸ‰(Eì—´)ì„ í™•ì¸Â·ìˆ˜ì •í•˜ì„¸ìš”.", vbYesNo + vbQuestion, "ì£¼ê°„ ì‹¤ì‚¬") <> vbYes Then Exit Sub
 
     nextW = LastRowOf(wsW, 2) + 1
     If nextW < 2 Then nextW = 2
@@ -74,10 +74,10 @@ Sub Weekly_Input()
         End If
     Next r
 
-    MsgBox n & "°³ Ç°¸ñÀ» ÀÔ·ÂÇß½À´Ï´Ù.", vbInformation, "ÁÖ°£ ½Ç»ç"
+    MsgBox n & "ê°œ í’ˆëª©ì„ ìž…ë ¥í–ˆìŠµë‹ˆë‹¤.", vbInformation, "ì£¼ê°„ ì‹¤ì‚¬"
 End Sub
 
-' ---------- ¹°Ç° Ã»±¸¼­ ÀÚµ¿ »ý¼º ----------
+' ---------- ë¬¼í’ˆ ì²­êµ¬ì„œ ìžë™ ìƒì„± ----------
 Sub Request_Generate()
     Dim wsM As Worksheet, wsQ As Worksheet
     Dim lastM As Long, r As Long, nextQ As Long, n As Long
@@ -92,7 +92,9 @@ Sub Request_Generate()
     lastM = LastRowOf(wsM, 1)
     nextQ = LastRowOf(wsQ, 3) + 1
     If nextQ < 2 Then nextQ = 2
-    reqId = "R" & Format(Now, "yymmddhhnnss")
+    Dim rndSuffix As String
+    rndSuffix = Right(Format(Timer * 1000, "0"), 3)
+    reqId = "R" & Format(Now, "yymmddHHnnss") & "-" & rndSuffix
 
     For r = 2 To lastM
         cur = wsM.Cells(r, 5).Value
@@ -111,10 +113,10 @@ Sub Request_Generate()
             End If
         End If
     Next r
-
+h
     If n = 0 Then
-        MsgBox "Àç°íºÎÁ· Ç°¸ñÀÌ ¾ø½À´Ï´Ù.", vbInformation, "¹°Ç° Ã»±¸¼­"
+        MsgBox "ìž¬ê³ ë¶€ì¡± í’ˆëª©ì´ ì—†ìŠµë‹ˆë‹¤.", vbInformation, "ë¬¼í’ˆ ì²­êµ¬ì„œ"
     Else
-        MsgBox "Ã»±¸¼­ " & reqId & " ¸¦ ¸¸µé¾ú½À´Ï´Ù. (" & n & "°³ Ç°¸ñ)", vbInformation, "¹°Ç° Ã»±¸¼­"
+        MsgBox "ì²­êµ¬ì„œ " & reqId & " ë¥¼ ë§Œë“¤ì—ˆìŠµë‹ˆë‹¤. (" & n & "ê°œ í’ˆëª©)", vbInformation, "ë¬¼í’ˆ ì²­êµ¬ì„œ"
     End If
 End Sub
