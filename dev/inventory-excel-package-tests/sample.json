@@ -1,0 +1,86 @@
+[
+ {
+  "name": "멸균장갑 7.0",
+  "loc": "수술실",
+  "spec": "Box(50쌍)",
+  "par": 10,
+  "stock": 4
+ },
+ {
+  "name": "수술용 드레이프",
+  "loc": "수술실",
+  "spec": "EA",
+  "par": 30,
+  "stock": 22
+ },
+ {
+  "name": "생리식염수 1L",
+  "loc": "수술실",
+  "spec": "EA",
+  "par": 30,
+  "stock": 28
+ },
+ {
+  "name": "일회용 주사기 5cc",
+  "loc": "처치실",
+  "spec": "Box(100개)",
+  "par": 8,
+  "stock": 2
+ },
+ {
+  "name": "알코올 솜",
+  "loc": "처치실",
+  "spec": "Pack",
+  "par": 20,
+  "stock": 20
+ },
+ {
+  "name": "반창고",
+  "loc": "처치실",
+  "spec": "Box",
+  "par": 6,
+  "stock": 7
+ },
+ {
+  "name": "거즈 4x4",
+  "loc": "병동",
+  "spec": "Pack",
+  "par": 25,
+  "stock": 6
+ },
+ {
+  "name": "무릎 보조기 M",
+  "loc": "병동",
+  "spec": "EA",
+  "par": 5,
+  "stock": 5
+ },
+ {
+  "name": "일회용 가운",
+  "loc": "병동",
+  "spec": "EA",
+  "par": 30,
+  "stock": 38
+ },
+ {
+  "name": "일회용 베드시트",
+  "loc": "물리치료실",
+  "spec": "Roll",
+  "par": 12,
+  "stock": 12
+ },
+ {
+  "name": "전극 패드",
+  "loc": "물리치료실",
+  "spec": "Pack",
+  "par": 10,
+  "stock": 12
+ },
+ {
+  "name": "초음파 젤",
+  "loc": "물리치료실",
+  "spec": "병(250ml)",
+  "par": 6,
+  "stock": 2
+ }
+]
