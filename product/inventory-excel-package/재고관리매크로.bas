@@ -1,4 +1,4 @@
-Option Explicit
+﻿Option Explicit
 
 ' ============================================================
 ' 병원 소모품 재고관리 매크로
@@ -13,8 +13,31 @@ Private Const SH_WEEKLY As String = "주간 재고 파악"
 Private Const SH_REQUEST As String = "물품 청구서"
 
 ' 지정한 열에서 데이터가 있는 마지막 행 번호 (없으면 1 = 머리글 행)
+' 사용 범위의 맨 아래 행부터 위로 올라가며 값이 있는 첫 행을 찾는다.
 Private Function LastRowOf(ws As Worksheet, ByVal col As Long) As Long
-    LastRowOf = ws.Cells(ws.Rows.Count, col).End(xlUp).Row
+    Dim r As Long
+    r = ws.UsedRange.Row + ws.UsedRange.Rows.Count - 1
+    Do While r > 1
+        If Trim(CStr(ws.Cells(r, col).Value)) <> "" Then Exit Do
+        r = r - 1
+    Loop
+    LastRowOf = r
+End Function
+
+' 청구번호: R + 연월일시분초 12자리 + "-" + 무작위 3자리 (예: R261102143025-482)
+' 같은 초에 두 번 만들어도 번호가 겹치지 않도록 접미사를 붙인다. (앱의 청구번호 모양과 동일)
+' 서식 문자열(Format) 대신 숫자를 직접 조립해 어떤 환경에서도 같은 결과가 나온다.
+Private Function NewRequestId() As String
+    Dim t As Date
+    Dim rndSuffix As String
+    t = Now
+    rndSuffix = Right("000" & CStr(CLng(Timer * 1000) Mod 1000), 3)
+    NewRequestId = "R" & Two(Year(t) Mod 100) & Two(Month(t)) & Two(Day(t)) & _
+                   Two(Hour(t)) & Two(Minute(t)) & Two(Second(t)) & "-" & rndSuffix
+End Function
+
+Private Function Two(ByVal n As Long) As String
+    Two = Right("0" & CStr(n), 2)
 End Function
 
 ' 상태 수식 (현재재고 < 적정재고 이면 재고부족)
@@ -92,9 +115,7 @@ Sub Request_Generate()
     lastM = LastRowOf(wsM, 1)
     nextQ = LastRowOf(wsQ, 3) + 1
     If nextQ < 2 Then nextQ = 2
-    Dim rndSuffix As String
-    rndSuffix = Right(Format(Timer * 1000, "0"), 3)
-    reqId = "R" & Format(Now, "yymmddHHnnss") & "-" & rndSuffix
+    reqId = NewRequestId()
 
     For r = 2 To lastM
         cur = wsM.Cells(r, 5).Value
@@ -113,7 +134,7 @@ Sub Request_Generate()
             End If
         End If
     Next r
-h
+
     If n = 0 Then
         MsgBox "재고부족 품목이 없습니다.", vbInformation, "물품 청구서"
     Else

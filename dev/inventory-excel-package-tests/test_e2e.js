@@ -37,51 +37,51 @@ let n=0;const ok=m=>console.log(++n+' '+m+' OK');
 
  // A. 오프라인(URL 미설정)
  let p=await open(html);
- assert.strictEqual(await p.innerText('#pillText'),'오프라인'); assert.strictEqual(await p.locator('#list .card').count(),12); ok('URL 미설정: 오프라인 표시 + 샘플 12개 표시');
+ assert.strictEqual(await p.innerText('#pillText'),'오프라인'); assert.strictEqual(await p.locator('#list .card').count(),15); ok('URL 미설정: 오프라인 표시 + 샘플 15개 표시');
  p.once('dialog',d=>d.accept()); await p.click('[data-act=del]'); await p.waitForTimeout(200);
- assert(/오프라인 상태/.test(await p.innerText('#toast'))); assert.strictEqual(await p.locator('#list .card').count(),12); ok('오프라인에서 삭제 시도: 안내만 하고 데이터 유지');
+ assert(/오프라인 상태/.test(await p.innerText('#toast'))); assert.strictEqual(await p.locator('#list .card').count(),15); ok('오프라인에서 삭제 시도: 안내만 하고 데이터 유지');
  await p.close();
 
  // B. 연결됨
  p=await open(online);
- assert.strictEqual(await p.innerText('#pillText'),'실시간 연결됨'); assert.strictEqual(await p.locator('#list .card').count(),12); ok('연결됨 표시 + 시트에서 12개 로드');
- const stats=await p.locator('.stat b').allInnerTexts(); assert.deepStrictEqual(stats,['6','6','12']); ok('통계 부족6/정상6/전체12');
+ assert.strictEqual(await p.innerText('#pillText'),'실시간 연결됨'); assert.strictEqual(await p.locator('#list .card').count(),15); ok('연결됨 표시 + 시트에서 15개 로드');
+ const stats=await p.locator('.stat b').allInnerTexts(); assert.deepStrictEqual(stats,['9','6','15']); ok('통계 부족9/정상6/전체15');
  await p.screenshot({path:SPD+'/pkg_status.png'});
  await p.click('[data-zone=병동]'); assert.strictEqual(await p.locator('#list .card').count(),3); ok('구역 필터(병동 3개)');
  await p.click('[data-zone=전체]');
  // 한글 조합 시뮬레이션
  await p.evaluate(()=>{const i=document.getElementById('q');i.dispatchEvent(new CompositionEvent('compositionstart'));i.value='주사';i.dispatchEvent(new Event('input',{bubbles:true}))});
- assert.strictEqual(await p.locator('#list .card').count(),12); ok('한글 조합 중에는 목록을 다시 그리지 않음');
+ assert.strictEqual(await p.locator('#list .card').count(),15); ok('한글 조합 중에는 목록을 다시 그리지 않음');
  await p.evaluate(()=>{const i=document.getElementById('q');i.dispatchEvent(new CompositionEvent('compositionend'))});
- assert.strictEqual(await p.locator('#list .card').count(),1); assert(/주사기/.test(await p.innerText('#list'))); ok('조합 종료 후 검색 반영(주사기 1개)');
+ assert.strictEqual(await p.locator('#list .card').count(),2); assert(/주사기/.test(await p.innerText('#list'))); ok('조합 종료 후 검색 반영("주사" 2개: 주사기·주사바늘)');
  await p.fill('#q',''); 
  // 청구
- await p.click('[data-tab=request]'); assert.strictEqual(await p.locator('.card').count(),6); ok('청구 탭: 부족 품목 6개 자동 표시');
+ await p.click('[data-tab=request]'); assert.strictEqual(await p.locator('.card').count(),9); ok('청구 탭: 부족 품목 9개 자동 표시');
  const first=await p.locator('.card .nm').first().innerText(); const q0=+await p.locator('.card input[type=number]').first().inputValue();
  await p.locator('[data-act=plus]').first().click(); assert.strictEqual(+await p.locator('.card input[type=number]').first().inputValue(),q0+1); ok('수량 + 버튼');
- await p.locator('.card .cb').nth(1).uncheck(); assert(/\(5개\)/.test(await p.innerText('[data-act=submitReq]'))); ok('체크 해제 시 제출 개수 5개');
+ await p.locator('.card .cb').nth(1).uncheck(); assert(/\(8개\)/.test(await p.innerText('[data-act=submitReq]'))); ok('체크 해제 시 제출 개수 8개');
  await p.screenshot({path:SPD+'/pkg_request.png'});
  await p.click('[data-act=submitReq]'); await p.waitForTimeout(300);
- const reqs=gget('getRequests'); assert.strictEqual(reqs.length,1); assert.strictEqual(reqs[0].items.length,5); assert(reqs[0].items.find(i=>i.name===first).qty===q0+1); ok('청구서 제출 → 시트 물품 청구서에 5개 품목, 조정한 수량 반영');
+ const reqs=gget('getRequests'); assert.strictEqual(reqs.length,1); assert.strictEqual(reqs[0].items.length,8); assert(reqs[0].items.find(i=>i.name===first).qty===q0+1); ok('청구서 제출 → 시트 물품 청구서에 8개 품목, 조정한 수량 반영');
  // 주간실사
- await p.click('[data-tab=weekly]'); await p.click('[data-act=loadDraft]'); assert.strictEqual(await p.locator('input[data-act=draftin]').count(),12); ok('주간실사: 전체 12개 품목 불러오기');
- await p.locator('input[data-name="거즈 4x4"]').fill('30');
+ await p.click('[data-tab=weekly]'); await p.click('[data-act=loadDraft]'); assert.strictEqual(await p.locator('input[data-act=draftin]').count(),15); ok('주간실사: 전체 15개 품목 불러오기');
+ await p.locator('input[data-name="탄력붕대 4인치"]').fill('45');
  await p.screenshot({path:SPD+'/pkg_weekly.png'});
  await p.click('[data-act=saveWeekly]'); await p.waitForTimeout(300);
- assert.strictEqual(gget('getMaster').find(i=>i.name==='거즈 4x4').stock,30); assert.strictEqual(gget('getWeekly').length,12); ok('실사 저장 → 품목 마스터 재고 갱신 + 주간 기록 12건');
- await p.click('[data-tab=status]'); assert.deepStrictEqual(await p.locator('.stat b').allInnerTexts(),['5','7','12']); ok('저장 후 현황 즉시 반영(부족 5/정상 7)');
+ assert.strictEqual(gget('getMaster').find(i=>i.name==='탄력붕대 4인치').stock,45); assert.strictEqual(gget('getWeekly').length,15); ok('실사 저장 → 품목 마스터 재고 갱신 + 주간 기록 15건');
+ await p.click('[data-tab=status]'); assert.deepStrictEqual(await p.locator('.stat b').allInnerTexts(),['8','7','15']); ok('저장 후 현황 즉시 반영(부족 8/정상 7)');
  // 삭제
- p.once('dialog',d=>d.accept()); await p.locator('.card',{hasText:'반창고'}).locator('[data-act=del]').click(); await p.waitForTimeout(300);
- assert(!gget('getMaster').some(i=>i.name==='반창고')); assert.strictEqual(await p.locator('#list .card').count(),11); ok('삭제 → 시트에서도 삭제, 화면 11개');
+ p.once('dialog',d=>d.accept()); await p.locator('.card',{hasText:'부직포 반창고'}).locator('[data-act=del]').click(); await p.waitForTimeout(300);
+ assert(!gget('getMaster').some(i=>i.name==='부직포 반창고')); assert.strictEqual(await p.locator('#list .card').count(),14); ok('삭제 → 시트에서도 삭제, 화면 14개');
  // 삭제 취소
  p.once('dialog',d=>d.dismiss()); await p.locator('.card',{hasText:'알코올 솜'}).locator('[data-act=del]').click(); await p.waitForTimeout(200);
  assert(gget('getMaster').some(i=>i.name==='알코올 솜')); ok('삭제 확인창에서 취소하면 유지');
  // 재접속 시 상태 유지
- await p.close(); p=await open(online); assert.strictEqual(await p.locator('#list .card').count(),11); ok('앱을 다시 열어도 시트 상태 유지(11개)');
+ await p.close(); p=await open(online); assert.strictEqual(await p.locator('#list .card').count(),14); ok('앱을 다시 열어도 시트 상태 유지(14개)');
  // 연결 실패 처리
  const bad=html.replace('"SCRIPT_URL_HERE"','"https://down.local/exec"'); const p2=await b.newPage(); await p2.route('https://down.local/**',r=>r.abort());
  await p2.setContent(bad,{waitUntil:'load'}); await p2.waitForTimeout(500);
- assert.strictEqual(await p2.innerText('#pillText'),'오프라인'); assert.strictEqual(await p2.locator('#list .card').count(),12); ok('서버 응답 없음: 오프라인 + 내장 샘플로 화면 유지');
+ assert.strictEqual(await p2.innerText('#pillText'),'오프라인'); assert.strictEqual(await p2.locator('#list .card').count(),15); ok('서버 응답 없음: 오프라인 + 내장 샘플로 화면 유지');
  assert.deepStrictEqual(errs.filter(e=>!/ERR_FAILED|down\.local|Failed to load resource/.test(e)),[]); ok('예상 밖의 콘솔/페이지 오류 없음');
  await b.close(); console.log('\n전체 '+n+'개 통과');
 })().catch(e=>{console.error('실패:',e.message);process.exit(1)});
