@@ -15,4 +15,5 @@ facilities: []
 brand_color: ""
 logo_use: false
 tone: 차분하고 신뢰감 있는
-doctor_info_allowed: false
+doctor_name: 김진일 원장   # 영상 문구 '김진일 원장님께 확인하세요'에 사용 (원장님 요청)
+doctor_info_allowed: true   # 이름 표기만 허용. 경력·자격 표기는 증빙 확인 후

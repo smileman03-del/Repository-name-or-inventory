@@ -139,12 +139,13 @@ function caption(c, text, alpha = 1) {
 
 // ---------- 수술 전 준비용 추가 아이콘 ----------
 function check(c, x, y, s = 1, col = GOLD, w = 7) { line(c, [[x - 14 * s, y], [x - 4 * s, y + 11 * s], [x + 16 * s, y - 12 * s]], col, w); }
-function checklist(c, cx, cy, sc = 1, ticks = [0, 0, 0, 0], alpha = 1, bar = -1) {
+function checklist(c, cx, cy, sc = 1, ticks = [0, 0, 0, 0], alpha = 1, bar = -1, iconA = [0, 0, 0, 0]) {
   c.save(); c.globalAlpha = alpha; c.translate(cx, cy); c.scale(sc, sc);
   rr(c, -120, -160, 240, 320, 18, INK, '#ffffff', 5); rr(c, -36, -176, 72, 24, 8, INK, '#ffffff', 4);
   for (let i = 0; i < 4; i++) {
     const y = -95 + i * 65; rr(c, -88, y - 20, 40, 40, 6, bar === i ? BLUE : INK, null, 5);
-    line(c, [[-26, y], [84, y]], '#bbbbbb', 6);
+    if (iconA[i] < 0.02) line(c, [[-26, y], [84, y]], '#bbbbbb', 6);
+    else { c.save(); c.globalAlpha = alpha * iconA[i]; c.translate(30, y); ROW_ICONS[i](c); c.restore(); }
     if (ticks[i] > 0) { c.save(); c.globalAlpha = alpha * ticks[i]; check(c, -68, y, 1.1); c.restore(); }
   }
   c.restore();
@@ -165,6 +166,20 @@ function medList(c, x, y, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); r
 function shirt(c, x, y, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); line(c, [[-20, -36], [-44, -22], [-34, -6], [-24, -12], [-24, 36], [24, 36], [24, -12], [34, -6], [44, -22], [20, -36], [8, -28], [-8, -28], [-20, -36]], INK, 5); c.restore(); }
 function ring(c, x, y) { circle(c, x, y, 14, GOLD, null, 5); line(c, [[x - 6, y - 18], [x, y - 28], [x + 6, y - 18]], GOLD, 5); }
 function watchI(c, x, y) { rr(c, x - 10, y - 30, 20, 60, 6, INK, null, 4); circle(c, x, y, 16, INK, '#ffffff', 4); line(c, [[x, y], [x, y - 8]], INK, 3); }
+
+function necklace(c, x, y, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); c.strokeStyle = GOLD; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(0, -8, 28, 0.15 * Math.PI, 0.85 * Math.PI); c.stroke(); circle(c, 0, 26, 7, GOLD, null, 5); c.restore(); }
+function earring(c, x, y, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); circle(c, 0, -14, 9, GOLD, null, 4); line(c, [[0, -5], [0, 12]], GOLD, 4); circle(c, 0, 20, 7, GOLD, '#fbe3a0', 4); c.restore(); }
+function xMark(c, x, y, s = 1) { c.save(); c.translate(x, y); c.scale(s, s); line(c, [[-16, -16], [16, 16]], RED, 6); line(c, [[16, -16], [-16, 16]], RED, 6); c.restore(); }
+const withS = (c, x, y, s, fn) => { c.save(); c.translate(x, y); c.scale(s, s); fn(c); c.restore(); };
+// 체크리스트 각 줄에 들어가는 아이콘 (1 약 / 2 금식 / 3 준비물 / 4 장신구 빼기)
+const ROW_ICONS = [
+  (c) => { pill(c, -34, 0, 0.3, 0.8); bag(c, 26, 4, 0.5); },
+  (c) => { withS(c, -42, 0, 0.5, (k) => clock(k, 0, 0, 2.2)); withS(c, 4, 0, 0.36, (k) => food(k, 0, 0)); withS(c, 46, 0, 0.3, (k) => cup(k, 0, 0)); xMark(c, 8, 0, 0.8); },
+  (c) => { idCard(c, -40, 0, 0.5); medList(c, 4, 0, 0.45); shirt(c, 46, 0, 0.5); },
+  (c) => { withS(c, -42, 0, 0.8, (k) => ring(k, 0, 6)); necklace(c, 0, 0, 0.5); earring(c, 42, 0, 0.55); line(c, [[-58, 18], [58, -18]], RED, 5); },
+];
+// 화면 오른쪽 위에 계속 남는 진행 요약 패널
+function panel(c, a, ticks, iconA) { if (a > 0) checklist(c, 1150, 195, 0.75, ticks, a, -1, iconA); }
 
 // ---------- 장면 ----------
 function sceneGround(c, y = GROUND, x0 = 0, x1 = W) { line(c, [[x0, y], [x1, y]], INK, 4); }
@@ -225,7 +240,7 @@ function S3(c, t) { // 약은 모두 알려 주세요
   const toCard = seg(t, 6.8, 8.2);
   const bagA = t > 2.4 ? 1 : 0;
   const cardA = seg(t, 6.4, 7.4);
-  if (cardA > 0) checklist(c, CARD_END.x, CARD_END.y, CARD_END.s, [seg(t, 8.0, 8.5), 0, 0, 0], cardA);
+  if (cardA > 0) checklist(c, CARD_END.x, CARD_END.y, CARD_END.s, [seg(t, 8.0, 8.5), 0, 0, 0], cardA, -1, [seg(t, 8.2, 9.0), 0, 0, 0]);
   if (bagA && toCard < 1) { const gx = lerp(bx, CARD_END.x - 88 * CARD_END.s, toCard), gy = lerp(by, CARD_END.y - 95 * CARD_END.s, toCard), sc = lerp(1, 0.4, toCard); c.save(); c.globalAlpha = 1 - seg(t, 7.8, 8.3); bag(c, gx, gy, sc); c.restore();
     // 느낌표 → 금색 체크
     if (t > 4.4 && t < 7.2) { if (t < 5.7) { c.save(); c.globalAlpha = seg(t, 4.4, 4.9); exclaim(c, gx, gy - 70, 0.9, RED); c.restore(); } else { c.save(); c.globalAlpha = seg(t, 5.7, 6.1); check(c, gx, gy - 66, 1.2, GOLD, 8); c.restore(); } } }
@@ -234,7 +249,7 @@ function S3(c, t) { // 약은 모두 알려 주세요
 function S4(c, t) { // 금식·검사 일정
   sceneGround(c);
   const rowOpen = seg(t, 0.3, 1.2), ok = seg(t, 7, 7.8), paperK = seg(t, 8, 10), cardA = 1 - seg(t, 8.6, 9.6);
-  checklist(c, CARD_END.x - 120, CARD_END.y, CARD_END.s, [1, ok, 0, 0], cardA, rowOpen > 0.5 && ok < 1 ? 1 : -1);
+  checklist(c, CARD_END.x - 120, CARD_END.y, CARD_END.s, [1, ok, 0, 0], cardA, rowOpen > 0.5 && ok < 1 ? 1 : -1, [1, seg(t, 1.2, 2.0), 0, 0]);
   const dx = lerp(950, 1500, seg(t, 0, 2.5));
   if (dx < 1450) { c.save(); figure(c, dx, GROUND, { ...walkPose(t * 8), armL: { a: -0.5, b: -1.2 }, face: 'smile' }, { dir: -1 }); c.restore(); }
   const reach = seg(t, 3.2, 4.0) * (1 - seg(t, 6.8, 7.4));
@@ -243,6 +258,7 @@ function S4(c, t) { // 금식·검사 일정
   if (ia > 0) { c.save(); c.globalAlpha = ia; clock(c, 900, 190, seg(t, 3, 7) * Math.PI * 4); food(c, 1010, 190 + 150 - 150); cup(c, 1150, 190);
     const nsA = seg(t, 4, 5) * (1 - ok); noSign(c, 1050, 190, nsA); if (ok > 0) { c.globalAlpha = ia * ok; check(c, 1050, 190, 2.2, GOLD, 12); } c.restore(); }
   if (paperK > 0) { c.save(); c.globalAlpha = paperK; paper(c, CARD_END.x - 120 + lerp(0, 120, paperK), lerp(400, 300, paperK), lerp(0.5, 1.4, paperK)); c.restore(); }
+  panel(c, seg(t, 8.6, 9.6), [1, 1, 0, 0], [1, 1, 0, 0]);
 }
 
 function S5(c, t) { // 입원 준비물
@@ -258,8 +274,10 @@ function S5(c, t) { // 입원 준비물
   const pose = hold ? { ...walkPose(t * 8), face: 'smile' } : { ...STAND, armR: { a: 0.7 + 0.3 * Math.sin(t * 5), b: 0.9 }, face: 'smile' };
   const f = figure(c, fx, GROUND, pose);
   if (!hold) bag(c, bagX, bagY, 1); else bag(c, f.handR.x + 14, f.handR.y + 10, 1);
-  const ra = seg(t, 5.2, 6.2); if (ra > 0 && !hold) { c.save(); c.globalAlpha = ra; ring(c, 640, GROUND - 22); watchI(c, 700, GROUND - 32); c.restore(); }
-  if (hold) { c.save(); c.globalAlpha = 1 - seg(t, 7.2, 8.0); ring(c, 640, GROUND - 22); watchI(c, 700, GROUND - 32); c.restore(); }
+  // 목걸이·반지·귀걸이는 몸에서 빼 두는 모습: 스틱맨 출발 지점 왼쪽에 계속 남김
+  const ra = seg(t, 5.2, 6.2);
+  if (ra > 0) { c.save(); c.globalAlpha = ra; ring(c, 90, GROUND - 22); necklace(c, 160, GROUND - 34, 1); earring(c, 230, GROUND - 40, 1); [90, 160, 230].forEach((x) => xMark(c, x, GROUND - 84, 0.6)); c.restore(); }
+  panel(c, 1, [1, 1, seg(t, 6.0, 6.6), seg(t, 6.8, 7.4)], [1, 1, seg(t, 4.0, 5.0), seg(t, 6.2, 7.0)]);
 }
 
 function S6(c, t) { // 마무리: 병원 문
@@ -272,6 +290,7 @@ function S6(c, t) { // 마무리: 병원 문
   const waving = seg(t, 2.8, 3.2) * (1 - seg(t, 4.0, 4.3)); const da = seg(t, 1.5, 2.4);
   c.save(); c.globalAlpha = da * (1 - seg(t, 5.2, 5.8)); figure(c, 900, GROUND, { ...STAND, armL: { a: lerp(-0.12, -2.5 - 0.35 * Math.sin(t * 12), waving), b: lerp(-0.05, -2.5 - 0.35 * Math.sin(t * 12), waving) }, face: 'smile' }, { dir: -1 }); c.restore();
   glow(c, dx + 65, GROUND - 115, 260, '#e8a317', seg(t, 4.4, 5.2) * (1 - seg(t, 6.5, 8)));
+  panel(c, 1, [1, 1, 1, 1], [1, 1, 1, 1]);
   const card = seg(t, 5.2, 6.2);
   if (card > 0) {
     c.save(); c.globalAlpha = card; c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, 615);
@@ -280,7 +299,7 @@ function S6(c, t) { // 마무리: 병원 문
     line(c, [[260, 175], [1020, 175]], GOLD, 4);
     const rows = ['충남 천안시 서북구 불당대로 272 (쌍용동 220-42)', '전화 041-575-6000', '평일(월·화·수·금) 09:00-18:00 (점심 13:00-14:00)', '목요일 09:00-13:00 / 토요일 09:00-12:00', '일요일·공휴일 휴진'];
     rows.forEach((r, i) => { c.fillStyle = i === 1 ? INK : '#333333'; c.font = i === 1 ? 'bold 44px KR' : '34px KR'; c.fillText(r, W / 2, 238 + i * 62 + (i > 1 ? 10 : 0)); });
-    c.font = '24px KR'; c.fillStyle = '#666666'; c.fillText('일반 안내이며 개인 상태에 따라 다를 수 있습니다.', W / 2, 528); c.fillText('정확한 안내는 담당 의료진에게 확인하세요.', W / 2, 558);
+    c.font = '24px KR'; c.fillStyle = '#666666'; c.fillText('일반 안내이며 개인 상태에 따라 다를 수 있습니다.', W / 2, 528); c.fillText('정확한 안내는 김진일 원장님께 확인하세요.', W / 2, 558);
     c.restore();
   }
 }
@@ -290,8 +309,8 @@ const CAPS = [
   [[0.3, 9.6, '당일에 준비하면 된다고 생각하기 쉽지만, 미리 확인할 것이 있습니다.']],
   [[0.3, 3.8, '드시는 약은 모두 알려 주세요.'], [4.0, 9.7, '약에 따라 조정이 필요할 수 있어, 임의로 끊거나 계속 드시지 마세요.']],
   [[0.3, 9.6, '금식 시간과 검사 일정은 안내문에 적힌 대로 꼭 지켜 주세요.']],
-  [[0.3, 9.6, '신분증과 복용 약 목록, 편한 옷을 챙기고, 장신구는 빼고 오세요.']],
-  [[0.3, 4.0, '궁금한 점은 병원으로 문의해 주세요.'], [4.2, 9.7, '개인 상태에 따라 다를 수 있으니 담당 의료진의 안내를 따라 주세요.']],
+  [[0.3, 9.6, '신분증과 복용 약 목록, 편한 옷을 챙기고, 목걸이, 반지, 귀걸이 등 장신구는 빼고 오세요.']],
+  [[0.3, 4.0, '궁금한 점은 병원으로 문의해 주세요.'], [4.2, 9.7, '개인 상태에 따라 다를 수 있으니 김진일 원장님께 확인하세요.']],
 ];
 
 const SCENES = [S1, S2, S3, S4, S5, S6];

@@ -126,10 +126,10 @@ One off-screen adult female narrator throughout, speaking Korean. Standard Seoul
 **Style language:** Rapid scene changes, kinetic motion-graphic transformations, and frequent visual events, while preserving an identical stick-figure design, constant line weight, and strict temporal consistency.
 **First frame (inherited):** A folded guide paper icon centered on the white canvas, with the stick figure beside it.
 **Timed beats:**
-- [0–3s] The guide paper unfolds and lifts out three simple icons that float in a neat row: an ID card, a medicine list sheet, and a folded set of comfortable clothes.
-- [3–7s] The stick figure picks the icons one by one into a simple black line bag, and sets a ring icon and a wristwatch icon down beside the bag, leaving them out.
+- [0–3s] The guide paper unfolds and lifts out three simple icons that float in a neat row: an ID card, a medicine list sheet, and a folded set of comfortable clothes. A small checklist panel stays in the upper-right corner for the rest of the video, with four icon-only rows (a pill with a medicine bag, a clock with a crossed-out food icon, an ID card with a shirt, and a ring, necklace and earring with a red slash), each ticked in warm gold once completed.
+- [3–7s] The stick figure picks the icons one by one into a simple black line bag, and takes off a ring icon, a necklace icon and an earring icon, setting them down to the left of the figure each with a small vivid red cross mark above it; these three jewelry icons stay visible on the canvas for the rest of the clip.
 - [7–10s] The figure slings the bag over one shoulder and begins walking toward the right edge of the frame in a smooth lateral tracking shot.
-**Dialogue (Korean, audio-only):** "신분증과 복용 약 목록, 편한 옷을 챙기고, 장신구는 빼고 오세요." Audio voiceover only, strictly no speech bubbles, no dialogue boxes. Speak the quoted Korean line exactly once, without adding, omitting, paraphrasing, repeating, reordering, captioning, subtitling or visually transcribing any word.
+**Dialogue (Korean, audio-only):** "신분증과 복용 약 목록, 편한 옷을 챙기고, 목걸이, 반지, 귀걸이 등 장신구는 빼고 오세요." Audio voiceover only, strictly no speech bubbles, no dialogue boxes. Speak the quoted Korean line exactly once, without adding, omitting, paraphrasing, repeating, reordering, captioning, subtitling or visually transcribing any word.
 **Narrator voice lock:** One off-screen adult female narrator throughout, speaking Korean. Standard Seoul Korean accent, clear warm mid-low voice, medium-low pitch, gentle forward resonance, no raspiness or breathiness. Calm conversational delivery, restrained pitch variation, steady speaking pace, and close, dry studio sound. Keep the same vocal timbre, register, accent, pace, and recording quality throughout. Emotional progression belongs to the visuals and music; do not change the narrator's voice or switch to character dialogue.
 **Audio:** Voiceover seamlessly continues the identical quiet, thoughtful piano and subtle soft ambient synth from clip 1, maintaining identical tempo, instrumentation, and optimistic narrative momentum. Synchronized crisp SFX on physical actions. The narrator stays voice-first in the mix. Clip-specific SFX: Paper unfolding, soft zipper and rustle sounds as items go in, light rhythmic footsteps.
 **Final frame (inherited by next clip):** The stick figure with the bag on one shoulder walks toward the right of the frame in a continuous lateral tracking shot, with clean white space ahead.
@@ -147,10 +147,10 @@ One off-screen adult female narrator throughout, speaking Korean. Standard Seoul
 **Style language:** Rapid scene changes, kinetic motion-graphic transformations, and frequent visual events, while preserving an identical stick-figure design, constant line weight, and strict temporal consistency.
 **First frame (inherited):** The stick figure with the bag on one shoulder walks toward the right of the frame in a continuous lateral tracking shot.
 **Timed beats:**
-- [0–3s] A simple black line clinic door appears at the right end of the path and the stick figure keeps walking toward it with the same direction and pace.
+- [0–3s] The small icon-only checklist panel remains in the upper-right corner with all four rows ticked in warm gold. A simple black line clinic door appears at the right end of the path and the stick figure keeps walking toward it with the same direction and pace.
 - [3–7s] The figure reaches the door, where a second identical stick figure holding a black line clipboard (the medical staff) waves a friendly greeting; a soft warm gold light spreads from the doorway.
 - [7–10s] The gold light and both figures fade out gently, leaving a clean, empty, digitally pure-white frame with generous negative space in the center, held calmly for the final moment.
-**Dialogue (Korean, audio-only):** "궁금한 점은 병원으로 문의해 주세요. 개인 상태에 따라 다를 수 있으니 담당 의료진의 안내를 따라 주세요." Audio voiceover only, strictly no speech bubbles, no dialogue boxes. Speak the quoted Korean line exactly once, without adding, omitting, paraphrasing, repeating, reordering, captioning, subtitling or visually transcribing any word.
+**Dialogue (Korean, audio-only):** "궁금한 점은 병원으로 문의해 주세요. 개인 상태에 따라 다를 수 있으니 김진일 원장님께 확인하세요." Audio voiceover only, strictly no speech bubbles, no dialogue boxes. Speak the quoted Korean line exactly once, without adding, omitting, paraphrasing, repeating, reordering, captioning, subtitling or visually transcribing any word.
 **Narrator voice lock:** One off-screen adult female narrator throughout, speaking Korean. Standard Seoul Korean accent, clear warm mid-low voice, medium-low pitch, gentle forward resonance, no raspiness or breathiness. Calm conversational delivery, restrained pitch variation, steady speaking pace, and close, dry studio sound. Keep the same vocal timbre, register, accent, pace, and recording quality throughout. Emotional progression belongs to the visuals and music; do not change the narrator's voice or switch to character dialogue.
 **Audio:** Voiceover seamlessly continues the identical quiet, thoughtful piano and subtle soft ambient synth from clip 1, maintaining identical tempo, instrumentation, and optimistic narrative momentum. Synchronized crisp SFX on physical actions. The narrator stays voice-first in the mix. Clip-specific SFX: Soft footsteps, a door-open chime, a warm resolving glow.
 **Final frame (inherited by next clip):** A clean, empty, pure-white canvas with generous central negative space, held still for the post-production information card, with the piano resolving on a final soft chord.
@@ -185,8 +185,8 @@ One off-screen adult female narrator throughout, speaking Korean. Standard Seoul
 | 2 | 28 | 적정 |
 | 3 | 39 | 적정 |
 | 4 | 24 | 적정 |
-| 5 | 25 | 적정 |
-| 6 | 42 | 적정 |
+| 5 | 34 | 적정 |
+| 6 | 40 | 적정 |
 
 한국어 차분한 속도 기준 10초에 45~55음절이 한계입니다. 생성 결과에서 말이 잘리면 속도를 올리지 말고 문장을 줄여 다시 승인받으세요.
 
@@ -205,5 +205,5 @@ One off-screen adult female narrator throughout, speaking Korean. Standard Seoul
 
 1. `knee-surgery-preop-guide-draft.md`의 `[ ]` 칸을 의료진이 채우고 확인했는지
 2. 영상 3클립(약)과 5클립(장신구) 내용이 병원 기준과 맞는지
-3. 영상 설명란에 "정확한 안내는 담당 의료진에게 확인하세요"를 넣었는지
+3. 영상 설명란에 "정확한 안내는 김진일 원장님께 확인하세요"를 넣었는지
 4. 사전심의 대상 여부
