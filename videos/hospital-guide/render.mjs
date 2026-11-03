@@ -250,14 +250,30 @@ function S1(c, t) { // 인트로
   const ta = seg(t, 3.4, 4.4); if (ta > 0) { c.save(); c.globalAlpha = ta; c.font = '76px KR'; c.fillStyle = INK; c.textAlign = 'center'; c.fillText('진료 절차 4단계', 640, 200); line(c, [[430, 222], [850, 222]], GOLD, 6); c.restore(); }
 }
 
-function S2(c, t) { // 1 상담 예약
+function S2(c, t) { // 1 상담 예약: 재진 환자는 전화 예약 가능 / 초진 환자는 전화 예약 불가
   sceneGround(c);
-  const hand = figure(c, 330, GROUND, { ...STAND, armR: { a: lerp(0.12, 1.2, seg(t, 0.2, 0.9)), b: lerp(0.2, 2.2, seg(t, 0.2, 0.9)) }, face: 'smile' });
-  const ph = seg(t, 0.2, 0.9); c.save(); c.globalAlpha = ph; phoneI(c, hand.handR.x + 14, hand.handR.y - 30, 1); c.restore();
-  if (t < 3.6) waves(c, hand.handR.x + 40, hand.handR.y - 40, t);
-  const ma = seg(t, 1.6, 2.6) * (1 - seg(t, 6.4, 6.8)); if (ma > 0) { c.save(); c.globalAlpha = ma; monitorI(c, 850, 250, 1.5); withS(c, 806, 208, 0.52, (k) => calendar(k, 0, 0)); circle(c, 860, 256, 9, GOLD, null, 4); c.restore(); }
-  const bub = seg(t, 3.8, 4.4) * (1 - seg(t, 6.6, 7.0)); if (bub > 0) { speech(c, 250, 120, 190, 110, 330, bub); c.save(); c.globalAlpha = bub; flash(c, 345, 178, t); sweat(c, 400, 160); c.restore(); }
-  const h2 = seg(t, 6.8, 7.6); if (h2 > 0) { c.save(); c.globalAlpha = h2; const hs = lerp(1.8, 1.0, seg(t, 7.0, 9.0)); hourglass(c, 760, 270, hs); line(c, [[860, 230], [860, 300]], GOLD, 7); line(c, [[840, 282], [860, 306], [880, 282]], GOLD, 7); clipboard(c, 930, 230); check(c, 953, 262, 0.9, GOLD, 7); c.restore(); }
+  const tag = (x, txt, a) => { c.save(); c.globalAlpha = a; c.font = '46px KR'; c.fillStyle = INK; c.textAlign = 'center'; c.fillText(txt, x, 296); c.restore(); };
+  // 재진 환자: 전화 + 금색 체크
+  const up1 = seg(t, 0.2, 0.9);
+  const h1 = figure(c, 260, GROUND, { ...STAND, armR: { a: lerp(0.12, 1.2, up1), b: lerp(0.2, 2.2, up1) }, face: 'smile' });
+  c.save(); c.globalAlpha = up1; phoneI(c, h1.handR.x + 14, h1.handR.y - 30, 1); c.restore();
+  tag(260, '재진 환자', seg(t, 0.2, 0.8));
+  if (t < 2.9) waves(c, h1.handR.x + 40, h1.handR.y - 40, t);
+  const ok1 = seg(t, 1.4, 2.0); if (ok1 > 0) { c.save(); c.globalAlpha = ok1; check(c, h1.handR.x + 74, h1.handR.y - 104, 1.3, GOLD, 10); c.restore(); }
+  // 초진 환자: 전화 + 빨강 금지 표시
+  const a2 = seg(t, 3.0, 3.6);
+  if (a2 > 0) {
+    const up2 = seg(t, 3.2, 3.9);
+    const h2 = figure(c, 640, GROUND, { ...STAND, armR: { a: lerp(0.12, 1.2, up2), b: lerp(0.2, 2.2, up2) }, face: seg(t, 4.2, 4.8) > 0.5 ? 'puzzle' : 'smile' });
+    c.save(); c.globalAlpha = a2; phoneI(c, h2.handR.x + 14, h2.handR.y - 30, 1); c.restore();
+    tag(640, '초진 환자', a2);
+    const nk = seg(t, 4.0, 4.6); if (nk > 0) { c.save(); c.globalAlpha = nk; withS(c, h2.handR.x + 14, h2.handR.y - 30, 0.75, (k) => noSign(k, 0, 0, 1)); c.restore(); }
+    // 증상을 미리 알림 → 대기 시간 감소, 검사 안내
+    const bub = seg(t, 5.6, 6.2) * (1 - seg(t, 7.4, 7.8));
+    if (bub > 0) { speech(c, 540, 110, 190, 110, 620, bub); c.save(); c.globalAlpha = bub; flash(c, 635, 168, t); sweat(c, 692, 150); c.restore(); }
+  }
+  const hg = seg(t, 7.2, 7.8); if (hg > 0) { c.save(); c.globalAlpha = hg; hourglass(c, 960, 270, lerp(1.8, 1.0, seg(t, 7.4, 9.4))); line(c, [[1060, 230], [1060, 300]], GOLD, 7); line(c, [[1040, 282], [1060, 306], [1080, 282]], GOLD, 7); c.restore(); }
+  const cb = seg(t, 8.4, 9.0); if (cb > 0) { c.save(); c.globalAlpha = cb; clipboard(c, 1120, 230); check(c, 1143, 262, 0.9, GOLD, 7); c.restore(); }
 }
 
 function S3(c, t) { // 2 초진 상담
@@ -304,7 +320,7 @@ function S6(c, t) { // 서류·CD 접수 → 안내 카드
 
 const CAPS = [
   [[0.4, 4.8, '처음 오셨나요? 진료 절차를 안내해 드립니다.'], [5.0, 9.6, '진료는 네 단계로 진행됩니다.']],
-  [[0.3, 3.6, '전화 또는 온라인으로 간편하게 예약하세요.'], [3.8, 6.6, '예약할 때 증상을 미리 알려 주시면'], [6.8, 9.8, '대기 시간을 줄이고, 필요한 검사도 미리 안내해 드립니다.']],
+  [[0.3, 2.9, '재진 환자는 전화로 예약하실 수 있습니다.'], [3.0, 5.4, '초진 환자분은 전화 예약이 안 됩니다.'], [5.6, 9.8, '예약 시 증상을 미리 알려 주시면 대기 시간을 줄이고, 필요한 검사도 미리 안내해 드립니다.']],
   [[0.3, 4.6, '원장님이 증상과 통증이 시작된 시점,'], [4.8, 9.7, '생활 습관까지 자세히 살펴 원인을 함께 찾아갑니다.']],
   [[0.3, 3.4, '진단 장비로 통증의 원인을 살펴보고,'], [3.6, 6.4, '필요하면 초음파·혈액 검사를 함께 합니다.'], [6.6, 9.8, '결과는 영상 자료와 함께 쉽게 설명해 드립니다.']],
   [[0.3, 5.2, '진단 결과에 따라 수술적·비수술적 치료 계획을 함께 세우고,'], [5.4, 9.7, '회복 단계까지 원장님이 함께합니다.']],
