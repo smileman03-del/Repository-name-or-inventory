@@ -1,11 +1,13 @@
 // 무릎 관절염 안내 영상 (본정형외과의원) - 무음 자막 영상 렌더러
 // 사용법: node videos/knee-arthritis/render.mjs [출력.mp4] [--frame 초] (프레임 PNG만 저장)
 // 의존: skills/directing-stickman-videos/node_modules (npm ci), ffmpeg, 한글 글꼴(WenQuanYi Zen Hei)
-import { createCanvas, GlobalFonts } from '../../skills/directing-stickman-videos/node_modules/@napi-rs/canvas/index.js';
+import { createCanvas, GlobalFonts, loadImage } from '../../skills/directing-stickman-videos/node_modules/@napi-rs/canvas/index.js';
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 
 const W = 1280, H = 720, FPS = 24, DUR = 60;
+const OW = 1920, OH = 1080; // 출력 해상도(1080p): 그림은 1280x720 좌표로 그리고 1.5배 확대 렌더링
+const LOGO = await loadImage(fs.readFileSync(new URL('../assets/bone-logo.jpg', import.meta.url)));
 const FONT = process.env.KR_FONT || '/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc';
 GlobalFonts.registerFromPath(FONT, 'KR');
 
@@ -131,17 +133,41 @@ function wrap(c, text, maxW) {
   if (cur) lines.push(cur); return lines;
 }
 function caption(c, text, alpha = 1) {
-  c.save(); c.globalAlpha = alpha; c.font = '40px KR'; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
-  const lines = wrap(c, text, 1120); const lh = 54; const y0 = 664 - (lines.length - 1) * lh;
-  lines.forEach((l, i) => { c.lineWidth = 8; c.strokeStyle = '#ffffff'; c.strokeText(l, W / 2, y0 + i * lh); c.fillStyle = INK; c.fillText(l, W / 2, y0 + i * lh); });
+  c.save(); c.globalAlpha = alpha; c.textAlign = 'center'; c.textBaseline = 'alphabetic'; c.lineJoin = 'round';
+  let size = 54, lines;
+  for (; size >= 40; size -= 2) { c.font = `${size}px KR`; lines = wrap(c, text, 1180); if (lines.length <= 2) break; }
+  const lh = Math.round(size * 1.3), y0 = 694 - (lines.length - 1) * lh;
+  lines.forEach((l, i) => {
+    c.lineWidth = 10; c.strokeStyle = '#ffffff'; c.strokeText(l, W / 2, y0 + i * lh);
+    c.fillStyle = INK; c.fillText(l, W / 2, y0 + i * lh);
+    c.lineWidth = 1.6; c.strokeStyle = INK; c.strokeText(l, W / 2, y0 + i * lh);
+  });
+  c.restore();
+}
+function fitText(c, text, maxW, size, x, y, color = INK, bold = false) {
+  let s = size; do { c.font = `${bold ? 'bold ' : ''}${s}px KR`; s -= 2; } while (c.measureText(text).width > maxW && s > 20);
+  c.fillStyle = color; c.textAlign = 'center'; c.fillText(text, x, y);
+}
+function drawCard(c, a, notes) {
+  c.save(); c.globalAlpha = a; c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, 615);
+  rr(c, 50, 20, 1180, 536, 24, GOLD, '#fffdf7', 6);
+  const lh = 96, lw = LOGO.width * lh / LOGO.height; c.drawImage(LOGO, W / 2 - lw / 2, 30, lw, lh);
+  fitText(c, '천안본정형외과', 1000, 62, W / 2, 186);
+  line(c, [[260, 202], [1020, 202]], GOLD, 4);
+  fitText(c, '충남 천안시 서북구 불당대로 272 (쌍용동 220-42)', 1100, 38, W / 2, 246, '#333333');
+  fitText(c, '전화 041-575-6000', 1000, 54, W / 2, 308, INK, true);
+  fitText(c, '평일(월·화·수·금) 09:00-18:00 (점심 13:00-14:00)', 1100, 38, W / 2, 362, '#333333');
+  fitText(c, '목요일 09:00-13:00 / 토요일 09:00-12:00', 1100, 38, W / 2, 408, '#333333');
+  fitText(c, '일요일·공휴일 휴진', 1100, 38, W / 2, 454, '#333333');
+  notes.forEach((n, i) => fitText(c, n, 1100, 28, W / 2, 540 - (notes.length - 1 - i) * 34, '#555555'));
   c.restore();
 }
 const CAPS = [
   [[0.5, 8.7, '계단을 오르내릴 때 무릎이 시큰거리신 적 있으신가요?']],
   [[0.3, 4.8, '나이 탓이라며 참고 지내는 분들이 많습니다.'], [5.0, 9.7, '하지만 원인은 다양할 수 있습니다.']],
   [[0.3, 4.8, '무릎 뼈 끝에는 충격을 줄여 주는 연골이 있습니다.'], [5.0, 9.7, '연골이 닳거나 손상되면 관절염으로 이어질 수 있습니다.']],
-  [[0.3, 9.6, '병원에서는 먼저 증상을 듣고, 진찰과 검사로 상태를 살펴본 뒤 치료 방향을 함께 상의합니다.']],
-  [[0.3, 9.6, '무리한 계단 사용은 줄이고, 가벼운 걷기와 스트레칭으로 무릎 주변 근육을 관리해 보세요.']],
+  [[0.3, 4.6, '병원에서는 먼저 증상을 듣고, 진찰과 검사로'], [4.8, 9.6, '상태를 살펴본 뒤 치료 방향을 함께 상의합니다.']],
+  [[0.3, 3.4, '무리한 계단 사용은 줄이고,'], [3.6, 9.6, '가벼운 걷기와 스트레칭으로 무릎 주변 근육을 관리해 보세요.']],
   [[0.3, 4.0, '증상이 계속된다면 의료진과 상담해 보세요.'], [4.2, 9.7, '증상과 경과는 사람마다 다를 수 있습니다.']],
 ];
 
@@ -188,7 +214,7 @@ function S2(c, t) { // 통념 깨기
 
 function S3(c, t) { // 연골 도해
   const fade = seg(t, 0, 1.2), pan = seg(t, 7, 10) * 40;
-  c.save(); c.translate(0, -pan);
+  c.save(); c.translate(0, -48 - pan);
   c.save(); c.globalAlpha = fade;
   // 대퇴골(위) / 경골(아래)
   rr(c, 640, 90, 330, 190, [0, 0, 70, 70], INK, '#fff'); rr(c, 640, 380, 330, 210, [40, 40, 0, 0], INK, '#fff');
@@ -204,7 +230,7 @@ function S3(c, t) { // 연골 도해
   c.globalAlpha = fade * (0.45 + 0.4 * pulse); line(c, [[700, 232], [700, 276]], BLUE, 5); line(c, [[690, 266], [700, 278], [710, 266]], BLUE, 5);
   line(c, [[920, 232], [920, 276]], BLUE, 5); line(c, [[910, 266], [920, 278], [930, 266]], BLUE, 5);
   c.restore();
-  c.save(); c.globalAlpha = fade; c.font = '34px KR'; c.fillStyle = BLUE; c.textAlign = 'left'; c.fillText('무릎 연골', 985, 332); c.restore();
+  c.save(); c.globalAlpha = fade; c.font = '46px KR'; c.fillStyle = BLUE; c.textAlign = 'left'; c.fillText('무릎 연골', 985, 336); c.restore();
   // 스틱맨 + 돋보기
   const m = seg(t, 2.5, 3.6);
   const pose = { ...STAND, armR: { a: lerp(0.12, 1.25, m), b: lerp(0.2, 1.45, m) }, face: 'smile' };
@@ -275,22 +301,12 @@ function S6(c, t) { // 병원 문 앞 → 안내 카드
   glow(c, dx + 65, GROUND - 115, 260, '#e8a317', seg(t, 4.4, 5.2) * (1 - seg(t, 6.5, 8)));
   // 안내 카드 (5s~)
   const card = seg(t, 5.2, 6.2);
-  if (card > 0) {
-    c.save(); c.globalAlpha = card; c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, 615); // 장면 정리
-    rr(c, 150, 70, 980, 500, 24, GOLD, '#fffdf7', 6);
-    c.textAlign = 'center'; c.fillStyle = INK; c.font = '56px KR'; c.fillText('본정형외과의원', W / 2, 150);
-    line(c, [[260, 175], [1020, 175]], GOLD, 4);
-    c.font = '34px KR';
-    const rows = ['충남 천안시 서북구 불당대로 272 (쌍용동 220-42)', '전화 041-575-6000', '평일(월·화·수·금) 09:00-18:00 (점심 13:00-14:00)', '목요일 09:00-13:00 / 토요일 09:00-12:00', '일요일·공휴일 휴진'];
-    rows.forEach((r, i) => { c.fillStyle = i === 1 ? INK : '#333333'; c.font = i === 1 ? 'bold 44px KR' : '34px KR'; c.fillText(r, W / 2, 238 + i * 62 + (i > 1 ? 10 : 0)); });
-    c.font = '26px KR'; c.fillStyle = '#666666'; c.fillText('일반 건강 정보 영상이며 개인에 따라 증상과 경과는 다를 수 있습니다.', W / 2, 548);
-    c.restore();
-  }
+  if (card > 0) drawCard(c, card, ['일반 건강 정보 영상이며 개인에 따라 증상과 경과는 다를 수 있습니다.']);
 }
 
 const SCENES = [S1, S2, S3, S4, S5, S6];
 
-function drawFrame(c, time) {
+function drawFrame0(c, time) {
   const si = Math.min(5, Math.floor(time / 10)), t = time - si * 10;
   c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H);
   SCENES[si](c, t);
@@ -298,16 +314,20 @@ function drawFrame(c, time) {
   const fadeIn = si > 0 ? 1 - seg(t, 0, 0.35) : 0, fadeOut = si < 5 ? seg(t, 9.65, 10) : 0;
   const f = Math.max(fadeIn, fadeOut);
   if (f > 0) { c.save(); c.globalAlpha = f; c.fillStyle = '#ffffff'; c.fillRect(0, 0, W, H); c.restore(); }
+  // 병원 로고 (왼쪽 위, 안내 카드가 나오면 카드 안 로고로 대체)
+  { const la = si === 5 ? 1 - seg(t, 5.2, 6.2) : 1; if (la > 0) { c.save(); c.globalAlpha = la; const lh = 100, lw = LOGO.width * lh / LOGO.height; c.drawImage(LOGO, 28, 12, lw, lh); c.restore(); } }
   // 자막
   for (const [a, b, txt] of CAPS[si]) {
     if (t >= a && t <= b) { const al = Math.min(seg(t, a, a + 0.3), 1 - seg(t, b - 0.3, b)); caption(c, txt, Math.max(al, 0)); }
   }
 }
 
+function drawFrame(c, time) { c.save(); c.scale(OW / W, OH / H); drawFrame0(c, time); c.restore(); }
+
 // ---------- 실행 ----------
 const args = process.argv.slice(2);
 const frameIdx = args.indexOf('--frame');
-const canvas = createCanvas(W, H), ctx = canvas.getContext('2d');
+const canvas = createCanvas(OW, OH), ctx = canvas.getContext('2d');
 if (frameIdx >= 0) {
   const secs = args.slice(frameIdx + 1).map(Number);
   for (const s of secs) { drawFrame(ctx, s); fs.writeFileSync(`${process.env.FRAME_DIR || '.'}/frame_${String(s).replace('.', '_')}.png`, canvas.toBuffer('image/png')); }
@@ -315,8 +335,8 @@ if (frameIdx >= 0) {
 } else {
   const out = args[0] || 'videos/knee-arthritis/knee-arthritis.mp4';
   fs.mkdirSync(out.split('/').slice(0, -1).join('/') || '.', { recursive: true });
-  const ff = spawn(process.env.FFMPEG || 'ffmpeg', ['-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${W}x${H}`, '-r', String(FPS), '-i', '-',
-    '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-shortest', '-c:v', 'libx264', '-preset', 'medium', '-crf', '20', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '64k', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
+  const ff = spawn(process.env.FFMPEG || 'ffmpeg', ['-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgba', '-s', `${OW}x${OH}`, '-r', String(FPS), '-i', '-',
+    '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-shortest', '-c:v', 'libx264', '-preset', 'medium', '-crf', '17', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '64k', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
   const total = FPS * DUR;
   for (let i = 0; i < total; i++) {
     drawFrame(ctx, i / FPS);
