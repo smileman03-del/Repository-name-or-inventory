@@ -70,7 +70,9 @@ nav button.act{color:var(--teal);font-weight:800}
             sel: {}, qty: {}, draft: null, draftDate: '', composing: false, busy: false };
   var main = document.getElementById('main');
 
-  function configured() { return SCRIPT_URL && SCRIPT_URL !== 'SCRIPT_URL_HERE'; }
+  // 실제 URL(https://...)이 들어 있을 때만 연결을 시도한다.
+  // 안내 문구(SCRIPT_URL_HERE)와 비교하지 않는 이유: 메모장 "모두 바꾸기"로 URL을 넣으면 비교 문구까지 같이 바뀌어 항상 '미설정'으로 판단되기 때문이다.
+  function configured() { return /^https?:\/\//i.test(SCRIPT_URL); }
 
   // ---------- 통신 ----------
   function unwrap(res) {

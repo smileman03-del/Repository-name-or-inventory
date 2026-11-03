@@ -12,6 +12,7 @@ python3 "$D/dump_xlsx.py" "$W/in.xlsx" "$W/recalc/in.xlsx" "$W/xlsx_dump.json" >
 step "1/5 백엔드(Code.gs) 시험" node "$D/test_pkg_gs.js" "$PK/Code.gs"
 step "2/5 앱 화면 + 백엔드 연동 시험" node "$D/test_e2e.js" "$W"
 step "3/5 엑셀 → 재고 파악 → 청구서 전체 흐름" node "$D/test_full.js" "$PK" "$W/xlsx_dump.json" "$W"
+step "3b/5 구매자 URL 교체 방식별 연결 시험" node "$D/test_url_replace.js" "$PK/index.html"
 step "4/5 최종 시트 수식 재계산 검증" python3 "$D/check_final_formulas.py" "$W"
 pgrep -x soffice.bin >/dev/null && pkill -x soffice.bin; sleep 1
 step "5/5 VBA 매크로 실행 시험(LibreOffice)" python3 "$D/test_vba_lo.py" "$PK/재고관리매크로.bas" "$W/in.xlsx"
