@@ -2,7 +2,7 @@
  * 병원 소모품 재고관리 (프로) - Apps Script (구글 시트 메뉴 + 웹앱 API)
  *
  * 시트 탭 3개 (setupSheets 가 자동으로 만들어 줍니다):
- *   품목 마스터 / 실사 기록 / 물품 청구서
+ *   품목 마스터 / 실사 기록 / 물품 청구서 / 입고 기록
  *
  * 설치: 새 구글 시트 > 확장 프로그램 > Apps Script > 이 코드 붙여넣기 > 저장
  *       > setupSheets (빈 상태로 시작) 또는 loadSampleData (예제로 체험) 실행 > 권한 승인
@@ -13,11 +13,14 @@
 var TAB_MASTER = '품목 마스터';
 var TAB_AUDIT = '실사 기록';
 var TAB_REQUEST = '물품 청구서';
+var TAB_RECEIPT = '입고 기록';
 
 // 품목 마스터: A~G 는 사람이 입력, H(품목번호)는 자동, I(상태)는 I1 의 자동 수식
 var HEAD_MASTER = ['대분류(부서)', '소분류', '품목명', '규격/단위', '적정재고', '현재재고', '메모', '품목번호(자동)'];
 var HEAD_AUDIT = ['실사일', '대분류(부서)', '변경건수', '변경내역'];
 var HEAD_REQUEST = ['청구번호', '청구일', '청구 대상', '대분류(부서)', '소분류', '품목번호', '품목명', '규격/단위', '현재재고', '적정재고', '청구수량'];
+// 입고 기록: 한 번의 입고(입고번호)에 품목별로 한 줄씩. 청구번호는 청구서를 보고 입고했을 때만 채워진다.
+var HEAD_RECEIPT = ['입고번호', '입고일', '청구번호', '대분류(부서)', '소분류', '품목번호', '품목명', '규격/단위', '입고수량', '입고 전 재고', '입고 후 재고', '메모'];
 
 // 상태 열: 머리글 칸(I1) 하나로 모든 행의 상태를 자동 계산한다.
 // (2행에 두면 첫 품목을 삭제할 때 수식이 같이 사라지므로 머리글 칸에 둔다)
@@ -111,7 +114,7 @@ function fillIdsFromMenu() {
 function clearSampleDataFromMenu() {
   var ui = SpreadsheetApp.getUi();
   var ok = ui.alert('예제 데이터 지우기',
-    '예제 품목과, 체험하며 만든 실사 기록·물품 청구서를 모두 지웁니다.\n(예제가 아닌 품목이 있으면 아무것도 지우지 않습니다.)\n\n계속할까요?',
+    '예제 품목과, 체험하며 만든 실사 기록·물품 청구서·입고 기록을 모두 지웁니다.\n(예제가 아닌 품목이 있으면 아무것도 지우지 않습니다.)\n\n계속할까요?',
     ui.ButtonSet.YES_NO);
   if (ok !== ui.Button.YES) return;
   try {
@@ -144,6 +147,7 @@ function doPost(e) {
     else if (p.action === 'itemDelete') data = itemDelete_(p);
     else if (p.action === 'auditSubmit') data = auditSubmit_(p);
     else if (p.action === 'requestCreate') data = requestCreate_(p);
+    else if (p.action === 'receiveSubmit') data = receiveSubmit_(p);
     else return json_({ success: false, error: '알 수 없는 action: ' + p.action });
     return json_({ success: true, data: data });
   } catch (err) {
@@ -161,7 +165,8 @@ function getAll_() {
     lock.waitLock(15000);
     try { idx = masterIndexFixed_(); } finally { lock.releaseLock(); }
   }
-  return { items: masterItems_(idx), audits: auditDates_(), requests: requestList_() };
+  var rc = receiptData_();
+  return { items: masterItems_(idx), audits: auditDates_(), requests: requestList_(rc.received), receipts: rc.list };
 }
 
 function auditDates_() {
@@ -178,7 +183,26 @@ function auditDates_() {
   return out;
 }
 
-function requestList_() {
+// 입고 기록을 한 번 읽어 (1) 입고 내역 목록, (2) 청구서·품목별 누적 입고수량 표를 만든다
+function receiptData_() {
+  var sh = tab_(TAB_RECEIPT);
+  var last = lastRowByCol_(sh, 1);
+  var out = { list: [], received: {} };
+  if (last < 2) return out;
+  var byId = {};
+  sh.getRange(2, 1, last - 1, 12).getValues().forEach(function (r) {
+    var id = String(r[0]);
+    if (!id) return;
+    if (!byId[id]) { byId[id] = { id: id, date: dateStr_(r[1]), requestId: String(r[2]), memo: String(r[11]), items: [] }; out.list.push(byId[id]); }
+    byId[id].items.push({ id: Number(r[5]) || 0, dept: String(r[3]), cat: String(r[4]), name: String(r[6]), spec: String(r[7]), qty: num_(r[8]), before: num_(r[9]), after: num_(r[10]) });
+    var rid = String(r[2]);
+    if (rid) { var k = rid + '|' + (Number(r[5]) || 0); out.received[k] = (out.received[k] || 0) + num_(r[8]); }
+  });
+  return out;
+}
+
+function requestList_(received) {
+  received = received || {};
   var sh = tab_(TAB_REQUEST);
   var last = lastRowByCol_(sh, 1);
   if (last < 2) return [];
@@ -187,9 +211,17 @@ function requestList_() {
     var id = String(r[0]);
     if (!id) return;
     if (!byId[id]) { byId[id] = { id: id, date: dateStr_(r[1]), dept: String(r[2]), items: [] }; order.push(id); }
-    byId[id].items.push({ id: Number(r[5]) || 0, dept: String(r[3]), cat: String(r[4]), name: String(r[6]), spec: String(r[7]), stock: num_(r[8]), par: num_(r[9]), qty: num_(r[10]) });
+    var itemId = Number(r[5]) || 0;
+    byId[id].items.push({ id: itemId, dept: String(r[3]), cat: String(r[4]), name: String(r[6]), spec: String(r[7]), stock: num_(r[8]), par: num_(r[9]), qty: num_(r[10]), received: received[id + '|' + itemId] || 0 });
   });
-  return order.map(function (id) { return byId[id]; });
+  // 입고 상태: none(입고 전) / partial(일부 입고) / done(전부 입고)
+  return order.map(function (id) {
+    var q = byId[id];
+    var all = q.items.length > 0 && q.items.every(function (i) { return i.received >= i.qty; });
+    var any = q.items.some(function (i) { return i.received > 0; });
+    q.status = all ? 'done' : (any ? 'partial' : 'none');
+    return q;
+  });
 }
 
 // ---------- 변경 ----------
@@ -259,6 +291,54 @@ function requestCreate_(p) {
   }));
 }
 
+// 입고: 현재재고를 "더하고" 입고 기록을 남긴다. (실사는 수량을 "덮어쓰고", 입고는 "더한다")
+// 청구서를 보고 입고하면 requestId 를 함께 보내 청구서별 입고 현황(입고 전/일부/완료)이 계산된다.
+function receiveSubmit_(p) {
+  var items = Array.isArray(p.items) ? p.items : [];
+  if (!items.length) throw new Error('입고할 품목이 없습니다.');
+  var requestId = String(p.requestId || '').trim();
+  if (requestId && !requestExists_(requestId)) throw new Error('청구서를 찾을 수 없습니다: ' + requestId + ' (앱을 새로고침해 주세요)');
+  var memo = String(p.memo || '').trim().slice(0, 200);
+
+  var want = {}, order = [], anyQty = false;   // 같은 품목이 여러 줄이면 수량을 합친다
+  items.forEach(function (u) {
+    var qty = num_(u.qty);
+    if (qty < 1) return;
+    anyQty = true;
+    var id = Number(u.id);
+    if (!want[id]) { want[id] = { qty: 0, name: String(u.name || u.id) }; order.push(id); }
+    want[id].qty += qty;
+  });
+  if (!anyQty) throw new Error('입고 수량이 없습니다. 수량을 1 이상 입력해 주세요.');
+
+  var idx = masterIndexFixed_();
+  var changes = [], rows = [], skipped = [], stocks = {};
+  var rid = 'IN' + Utilities.formatDate(new Date(), tz_(), 'yyMMddHHmmss') + '-' + Utilities.getUuid().slice(0, 3);
+  var date = today_();
+  order.forEach(function (id) {
+    var row = idx.rowById[id];
+    if (!row) { skipped.push(want[id].name); return; }
+    var v = idx.data[row - 2];
+    var before = num_(v[5]), after = before + want[id].qty;
+    changes.push({ row: row, qty: after });
+    stocks[id] = after;
+    rows.push([rid, date, requestId, String(v[0]).trim(), String(v[1]).trim(), id, String(v[2]).trim(), String(v[3]).trim(), want[id].qty, before, after, memo]);
+  });
+  if (!changes.length) throw new Error('시트에서 찾을 수 없는 품목입니다: ' + skipped.slice(0, 3).join(', ') + ' (앱을 새로고침해 주세요)');
+
+  writeStock_(idx, changes);
+  var sh = tab_(TAB_RECEIPT);
+  sh.getRange(Math.max(lastRowByCol_(sh, 1), 1) + 1, 1, rows.length, 12).setValues(rows);
+  return { id: rid, date: date, count: rows.length, skipped: skipped, stocks: stocks };
+}
+
+function requestExists_(requestId) {
+  var sh = tab_(TAB_REQUEST);
+  var last = lastRowByCol_(sh, 1);
+  if (last < 2) return false;
+  return sh.getRange(2, 1, last - 1, 1).getValues().some(function (r) { return String(r[0]) === requestId; });
+}
+
 // ---------- 시트 도우미 ----------
 // 현재재고(F열) 갱신: 값만 들어 있으면 한 번에 쓰고, 수식이 섞여 있으면 수식을 지키기 위해 한 칸씩 쓴다
 function writeStock_(idx, changes) {
@@ -298,7 +378,7 @@ function writeRequest_(dept, list) {
 // 탭 3개와 머리글, 상태 자동 수식을 만든다. 이미 있으면 건드리지 않는다. 비어 있는 기본 시트는 정리한다.
 function setupSheets() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var defs = [[TAB_MASTER, HEAD_MASTER], [TAB_AUDIT, HEAD_AUDIT], [TAB_REQUEST, HEAD_REQUEST]];
+  var defs = [[TAB_MASTER, HEAD_MASTER], [TAB_AUDIT, HEAD_AUDIT], [TAB_REQUEST, HEAD_REQUEST], [TAB_RECEIPT, HEAD_RECEIPT]];
   var ours = defs.map(function (d) { return d[0]; });
   defs.forEach(function (p) {
     var sh = ss.getSheetByName(p[0]) || ss.insertSheet(p[0]);
@@ -339,7 +419,7 @@ function clearSampleData_() {
   if (others.length) {
     throw new Error('예제가 아닌 품목이 있습니다 (' + others.slice(0, 3).join(', ') + (others.length > 3 ? ' 외 ' + (others.length - 3) + '개' : '') + '). 직접 지워 주세요.');
   }
-  [[TAB_MASTER, 8, 3], [TAB_AUDIT, 4, 2], [TAB_REQUEST, 11, 1]].forEach(function (t) {
+  [[TAB_MASTER, 8, 3], [TAB_AUDIT, 4, 2], [TAB_REQUEST, 11, 1], [TAB_RECEIPT, 12, 1]].forEach(function (t) {
     var sh = tab_(t[0]);
     var last = lastRowByCol_(sh, t[2]);
     if (last > 1) sh.getRange(2, 1, last - 1, t[1]).clearContent();

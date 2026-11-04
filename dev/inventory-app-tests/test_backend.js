@@ -15,12 +15,12 @@ let e = fresh();
 e.run('onOpen()'); assert.strictEqual(e.ui.menu.title, '🏥 재고관리'); assert.strictEqual(e.ui.menu.items, 5); ok('시트 메뉴 5개 항목');
 assert.strictEqual(e.get('getAll').success, false); assert(/setupSheets/.test(e.get('getAll').error)); ok('탭이 없으면 "setupSheets 를 먼저 실행" 안내 오류');
 e.run('setupSheets()');
-assert.deepStrictEqual(e.sheets.map(s => s.name), ['품목 마스터', '실사 기록', '물품 청구서']); ok('setupSheets: 탭 3개가 정확한 이름·순서로 생기고, 비어 있던 기본 시트("시트1")는 정리됨');
+assert.deepStrictEqual(e.sheets.map(s => s.name), ['품목 마스터', '실사 기록', '물품 청구서', '입고 기록']); ok('setupSheets: 탭 4개가 정확한 이름·순서로 생기고, 비어 있던 기본 시트("시트1")는 정리됨');
 assert.strictEqual(e.sheet('품목 마스터').d[0][8], e.run('MASTER_STATUS_FORMULA')); assert(/^=ARRAYFORMULA\(\{"상태\(자동\)"; IF\(F2:F=""/.test(e.sheet('품목 마스터').d[0][8])); ok('품목 마스터 I1 에 상태 자동 수식(ARRAYFORMULA) 입력');
 assert.deepStrictEqual(e.sheet('품목 마스터').d[0].slice(0, 8), e.J(e.run('HEAD_MASTER'))); assert.deepStrictEqual(e.sheet('물품 청구서').d[0], e.J(e.run('HEAD_REQUEST'))); ok('머리글 정확');
 const before = JSON.stringify(e.sheets.map(s => s.d)); e.run('setupSheets()'); assert.strictEqual(JSON.stringify(e.sheets.map(s => s.d)), before); ok('setupSheets 를 두 번 실행해도 안전(아무것도 바뀌지 않음)');
-{ const x = fresh(); x.paste('시트1', 1, [['내 메모']]); x.run('setupSheets()'); assert(x.ss.getSheetByName('시트1')); assert.strictEqual(x.sheets.length, 4); ok('내용이 있는 기존 시트는 지우지 않고 보존'); }
-let r = all(e); assert.deepStrictEqual(r, { items: [], audits: {}, requests: [] }); ok('빈 상태의 getAll 응답: items/audits/requests 모두 빈 값');
+{ const x = fresh(); x.paste('시트1', 1, [['내 메모']]); x.run('setupSheets()'); assert(x.ss.getSheetByName('시트1')); assert.strictEqual(x.sheets.length, 5); ok('내용이 있는 기존 시트는 지우지 않고 보존'); }
+let r = all(e); assert.deepStrictEqual(r, { items: [], audits: {}, requests: [], receipts: [] }); ok('빈 상태의 getAll 응답: items/audits/requests/receipts 모두 빈 값');
 
 // ---- 예제 ----
 e = sample(); r = all(e);
@@ -86,10 +86,37 @@ assert(e.post({ action: 'auditSubmit', dept: '', updates: [] }).success === fals
 e = sample();
 const reqItems = [{ id: 1, name: '멸균 수술장갑 7.0', spec: 'Box(50쌍)', dept: '수술실', cat: '소모품', stock: 4, par: 10, qty: 6 }, { id: 14, name: '초음파 젤', spec: '병(250ml)', dept: '물리치료실', cat: '소모품', stock: 2, par: 6, qty: 0 }];
 r = e.post({ action: 'requestCreate', dept: '전체', items: reqItems }); assert(r.success && /^R\d{12}-[0-9a-f]{3}$/.test(r.data.id) && /^\d{4}-\d{2}-\d{2}$/.test(r.data.date)); ok('청구서 생성: 청구번호(R+시각+무작위)와 날짜 반환');
-let rq = all(e).requests; assert.strictEqual(rq.length, 1); assert.strictEqual(rq[0].dept, '전체'); assert.strictEqual(rq[0].items.length, 2); assert.deepStrictEqual(rq[0].items[0], { id: 1, dept: '수술실', cat: '소모품', name: '멸균 수술장갑 7.0', spec: 'Box(50쌍)', stock: 4, par: 10, qty: 6 }); assert.strictEqual(rq[0].items[1].qty, 1); ok('청구 내역이 앱이 기대하는 형태로 복원됨(수량 0은 1로 보정)');
+let rq = all(e).requests; assert.strictEqual(rq.length, 1); assert.strictEqual(rq[0].dept, '전체'); assert.strictEqual(rq[0].items.length, 2); assert.deepStrictEqual(rq[0].items[0], { id: 1, dept: '수술실', cat: '소모품', name: '멸균 수술장갑 7.0', spec: 'Box(50쌍)', stock: 4, par: 10, qty: 6, received: 0 }); assert.strictEqual(rq[0].status, 'none'); assert.strictEqual(rq[0].items[1].qty, 1); ok('청구 내역이 앱이 기대하는 형태로 복원됨(수량 0은 1로 보정)');
 e.post({ action: 'requestCreate', dept: '병동', items: [reqItems[0]] }); e.post({ action: 'requestCreate', dept: '병동', items: [reqItems[0]] }); const ids = all(e).requests.map(x => x.id); assert.strictEqual(ids.length, 3); assert.strictEqual(new Set(ids).size, 3); ok('같은 초에 여러 번 청구해도 번호 중복 없음(청구가 합쳐지지 않음)');
 assert(e.post({ action: 'requestCreate', dept: '병동', items: [] }).success === false && e.post({ action: 'requestCreate', dept: '병동', items: 5 }).success === false); ok('빈 청구·잘못된 형식 거부');
 e.post({ action: 'requestCreate', items: [reqItems[0]] }); assert.strictEqual(all(e).requests.at(-1).dept, '전체'); ok('청구 대상을 안 보내면 "전체"로 기록');
+
+// ---- 입고 ----
+e = sample();
+r = e.post({ action: 'receiveSubmit', items: [{ id: 1, name: '멸균 수술장갑 7.0', qty: 6 }, { id: 6, name: '일회용 주사기 5cc', qty: 5 }], memo: '○○상사 납품' });
+assert(r.success && r.data.count === 2 && /^IN\d{12}-[0-9a-f]{3}$/.test(r.data.id) && /^\d{4}-\d{2}-\d{2}$/.test(r.data.date) && r.data.skipped.length === 0); ok('입고 저장: 입고번호(IN+시각+무작위)·날짜·건수 반환');
+assert.deepStrictEqual(r.data.stocks, { 1: 10, 6: 8 }); assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, 10); assert.strictEqual(byName(e, '일회용 주사기 5cc').stock, 8); assert.strictEqual(byName(e, '알코올 솜').stock, 20); ok('입고는 현재재고에 "더해진다"(4+6=10, 3+5=8), 입고 후 재고를 돌려주고 다른 품목은 그대로');
+let rc = all(e).receipts; assert.strictEqual(rc.length, 1); assert.strictEqual(rc[0].memo, '○○상사 납품'); assert.strictEqual(rc[0].requestId, ''); assert.deepStrictEqual(rc[0].items[0], { id: 1, dept: '수술실', cat: '소모품', name: '멸균 수술장갑 7.0', spec: 'Box(50쌍)', qty: 6, before: 4, after: 10 }); ok('입고 기록 탭에 입고 전·후 재고, 메모가 남고 getAll 로 조회됨');
+assert.strictEqual(e.sheet('입고 기록').d.length, 3); assert.strictEqual(e.sheet('입고 기록').d[1][0], e.sheet('입고 기록').d[2][0]); ok('한 번의 입고는 품목별 한 줄씩, 같은 입고번호로 묶임');
+r = e.post({ action: 'receiveSubmit', items: [{ id: 2, qty: 3 }, { id: 2, qty: 4 }, { id: 3, qty: 0 }, { id: 4, qty: -5 }] }); assert(r.success && r.data.count === 1); assert.strictEqual(byName(e, '멸균 수술장갑 7.5').stock, 16); assert.strictEqual(byName(e, '일회용 수술가운').stock, 26); ok('같은 품목이 여러 줄이면 합쳐서 입고(3+4=7), 수량 0·음수 줄은 무시');
+r = e.post({ action: 'receiveSubmit', items: [{ id: 5, qty: 1 }, { id: 999, name: '없는품목', qty: 3 }] }); assert(r.success && JSON.stringify(r.data.skipped) === JSON.stringify(['없는품목'])); assert.strictEqual(byName(e, '생리식염수 1L').stock, 53); ok('일부만 못 찾으면 나머지는 입고하고 건너뛴 이름을 알려줌');
+const nIn = e.sheet('입고 기록').d.length;
+assert(/수량이 없습니다/.test(e.post({ action: 'receiveSubmit', items: [{ id: 1, qty: 0 }] }).error)); assert(e.post({ action: 'receiveSubmit', items: [] }).success === false); r = e.post({ action: 'receiveSubmit', items: [{ id: 888, name: '없는A', qty: 2 }] }); assert(r.success === false && /없는A/.test(r.error) && /새로고침/.test(r.error)); assert.strictEqual(e.sheet('입고 기록').d.length, nIn); ok('수량이 전부 0이거나 품목을 전부 못 찾으면 오류로 알리고 아무것도 기록하지 않음');
+{ const x = sample(); x.sheet('품목 마스터').d[3][5] = '=E4';   // 3번 품목(입고 대상 아님)의 현재재고 칸에 수식
+  x.post({ action: 'receiveSubmit', items: [{ id: 1, qty: 5 }, { id: 2, qty: 2 }] }); assert.strictEqual(x.sheet('품목 마스터').d[3][5], '=E4'); assert.strictEqual(byName(x, '멸균 수술장갑 7.0').stock, 9); assert.strictEqual(byName(x, '멸균 수술장갑 7.5').stock, 11); ok('입고 대상이 아닌 품목의 현재재고 수식은 지우지 않고 보존(대상 품목은 정상 입고)'); }
+// 청구서 기준 입고 현황
+e = sample();
+const rq1 = e.post({ action: 'requestCreate', dept: '전체', items: [{ id: 1, name: 'a', spec: '', dept: '수술실', cat: '소모품', stock: 4, par: 10, qty: 6 }, { id: 6, name: 'b', spec: '', dept: '처치실', cat: '소모품', stock: 3, par: 8, qty: 5 }] }).data.id;
+let q = all(e).requests[0]; assert.strictEqual(q.status, 'none'); assert(q.items.every(i => i.received === 0)); ok('입고 전 청구서의 상태는 none(입고 전)');
+r = e.post({ action: 'receiveSubmit', requestId: rq1, items: [{ id: 1, qty: 4 }] }); assert(r.success); q = all(e).requests[0];
+assert.strictEqual(q.status, 'partial'); assert.strictEqual(q.items.find(i => i.id === 1).received, 4); assert.strictEqual(q.items.find(i => i.id === 6).received, 0); assert.strictEqual(all(e).receipts[0].requestId, rq1); ok('일부만 입고하면 partial(일부 입고), 품목별 누적 입고수량이 청구서에 표시됨');
+e.post({ action: 'receiveSubmit', requestId: rq1, items: [{ id: 1, qty: 2 }, { id: 6, qty: 5 }] }); q = all(e).requests[0]; assert.strictEqual(q.status, 'done'); assert.strictEqual(q.items.find(i => i.id === 1).received, 6); ok('나눠서 입고해도 누적되어 전부 채우면 done(입고 완료)');
+e.post({ action: 'receiveSubmit', requestId: rq1, items: [{ id: 1, qty: 3 }] }); q = all(e).requests[0]; assert.strictEqual(q.status, 'done'); assert.strictEqual(q.items.find(i => i.id === 1).received, 9); ok('청구보다 더 들어와도(초과 입고) 그대로 기록되고 완료 상태 유지');
+const rq2 = e.post({ action: 'requestCreate', dept: '병동', items: [{ id: 10, name: 'c', spec: '', dept: '병동', cat: '소모품', stock: 11, par: 30, qty: 19 }] }).data.id; e.post({ action: 'receiveSubmit', requestId: rq2, items: [{ id: 10, qty: 19 }] });
+assert.deepStrictEqual(all(e).requests.map(x => x.status), ['done', 'done']); assert.strictEqual(e.get('getAll').data.requests[1].items[0].received, 19); ok('청구서가 여러 개여도 청구서별로 입고 현황이 따로 계산됨');
+assert(e.post({ action: 'receiveSubmit', requestId: 'R없는번호', items: [{ id: 1, qty: 1 }] }).success === false && /청구서를 찾을 수 없습니다/.test(e.post({ action: 'receiveSubmit', requestId: 'R없는번호', items: [{ id: 1, qty: 1 }] }).error)); ok('없는 청구번호로는 입고하지 않고 안내(재고도 그대로)');
+{ const before = byName(e, '멸균 수술장갑 7.0').stock; e.post({ action: 'receiveSubmit', requestId: 'R없는번호', items: [{ id: 1, qty: 1 }] }); assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, before); }
+assert.deepStrictEqual(all(e).receipts.map(x => x.id).length, new Set(all(e).receipts.map(x => x.id)).size); ok('입고번호는 모두 고유(같은 초에 여러 번 입고해도 합쳐지지 않음)');
 
 // ---- 시트 메뉴 ----
 e = sample();
@@ -99,12 +126,12 @@ e.ui.promptText = '병동'; e.run('recordAuditFromMenu()'); assert(/병동 실�
 const nA = e.sheet('실사 기록').d.length; e.ui.promptText = '없는부서'; e.run('recordAuditFromMenu()'); assert(/없는 대분류/.test(e.alerts.at(-1))); assert.strictEqual(e.sheet('실사 기록').d.length, nA); ok('없는 대분류는 기록하지 않고 안내');
 { const x = sample(); x.run('createRequestFromMenu()'); x.run('clearSampleDataFromMenu()'); assert.strictEqual(all(x).items.length, 0); }
 // ---- 예제 데이터 지우기 ----
-e = sample(); e.post({ action: 'auditSubmit', dept: '처치실', updates: [{ id: 6, name: 'a', stock: 9 }] }); e.post({ action: 'requestCreate', dept: '병동', items: [reqItems[0]] });
+e = sample(); e.post({ action: 'auditSubmit', dept: '처치실', updates: [{ id: 6, name: 'a', stock: 9 }] }); e.post({ action: 'requestCreate', dept: '병동', items: [reqItems[0]] }); e.post({ action: 'receiveSubmit', items: [{ id: 6, qty: 2 }] });
 e.paste('품목 마스터', 17, [['병동', '소모품', '우리병원 품목', 'EA', 5, 1, '']]);
 assert.throws(() => e.run('clearSampleData_()'), /예제가 아닌 품목/); assert.strictEqual(all(e).items.length, 16); assert.strictEqual(all(e).requests.length, 1); ok('예제가 아닌 품목이 섞여 있으면 아무것도 지우지 않고 이유를 알려줌');
 e.sheet('품목 마스터').d.splice(16, 1);
 e.ui.answer = 'NO'; e.run('clearSampleDataFromMenu()'); assert.strictEqual(all(e).items.length, 15); ok('확인 창에서 "아니오"를 누르면 지우지 않음');
-e.ui.answer = 'YES'; e.run('clearSampleDataFromMenu()'); r = all(e); assert.deepStrictEqual([r.items.length, Object.keys(r.audits).length, r.requests.length], [0, 0, 0]); ok('예제 품목 + 체험 기록(실사 기록·청구서)을 한 번에 삭제');
+e.ui.answer = 'YES'; e.run('clearSampleDataFromMenu()'); r = all(e); assert.deepStrictEqual([r.items.length, Object.keys(r.audits).length, r.requests.length, r.receipts.length], [0, 0, 0, 0]); ok('예제 품목 + 체험 기록(실사 기록·청구서·입고 기록)을 한 번에 삭제');
 assert.strictEqual(e.sheet('품목 마스터').d[0][8], e.run('MASTER_STATUS_FORMULA')); assert.strictEqual(e.sheet('품목 마스터').d[0][2], '품목명'); assert.strictEqual(e.sheet('물품 청구서').d[0][0], '청구번호'); ok('머리글과 상태 자동 수식은 그대로 남음');
 e.post({ action: 'itemAdd', dept: '병동', cat: '소모품', name: '내 첫 품목', par: 5, stock: 1 }); assert.strictEqual(e.sheet('품목 마스터').d[1][2], '내 첫 품목'); assert.strictEqual(all(e).items[0].id, 1); ok('지운 뒤 첫 품목은 2행·번호 1부터 시작');
 

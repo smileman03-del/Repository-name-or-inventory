@@ -26,6 +26,7 @@ const html = fs.readFileSync(PKG + '/index.html', 'utf8').replace('"SCRIPT_URL_H
     await p.locator('[data-d]').nth(1).click(); await p.waitForTimeout(80); await overflow(p, '재고파악(입력: 아주 긴 이름의 대분류)', w);
     await go(p, 'request'); await overflow(p, '물품청구', w); await p.click('#genRequest'); await p.waitForTimeout(300); await overflow(p, '청구서 모달', w);
     if (w === 320) await p.screenshot({ path: OUT + '/pro_narrow_modal.png' }); await p.click('#closeModal');
+    await go(p, 'receive'); await overflow(p, '입고(청구서 목록)', w); await p.click('.seg-btn[data-mode=direct]'); await p.waitForTimeout(100); await overflow(p, '입고(직접·긴 이름)', w);
     await go(p, 'manage'); await overflow(p, '품목관리', w); await p.click('#addItemBtn'); await p.waitForTimeout(80); await overflow(p, '품목 추가 모달', w); await p.click('#cancelItem');
     await p.click('#bulkCatBtn'); await p.waitForTimeout(80); await overflow(p, '일괄 변경 모달', w); await p.click('#cancelBulk');
     if (w === 320) { await go(p, 'manage'); await p.screenshot({ path: OUT + '/pro_narrow320.png' }); }
@@ -34,7 +35,7 @@ const html = fs.readFileSync(PKG + '/index.html', 'utf8').replace('"SCRIPT_URL_H
   ok('화면 폭 320·360·430·768px × 4개 화면 + 모달 3종(청구서·품목 추가·일괄 변경): 가로 넘침 없음 (긴 이름·큰 숫자·긴 메모 포함)');
   const p = await page(390);
   assert.strictEqual(await p.evaluate(() => window.__pwned || 0), 0); assert.strictEqual(p.dialogs.length, 0);
-  for (const scr of ['dashboard', 'audit', 'request', 'manage']) {
+  for (const scr of ['dashboard', 'audit', 'request', 'receive', 'manage']) {
     await go(p, scr);
     if (scr === 'audit') for (let i = 0; i < 3; i++) { await go(p, 'audit'); const bt = p.locator('[data-d]'); if (await bt.count() > i) { await bt.nth(i).click(); await p.waitForTimeout(60); } }
     // 주입한 태그가 실제 요소로 만들어졌다면 이런 요소가 존재한다

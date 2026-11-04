@@ -43,7 +43,7 @@ named = set(re.findall(r'`(\w+)`', readme)) & {'setupSheets', 'loadSampleData', 
 if named == {'setupSheets', 'loadSampleData', 'onOpen'} and named <= funcs: good(f'설명서가 안내하는 함수 {sorted(named)} 가 Code.gs 에 모두 있음')
 else: fail('설명서가 안내하는 함수가 Code.gs 에 없음')
 tabs = re.findall(r"var TAB_\w+ = '([^']+)'", code)
-if len(tabs) == 3 and all(f'`{t}`' in readme for t in tabs): good('Code.gs 의 탭 3개가 모두 설명서에 설명되어 있음')
+if len(tabs) == 4 and all(f'`{t}`' in readme for t in tabs): good('Code.gs 의 탭 4개(입고 기록 포함)가 모두 설명서에 설명되어 있음')
 else: fail(f'탭 설명 누락: {tabs}')
 menu = re.findall(r"addItem\('([^']+)'", code)
 need = ['현황 대시보드', '물품 청구서 생성', '실사 완료 기록', '품목번호 채우기', '예제 데이터 지우기']
@@ -71,7 +71,13 @@ else: good('설명서 필수 안내(GitHub 배포 단계·보안·주소 교체�
 steps = re.findall(r'^### (\d+)\. ', readme, re.M)
 if steps == [str(i) for i in range(1, 7)]: good('설치 단계 번호가 1~6으로 연속')
 else: fail(f'설치 단계 번호가 이상함: {steps}')
-screens = ['재고현황', '재고파악', '물품청구', '품목관리']
-if all(k in readme for k in screens) and all(k in app for k in screens): good('앱 화면 4개 이름이 설명서와 앱에서 일치')
+screens = ['재고현황', '재고파악', '물품청구', '입고', '품목관리']
+if all(k in readme for k in screens) and all(k in app for k in screens): good('앱 화면 5개 이름이 설명서와 앱에서 일치')
 else: fail('앱 화면 이름이 설명서와 다름')
+for w in ['입고 기록', '청구서 기준', '직접 입고', '일부 입고', '입고 완료', '더해', '덮어', '다크 모드', '부족만', '결재']:
+    if w not in readme: fail(f'설명서에 입고·디자인 기능 안내 "{w}" 없음')
+else: good('설명서에 입고(청구서 기준·직접·일부/완료)·재고파악과의 차이·다크 모드·결재용 인쇄 안내가 모두 있음')
+ext_res = re.findall(r'(?:src|href)\s*=\s*["\'](?!#)[^"\']+["\']', app)
+if ext_res: fail(f'앱이 외부 자원을 불러옴: {ext_res[:3]}')
+else: good('앱이 외부 글꼴·이미지·스크립트를 불러오지 않음(오프라인·추적 없음)')
 print(); sys.exit(1 if fails else 0)

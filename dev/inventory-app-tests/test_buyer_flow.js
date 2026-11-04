@@ -15,7 +15,7 @@ const today = ymdKR(new Date());
   const env = createEnv(PKG + '/Code.gs');   // 빈 기본 시트("시트1") 포함, ARRAYFORMULA 때문에 getLastRow 가 맨 아래로 보고되는 최악의 환경
   const all = () => env.get('getAll').data;
   env.run('onOpen()'); env.run('setupSheets()');
-  assert.deepStrictEqual(env.sheets.map(s => s.name), ['품목 마스터', '실사 기록', '물품 청구서']); ok('① setupSheets 한 번으로 탭 3개 완성(탭 이름 확인 불필요), 빈 기본 시트 정리');
+  assert.deepStrictEqual(env.sheets.map(s => s.name), ['품목 마스터', '실사 기록', '물품 청구서', '입고 기록']); ok('① setupSheets 한 번으로 탭 4개 완성(탭 이름 확인 불필요), 빈 기본 시트 정리');
 
   const b = await chromium.launch(); const pageErrs = [];
   const ctx = await b.newContext({ viewport: { width: 390, height: 820 }, timezoneId: 'Asia/Seoul' });
