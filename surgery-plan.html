@@ -353,6 +353,7 @@ function openRecord(id){
   const params = new URLSearchParams();
   if (r.chartNo)     params.set('p_no', r.chartNo);
   if (r.name)        params.set('p_name', r.name);
+  if (r.age)         params.set('p_dob', r.age);
   if (r.gender)      params.set('p_sex', r.gender);
   if (r.doctor)      { params.set('p_doctor', r.doctor); params.set('s_surgeon', r.doctor); }
   if (r.date)        params.set('s_date', r.date);
