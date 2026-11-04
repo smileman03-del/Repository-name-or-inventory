@@ -40,6 +40,7 @@ input[type=search],input[type=text]{width:100%;padding:12px 14px;border:1px soli
 .btn.ghost{background:var(--teal-t);color:var(--teal)}
 .btn:disabled{opacity:.45}
 .note{font-size:13px;color:var(--soft);margin:6px 0 12px;line-height:1.5}
+.warn{background:#FBEEDD;border:1px solid #E8C99B;color:#8A5314;border-radius:12px;padding:10px 12px;font-size:13.5px;line-height:1.5;margin-bottom:12px}
 .empty{text-align:center;color:var(--soft);padding:36px 0}
 nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);display:flex;z-index:10}
 nav button{flex:1;border:0;background:none;padding:12px 0 14px;font-size:13px;color:var(--soft);font-family:inherit}
@@ -115,6 +116,21 @@ nav button.act{color:var(--teal);font-weight:800}
     S.items.forEach(function (i) { if (i.loc && z.indexOf(i.loc) < 0) z.push(i.loc); });
     return z;
   }
+  // 같은 이름의 품목이 둘 이상이면 실사 저장·삭제를 어느 행에 할지 알 수 없다. 눈에 띄게 알려준다.
+  function dupNames() {
+    var seen = {}, dups = [];
+    S.items.forEach(function (i) {
+      var n = String(i.name).trim();
+      if (seen[n] && dups.indexOf(n) < 0) dups.push(n);
+      seen[n] = true;
+    });
+    return dups;
+  }
+  function dupBanner() {
+    var d = dupNames();
+    if (!d.length) return null;
+    return h('div', { class: 'warn', text: '⚠️ 품목명이 중복된 항목이 있어요: ' + d.join(', ') + '. 구글 시트의 품목 마스터에서 이름을 서로 다르게 고쳐야 실사 저장과 삭제가 정확해요.' });
+  }
   function find(name) { return S.items.filter(function (i) { return i.name === name; })[0]; }
   function needOnline() {
     if (S.online) return true;
@@ -169,6 +185,7 @@ nav button.act{color:var(--teal);font-weight:800}
 
   function renderStatus() {
     var lack = S.items.filter(lacking).length;
+    var db = dupBanner(); if (db) main.appendChild(db);
     main.appendChild(h('div', { class: 'stats' }, [
       h('div', { class: 'stat bad' }, [h('b', { text: String(lack) }), h('span', { text: '재고부족' })]),
       h('div', { class: 'stat good' }, [h('b', { text: String(S.items.length - lack) }), h('span', { text: '정상' })]),
@@ -237,6 +254,7 @@ nav button.act{color:var(--teal);font-weight:800}
   }
 
   function renderWeekly() {
+    var db = dupBanner(); if (db) main.appendChild(db);
     main.appendChild(h('div', { class: 'note', text: '실사한 수량을 입력해 저장하면 구글 시트의 주간 재고 파악에 기록되고 현재재고가 갱신돼요.' }));
     if (!S.draft) {
       main.appendChild(h('button', { class: 'btn ghost', 'data-act': 'loadDraft', text: '오늘 날짜로 전체 품목 불러오기' }));

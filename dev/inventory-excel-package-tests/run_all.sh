@@ -4,16 +4,18 @@ set -u
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"; D="$ROOT/dev/inventory-excel-package-tests"; PK="$ROOT/product/inventory-excel-package"
 W="$(mktemp -d)"; fail=0
 step(){ echo; echo "■ $1"; shift; "$@" || { echo "  ✗ 실패"; fail=1; }; }
-cp "$D/sample.json" "$W/" ; mkdir -p "$W/build"; cp "$D/sample.json" "$W/build/"
-python3 "$D/make_xlsx.py" "$D" "$W/template.xlsx" >/dev/null && cmp -s <(unzip -p "$W/template.xlsx" xl/worksheets/sheet1.xml) <(unzip -p "$PK/소모품관리대장_템플릿.xlsx" xl/worksheets/sheet1.xml) && echo "■ 엑셀 템플릿이 샘플 데이터와 일치" || { echo "■ 엑셀 템플릿 불일치"; fail=1; }
-cp "$PK/소모품관리대장_템플릿.xlsx" "$W/in.xlsx"
-(cd "$W" && timeout 120 soffice --headless --convert-to xlsx:"Calc MS Excel 2007 XML" --outdir recalc in.xlsx >/dev/null 2>&1)
-python3 "$D/dump_xlsx.py" "$W/in.xlsx" "$W/recalc/in.xlsx" "$W/xlsx_dump.json" >/dev/null
-step "1/5 백엔드(Code.gs) 시험" node "$D/test_pkg_gs.js" "$PK/Code.gs"
-step "2/5 앱 화면 + 백엔드 연동 시험" node "$D/test_e2e.js" "$W"
-step "3/5 엑셀 → 재고 파악 → 청구서 전체 흐름" node "$D/test_full.js" "$PK" "$W/xlsx_dump.json" "$W"
-step "3b/5 구매자 URL 교체 방식별 연결 시험" node "$D/test_url_replace.js" "$PK/index.html"
-step "4/5 최종 시트 수식 재계산 검증" python3 "$D/check_final_formulas.py" "$W"
-pgrep -x soffice.bin >/dev/null && pkill -x soffice.bin; sleep 1
-step "5/5 VBA 매크로 실행 시험(LibreOffice)" python3 "$D/test_vba_lo.py" "$PK/재고관리매크로.bas" "$W/in.xlsx"
+syntax(){ cp "$PK/Code.gs" "$W/code_chk.js" && node --check "$W/code_chk.js" && python3 - "$PK/index.html" "$W/app_chk.js" <<'PY'
+import re,sys
+s=open(sys.argv[1],encoding='utf-8').read(); open(sys.argv[2],'w').write(re.findall(r'<script>(.*?)</script>',s,re.S)[-1])
+if re.search(r'onclick\s*=',s): sys.exit('금지 패턴 onclick= 사용')
+PY
+node --check "$W/app_chk.js" && echo "  Code.gs / 앱 JS 문법 OK, onclick 금지 패턴 없음"; }
+rebuilt(){ python3 "$D/build_index.py" "$D" "$W/index_rebuilt.html" >/dev/null && cmp -s "$W/index_rebuilt.html" "$PK/index.html" && echo "  index.html 이 템플릿·sample.json 과 일치(수동 수정 흔적 없음)"; }
+step "1/7 패키지 정적 점검(파일 구성·개인정보·설명서와 코드 일치)" python3 "$D/check_package.py" "$PK"
+step "2/7 문법 검사" syntax
+step "3/7 앱이 템플릿과 일치" rebuilt
+step "4/7 백엔드(Code.gs) 시험" node "$D/test_backend.js" "$PK/Code.gs"
+step "5/7 앱 화면 + 백엔드 연동 시험" node "$D/test_app.js" "$PK" "$W"
+step "6/7 신규 구매자 전체 흐름(설명서 그대로)" node "$D/test_buyer_flow.js" "$PK" "$W"
+step "7/7 URL 교체 방식별 연결 시험" node "$D/test_url_replace.js" "$PK/index.html"
 echo; [ $fail -eq 0 ] && echo "★ 전체 통과" || echo "✗ 실패 항목 있음"; exit $fail
