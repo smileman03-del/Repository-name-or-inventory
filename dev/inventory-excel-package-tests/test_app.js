@@ -69,6 +69,14 @@ const master = () => env.get('getMaster').data;
   assert.strictEqual(master().find(i => i.name === '탄력붕대 4인치').stock, 45); assert.strictEqual(env.get('getWeekly').data.length, 15); ok('실사 저장 → 품목 마스터 갱신 + 주간 기록 15건');
   await p.click('[data-tab=status]'); assert.deepStrictEqual(await stats(p), ['9', '6', '15']); ok('저장 후 현황 즉시 반영 (탄력붕대 보충 −1, 주사바늘 부족 +1 → 부족 9)');
 
+  // 앱을 켜 둔 사이 시트에서 품목 이름이 바뀐 경우: 일부만 저장되고 사용자에게 알림
+  await p.click('[data-tab=weekly]'); await p.click('[data-act=loadDraft]');
+  env.sheet('품목 마스터').d.forEach(r => { if (r && r[0] === '전극 패드') r[0] = '전극 패드(이름 변경)'; });
+  await p.locator('input[data-name="초음파 젤"]').fill('11'); await p.click('[data-act=saveWeekly]'); await p.waitForTimeout(300);
+  assert(/못 찾은 1개/.test(await toast(p))); assert.strictEqual(master().find(i => i.name === '초음파 젤').stock, 11);
+  env.sheet('품목 마스터').d.forEach(r => { if (r && r[0] === '전극 패드(이름 변경)') r[0] = '전극 패드'; }); ok('앱을 켜 둔 사이 시트에서 이름이 바뀌면: 나머지는 저장 + "못 찾은 1개는 저장되지 않았어요" 알림');
+  await p.click('[data-tab=status]');
+
   // 삭제
   p.once('dialog', d => d.accept()); await p.locator('.card', { hasText: '부직포 반창고' }).locator('[data-act=del]').click(); await p.waitForTimeout(300);
   assert(!master().some(i => i.name === '부직포 반창고')); assert.strictEqual(await p.locator('#list .card').count(), 14); ok('삭제 → 시트에서도 삭제, 화면 14개');

@@ -300,7 +300,9 @@ nav button.act{color:var(--teal);font-weight:800}
     S.busy = true;
     apiPost({ action: 'saveWeekly', date: S.draftDate, rows: rows }).then(function (r) {
       rows.forEach(function (x) { var it = find(x.name); if (it) it.stock = x.qty; });
-      S.draft = null; S.busy = false; cacheSave(); toast('실사 저장 완료 (' + r.saved + '개 품목)'); render();
+      var skipped = (r.skipped || []).length;
+      S.draft = null; S.busy = false; cacheSave();
+      toast('실사 저장 완료 (' + r.saved + '개 품목)' + (skipped ? ' · 시트에서 못 찾은 ' + skipped + '개는 저장되지 않았어요. 앱을 새로고침하세요' : '')); render();
     }).catch(function (e) { S.busy = false; toast('저장 실패: ' + e.message); });
   }
 

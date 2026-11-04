@@ -233,20 +233,22 @@ function saveWeekly_(p) {
 
   var changes = [];   // {row, qty}
   var logs = [];
+  var skipped = [];   // 시트에서 찾지 못한 이름 (앱을 켜 둔 사이 시트에서 이름을 고쳤거나 지운 경우)
   rows.forEach(function (r) {
     var row = idx.rows[String(r.name).trim()];
-    if (!row) return;
+    if (!row) { skipped.push(String(r.name)); return; }
     var qty = num_(r.qty);
     var v = idx.data[row - 2];
     changes.push({ row: row, qty: qty });
     logs.push([date, v[0], v[1], num_(v[3]), qty]);
   });
-  if (!changes.length) return { saved: 0, date: date };
+  // 하나도 못 찾았으면 "성공"이라고 답하지 않는다
+  if (!changes.length) throw new Error('시트에서 찾을 수 없는 품목입니다: ' + skipped.slice(0, 3).join(', ') + ' (앱을 새로고침해 주세요)');
 
   writeStock_(idx, changes);
   appendWeekly_(logs);
   refreshRealtime();
-  return { saved: changes.length, date: date };
+  return { saved: changes.length, date: date, skipped: skipped };
 }
 
 function submitRequest_(p) {

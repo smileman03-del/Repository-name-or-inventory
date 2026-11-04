@@ -41,12 +41,14 @@ assert(e.post({ action: 'deleteItem', name: '신규품목' }).success); assert(e
 // ---- 주간실사 (일괄 처리) ----
 e = fresh(); e.run('loadSampleData()');
 let r = e.post({ action: 'saveWeekly', date: '2026-11-03', rows: [{ name: '멸균 수술장갑 7.0', qty: 12 }, { name: '주사바늘 23G', qty: 2 }, { name: '없는품목', qty: 1 }] });
-assert(r.success && r.data.saved === 2); m = e.get('getMaster').data;
+assert(r.success && r.data.saved === 2 && JSON.stringify(r.data.skipped) === JSON.stringify(['없는품목'])); m = e.get('getMaster').data;
 assert.strictEqual(m.find(i => i.name === '멸균 수술장갑 7.0').stock, 12); assert.strictEqual(m.find(i => i.name === '알코올 솜').stock, 20); ok('실사 저장: 2건 갱신, 없는 품목 무시, 나머지 재고 유지');
 const wk = e.get('getWeekly').data; assert.strictEqual(wk.length, 2); assert.strictEqual(wk[0].date, '2026-11-03'); ok('주간 재고 파악 탭에 기록');
 assert.strictEqual(e.sheet('주간 재고 파악').d[1][5], '=IF(E2="","",IF(E2<D2,"❌ 재고부족","✅ 안정"))'); assert(e.sheet('주간 재고 파악').d[2][5].includes('E3')); ok('주간 기록의 상태 수식이 행 번호에 맞게 입력됨');
 assert.deepStrictEqual(e.get('getRealtime').data.map(i => i.name).sort(), shortage(m)); ok('실사 후 실시간 재고 대장 자동 갱신');
 assert(e.post({ action: 'saveWeekly', rows: [] }).success === false); ok('빈 실사 거부');
+r = e.post({ action: 'saveWeekly', date: '2026-11-03', rows: [{ name: '없는A', qty: 1 }, { name: '없는B', qty: 2 }] }); assert(r.success === false && /없는A/.test(r.error) && /새로고침/.test(r.error)); assert.strictEqual(e.get('getWeekly').data.length, 2); ok('전부 못 찾으면 "성공"이 아니라 오류로 알리고(이름 표시 + 새로고침 안내), 아무것도 저장하지 않음');
+ok('일부만 못 찾으면 나머지는 저장하고 건너뛴 이름을 알려줌(skipped)');
 { const x = fresh(); x.run('loadSampleData()'); x.sheet('품목 마스터').d[2][4] = '=B3';   // E3 에 수식이 들어 있는 경우
   x.post({ action: 'saveWeekly', date: '2026-11-03', rows: [{ name: '멸균 수술장갑 7.0', qty: 99 }, { name: '일회용 수술가운', qty: 7 }] });
   assert.strictEqual(x.sheet('품목 마스터').d[2][4], '=B3'); assert.strictEqual(x.get('getMaster').data.find(i => i.name === '멸균 수술장갑 7.0').stock, 99); ok('현재재고 칸에 수식이 있으면 지우지 않고 보존(그 칸 외에는 정상 저장)'); }
