@@ -61,5 +61,11 @@ else: fail('SCRIPT_URL_HERE 안내와 index.html 이 맞지 않음')
 for w in ['중복', '정수', '시간대', '보안 안내', '주소 교체', '예제 데이터 지우기', '실시간 재고 대장']:
     if w not in readme: fail(f'설명서에 "{w}" 안내 없음')
 if all(w in readme for w in ['중복', '정수', '시간대', '보안 안내', '주소 교체']): good('설명서 필수 안내(품목명 중복·정수·시간대·보안·주소 교체) 모두 포함')
+for w in ['New repository', 'Public', 'Upload files', 'Settings', 'Pages', 'Deploy from a branch', 'github.io', '내 저장소를 새로 만듭니다']:
+    if w not in readme: fail(f'설명서의 GitHub 배포 안내에 "{w}" 없음')
+if all(w in readme for w in ['New repository', 'Public', 'Upload files', 'Settings', 'Pages', 'Deploy from a branch', 'github.io']): good('구매자용 GitHub 저장소 만들기·배포(Pages) 단계별 안내 포함')
+steps = re.findall(r'^### (\d+)\. ', readme, re.M)
+if steps == [str(i) for i in range(1, len(steps) + 1)] and len(steps) == 6: good('설치 단계 번호가 1~6으로 연속')
+else: fail(f'설치 단계 번호가 이상함: {steps}')
 print()
 sys.exit(1 if fails else 0)
