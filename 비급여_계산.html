@@ -138,7 +138,7 @@ var BASIS = "2026.08.21 공시";
 
 var CAT = JSON.parse(document.getElementById("jcatalog").textContent);
 var SETS = JSON.parse(document.getElementById("jsets").textContent);
-var S = { screen:"home", title:"", list:[], qty:{}, amt:{}, base:[], tab:"전체", q:"", online:false, patient:"", staff:"", msg:"", edit:false, pin:"", form:null, aq:"", dup:[] };
+var S = { screen:"home", title:"", list:[], qty:{}, amt:{}, base:[], tab:"전체", q:"", online:false, patient:"", patientName:"", surgDate:"", dob:"", staff:"", msg:"", edit:false, pin:"", form:null, aq:"", dup:[] };
 
 try {
   var cc = localStorage.getItem("bg_cat"); if (cc) CAT = JSON.parse(cc);
@@ -366,11 +366,17 @@ function reviewView() {
       '<div style="font-size:12.5px;color:var(--mut);margin-top:5px">' + picked().length + "건 · " + won(total()) + "</div></div>"));
   }
   var pi = el('<div class="card" style="margin-top:12px"><div style="font-size:13px;font-weight:600">케이스 정보</div></div>');
-  var p1 = el('<input placeholder="환자 ID / 등록번호" value="' + esc(S.patient) + '" style="margin-top:10px">');
+  var pName = el('<input placeholder="환자명" value="' + esc(S.patientName) + '" style="margin-top:10px">');
+  pName.addEventListener("input", function (e) { S.patientName = e.target.value; });
+  var p1 = el('<input placeholder="차트번호 / 등록번호" value="' + esc(S.patient) + '" style="margin-top:8px">');
   p1.addEventListener("input", function (e) { S.patient = e.target.value; });
+  var pSurgDate = el('<div style="margin-top:8px"><div style="font-size:11px;color:var(--mut);margin-bottom:3px">수술날짜</div><input type="date" value="' + esc(S.surgDate) + '" style="width:100%;box-sizing:border-box"></div>');
+  pSurgDate.querySelector('input').addEventListener("input", function (e) { S.surgDate = e.target.value; });
+  var pDob = el('<div style="margin-top:8px"><div style="font-size:11px;color:var(--mut);margin-bottom:3px">생년월일</div><input type="date" value="' + esc(S.dob) + '" style="width:100%;box-sizing:border-box"></div>');
+  pDob.querySelector('input').addEventListener("input", function (e) { S.dob = e.target.value; });
   var p2 = el('<input placeholder="작성자" value="' + esc(S.staff) + '" style="margin-top:8px">');
   p2.addEventListener("input", function (e) { S.staff = e.target.value; localStorage.setItem("bg_staff", e.target.value); });
-  pi.appendChild(p1); pi.appendChild(p2);
+  pi.appendChild(pName); pi.appendChild(p1); pi.appendChild(pSurgDate); pi.appendChild(pDob); pi.appendChild(p2);
   b.appendChild(pi);
   b.appendChild(el('<div class="btn d" style="margin-top:14px" data-a="claim">청구 목록 만들기</div>'));
   return v;
@@ -382,8 +388,14 @@ function claimView() {
   h.appendChild(el('<div class="row"><div class="grow link" data-a="list">← 편집</div><div style="font-size:13px;font-weight:600;color:var(--mut)">' + esc(BASIS) + "</div></div>"));
   var card = el('<div class="card" style="border-radius:18px;padding:20px 18px"></div>');
   card.appendChild(el('<div style="font-size:19px;font-weight:700;letter-spacing:-.02em">' + esc(S.title || "새 체크리스트") + "</div>"));
-  card.appendChild(el('<div style="font-size:12.5px;color:var(--dim);margin-top:5px">' +
-    esc([S.patient ? "환자 " + S.patient : "", S.staff ? "작성 " + S.staff : "", "관리코드 포함"].filter(Boolean).join(" · ")) + "</div>"));
+  var infoLine = [
+    S.patientName ? S.patientName : "",
+    S.patient ? "차트 " + S.patient : "",
+    S.surgDate ? "수술 " + S.surgDate : "",
+    S.dob ? "생년월일 " + S.dob : "",
+    S.staff ? "작성 " + S.staff : ""
+  ].filter(Boolean).join(" · ");
+  card.appendChild(el('<div style="font-size:12.5px;color:var(--dim);margin-top:5px">' + esc(infoLine) + "</div>"));
   card.appendChild(el('<div style="height:1px;background:rgba(0,0,0,.08);margin:16px 0"></div>'));
   ["행위료", "치료재료대", "약제"].forEach(function (sec) {
     var lines = picked().map(item).filter(function (i) { return i && i.s === sec; });
@@ -639,7 +651,7 @@ var actions = {
   },
   save: function () {
     S.msg = "기록 중...";
-    api("saveCase", { setName: S.title, patient: S.patient, staff: S.staff, lines: claimLines() })
+    api("saveCase", { setName: S.title, patient: S.patient, patientName: S.patientName, surgDate: S.surgDate, dob: S.dob, staff: S.staff, lines: claimLines() })
       .then(function (d) { S.msg = "구글 시트에 " + d.saved + "행 기록됨."; render(); })
       .catch(function (e) { S.msg = "기록 실패: " + e; render(); });
   },
@@ -654,15 +666,28 @@ var actions = {
     var data = {
       setName: S.title || "비급여 항목",
       patient: S.patient || "",
+      patientName: S.patientName || "",
+      surgDate: S.surgDate || "",
+      dob: S.dob || "",
       staff: S.staff || "",
       total: total(),
       lines: claimLines().map(function(l){ return { code: l.code, name: l.name, qty: l.qty, amount: l.unit * l.qty, section: (item(l.code)||{}).s || "" }; }),
       basis: BASIS,
       savedAt: new Date().toISOString()
     };
+    /* 수술계획표 연동 데이터 (bg_pending_plan) */
+    var planData = {
+      chartNo: S.patient || "",
+      name: S.patientName || "",
+      date: S.surgDate || "",
+      age: S.dob || "",
+      setName: S.title || "",
+      savedAt: new Date().toISOString()
+    };
     try {
       localStorage.setItem("bg_pending_claim", JSON.stringify(data));
-      S.msg = "✅ 수술기록지에 연동했습니다. 수술기록지 앱에서 '비급여 불러오기'를 누르세요.";
+      localStorage.setItem("bg_pending_plan", JSON.stringify(planData));
+      S.msg = "✅ 수술기록지 및 수술계획표에 연동했습니다.";
     } catch(e) {
       S.msg = "저장 실패: " + e;
     }
@@ -727,6 +752,14 @@ function printExplain() {
     '<div class="header"><div><div class="hosp">천안 본정형외과</div></div><div class="date">' + dateStr + '</div></div>' +
     '<div class="badge">비급여 안내</div>' +
     '<div class="title">' + esc(S.title || '이번 수술') + '</div>' +
+    (function(){
+      var pts = [];
+      if (S.patientName) pts.push('<span style="font-weight:700;color:#17191A">' + esc(S.patientName) + '</span> 환자');
+      if (S.patient)     pts.push('차트번호 ' + esc(S.patient));
+      if (S.surgDate)    pts.push('수술일 ' + esc(S.surgDate));
+      if (S.dob)         pts.push('생년월일 ' + esc(S.dob));
+      return pts.length ? '<div style="margin-bottom:14px;padding:10px 12px;background:#F8F9FA;border-radius:8px;font-size:12.5px;color:#3D4245;line-height:1.9">' + pts.join('&nbsp;&nbsp;·&nbsp;&nbsp;') + '</div>' : '';
+    })() +
     '<div class="subtitle">이 수술에서 사용된 비급여 항목과 예상 금액입니다.</div>' +
     '<table>' +
       '<thead><tr>' +

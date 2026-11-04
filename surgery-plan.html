@@ -780,6 +780,46 @@ document.getElementById('app').innerHTML = `
   } catch(e){}
   render();
   pullFromSheet();
+
+  /* ── 비급여 앱 연동: bg_pending_plan 감지 ── */
+  try {
+    const pendingRaw = window.localStorage.getItem('bg_pending_plan');
+    if (pendingRaw) {
+      const pd = JSON.parse(pendingRaw);
+      const banner = document.createElement('div');
+      banner.id = 'bgPlanBanner';
+      banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1273a8;color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;z-index:9999;font-size:14px;font-weight:600;box-shadow:0 -2px 12px rgba(0,0,0,.18)';
+      var nameStr = pd.name ? pd.name : '(이름 미입력)';
+      var chartStr = pd.chartNo ? ' · 차트 ' + pd.chartNo : '';
+      var dateStr2 = pd.date ? ' · 수술일 ' + pd.date : '';
+      banner.innerHTML = '<span style="flex:1">📋 비급여에서 환자 정보가 넘어왔습니다: <strong>' + nameStr + '</strong>' + chartStr + dateStr2 + '</span>' +
+        '<button id="bgPlanFill" style="background:#fff;color:#1273a8;border:none;border-radius:8px;padding:7px 14px;font-size:13px;font-weight:700;cursor:pointer">수술계획표에 추가</button>' +
+        '<button id="bgPlanClose" style="background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer">닫기</button>';
+      document.body.appendChild(banner);
+      document.getElementById('bgPlanFill').addEventListener('click', function(){
+        try {
+          if (pd.date) {
+            state.selectedDate = pd.date;
+          }
+          state.formOpen = true; state.editingId = null;
+          state.formData = defaultFormData(state.selectedDate, state.doctors);
+          if (pd.chartNo)  state.formData.chartNo = pd.chartNo;
+          if (pd.name)     state.formData.name    = pd.name;
+          if (pd.date)     state.formData.date     = pd.date;
+          if (pd.age)      state.formData.age      = pd.age;
+          if (pd.setName)  state.formData.memo     = (state.formData.memo ? state.formData.memo + '\n' : '') + '[비급여] ' + pd.setName;
+          window.localStorage.removeItem('bg_pending_plan');
+          if (banner.parentNode) banner.parentNode.removeChild(banner);
+          render();
+          renderModals();
+        } catch(e){ alert('자동 입력 중 오류: ' + e); }
+      });
+      document.getElementById('bgPlanClose').addEventListener('click', function(){
+        window.localStorage.removeItem('bg_pending_plan');
+        if (banner.parentNode) banner.parentNode.removeChild(banner);
+      });
+    }
+  } catch(e){}
 })();
 
 /* ============================
