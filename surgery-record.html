@@ -233,6 +233,88 @@
 </style>
 </head>
 <body>
+<!-- ===== CHEONAN APP NAV ===== -->
+<style>
+#cnav{position:fixed;top:0;left:0;right:0;z-index:9999;background:#1a3a5c;color:#fff;height:36px;display:flex;align-items:center;padding:0 10px;gap:5px;font-family:'Apple SD Gothic Neo','맑은 고딕',sans-serif;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,.4);box-sizing:border-box}
+#cnav .cn-brand{font-weight:700;color:#7ec8f8;font-size:11.5px;white-space:nowrap;margin-right:4px;flex-shrink:0}
+#cnav .cn-steps{display:flex;align-items:center;gap:1px;flex:1;overflow:hidden;min-width:0}
+#cnav .cn-sep{color:rgba(255,255,255,.35);padding:0 1px;flex-shrink:0}
+#cnav .cn-step{cursor:pointer;padding:3px 7px;border-radius:4px;color:rgba(255,255,255,.72);font-size:11px;white-space:nowrap;flex-shrink:0;border:0;background:0}
+#cnav .cn-step:hover{background:rgba(255,255,255,.15);color:#fff}
+#cnav .cn-step.active{background:#fff;color:#1a3a5c;font-weight:700;cursor:default}
+#cnav .cn-pt{font-size:11px;color:rgba(255,255,255,.8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;padding-left:8px;border-left:1px solid rgba(255,255,255,.25);flex-shrink:0}
+@media print{#cnav{display:none!important}body{padding-top:0!important}#bar{top:0!important}}
+</style>
+<div id="cnav">
+  <span class="cn-brand">🏥 천안본정형외과</span>
+  <div class="cn-steps" id="cnavSteps"></div>
+  <div class="cn-pt" id="cnavPt"></div>
+</div>
+<script>
+(function(){
+  var APPS=[
+    {n:'수술마취동의서',e:'📝',u:'수술마취동의서.html'},
+    {n:'비급여 계산',e:'💊',u:'비급여_계산.html'},
+    {n:'수술계획표',e:'📋',u:'surgery-plan.html'},
+    {n:'수술기록지',e:'🏥',u:'surgery-record.html'},
+    {n:'마취기록지',e:'💉',u:'anesthesia-record.html'}
+  ];
+  var CUR=3;
+  var KEY='cheonan_nav_state';
+  function gs(){try{return JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){return {}}}
+  function ss(s){try{localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}}
+  function collect(){
+    var s=gs();
+    function tryGet(arr){for(var i=0;i<arr.length;i++){var el=document.getElementById(arr[i]);if(el&&el.value&&el.value.trim())return el.value.trim();}return '';}
+    var n=tryGet(['ptName','p_name']),c=tryGet(['p_no','chartNo']),sn=tryGet(['surgName','s_name']),d=tryGet(['diagnosis','s_diagnosis']);
+    if(n)s.ptName=n;if(c)s.chartNo=c;if(sn)s.surgName=sn;if(d)s.diagnosis=d;
+    try{var bp=JSON.parse(localStorage.getItem('bg_pending_plan')||'{}');if(bp.name&&!s.ptName)s.ptName=bp.name;if(bp.chartNo&&!s.chartNo)s.chartNo=bp.chartNo;if(bp.setName&&!s.surgName)s.surgName=bp.setName;if(bp.diagnosis&&!s.diagnosis)s.diagnosis=bp.diagnosis;}catch(e){}
+    try{var bc=JSON.parse(localStorage.getItem('bg_pending_claim')||'{}');if(bc.patientName&&!s.ptName)s.ptName=bc.patientName;if(bc.patient&&!s.chartNo)s.chartNo=bc.patient;if(bc.surgName&&!s.surgName)s.surgName=bc.surgName;if(bc.diagnosis&&!s.diagnosis)s.diagnosis=bc.diagnosis;}catch(e){}
+    return s;
+  }
+  function goTo(idx){
+    var s=collect();ss(s);
+    if(idx===CUR)return;
+    if(idx===4){
+      var p=new URLSearchParams();
+      if(s.chartNo)p.set('p_no',s.chartNo);if(s.ptName)p.set('p_name',s.ptName);
+      if(s.surgName)p.set('s_name',s.surgName);if(s.diagnosis)p.set('s_diagnosis',s.diagnosis);
+      if(s.surgDate)p.set('s_date',s.surgDate);
+      window.location.href=APPS[4].u+(p.toString()?'?'+p.toString():'');return;
+    }
+    if(idx===2&&(s.ptName||s.chartNo)){
+      try{localStorage.setItem('bg_pending_plan',JSON.stringify({name:s.ptName||'',chartNo:s.chartNo||'',setName:s.surgName||'',diagnosis:s.diagnosis||''}));}catch(e){}
+    }
+    if((idx===3||idx===0)&&(s.ptName||s.chartNo)){
+      try{localStorage.setItem('bg_pending_claim',JSON.stringify({patientName:s.ptName||'',patient:s.chartNo||'',surgName:s.surgName||'',diagnosis:s.diagnosis||''}));}catch(e){}
+    }
+    window.location.href=APPS[idx].u;
+  }
+  window.__cnavGo=goTo;
+  function renderNav(){
+    var el=document.getElementById('cnavSteps');var ptEl=document.getElementById('cnavPt');
+    if(!el)return;
+    var html='';
+    for(var i=0;i<APPS.length;i++){
+      if(i>0)html+='<span class="cn-sep">›</span>';
+      var cls='cn-step'+(i===CUR?' active':'');
+      html+='<span class="'+cls+'"'+(i===CUR?'':' onclick="__cnavGo('+i+')"')+'>'+APPS[i].e+' '+APPS[i].n+'</span>';
+    }
+    el.innerHTML=html;
+    var s=gs();if(s.ptName)ptEl.textContent='👤 '+s.ptName+(s.chartNo?' ('+s.chartNo+')':'');
+  }
+  function applyBodyPadding(){
+    document.documentElement.style.setProperty('--cnav-h','36px');
+    var b=document.body;if(b){var cur=parseInt(getComputedStyle(b).paddingTop)||0;if(cur<36)b.style.paddingTop='36px';}
+    var bar=document.getElementById('bar');if(bar){var cs=getComputedStyle(bar);if(cs.position==='sticky')bar.style.top='36px';}
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){renderNav();applyBodyPadding();});}
+  else{renderNav();applyBodyPadding();}
+  setInterval(function(){var ptEl=document.getElementById('cnavPt');if(!ptEl)return;var s=collect();if(s.ptName)ptEl.textContent='👤 '+s.ptName+(s.chartNo?' ('+s.chartNo+')':'');},3000);
+})();
+</script>
+<!-- ===== CHEONAN APP NAV END ===== -->
+
 <div class="app">
 
   <div class="letterhead">
