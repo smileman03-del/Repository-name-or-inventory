@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>수술(마취)동의서 - 천안본정형외과</title>
+<style>
+:root{--ink:#111;--gray:#e6e6e6;--acc:#1273a8;--line:#111}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:#e9ecef;font-family:"바탕","Batang","Noto Serif KR","Nanum Myeongjo",serif;color:var(--ink);-webkit-text-size-adjust:100%}
+.ui{font-family:"맑은 고딕","Malgun Gothic","Pretendard",system-ui,sans-serif}
+
+/* ---------- toolbar ---------- */
+#bar{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid #d5d9dd;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#bar .ttl{font-weight:700;font-size:15px;margin-right:auto}
+.btn{border:0;border-radius:9px;padding:10px 14px;font-size:14px;font-weight:700;cursor:pointer;background:#eef1f3;color:#222;font-family:inherit}
+.btn.p{background:var(--acc);color:#fff}
+.btn.w{background:#fff3e0;color:#9a5b00}
+#msg{width:100%;font-size:13px;color:var(--acc);font-weight:600;display:none}
+#msg.show{display:block}
+
+/* ---------- pages ---------- */
+#wrap{padding:14px 0 60px;overflow-x:auto}
+.page{width:210mm;height:297mm;margin:0 auto 14px;background:#fff;padding:16mm 17mm 12mm;position:relative;box-shadow:0 2px 10px rgba(0,0,0,.15);overflow:hidden;font-size:11.5pt;line-height:1.55}
+h1{font-size:21pt;text-align:center;margin:8mm 0 12mm;font-weight:700;letter-spacing:-.01em}
+.sec{font-weight:700;font-size:11.5pt;margin:6mm 0 2.5mm}
+table{border-collapse:collapse;width:100%}
+td,th{border:1px solid #888;padding:0;font-weight:400;vertical-align:middle}
+.t-outer{border:2px solid var(--line)}
+.t-outer td,.t-outer th{border:1px solid #888}
+.lbl{background:var(--gray);text-align:center;font-size:11pt;padding:3px 4px;height:9.2mm}
+.val{padding:0 6px;height:9.2mm}
+
+/* 입력칸 */
+input.f,textarea.f{width:100%;border:0;background:transparent;font:inherit;font-size:11.5pt;padding:4px 4px;outline:none;color:#0b3d91}
+input.f:focus,textarea.f:focus{background:#eef6ff}
+textarea.f{resize:none;display:block;min-height:15mm;line-height:1.5}
+.ph{color:#999}
+
+/* 의료진 */
+.docs{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:4px 14px;padding:2px 4px;min-height:9mm}
+.doc{display:inline-flex;align-items:center;gap:6px}
+.doc input{border:0;border-bottom:1px dashed #9ab;background:transparent;font:inherit;font-size:11.5pt;width:5.2em;text-align:center;padding:1px 0;color:#0b3d91}
+.doc img.sg{height:8mm;width:auto}
+.doc .x,.addbtn{border:0;background:#f0f0f0;border-radius:50%;width:20px;height:20px;line-height:18px;font-size:13px;cursor:pointer;color:#666;padding:0}
+.addbtn{background:#e3f1fb;color:var(--acc);font-weight:700}
+.hint{color:#555;font-size:10.5pt;white-space:nowrap}
+
+/* O/X */
+.ox{display:flex;justify-content:center;align-items:center;gap:6px;height:9.2mm}
+.ox button{width:30px;height:26px;border:1.5px solid #bbb;border-radius:6px;background:#fff;font:700 15px/1 "맑은 고딕",sans-serif;color:#bbb;cursor:pointer;padding:0}
+.ox button.on.o{border-color:#1b7f3b;color:#1b7f3b;background:#e8f6ec}
+.ox button.on.x{border-color:#c0392b;color:#c0392b;background:#fdecea}
+.ox .res{display:none;font:700 17px/1 "맑은 고딕",sans-serif}
+
+/* 본문 */
+.body p{margin:0}
+.body .it{margin:1.4mm 0 1.4mm 2mm}
+.body .sub{margin-left:5mm}
+.body .dash{margin-left:6mm;padding-left:3.2mm;text-indent:-3.2mm}
+.body .dash2{margin-left:12mm;padding-left:3.2mm;text-indent:-3.2mm}
+
+.sigline{text-align:right;margin:11mm 4mm 0 0;font-weight:700;display:flex;justify-content:flex-end;align-items:center;gap:8px;flex-wrap:wrap}
+.sigline .doc input{font-weight:700}
+.consent{margin-top:11mm;text-indent:2mm;line-height:1.75;text-align:justify}
+.consent input.inl{border:0;border-bottom:1px solid #666;background:transparent;font:inherit;font-size:11.5pt;width:6.5em;text-align:center;color:#0b3d91;padding:0}
+.dt{text-align:center;margin:20mm 0 11mm;letter-spacing:.1em}
+.dt input{border:0;border-bottom:1px solid #666;background:transparent;font:inherit;text-align:center;width:3.2em;color:#0b3d91;padding:0}
+.dt input.y{width:4.6em}
+
+/* 서명표 */
+.sgn td{height:15mm}
+.sgn .lbl{height:15mm;font-size:10.5pt;line-height:1.35}
+.sgcell{display:flex;align-items:center;justify-content:space-between;height:15mm;padding:0 4px 0 6px;gap:6px}
+.sgcell input.f{width:34%;min-width:0}
+.pad-btn{flex:1;height:13mm;border:1.5px dashed #9bb7cc;border-radius:6px;background:#f7fbfe;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#5d7a8f;font:600 11px "맑은 고딕",sans-serif;padding:0;min-width:0;overflow:hidden}
+.pad-btn img{max-height:12.5mm;max-width:100%}
+.pad-btn.has{border-style:solid;border-color:transparent;background:transparent}
+.chartno{position:absolute;left:17mm;bottom:8mm;font:9pt "맑은 고딕",sans-serif;color:#555}
+.chartno input{border:0;border-bottom:1px solid #aaa;background:transparent;font:inherit;width:9em;color:#0b3d91;padding:0 2px}
+.to{margin-top:16mm;text-align:center;font-weight:700;font-size:13pt;letter-spacing:.02em}
+
+/* 서명 모달 */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:12px}
+#modal.show{display:flex}
+#modal .box{background:#fff;border-radius:14px;padding:14px;width:min(640px,100%)}
+#modal h3{margin:0 0 8px;font-size:16px;font-family:"맑은 고딕",sans-serif}
+#cv{width:100%;height:240px;border:2px solid #333;border-radius:8px;background:#fff;touch-action:none;display:block}
+#modal .row{display:flex;gap:8px;margin-top:10px}
+#modal .row .btn{flex:1}
+
+/* ---------- print ---------- */
+@page{size:A4 portrait;margin:0}
+@media print{
+  body{background:#fff}
+  #bar,#modal,.noprint,.addbtn,.doc .x{display:none!important}
+  #wrap{padding:0;overflow:visible}
+  .page{margin:0;box-shadow:none;page-break-after:always;break-after:page}
+  .page:last-child{page-break-after:auto;break-after:auto}
+  input.f,textarea.f,.doc input,.consent input.inl,.dt input{color:#000!important;background:transparent!important}
+  .doc input{border-bottom:0}
+  .consent input.inl{border-bottom:0}
+  .dt input{border-bottom:0}
+  .ox button{display:none}
+  .ox .res{display:inline}
+  .pad-btn{border:0!important;background:transparent!important}
+  .pad-btn.empty span{visibility:hidden}
+  input::placeholder,textarea::placeholder{color:transparent}
+}
+@media screen and (max-width:230mm){#wrap{padding-left:0}.page{margin-left:8px;margin-right:auto}}
+</style>
+</head>
+<body>
+
+<div id="bar" class="ui">
+  <div class="ttl">📝 수술(마취)동의서</div>
+  <button class="btn w" id="btnLoad">비급여 앱 정보 불러오기</button>
+  <button class="btn" id="btnReset">새 환자(초기화)</button>
+  <button class="btn p" id="btnPrint">인쇄 / PDF 저장</button>
+  <div id="msg"></div>
+</div>
+
+<div id="wrap">
+
+<!-- ================= 1 페이지 ================= -->
+<section class="page" id="p1">
+  <h1>「수술(마취)동의서(의원급 의료기관용)」</h1>
+
+  <table class="t-outer" style="margin-top:2mm">
+    <colgroup><col style="width:17%"><col style="width:33%"><col style="width:50%"></colgroup>
+    <tr><th class="lbl" colspan="2">진단명</th><td class="val"><input class="f" id="diagnosis" placeholder="진단명"></td></tr>
+    <tr><th class="lbl" colspan="2">수술(마취·의식하 진정)명</th><td class="val"><input class="f" id="surgName" placeholder="수술명"></td></tr>
+    <tr>
+      <th class="lbl" rowspan="2">참여의료진</th>
+      <th class="lbl" style="text-align:left;padding-left:6px">수술(마취·의식하 진정) 의사</th>
+      <td class="val"><div class="docs" data-role="surgeon"></div></td>
+    </tr>
+    <tr>
+      <th class="lbl" style="text-align:left;padding-left:6px">수술(마취·의식하 진정) 참여의사</th>
+      <td class="val"><div class="docs" data-role="assist"></div></td>
+    </tr>
+  </table>
+
+  <div class="sec">1. 환자의 상태</div>
+  <table class="t-outer" id="cond">
+    <colgroup><col style="width:19%"><col style="width:31%"><col style="width:19%"><col style="width:31%"></colgroup>
+  </table>
+
+  <div class="sec">2. 설명사항</div>
+  <div class="body">
+    <p class="it">가. 수술의 목적 및 효과</p>
+    <p class="it">나. 수술과정 및 방법, 수술부위 및 추정 소요시간</p>
+    <p class="it">다. 수술이후에 나타날 수 있는 합병증(후유증)의 내용, 정도 및 대처방법</p>
+    <p class="it">라. 수술관련 주의사항</p>
+    <p class="it">마. 수술방법 및 수술의사 변경과 수술 범위 추가 가능성</p>
+    <p class="it">바. 의식하 진정 및 마취시 설명사항</p>
+    <p class="it sub">1) 의식하 진정</p>
+    <p class="dash">- 의식하 진정이란 진정제를 투여하여 환자를 어느 정도 진정상태(수면유사상태)에 도달하게 한 후 검사 또는 시술을 하는 것입니다. 이러한 진정은 검사(시술)에 따르는 불편함을 경감시켜주는 효과가 있습니다. 이러한 진정은 마취와 다르며, 이 상태에서는 환자의 협조가 가능합니다.</p>
+  </div>
+  <div class="chartno">차트번호 : <input class="chartInp" placeholder="차트번호"></div>
+</section>
+
+<!-- ================= 2 페이지 ================= -->
+<section class="page" id="p2">
+  <div class="body" style="margin-top:2mm">
+    <p class="dash">- 의식하 진정의 부작용으로는 호흡곤란 및 저산소증과 같은 호흡기계 합병증, 맥박이 빨라지는 등의 심혈관계 합병증, 낙상 등이 발생할 수 있습니다. 호흡기계통과 심혈관계 증상은 대부분의 경우에 특별한 조치 없이 정상상태로 돌아오게 되지만, 드물게 호흡과 심장이 정지되어 생명이 위협받거나, 약물에 대한 과민 반응에 의한 응급조치가 필요한 경우도 있으니 주의를 요합니다.</p>
+    <p class="dash" style="text-indent:0;margin-left:9.2mm">호흡기 질환으로 폐기능에 장애가 있거나, 신장이나 심장질환이 있는 경우에는 이러한 부작용이 과하게 나타날 수 있으므로 주의를 요하며, 시술 전에 반드시 담당의사에게 말씀을 해 주셔야 합니다.</p>
+    <p class="it sub" style="margin-top:6mm">2) 마취</p>
+    <p class="dash">- 시행하는 마취의 종류와 방법</p>
+    <p class="dash">- 마취에 따라 발현할 수 있는 부작용과 대처방법</p>
+    <p class="it" style="margin-left:0;margin-top:2mm">사. 수술(마취·의식하 진정)의 방법, 담당의사, 수술범위 변경가능성</p>
+    <p class="dash">- 수술(마취·의식하 진정)과정에서 환자의 상태 및 의료기관 사정에 따라 부득이하게 수술(마취·의식하 진정)방법 및 수술(마취·의식하 진정)의사가 변경되거나 수술범위가 추가될 수 있습니다.</p>
+  </div>
+
+  <div class="sigline">설명의사 : <div class="docs" data-role="explain" style="justify-content:flex-end;padding:0"></div></div>
+
+  <div class="consent">
+    본인은 본인(또는 환자 <input class="inl" id="ptInline" placeholder="환자명"> )에 대한 수술 및 마취/의식하 진정의 필요성, 내용, 예상되는 합병증과 후유증 등에 대한 설명을 의사 <b id="explainNames">김진일</b> 로부터 들었으며, 본 수술 및 마취/의식하진정 도중에 불가항력적으로 합병증이 발생하거나, 환자의 특이체질로 인하여 우발적인 사고가 일어날 수 있다는 것을 사전에 설명 들었고, 그 내용을 충분히 이해하였습니다. 이에 본 수술 및 마취/의식하 진정을 시행하는데 동의하며, 본 동의에 따른 의학적 처리를 담당의사 판단에 위임할 것을 서면으로 동의합니다. 또한 1항에 “환자의 상태”를 사실에 입각하여 성실히 기록하였음을 서면으로 알립니다.
+  </div>
+
+  <div class="dt"><input class="y" id="dY" inputmode="numeric"> 년 <input id="dM" inputmode="numeric"> 월 <input id="dD" inputmode="numeric"> 일</div>
+
+  <table class="t-outer sgn">
+    <colgroup><col style="width:13%"><col style="width:53%"><col style="width:14%"><col style="width:20%"></colgroup>
+    <tr>
+      <th class="lbl">환자명</th>
+      <td><div class="sgcell"><input class="f" id="ptName" placeholder="환자명"><button type="button" class="pad-btn empty" data-sig="patient"><span>✍ 서명 또는 날인</span></button></div></td>
+      <th class="lbl">주민등록상<br>생년월일</th>
+      <td class="val"><input class="f" id="ptDob" placeholder="YYYY-MM-DD"></td>
+    </tr>
+    <tr>
+      <th class="lbl">대리인<br>(보호자의 <input class="f" id="relation" style="width:3.6em;display:inline-block;padding:0;text-align:center;border-bottom:1px solid #777" placeholder="관계">)</th>
+      <td><div class="sgcell"><input class="f" id="guName" placeholder="대리인 성명"><button type="button" class="pad-btn empty" data-sig="guardian"><span>✍ 서명 또는 날인</span></button></div></td>
+      <th class="lbl">주민등록상<br>생년월일</th>
+      <td class="val"><input class="f" id="guDob" placeholder="YYYY-MM-DD"></td>
+    </tr>
+  </table>
+
+  <div class="to">천안본정형외과 의원(병원) 원장 귀하</div>
+  <div class="chartno">차트번호 : <input class="chartInp" placeholder="차트번호"></div>
+</section>
+
+</div>
+
+<!-- 서명 모달 -->
+<div id="modal" class="ui">
+  <div class="box">
+    <h3 id="mTitle">서명</h3>
+    <canvas id="cv" width="1200" height="480"></canvas>
+    <div class="row">
+      <button class="btn" id="mClear">지우기</button>
+      <button class="btn" id="mCancel">취소</button>
+      <button class="btn p" id="mOk">서명 완료</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var SIG_JIN = "data:image/png;base64,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";
+  var DEFAULT_DOC = "김진일";
+
+  /* ---------- 상태 ---------- */
+  var COND = [
+    ["고혈압", "hyper"], ["의약품 알레르기", "drugAl"],
+    ["당뇨병", "dm"], ["식품 알레르기", "foodAl"],
+    ["심혈관질환", "cvd"], ["가족력", "family"],
+    ["간장질환", "liver"], ["출혈성 소인", "bleed"],
+    ["신장질환", "kidney"], ["마취이력", "anes"]
+  ];
+  var ROLES = ["surgeon", "assist", "explain"];
+  var state = { docs: { surgeon: [DEFAULT_DOC], assist: [DEFAULT_DOC], explain: [DEFAULT_DOC] },
+                cond: {}, sig: { patient: "", guardian: "" } };
+
+  function $(id) { return document.getElementById(id); }
+  function msg(t) { var m = $("msg"); m.textContent = t; m.className = "show"; clearTimeout(msg._t); msg._t = setTimeout(function () { m.className = ""; }, 5000); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+
+  /* 의사 명단만 이 PC에 기억 (환자 정보·서명은 저장하지 않음) */
+  var DOC_KEY = "consent_doctors_v1";
+  function saveDocs() { try { localStorage.setItem(DOC_KEY, JSON.stringify(state.docs)); } catch (e) {} }
+  function loadDocs() {
+    try {
+      var d = JSON.parse(localStorage.getItem(DOC_KEY) || "null");
+      if (d) ROLES.forEach(function (r) { if (Array.isArray(d[r]) && d[r].length) state.docs[r] = d[r].map(String); });
+    } catch (e) {}
+  }
+
+  /* ---------- 의료진 ---------- */
+  function renderDocs() {
+    ROLES.forEach(function (role) {
+      var box = document.querySelector('.docs[data-role="' + role + '"]');
+      var html = state.docs[role].map(function (n, i) {
+        var sg = (n.trim() === DEFAULT_DOC && role !== "assist") ? '<img class="sg" alt="" src="' + SIG_JIN + '">' : "";
+        return '<span class="doc"><input data-role="' + role + '" data-i="' + i + '" value="' + esc(n) + '" size="4" placeholder="성명">' + sg +
+               (state.docs[role].length > 1 ? '<button type="button" class="x noprint" data-del="' + role + ':' + i + '" title="삭제">×</button>' : "") + '</span>';
+      }).join("");
+      html += '<button type="button" class="addbtn noprint" data-add="' + role + '" title="의사 추가">+</button>';
+      box.innerHTML = html;
+    });
+    $("explainNames").textContent = state.docs.explain.filter(Boolean).join(", ") || "          ";
+  }
+  document.addEventListener("input", function (e) {
+    var t = e.target;
+    if (t.matches && t.matches(".doc input")) {
+      var r = t.getAttribute("data-role"), i = +t.getAttribute("data-i");
+      state.docs[r][i] = t.value;
+      $("explainNames").textContent = state.docs.explain.filter(Boolean).join(", ") || "          ";
+      saveDocs();
+    }
+    if (t.id === "ptName") $("ptInline").value = t.value;
+    if (t.id === "ptInline") $("ptName").value = t.value;
+    if (t.classList && t.classList.contains("chartInp")) setChart(t.value);
+  });
+  /* 서명 이미지는 이름 입력이 끝난 뒤에 갱신 (입력 중 포커스 유지) */
+  document.addEventListener("change", function (e) { if (e.target.matches && e.target.matches(".doc input")) { renderDocs(); } });
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest ? e.target.closest("[data-add],[data-del]") : null;
+    if (!t) return;
+    if (t.hasAttribute("data-add")) {
+      state.docs[t.getAttribute("data-add")].push("");
+      renderDocs(); saveDocs();
+      var ins = document.querySelectorAll('.docs[data-role="' + t.getAttribute("data-add") + '"] input');
+      if (ins.length) ins[ins.length - 1].focus();
+    } else {
+      var p = t.getAttribute("data-del").split(":");
+      state.docs[p[0]].splice(+p[1], 1);
+      if (!state.docs[p[0]].length) state.docs[p[0]] = [DEFAULT_DOC];
+      renderDocs(); saveDocs();
+    }
+  });
+
+  /* ---------- 환자 상태 O / X ---------- */
+  function renderCond() {
+    var rows = "";
+    for (var i = 0; i < COND.length; i += 2) {
+      rows += "<tr>" + cell(COND[i]) + cell(COND[i + 1]) + "</tr>";
+    }
+    rows += '<tr><th class="lbl" colspan="4">기타사항</th></tr>' +
+            '<tr><td colspan="4"><textarea class="f" id="condEtc" rows="2" placeholder="기타사항"></textarea></td></tr>';
+    var keep = $("condEtc") ? $("condEtc").value : "";
+    $("cond").innerHTML = '<colgroup><col style="width:19%"><col style="width:31%"><col style="width:19%"><col style="width:31%"></colgroup>' + rows;
+    $("condEtc").value = keep;
+  }
+  function cell(c) {
+    var v = state.cond[c[1]] || "";
+    return '<th class="lbl">' + c[0] + '</th><td><div class="ox" data-k="' + c[1] + '">' +
+      '<button type="button" class="o' + (v === "O" ? " on" : "") + '" data-v="O" aria-label="' + c[0] + ' 있음 O">O</button>' +
+      '<button type="button" class="x' + (v === "X" ? " on" : "") + '" data-v="X" aria-label="' + c[0] + ' 없음 X">X</button>' +
+      '<span class="res" style="color:' + (v === "O" ? "#000" : "#000") + '">' + esc(v) + '</span></div></td>';
+  }
+  $("cond").addEventListener("click", function (e) {
+    var b = e.target.closest("button[data-v]"); if (!b) return;
+    var k = b.parentNode.getAttribute("data-k"), v = b.getAttribute("data-v");
+    state.cond[k] = (state.cond[k] === v) ? "" : v;   /* 같은 버튼 다시 누르면 해제 */
+    renderCond();
+  });
+
+  /* ---------- 서명 ---------- */
+  var cv = $("cv"), ctx = cv.getContext("2d"), drawing = false, dirty = false, curSig = null;
+  function resetCanvas() {
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.lineWidth = 6; ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0a0a40";
+    dirty = false;
+  }
+  function pos(e) {
+    var r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height };
+  }
+  cv.addEventListener("pointerdown", function (e) { e.preventDefault(); drawing = true; try { cv.setPointerCapture(e.pointerId); } catch (x) {} var p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + .1, p.y + .1); ctx.stroke(); dirty = true; });
+  cv.addEventListener("pointermove", function (e) { if (!drawing) return; e.preventDefault(); var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+  ["pointerup", "pointercancel", "pointerleave"].forEach(function (n) { cv.addEventListener(n, function () { drawing = false; }); });
+  function openPad(who) {
+    curSig = who;
+    $("mTitle").textContent = (who === "patient" ? "환자" : "대리인(보호자)") + " 서명 — 아래 칸에 손가락/펜으로 서명하세요";
+    resetCanvas(); $("modal").className = "show";
+  }
+  function trim(src) {
+    /* 여백 제거 후 PNG 반환 */
+    var w = src.width, h = src.height, d = src.getContext("2d").getImageData(0, 0, w, h).data;
+    var x0 = w, y0 = h, x1 = 0, y1 = 0;
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) if (d[(y * w + x) * 4 + 3] > 10) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 <= x0 || y1 <= y0) return "";
+    var pad = 10; x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(w - 1, x1 + pad); y1 = Math.min(h - 1, y1 + pad);
+    var c = document.createElement("canvas"); c.width = x1 - x0 + 1; c.height = y1 - y0 + 1;
+    c.getContext("2d").drawImage(src, x0, y0, c.width, c.height, 0, 0, c.width, c.height);
+    return c.toDataURL("image/png");
+  }
+  $("mClear").onclick = resetCanvas;
+  $("mCancel").onclick = function () { $("modal").className = ""; };
+  $("mOk").onclick = function () {
+    if (!dirty) { msg("서명이 비어 있습니다. 서명 후 '서명 완료'를 눌러 주세요."); return; }
+    state.sig[curSig] = trim(cv); $("modal").className = ""; renderSigs();
+  };
+  function renderSigs() {
+    document.querySelectorAll(".pad-btn").forEach(function (b) {
+      var s = state.sig[b.getAttribute("data-sig")];
+      if (s) { b.className = "pad-btn has"; b.innerHTML = '<img alt="서명" src="' + s + '">'; }
+      else { b.className = "pad-btn empty"; b.innerHTML = "<span>✍ 서명 또는 날인</span>"; }
+    });
+  }
+  document.querySelectorAll(".pad-btn").forEach(function (b) { b.addEventListener("click", function () { openPad(b.getAttribute("data-sig")); }); });
+
+  /* ---------- 비급여 앱 연동 (localStorage: bg_pending_claim) ---------- */
+  function dobText(v) { return v || ""; }
+  function loadLinked(manual) {
+    var raw = null, d = null;
+    try { raw = localStorage.getItem("bg_pending_claim"); d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; }
+    if (!d) { if (manual) msg("불러올 정보가 없습니다. 비급여 앱에서 환자 정보를 입력하고 '수술동의서 열기' 또는 '수술기록지에 연동'을 먼저 눌러 주세요. (같은 주소의 앱끼리만 연동됩니다)"); return false; }
+    var n = 0;
+    function put(id, val) { if (val) { $(id).value = val; n++; } }
+    put("ptName", d.patientName); put("ptInline", d.patientName);
+    put("ptDob", dobText(d.dob));
+    put("diagnosis", d.diagnosis);
+    put("surgName", d.surgName);
+    msg("비급여 앱 정보를 불러왔습니다" + (d.patientName ? " — " + d.patientName + (d.patient ? " (차트 " + d.patient + ")" : "") : "") + ".");
+    if (d.patient) { setChart(d.patient); n++; }
+    return true;
+  }
+  function setChart(v) { document.querySelectorAll(".chartInp").forEach(function (i) { if (i.value !== v) i.value = v; }); }
+  $("btnLoad").onclick = function () { loadLinked(true); };
+
+  /* ---------- 날짜 ---------- */
+  function setToday() {
+    var t = new Date();
+    $("dY").value = t.getFullYear(); $("dM").value = t.getMonth() + 1; $("dD").value = t.getDate();
+  }
+
+  /* ---------- 초기화 / 인쇄 ---------- */
+  $("btnReset").onclick = function () {
+    if (!confirm("현재 입력한 환자 정보와 서명을 모두 지우고 새 동의서를 시작할까요?")) return;
+    ["diagnosis", "surgName", "ptName", "ptInline", "ptDob", "guName", "guDob", "relation"].forEach(function (i) { $(i).value = ""; });
+    setChart("");
+    state.cond = {}; state.sig = { patient: "", guardian: "" };
+    renderCond(); renderSigs(); setToday(); $("condEtc").value = "";
+    msg("새 동의서로 초기화했습니다.");
+  };
+  $("btnPrint").onclick = function () { window.print(); };
+
+  /* ---------- 시작 ---------- */
+  loadDocs(); renderDocs(); renderCond(); renderSigs(); setToday();
+  loadLinked(false);   /* 비급여 앱에서 넘어온 정보가 있으면 자동 채움 */
+
+  /* 검증용 노출 */
+  window.__consent = { state: state };
+})();
+</script>
+</body>
+</html>

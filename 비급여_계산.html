@@ -138,7 +138,7 @@ var BASIS = "2026.08.21 공시";
 
 var CAT = JSON.parse(document.getElementById("jcatalog").textContent);
 var SETS = JSON.parse(document.getElementById("jsets").textContent);
-var S = { screen:"home", title:"", list:[], qty:{}, amt:{}, base:[], tab:"전체", q:"", online:false, patient:"", patientName:"", surgDate:"", dob:"", staff:"", msg:"", edit:false, pin:"", form:null, aq:"", dup:[] };
+var S = { screen:"home", title:"", list:[], qty:{}, amt:{}, base:[], tab:"전체", q:"", online:false, patient:"", patientName:"", surgDate:"", dob:"", surgName:"", diagnosis:"", staff:"", msg:"", edit:false, pin:"", form:null, aq:"", dup:[] };
 
 try {
   var cc = localStorage.getItem("bg_cat"); if (cc) CAT = JSON.parse(cc);
@@ -370,13 +370,17 @@ function reviewView() {
   pName.addEventListener("input", function (e) { S.patientName = e.target.value; });
   var p1 = el('<input placeholder="차트번호 / 등록번호" value="' + esc(S.patient) + '" style="margin-top:8px">');
   p1.addEventListener("input", function (e) { S.patient = e.target.value; });
+  var pDiag = el('<input placeholder="진단명 (예: 전방십자인대 파열)" value="' + esc(S.diagnosis) + '" style="margin-top:8px">');
+  pDiag.addEventListener("input", function (e) { S.diagnosis = e.target.value; });
+  var pSurgName = el('<input placeholder="수술명 (예: 관절경적 전방십자인대 재건술)" value="' + esc(S.surgName) + '" style="margin-top:8px">');
+  pSurgName.addEventListener("input", function (e) { S.surgName = e.target.value; });
   var pSurgDate = el('<div style="margin-top:8px"><div style="font-size:11px;color:var(--mut);margin-bottom:3px">수술날짜</div><input type="date" value="' + esc(S.surgDate) + '" style="width:100%;box-sizing:border-box"></div>');
   pSurgDate.querySelector('input').addEventListener("input", function (e) { S.surgDate = e.target.value; });
   var pDob = el('<div style="margin-top:8px"><div style="font-size:11px;color:var(--mut);margin-bottom:3px">생년월일</div><input type="date" value="' + esc(S.dob) + '" style="width:100%;box-sizing:border-box"></div>');
   pDob.querySelector('input').addEventListener("input", function (e) { S.dob = e.target.value; });
   var p2 = el('<input placeholder="작성자" value="' + esc(S.staff) + '" style="margin-top:8px">');
   p2.addEventListener("input", function (e) { S.staff = e.target.value; localStorage.setItem("bg_staff", e.target.value); });
-  pi.appendChild(pName); pi.appendChild(p1); pi.appendChild(pSurgDate); pi.appendChild(pDob); pi.appendChild(p2);
+  pi.appendChild(pName); pi.appendChild(p1); pi.appendChild(pDiag); pi.appendChild(pSurgName); pi.appendChild(pSurgDate); pi.appendChild(pDob); pi.appendChild(p2);
   b.appendChild(pi);
   b.appendChild(el('<div class="btn d" style="margin-top:14px" data-a="claim">청구 목록 만들기</div>'));
   return v;
@@ -393,6 +397,8 @@ function claimView() {
     S.patient ? "차트 " + S.patient : "",
     S.surgDate ? "수술 " + S.surgDate : "",
     S.dob ? "생년월일 " + S.dob : "",
+    S.diagnosis ? "진단 " + S.diagnosis : "",
+    S.surgName ? "수술명 " + S.surgName : "",
     S.staff ? "작성 " + S.staff : ""
   ].filter(Boolean).join(" · ");
   card.appendChild(el('<div style="font-size:12.5px;color:var(--dim);margin-top:5px">' + esc(infoLine) + "</div>"));
@@ -425,6 +431,7 @@ function claimView() {
   b.appendChild(el('<div class="btn p" style="margin-top:9px" data-a="explain">환자 설명 화면 열기</div>'));
   b.appendChild(el('<div class="btn g" style="margin-top:9px" data-a="saveset">이 구성을 세트로 저장</div>'));
   b.appendChild(el('<div class="btn" style="margin-top:9px;background:#f0f7ff;color:#1273a8;font-weight:700;border:1.5px solid rgba(18,115,168,.25)" data-a="sendToSurgery">📋 수술기록지에 연동</div>'));
+  b.appendChild(el('<div class="btn" style="margin-top:9px;background:#fff8ec;color:#9a5b00;font-weight:700;border:1.5px solid rgba(154,91,0,.25)" data-a="openConsent">📝 수술(마취)동의서 열기</div>'));
   b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-top:14px;line-height:1.6">' + esc(BASIS) + ' 단가 기준입니다. 범위 단가 항목은 입력된 실제 금액으로 계산됩니다.</div>'));
   return v;
 }
@@ -651,7 +658,7 @@ var actions = {
   },
   save: function () {
     S.msg = "기록 중...";
-    api("saveCase", { setName: S.title, patient: S.patient, patientName: S.patientName, surgDate: S.surgDate, dob: S.dob, staff: S.staff, lines: claimLines() })
+    api("saveCase", { setName: S.title, patient: S.patient, patientName: S.patientName, surgDate: S.surgDate, dob: S.dob, surgName: S.surgName, diagnosis: S.diagnosis, staff: S.staff, lines: claimLines() })
       .then(function (d) { S.msg = "구글 시트에 " + d.saved + "행 기록됨."; render(); })
       .catch(function (e) { S.msg = "기록 실패: " + e; render(); });
   },
@@ -669,6 +676,8 @@ var actions = {
       patientName: S.patientName || "",
       surgDate: S.surgDate || "",
       dob: S.dob || "",
+      surgName: S.surgName || "",
+      diagnosis: S.diagnosis || "",
       staff: S.staff || "",
       total: total(),
       lines: claimLines().map(function(l){ return { code: l.code, name: l.name, qty: l.qty, amount: l.unit * l.qty, section: (item(l.code)||{}).s || "" }; }),
@@ -691,6 +700,13 @@ var actions = {
     } catch(e) {
       S.msg = "저장 실패: " + e;
     }
+  },
+  openConsent: function () {
+    /* 환자명·생년월일·차트번호·수술명·진단명을 bg_pending_claim 으로 넘기고 동의서를 연다 */
+    actions.sendToSurgery();
+    if (S.msg.indexOf("저장 실패") === 0) return;
+    var w = window.open("수술마취동의서.html", "_blank");
+    S.msg = w ? "✅ 수술(마취)동의서를 열었습니다." : "✅ 연동 완료. 팝업이 막혔다면 '수술마취동의서.html'을 직접 열어 주세요.";
   }
 };
 
