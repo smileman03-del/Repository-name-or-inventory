@@ -1090,6 +1090,16 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       surgeryTypes = deepClone(DEFAULT_TYPES);
       await persistTypes();
     }
+    try{
+      const rN = await window.storage.get(STORAGE_NURSING_KEY, false);
+      nursingOpts = (rN && rN.value) ? JSON.parse(rN.value) : null;
+    }catch(e){ nursingOpts = null; }
+    if(!nursingOpts){ nursingOpts = deepClone(DEFAULT_NURSING_OPTS); await persistNursingOpts(); }
+    try{
+      const rS = await window.storage.get(STORAGE_SPECIAL_KEY, false);
+      specialOpts = (rS && rS.value) ? JSON.parse(rS.value) : null;
+    }catch(e){ specialOpts = null; }
+    if(!specialOpts){ specialOpts = deepClone(DEFAULT_SPECIAL_OPTS); await persistSpecialOpts(); }
     // 마이그레이션: "마취과-의약품" 카테고리를 "수술실-의약품"으로 병합 (과거에 저장된 데이터 대응)
     if(catalog['마취과-의약품']){
       catalog['수술실-의약품'] = (catalog['수술실-의약품']||[]).concat(catalog['마취과-의약품']);
@@ -1257,6 +1267,14 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
   async function persistTypes(){
     try{ await window.storage.set(STORAGE_TYPES_KEY, JSON.stringify(surgeryTypes), false); }
     catch(e){ console.error(e); showBanner('banner','수술종류 저장 중 오류가 발생했습니다.', false); }
+  }
+  async function persistNursingOpts(){
+    try{ await window.storage.set(STORAGE_NURSING_KEY, JSON.stringify(nursingOpts), false); }
+    catch(e){ console.error(e); showBanner('banner','간호기록 옵션 저장 중 오류가 발생했습니다.', false); }
+  }
+  async function persistSpecialOpts(){
+    try{ await window.storage.set(STORAGE_SPECIAL_KEY, JSON.stringify(specialOpts), false); }
+    catch(e){ console.error(e); showBanner('banner','특수재료 옵션 저장 중 오류가 발생했습니다.', false); }
   }
 
   function allItems(){
@@ -1562,7 +1580,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
           loadList();
         }
       }
-      if(btn.dataset.tab==='manage') { renderTypeManageList(); renderManageCatalog(); }
+      if(btn.dataset.tab==='manage') { renderTypeManageList(); renderManageCatalog(); renderNursingMgmt(); renderSpecialMgmt(); }
     });
   });
 
@@ -2152,7 +2170,148 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
 
   // ===== Manage panel: surgery types =====
   let editingTypeCode = null;
-  function renderTypeManageList(){
+  /* ─── 관리 탭: 04 간호기록 옵션 ───────────────────────────────── */
+  function populateSelectOptions(){
+    // nursingOpts의 각 필드를 해당 select 에 반영
+    const selMap = {
+      n_position:        'n_position',
+      n_position_device: 'n_position_device',
+      n_tourniquet_site: 'n_tourniquet_site',
+      n_bovie_site:      'n_bovie_site',
+      sp_plate_site:     'sp_plate_site',
+      sp_plate_type:     'sp_plate_type',
+      sp_block:          'sp_block',
+      sp_roll_wire:      'sp_roll_wire',
+      sp_kwire:          'sp_kwire',
+      sp_ball_kwire:     'sp_ball_kwire',
+      sp_steinman:       'sp_steinman'
+    };
+    // nursing opts
+    ['n_position','n_position_device','n_tourniquet_site','n_bovie_site'].forEach(key=>{
+      const el = document.getElementById(key);
+      if(!el || !nursingOpts[key]) return;
+      const cur = el.value;
+      el.innerHTML = nursingOpts[key].map(v=>`<option value="${v}">${v}</option>`).join('');
+      if([...el.options].some(o=>o.value===cur)) el.value = cur;
+    });
+    // special opts
+    ['sp_plate_site','sp_plate_type','sp_block','sp_roll_wire','sp_kwire','sp_ball_kwire','sp_steinman'].forEach(key=>{
+      const el = document.getElementById(key);
+      if(!el || !specialOpts[key]) return;
+      const cur = el.value;
+      el.innerHTML = specialOpts[key].map(v=>`<option value="${v}">${v}</option>`).join('');
+      if([...el.options].some(o=>o.value===cur)) el.value = cur;
+    });
+  }
+
+  function renderNursingMgmt(){
+    const root = document.getElementById('nursing-mgmt-root');
+    if(!root) return;
+    const labels = {
+      n_position:'체위', n_position_device:'체위고정기구',
+      n_tourniquet_site:'지혈대 부위', n_bovie_site:'전기소작기 패드'
+    };
+    root.innerHTML = Object.keys(labels).map(key=>{
+      const opts = (nursingOpts[key]||[]);
+      return `<div style="margin-bottom:14px;">
+        <div style="font-weight:600;margin-bottom:4px;">${labels[key]}</div>
+        <div id="nursing-opt-list-${key}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          ${opts.map((v,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface2,#f3f4f6);border-radius:6px;padding:3px 8px;font-size:.85rem;">
+            <span contenteditable="true" data-key="${key}" data-idx="${i}" style="outline:none;min-width:20px;" onblur="nursingOptRename('${key}',${i},this.textContent)">${v}</span>
+            <button onclick="nursingOptDelete('${key}',${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.9rem;padding:0 2px;">✕</button>
+          </span>`).join('')}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input id="nursing-opt-new-${key}" type="text" placeholder="새 옵션 입력" style="flex:1;padding:4px 8px;border:1px solid var(--border,#e5e7eb);border-radius:6px;font-size:.85rem;">
+          <button onclick="nursingOptAdd('${key}')" style="padding:4px 10px;background:var(--accent,#2563eb);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.85rem;">추가</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.nursingOptAdd = async function(key){
+    const inp = document.getElementById('nursing-opt-new-'+key);
+    const val = (inp.value||'').trim();
+    if(!val) return;
+    if(!(nursingOpts[key]||[]).includes(val)){
+      if(!nursingOpts[key]) nursingOpts[key]=[];
+      nursingOpts[key].push(val);
+      await persistNursingOpts();
+      populateSelectOptions();
+    }
+    inp.value='';
+    renderNursingMgmt();
+  };
+  window.nursingOptDelete = async function(key,idx){
+    if(!nursingOpts[key]) return;
+    nursingOpts[key].splice(idx,1);
+    await persistNursingOpts();
+    populateSelectOptions();
+    renderNursingMgmt();
+  };
+  window.nursingOptRename = async function(key,idx,val){
+    val=(val||'').trim();
+    if(!val || !nursingOpts[key]) return;
+    nursingOpts[key][idx]=val;
+    await persistNursingOpts();
+    populateSelectOptions();
+  };
+
+  function renderSpecialMgmt(){
+    const root = document.getElementById('special-mgmt-root');
+    if(!root) return;
+    const labels = {
+      sp_plate_site:'Plate 삽입부위', sp_plate_type:'Plate 종류',
+      sp_block:'HTO 블록', sp_roll_wire:'Roll-Wire',
+      sp_kwire:'K-Wire', sp_ball_kwire:'Ball K-Wire', sp_steinman:'Steinman Pin'
+    };
+    root.innerHTML = Object.keys(labels).map(key=>{
+      const opts = (specialOpts[key]||[]);
+      return `<div style="margin-bottom:14px;">
+        <div style="font-weight:600;margin-bottom:4px;">${labels[key]}</div>
+        <div id="special-opt-list-${key}" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;">
+          ${opts.map((v,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--surface2,#f3f4f6);border-radius:6px;padding:3px 8px;font-size:.85rem;">
+            <span contenteditable="true" data-key="${key}" data-idx="${i}" style="outline:none;min-width:20px;" onblur="specialOptRename('${key}',${i},this.textContent)">${v}</span>
+            <button onclick="specialOptDelete('${key}',${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.9rem;padding:0 2px;">✕</button>
+          </span>`).join('')}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input id="special-opt-new-${key}" type="text" placeholder="새 옵션 입력" style="flex:1;padding:4px 8px;border:1px solid var(--border,#e5e7eb);border-radius:6px;font-size:.85rem;">
+          <button onclick="specialOptAdd('${key}')" style="padding:4px 10px;background:var(--accent,#2563eb);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.85rem;">추가</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  window.specialOptAdd = async function(key){
+    const inp = document.getElementById('special-opt-new-'+key);
+    const val = (inp.value||'').trim();
+    if(!val) return;
+    if(!(specialOpts[key]||[]).includes(val)){
+      if(!specialOpts[key]) specialOpts[key]=[];
+      specialOpts[key].push(val);
+      await persistSpecialOpts();
+      populateSelectOptions();
+    }
+    inp.value='';
+    renderSpecialMgmt();
+  };
+  window.specialOptDelete = async function(key,idx){
+    if(!specialOpts[key]) return;
+    specialOpts[key].splice(idx,1);
+    await persistSpecialOpts();
+    populateSelectOptions();
+    renderSpecialMgmt();
+  };
+  window.specialOptRename = async function(key,idx,val){
+    val=(val||'').trim();
+    if(!val || !specialOpts[key]) return;
+    specialOpts[key][idx]=val;
+    await persistSpecialOpts();
+    populateSelectOptions();
+  };
+
+    function renderTypeManageList(){
     typeList.innerHTML = surgeryTypes.map(t=>{
       if(editingTypeCode === t.code){
         return `
@@ -2428,6 +2587,8 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
       // 2) 저장
       await persistTypes();
       await persistCatalog();
+      await persistNursingOpts();
+      await persistSpecialOpts();
 
       // 3) 저장 결과 한번 더 확인 (실제로 저장소에 반영됐는지 재조회)
       const [checkTypes, checkCatalog] = await Promise.all([
@@ -2439,8 +2600,11 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
 
       renderTypeManageList();
       renderManageCatalog();
+      renderNursingMgmt();
+      renderSpecialMgmt();
       renderTypeSelect();
       renderRecordCatalog();
+      populateSelectOptions();
 
       if(typesOk && catalogOk){
         const now = new Date().toLocaleString('ko-KR');
@@ -2529,6 +2693,7 @@ const DEFAULT_TYPES = [{"code":"ACL","label":"ACL · 전방십자인대재건술
     newItemCat.innerHTML = Object.keys(catalog).map(c=>`<option value="${c}">${c}</option>`).join('');
     renderTypeSelect();
     renderRecordCatalog();
+    populateSelectOptions();
     for(let i=0;i<5;i++) makeExtraRow();
     fillFromUrlParams(); // 수술계획표에서 넘어온 데이터 자동입력
   }
