@@ -108,8 +108,21 @@ textarea.f{resize:none;display:block;min-height:15mm;line-height:1.5}
   .pad-btn.empty span{visibility:hidden}
   input::placeholder,textarea::placeholder{color:transparent}
 }
+body.cap{background:#fff}
+body.cap #wrap{padding:0;overflow:visible}
+body.cap .page{margin:0;box-shadow:none}
+body.cap .noprint,body.cap .addbtn,body.cap .doc .x{display:none!important}
+body.cap input.f,body.cap textarea.f,body.cap .doc input,body.cap .consent input.inl,body.cap .dt input{color:#000!important;background:transparent!important}
+body.cap .doc input,body.cap .consent input.inl,body.cap .dt input{border-bottom:0}
+body.cap .ox button{display:none}
+body.cap .ox .res{display:inline}
+body.cap .pad-btn{border:0!important;background:transparent!important}
+body.cap .pad-btn.empty span{visibility:hidden}
+body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 @media screen and (max-width:230mm){#wrap{padding-left:0}.page{margin-left:8px;margin-right:auto}}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
@@ -117,7 +130,8 @@ textarea.f{resize:none;display:block;min-height:15mm;line-height:1.5}
   <div class="ttl">📝 수술(마취)동의서</div>
   <button class="btn w" id="btnLoad">비급여 앱 정보 불러오기</button>
   <button class="btn" id="btnReset">새 환자(초기화)</button>
-  <button class="btn p" id="btnPrint">인쇄 / PDF 저장</button>
+  <button class="btn p" id="btnPdf">⬇ PDF 파일 다운로드</button>
+  <button class="btn" id="btnPrint">인쇄</button>
   <div id="msg"></div>
 </div>
 
@@ -398,6 +412,44 @@ textarea.f{resize:none;display:block;min-height:15mm;line-height:1.5}
     msg("새 동의서로 초기화했습니다.");
   };
   $("btnPrint").onclick = function () { window.print(); };
+
+  /* ---------- PDF 파일 내려받기 ---------- */
+  function safeName(s) { return String(s || "").replace(/[\\/:*?"<>|]/g, "").trim(); }
+  $("btnPdf").onclick = function () {
+    if (!window.html2canvas || !(window.jspdf && window.jspdf.jsPDF)) {
+      msg("PDF 만드는 도구를 불러오지 못했습니다. 인터넷 연결을 확인하거나 '인쇄' 버튼으로 'PDF로 저장'을 선택해 주세요."); return;
+    }
+    var miss = [];
+    if (!$("ptName").value.trim()) miss.push("환자명");
+    if (!state.sig.patient && !state.sig.guardian) miss.push("환자(대리인) 서명");
+    if (miss.length && !confirm("아직 비어 있는 항목: " + miss.join(", ") + "\n\n그대로 PDF를 저장할까요?")) return;
+    var btn = $("btnPdf"), old = btn.textContent; btn.disabled = true; btn.textContent = "PDF 만드는 중...";
+    document.activeElement && document.activeElement.blur && document.activeElement.blur();
+    window.scrollTo(0, 0); document.body.classList.add("cap");
+    /* html2canvas 는 placeholder 숨김 스타일을 무시하므로, 캡처하는 동안 안내문구를 잠시 제거 */
+    var phEls = Array.prototype.slice.call(document.querySelectorAll("input[placeholder],textarea[placeholder]"));
+    phEls.forEach(function (el) { el.setAttribute("data-ph", el.getAttribute("placeholder")); el.removeAttribute("placeholder"); });
+    var pages = Array.prototype.slice.call(document.querySelectorAll(".page"));
+    var jsPDF = window.jspdf.jsPDF, pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+    var i = 0;
+    function done(err) {
+      document.body.classList.remove("cap"); btn.disabled = false; btn.textContent = old;
+      phEls.forEach(function (el) { el.setAttribute("placeholder", el.getAttribute("data-ph")); el.removeAttribute("data-ph"); });
+      if (err) { msg("PDF 만들기 실패: " + (err.message || err)); return; }
+      var d = $("dY").value + String(("0" + $("dM").value).slice(-2)) + String(("0" + $("dD").value).slice(-2));
+      var fn = (safeName($("ptName").value) || "환자") + "_수술마취동의서_" + d + ".pdf";
+      pdf.save(fn); msg("PDF 파일을 내려받았습니다: " + fn);
+    }
+    function next() {
+      if (i >= pages.length) { done(); return; }
+      window.html2canvas(pages[i], { scale: 2, backgroundColor: "#ffffff", useCORS: true, scrollX: 0, scrollY: 0 }).then(function (c) {
+        if (i > 0) pdf.addPage("a4", "portrait");
+        pdf.addImage(c.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 210, 297, undefined, "FAST");
+        i++; next();
+      }).catch(done);
+    }
+    setTimeout(next, 60);
+  };
 
   /* ---------- 시작 ---------- */
   loadDocs(); renderDocs(); renderCond(); renderSigs(); setToday();

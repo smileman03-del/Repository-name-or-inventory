@@ -138,7 +138,7 @@ var BASIS = "2026.08.21 공시";
 
 var CAT = JSON.parse(document.getElementById("jcatalog").textContent);
 var SETS = JSON.parse(document.getElementById("jsets").textContent);
-var S = { screen:"home", title:"", list:[], qty:{}, amt:{}, base:[], tab:"전체", q:"", online:false, patient:"", patientName:"", surgDate:"", dob:"", surgName:"", diagnosis:"", staff:"", msg:"", edit:false, pin:"", form:null, aq:"", dup:[] };
+var S = { screen:"home", title:"", list:[], qty:{}, amt:{}, base:[], tab:"전체", q:"", online:false, patient:"", patientName:"", surgDate:"", dob:"", surgName:"", surgNameSet:false, diagnosis:"", staff:"", msg:"", edit:false, pin:"", form:null, aq:"", dup:[] };
 
 try {
   var cc = localStorage.getItem("bg_cat"); if (cc) CAT = JSON.parse(cc);
@@ -372,8 +372,8 @@ function reviewView() {
   p1.addEventListener("input", function (e) { S.patient = e.target.value; });
   var pDiag = el('<input placeholder="진단명 (예: 전방십자인대 파열)" value="' + esc(S.diagnosis) + '" style="margin-top:8px">');
   pDiag.addEventListener("input", function (e) { S.diagnosis = e.target.value; });
-  var pSurgName = el('<input placeholder="수술명 (예: 관절경적 전방십자인대 재건술)" value="' + esc(S.surgName) + '" style="margin-top:8px">');
-  pSurgName.addEventListener("input", function (e) { S.surgName = e.target.value; });
+  var pSurgName = el('<input placeholder="수술명 (예: 관절경적 전방십자인대 재건술)" value="' + esc(surgNameVal()) + '" style="margin-top:8px">');
+  pSurgName.addEventListener("input", function (e) { S.surgName = e.target.value; S.surgNameSet = true; });
   var pSurgDate = el('<div style="margin-top:8px"><div style="font-size:11px;color:var(--mut);margin-bottom:3px">수술날짜</div><input type="date" value="' + esc(S.surgDate) + '" style="width:100%;box-sizing:border-box"></div>');
   pSurgDate.querySelector('input').addEventListener("input", function (e) { S.surgDate = e.target.value; });
   var pDob = el('<div style="margin-top:8px"><div style="font-size:11px;color:var(--mut);margin-bottom:3px">생년월일</div><input type="date" value="' + esc(S.dob) + '" style="width:100%;box-sizing:border-box"></div>');
@@ -398,7 +398,7 @@ function claimView() {
     S.surgDate ? "수술 " + S.surgDate : "",
     S.dob ? "생년월일 " + S.dob : "",
     S.diagnosis ? "진단 " + S.diagnosis : "",
-    S.surgName ? "수술명 " + S.surgName : "",
+    surgNameVal() ? "수술명 " + surgNameVal() : "",
     S.staff ? "작성 " + S.staff : ""
   ].filter(Boolean).join(" · ");
   card.appendChild(el('<div style="font-size:12.5px;color:var(--dim);margin-top:5px">' + esc(infoLine) + "</div>"));
@@ -434,6 +434,12 @@ function claimView() {
   b.appendChild(el('<div class="btn" style="margin-top:9px;background:#fff8ec;color:#9a5b00;font-weight:700;border:1.5px solid rgba(154,91,0,.25)" data-a="openConsent">📝 수술(마취)동의서 열기</div>'));
   b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-top:14px;line-height:1.6">' + esc(BASIS) + ' 단가 기준입니다. 범위 단가 항목은 입력된 실제 금액으로 계산됩니다.</div>'));
   return v;
+}
+
+/* 수술명: 직접 입력하지 않았으면 세트 이름을 자동 사용 */
+function surgNameVal() {
+  if (S.surgNameSet) return S.surgName || "";
+  return (S.title && S.title !== "새 체크리스트") ? S.title : "";
 }
 
 /* ---------- set edit form ---------- */
@@ -658,7 +664,7 @@ var actions = {
   },
   save: function () {
     S.msg = "기록 중...";
-    api("saveCase", { setName: S.title, patient: S.patient, patientName: S.patientName, surgDate: S.surgDate, dob: S.dob, surgName: S.surgName, diagnosis: S.diagnosis, staff: S.staff, lines: claimLines() })
+    api("saveCase", { setName: S.title, patient: S.patient, patientName: S.patientName, surgDate: S.surgDate, dob: S.dob, surgName: surgNameVal(), diagnosis: S.diagnosis, staff: S.staff, lines: claimLines() })
       .then(function (d) { S.msg = "구글 시트에 " + d.saved + "행 기록됨."; render(); })
       .catch(function (e) { S.msg = "기록 실패: " + e; render(); });
   },
@@ -676,7 +682,7 @@ var actions = {
       patientName: S.patientName || "",
       surgDate: S.surgDate || "",
       dob: S.dob || "",
-      surgName: S.surgName || "",
+      surgName: surgNameVal(),
       diagnosis: S.diagnosis || "",
       staff: S.staff || "",
       total: total(),
