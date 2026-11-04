@@ -402,7 +402,7 @@ function renderMonthView(){
   const startOffset = firstOfMonth.getDay();
   const gridStart = new Date(state.monthYear, state.monthMonth, 1 - startOffset);
   const today = toISO(new Date());
-  let monthTotalCount = 0, monthCancelledCount = 0;
+  let monthTotalCount = 0, monthCancelledCount = 0, monthCompletedCount = 0;
 
   const weekDaysHtml = WEEKDAY_LABELS.map((label,i) => `<div style="text-align:center;font-size:1rem;font-weight:800;color:${i===0?'#E0384A':(i===6?'#3B6FA8':'#6B7280')};padding:8px 0;">${label}</div>`).join('');
 
@@ -419,7 +419,7 @@ function renderMonthView(){
     const isSunday = d.getDay() === 0;
     const isHoliday = KR_HOLIDAYS.has(dateStr);
     const dateColor = isToday ? '#3B6FA8' : (isSunday || isHoliday) ? '#E0384A' : '#1F2430';
-    if (inMonth) { monthTotalCount += active.length; monthCancelledCount += cancelled.length; }
+    if (inMonth) { monthTotalCount += active.length; monthCancelledCount += cancelled.length; monthCompletedCount += recs.filter(r => r.status === '완료').length; }
     cellsHtml += `
       <div class="dayCell" data-date="${dateStr}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:140px;border-radius:10px;padding:10px;overflow:hidden;box-sizing:border-box;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
         <div style="font-size:2.1rem;font-weight:${isToday?900:700};color:${dateColor};line-height:1.2;">${d.getDate()}</div>
@@ -438,7 +438,7 @@ function renderMonthView(){
         <button id="btnTodayMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
       </div>
       <div style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:10px 18px;font-size:1rem;font-weight:700;color:#3B6FA8;">
-        이달 수술 ${monthTotalCount}건 (취소 ${monthCancelledCount}건 제외)
+        이달 수술 ${monthTotalCount}건&nbsp;&nbsp;·&nbsp;&nbsp;완료 ${monthCompletedCount}건&nbsp;&nbsp;·&nbsp;&nbsp;취소 ${monthCancelledCount}건
       </div>
     </div>
     <div style="background:#FFFFFF;border:1px solid #E3E7ED;border-radius:16px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);padding:16px;overflow:hidden;">
@@ -461,6 +461,7 @@ function renderDayView(){
   const emergency = dayRecs.filter(r => r.urgency === '응급' && r.status !== '취소').length;
   const warnCnt = dayRecs.filter(r => r.status !== '취소' && ((r.infection && r.infection !== '없음') || r.allergy === '있음' || r.anticoag === '복용 중')).length;
   const cancelCnt = dayCancelled.length;
+  const completedCnt = dayRecs.filter(r => r.status === '완료').length;
 
   const summaryBar = `<div class="day-summary-bar">
     <div class="dsb-item"><span class="dsb-n">${total}</span><span class="dsb-l">전체</span></div>
@@ -468,6 +469,7 @@ function renderDayView(){
     <div class="dsb-item"><span class="dsb-n" style="color:#E0384A">${emergency}</span><span class="dsb-l">응급</span></div>
     <div class="dsb-item"><span class="dsb-n" style="color:#E08A2B">${warnCnt}</span><span class="dsb-l">주의</span></div>
     <div class="dsb-item"><span class="dsb-n" style="color:#8A8F98">${cancelCnt}</span><span class="dsb-l">취소</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#22c55e">${completedCnt}</span><span class="dsb-l">완료</span></div>
   </div>`;
 
   // 카드 빌더
@@ -548,7 +550,7 @@ function renderDayView(){
     </div>
     <div style="display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px;">
       <h2 style="margin:0;font-size:1.8rem;font-weight:800;">${selectedDateLabel}</h2>
-      <div style="font-size:1.1rem;color:#6B7280;font-weight:700;">수술 ${dayActive.length}건 (취소 제외) · 취소 ${dayCancelled.length}건</div>
+      <div style="font-size:1.1rem;color:#6B7280;font-weight:700;">수술 ${dayActive.length}건 (취소 제외) · 완료 ${completedCnt}건 · 취소 ${dayCancelled.length}건</div>
     </div>
     ${summaryBar}
     <div class="day-card-list">${cardsHtml}</div>
