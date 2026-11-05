@@ -216,7 +216,6 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
   <button class="btn" id="btnSave" style="background:#e8f5e9;color:#1b7a35">💾 저장</button>
   <button class="btn" id="btnList">📋 저장목록</button>
   <button class="btn p" id="btnPdf">⬇ PDF 파일 다운로드</button>
-  <button class="btn" id="btnPrint">인쇄</button>
   <button class="btn ui" id="storageBadge" style="font-size:12px;padding:6px 10px;background:#f1f5f9;color:#475569;min-width:72px">💾 --</button>
   <div id="msg"></div>
 </div>
@@ -517,13 +516,12 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     if (ptEl) ptEl.textContent = '';
     msg("새 동의서로 초기화했습니다.");
   };
-  $("btnPrint").onclick = function () { window.print(); };
 
   /* ---------- PDF 파일 내려받기 ---------- */
   function safeName(s) { return String(s || "").replace(/[\\/:*?"<>|]/g, "").trim(); }
   $("btnPdf").onclick = function () {
     if (!window.html2canvas || !(window.jspdf && window.jspdf.jsPDF)) {
-      msg("PDF 만드는 도구를 불러오지 못했습니다. 인터넷 연결을 확인하거나 '인쇄' 버튼으로 'PDF로 저장'을 선택해 주세요."); return;
+      msg("PDF 만드는 도구를 불러오지 못했습니다. 인터넷 연결을 확인해 주세요."); return;
     }
     var miss = [];
     if (!$("ptName").value.trim()) miss.push("환자명");
@@ -544,7 +542,23 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       if (err) { msg("PDF 만들기 실패: " + (err.message || err)); return; }
       var d = $("dY").value + String(("0" + $("dM").value).slice(-2)) + String(("0" + $("dD").value).slice(-2));
       var fn = (safeName($("ptName").value) || "환자") + "_수술마취동의서_" + d + ".pdf";
-      pdf.save(fn); msg("PDF 파일을 내려받았습니다: " + fn);
+      if (window.showSaveFilePicker) {
+        window.showSaveFilePicker({
+          suggestedName: fn,
+          types: [{ description: 'PDF 파일', accept: { 'application/pdf': ['.pdf'] } }]
+        }).then(function(handle) {
+          return handle.createWritable().then(function(writable) {
+            var pdfBytes = pdf.output('arraybuffer');
+            return writable.write(pdfBytes).then(function() { return writable.close(); });
+          });
+        }).then(function() {
+          msg("PDF 파일을 저장했습니다: " + fn);
+        }).catch(function(e) {
+          if (e.name !== 'AbortError') { msg("PDF 저장 실패: " + (e.message || e)); }
+        });
+      } else {
+        pdf.save(fn); msg("PDF 파일을 내려받았습니다: " + fn);
+      }
     }
     function next() {
       if (i >= pages.length) { done(); return; }
