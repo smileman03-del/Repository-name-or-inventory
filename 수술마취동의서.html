@@ -213,8 +213,11 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
   <div class="ttl">📝 수술(마취)동의서</div>
   <button class="btn w" id="btnLoad">비급여 앱으로 정보 보내기</button>
   <button class="btn" id="btnReset">새 환자(초기화)</button>
+  <button class="btn" id="btnSave" style="background:#e8f5e9;color:#1b7a35">💾 저장</button>
+  <button class="btn" id="btnList">📋 저장목록</button>
   <button class="btn p" id="btnPdf">⬇ PDF 파일 다운로드</button>
   <button class="btn" id="btnPrint">인쇄</button>
+  <button class="btn ui" id="storageBadge" style="font-size:12px;padding:6px 10px;background:#f1f5f9;color:#475569;min-width:72px">💾 --</button>
   <div id="msg"></div>
 </div>
 
@@ -554,9 +557,159 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     setTimeout(next, 60);
   };
 
+  /* ---------- 저장 / 불러오기 ---------- */
+  var REC_PREFIX = 'consent_rec_';
+
+  function collectFormData() {
+    var chartEl = document.querySelector('.chartInp');
+    return {
+      savedAt: new Date().toISOString(),
+      diagnosis: $('diagnosis') ? $('diagnosis').value : '',
+      surgName: $('surgName') ? $('surgName').value : '',
+      chartNo: chartEl ? chartEl.value : '',
+      ptName: $('ptName') ? $('ptName').value : '',
+      ptDob: $('ptDob') ? $('ptDob').value : '',
+      guName: $('guName') ? $('guName').value : '',
+      guDob: $('guDob') ? $('guDob').value : '',
+      relation: $('relation') ? $('relation').value : '',
+      condEtc: $('condEtc') ? $('condEtc').value : '',
+      dY: $('dY') ? $('dY').value : '',
+      dM: $('dM') ? $('dM').value : '',
+      dD: $('dD') ? $('dD').value : '',
+      cond: JSON.parse(JSON.stringify(state.cond)),
+      sig: JSON.parse(JSON.stringify(state.sig)),
+      docs: JSON.parse(JSON.stringify(state.docs))
+    };
+  }
+
+  function fillFormData(d) {
+    if (!d) return;
+    ['diagnosis','surgName','ptName','ptInline','ptDob','guName','guDob','relation'].forEach(function(id) {
+      if ($(id) && d[id] !== undefined) $(id).value = d[id];
+    });
+    if (d.chartNo !== undefined) setChart(d.chartNo);
+    if (d.condEtc && $('condEtc')) $('condEtc').value = d.condEtc;
+    if (d.dY && $('dY')) $('dY').value = d.dY;
+    if (d.dM && $('dM')) $('dM').value = d.dM;
+    if (d.dD && $('dD')) $('dD').value = d.dD;
+    if (d.cond) state.cond = d.cond;
+    if (d.sig) state.sig = d.sig;
+    if (d.docs) { state.docs = d.docs; renderDocs(); }
+    renderCond(); renderSigs();
+  }
+
+  function saveRecord() {
+    var d = collectFormData();
+    if (!d.ptName && !d.chartNo) { msg('환자명 또는 차트번호를 먼저 입력해 주세요.'); return; }
+    var key = REC_PREFIX + (d.chartNo || d.ptName) + '_' + (d.dY||'') + (d.dM ? ('0'+d.dM).slice(-2) : '') + (d.dD ? ('0'+d.dD).slice(-2) : '');
+    var existing = null;
+    try { existing = localStorage.getItem(key); } catch(e) {}
+    if (existing && !confirm('같은 차트번호와 날짜의 저장 기록이 있습니다. 덮어쓸까요?')) return;
+    try {
+      localStorage.setItem(key, JSON.stringify(d));
+      updateStorageBadge();
+      msg('저장했습니다 (' + (d.ptName || d.chartNo) + ')');
+    } catch(e) {
+      msg('저장 실패: 저장 공간이 부족합니다. 저장목록에서 오래된 기록을 삭제해 주세요.');
+    }
+  }
+
+  function getAllRecords() {
+    var recs = [];
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k && k.indexOf(REC_PREFIX) === 0) {
+          try {
+            var d = JSON.parse(localStorage.getItem(k));
+            d._key = k;
+            recs.push(d);
+          } catch(e) {}
+        }
+      }
+    } catch(e) {}
+    recs.sort(function(a,b){ return (b.savedAt||'').localeCompare(a.savedAt||''); });
+    return recs;
+  }
+
+  function deleteRecord(key) {
+    try { localStorage.removeItem(key); } catch(e) {}
+    updateStorageBadge();
+    showSavedList();
+  }
+
+  function updateStorageBadge() {
+    var badge = $('storageBadge');
+    if (!badge) return;
+    try {
+      var total = 0;
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i);
+        if (k) { var v = localStorage.getItem(k) || ''; total += (k.length + v.length) * 2; }
+      }
+      var kb = (total / 1024).toFixed(0);
+      var cnt = getAllRecords().length;
+      badge.textContent = '💾 ' + kb + 'KB · ' + cnt + '건';
+    } catch(e) { badge.textContent = '💾 --'; }
+  }
+
+  function showSavedList() {
+    var recs = getAllRecords();
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding-top:60px;box-sizing:border-box;';
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#fff;border-radius:14px;padding:24px;width:94%;max-width:580px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18);';
+    var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><strong style="font-size:1.1rem;">📋 저장된 동의서 목록</strong><button id="slClose" style="border:none;background:none;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button></div>';
+    if (recs.length === 0) {
+      html += '<p style="color:#888;text-align:center;padding:24px 0;">저장된 동의서가 없습니다.</p>';
+    } else {
+      recs.forEach(function(r) {
+        var dt = r.savedAt ? new Date(r.savedAt).toLocaleString('ko-KR') : '';
+        var label = (r.ptName || r.chartNo || '이름없음') + (r.chartNo ? ' (' + r.chartNo + ')' : '');
+        var dateStr = (r.dY||'') + '.' + (r.dM ? ('0'+r.dM).slice(-2) : '??') + '.' + (r.dD ? ('0'+r.dD).slice(-2) : '??');
+        html += '<div style="border:1px solid #e3e7ed;border-radius:10px;padding:12px 14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;">';
+        html += '<div style="flex:1;min-width:0;"><div style="font-weight:600;font-size:0.95rem;">' + esc(label) + '</div>';
+        html += '<div style="font-size:0.8rem;color:#888;margin-top:2px;">수술일 ' + esc(dateStr) + ' · 저장 ' + esc(dt) + '</div>';
+        if (r.surgName) html += '<div style="font-size:0.82rem;color:#3b6fa8;margin-top:2px;">' + esc(r.surgName) + '</div>';
+        html += '</div>';
+        html += '<div style="display:flex;gap:6px;flex-shrink:0;">';
+        html += '<button onclick="window.__consentLoadRec(' + JSON.stringify(r._key) + ')" style="padding:6px 12px;border:none;border-radius:7px;background:#3b6fa8;color:#fff;cursor:pointer;font-size:0.85rem;">불러오기</button>';
+        html += '<button onclick="window.__consentDelRec(' + JSON.stringify(r._key) + ')" style="padding:6px 10px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;cursor:pointer;font-size:0.85rem;">삭제</button>';
+        html += '</div></div>';
+      });
+    }
+    box.innerHTML = html;
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', function(e){ if (e.target === overlay) document.body.removeChild(overlay); });
+    document.getElementById('slClose').onclick = function(){ document.body.removeChild(overlay); };
+  }
+
+  window.__consentLoadRec = function(key) {
+    try {
+      var d = JSON.parse(localStorage.getItem(key));
+      if (!d) { msg('기록을 찾을 수 없습니다.'); return; }
+      fillFormData(d);
+      var overlays = document.querySelectorAll('div[style*="z-index:9999"]');
+      overlays.forEach(function(el){ if (el.parentNode) el.parentNode.removeChild(el); });
+      msg('저장된 기록을 불러왔습니다.');
+    } catch(e) { msg('불러오기 실패: ' + e.message); }
+  };
+
+  window.__consentDelRec = function(key) {
+    if (!confirm('이 저장 기록을 삭제할까요?')) return;
+    deleteRecord(key);
+    msg('삭제했습니다.');
+  };
+
+  $('btnSave').onclick = saveRecord;
+  $('btnList').onclick = showSavedList;
+  $('storageBadge').onclick = showSavedList;
+
   /* ---------- 시작 ---------- */
   loadDocs(); renderDocs(); renderCond(); renderSigs(); setToday();
   loadLinked(false);   /* 비급여 앱에서 넘어온 정보가 있으면 자동 채움 */
+  updateStorageBadge();
 
   /* 검증용 노출 */
   window.__consent = { state: state };
