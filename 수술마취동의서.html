@@ -160,8 +160,9 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     function tryGet(arr){for(var i=0;i<arr.length;i++){var el=document.getElementById(arr[i]);if(el&&el.value&&el.value.trim())return el.value.trim();}return '';}
     var n=tryGet(['ptName','p_name']),c=tryGet(['p_no','chartNo']),sn=tryGet(['surgName','s_name']),d=tryGet(['diagnosis','s_diagnosis']);
     if(n)s.ptName=n;if(c)s.chartNo=c;if(sn)s.surgName=sn;if(d)s.diagnosis=d;
+    var dob=tryGet(['ptDob']);if(dob)s.dob=dob;
     try{var bp=JSON.parse(localStorage.getItem('bg_pending_plan')||'{}');if(bp.name&&!s.ptName)s.ptName=bp.name;if(bp.chartNo&&!s.chartNo)s.chartNo=bp.chartNo;if(bp.setName&&!s.surgName)s.surgName=bp.setName;if(bp.diagnosis&&!s.diagnosis)s.diagnosis=bp.diagnosis;}catch(e){}
-    try{var bc=JSON.parse(localStorage.getItem('bg_pending_claim')||'{}');if(bc.patientName&&!s.ptName)s.ptName=bc.patientName;if(bc.patient&&!s.chartNo)s.chartNo=bc.patient;if(bc.surgName&&!s.surgName)s.surgName=bc.surgName;if(bc.diagnosis&&!s.diagnosis)s.diagnosis=bc.diagnosis;}catch(e){}
+    try{var bc=JSON.parse(localStorage.getItem('bg_pending_claim')||'{}');if(bc.patientName&&!s.ptName)s.ptName=bc.patientName;if(bc.patient&&!s.chartNo)s.chartNo=bc.patient;if(bc.surgName&&!s.surgName)s.surgName=bc.surgName;if(bc.diagnosis&&!s.diagnosis)s.diagnosis=bc.diagnosis;if(bc.dob&&!s.dob)s.dob=bc.dob;}catch(e){}
     return s;
   }
   function goTo(idx){
@@ -177,8 +178,8 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     if(idx===2&&(s.ptName||s.chartNo)){
       try{localStorage.setItem('bg_pending_plan',JSON.stringify({name:s.ptName||'',chartNo:s.chartNo||'',setName:s.surgName||'',diagnosis:s.diagnosis||''}));}catch(e){}
     }
-    if((idx===3||idx===0)&&(s.ptName||s.chartNo)){
-      try{localStorage.setItem('bg_pending_claim',JSON.stringify({patientName:s.ptName||'',patient:s.chartNo||'',surgName:s.surgName||'',diagnosis:s.diagnosis||''}));}catch(e){}
+    if((idx===3||idx===1)&&(s.ptName||s.chartNo)){
+      try{localStorage.setItem('bg_pending_claim',JSON.stringify({patientName:s.ptName||'',patient:s.chartNo||'',surgName:s.surgName||'',diagnosis:s.diagnosis||'',dob:s.dob||''}));}catch(e){}
     }
     window.location.href=APPS[idx].u;
   }
@@ -210,7 +211,7 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 
 <div id="bar" class="ui">
   <div class="ttl">📝 수술(마취)동의서</div>
-  <button class="btn w" id="btnLoad">비급여 앱 정보 불러오기</button>
+  <button class="btn w" id="btnLoad">비급여 앱으로 정보 보내기</button>
   <button class="btn" id="btnReset">새 환자(초기화)</button>
   <button class="btn p" id="btnPdf">⬇ PDF 파일 다운로드</button>
   <button class="btn" id="btnPrint">인쇄</button>
@@ -283,13 +284,13 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       <th class="lbl">환자명</th>
       <td><div class="sgcell"><input class="f" id="ptName" placeholder="환자명"><button type="button" class="pad-btn empty" data-sig="patient"><span>✍ 서명 또는 날인</span></button></div></td>
       <th class="lbl">주민등록상<br>생년월일</th>
-      <td class="val"><input class="f" id="ptDob" placeholder="YYYY-MM-DD"></td>
+      <td class="val"><input class="f" id="ptDob" type="date"></td>
     </tr>
     <tr>
       <th class="lbl">대리인<br>(보호자의 <input class="f" id="relation" style="width:3.6em;display:inline-block;padding:0;text-align:center;border-bottom:1px solid #777" placeholder="관계">)</th>
       <td><div class="sgcell"><input class="f" id="guName" placeholder="대리인 성명"><button type="button" class="pad-btn empty" data-sig="guardian"><span>✍ 서명 또는 날인</span></button></div></td>
       <th class="lbl">주민등록상<br>생년월일</th>
-      <td class="val"><input class="f" id="guDob" placeholder="YYYY-MM-DD"></td>
+      <td class="val"><input class="f" id="guDob" type="date"></td>
     </tr>
   </table>
 
@@ -461,22 +462,36 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 
   /* ---------- 비급여 앱 연동 (localStorage: bg_pending_claim) ---------- */
   function dobText(v) { return v || ""; }
+  /* 비급여 앱에서 넘어온 경우: bg_pending_claim 에서 자동 채움 (비급여→동의서 방향) */
   function loadLinked(manual) {
     var raw = null, d = null;
     try { raw = localStorage.getItem("bg_pending_claim"); d = raw ? JSON.parse(raw) : null; } catch (e) { d = null; }
-    if (!d) { if (manual) msg("불러올 정보가 없습니다. 비급여 앱에서 환자 정보를 입력하고 '수술동의서 열기' 또는 '수술기록지에 연동'을 먼저 눌러 주세요. (같은 주소의 앱끼리만 연동됩니다)"); return false; }
+    if (!d) { if (manual) msg("불러올 정보가 없습니다. 비급여 앱에서 환자 정보를 입력하고 '수술동의서 열기'를 눌러 주세요. (같은 주소의 앱끼리만 연동됩니다)"); return false; }
     var n = 0;
     function put(id, val) { if (val) { $(id).value = val; n++; } }
     put("ptName", d.patientName); put("ptInline", d.patientName);
     put("ptDob", dobText(d.dob));
     put("diagnosis", d.diagnosis);
     put("surgName", d.surgName);
-    msg("비급여 앱 정보를 불러왔습니다" + (d.patientName ? " — " + d.patientName + (d.patient ? " (차트 " + d.patient + ")" : "") : "") + ".");
+    msg("정보를 불러왔습니다" + (d.patientName ? " — " + d.patientName + (d.patient ? " (차트 " + d.patient + ")" : "") : "") + ".");
     if (d.patient) { setChart(d.patient); n++; }
     return true;
   }
+  /* 동의서→비급여 방향: 현재 입력 정보를 저장하고 비급여 앱으로 이동 */
+  function sendToBigup() {
+    var ptName = $("ptName").value.trim();
+    var dob    = $("ptDob").value.trim();
+    var surgN  = $("surgName") ? $("surgName").value.trim() : "";
+    var diag   = $("diagnosis") ? $("diagnosis").value.trim() : "";
+    var chartNo= document.querySelector(".chartInp") ? document.querySelector(".chartInp").value.trim() : "";
+    if (!ptName && !chartNo) { msg("환자명 또는 차트번호를 먼저 입력해 주세요."); return; }
+    var data = { patientName: ptName, patient: chartNo, dob: dob, surgName: surgN, diagnosis: diag };
+    try { localStorage.setItem("bg_pending_claim", JSON.stringify(data)); } catch(e) {}
+    msg("정보를 저장했습니다. 비급여 앱으로 이동합니다...");
+    setTimeout(function(){ window.location.href = "비급여_계산.html"; }, 600);
+  }
   function setChart(v) { document.querySelectorAll(".chartInp").forEach(function (i) { if (i.value !== v) i.value = v; }); }
-  $("btnLoad").onclick = function () { loadLinked(true); };
+  $("btnLoad").onclick = function () { sendToBigup(); };
 
   /* ---------- 날짜 ---------- */
   function setToday() {
