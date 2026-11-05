@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F5F3EF">
 <title>비급여 수술 체크리스트</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orihoncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/pretendard.min.css">
 <style>
 :root{--ink:#17191A;--mut:#6E7375;--dim:#9A9FA2;--line:rgba(0,0,0,.07);--acc:#1273a8;--bg:#F5F3EF}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -527,7 +527,6 @@ function claimView() {
   b.appendChild(el('<div class="btn p" style="margin-top:9px" data-a="explain">환자 설명 화면 열기</div>'));
   b.appendChild(el('<div class="btn g" style="margin-top:9px" data-a="saveset">이 구성을 세트로 저장</div>'));
   b.appendChild(el('<div class="btn" style="margin-top:9px;background:#f0f7ff;color:#1273a8;font-weight:700;border:1.5px solid rgba(18,115,168,.25)" data-a="sendToSurgery">📋 수술기록지에 연동</div>'));
-  b.appendChild(el('<div class="btn" style="margin-top:9px;background:#fff8ec;color:#9a5b00;font-weight:700;border:1.5px solid rgba(154,91,0,.25)" data-a="openConsent">📝 수술(마취)동의서 열기</div>'));
   b.appendChild(el('<div style="font-size:11.5px;color:var(--dim);margin-top:14px;line-height:1.6">' + esc(BASIS) + ' 단가 기준입니다. 범위 단가 항목은 입력된 실제 금액으로 계산됩니다.</div>'));
   return v;
 }
@@ -803,13 +802,6 @@ var actions = {
       S.msg = "저장 실패: " + e;
     }
   },
-  openConsent: function () {
-    /* 환자명·생년월일·차트번호·수술명·진단명을 bg_pending_claim 으로 넘기고 동의서를 연다 */
-    actions.sendToSurgery();
-    if (S.msg.indexOf("저장 실패") === 0) return;
-    var w = window.open("수술마취동의서.html", "_blank");
-    S.msg = w ? "✅ 수술(마취)동의서를 열었습니다." : "✅ 연동 완료. 팝업이 막혔다면 '수술마취동의서.html'을 직접 열어 주세요.";
-  }
 };
 
 document.addEventListener("click", function (ev) {
