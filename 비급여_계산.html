@@ -863,7 +863,7 @@ function printExplain(doPrint) {
       '.sign-line{width:120px;border-bottom:1.5px solid #ccc;margin-top:28px}' +
       '@media print{body{padding:16px 18px}@page{margin:15mm 12mm;size:A4 portrait}}' +
     '</style>' +
-  '</head><body>' +
+  '</head><body><div id="__pdfcontent">' +
     '<div class="header"><div><div class="hosp">천안 본정형외과</div></div><div class="date">' + dateStr + '</div></div>' +
     '<div class="badge">비급여 안내</div>' +
     '<div class="title">' + esc(S.title || '이번 수술') + '</div>' +
@@ -892,15 +892,51 @@ function printExplain(doPrint) {
       '<div class="sign-box"><div class="sign-label">환자 서명</div><div class="sign-line"></div></div>' +
       '<div class="sign-box"><div class="sign-label">담당자</div><div class="sign-line"></div></div>' +
     '</div>' +
+    '<\/div>' +  /* #__pdfcontent 닫기 */
     (doPrint === false
-      ? '<div style="text-align:center;padding:20px 0 8px"><button onclick="window.print()" style="background:#1273a8;color:#fff;border:none;padding:13px 36px;font-size:16px;font-weight:700;border-radius:10px;cursor:pointer;font-family:inherit;letter-spacing:-.01em">💾 PDF로 저장하기<\/button><div style="font-size:11px;color:#9A9FA2;margin-top:10px">저장 위치를 선택해 PDF 파일로 저장하세요<\/div><\/div>'
-      : '') +
-    '<script>' +
-      'var _ptLabel="'+ esc((S.patientName||'')+(S.patient?'_'+S.patient:''))+'",' +
-      '_today="'+dateStr.replace(/\./g,'')+'",' +
-      'dt=document;dt.title="비급여안내"+((_ptLabel)?"_"+_ptLabel:"")+("_")+_today;' +
-      (doPrint!==false?'window.onload=function(){window.print();};':'') +
-    '<\/script>' +
+      /* PDF 저장 모드: html2pdf.js 로 직접 파일 저장 (인쇄 창 없음) */
+      ? '<div id="__pdfstatus" style="margin:16px 0 0;text-align:center;padding:14px 20px;background:#EEF6FF;border-radius:8px;font-size:13px;color:#1273a8">PDF 파일 생성 중…<\/div>' +
+        '<script>(function(){' +
+          'var _ptLabel="'+ esc((S.patientName||'')+(S.patient?'_'+S.patient:''))+'",' +
+          '_today="'+dateStr.replace(/\./g,'')+'",' +
+          'fname="비급여안내"+((_ptLabel)?"_"+_ptLabel:"")+"_"+_today+".pdf";' +
+          'document.title=fname.replace(/\\.pdf$/,"");' +
+          'function _loadPdf(){' +
+            'var s=document.createElement("script");' +
+            's.src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";' +
+            's.onload=function(){' +
+              'document.fonts.ready.then(function(){' +
+                'var el=document.getElementById("__pdfcontent");' +
+                'var st=document.getElementById("__pdfstatus");' +
+                'if(st)st.style.display="none";' +
+                'html2pdf().set({margin:[10,10,10,10],filename:fname,' +
+                  'image:{type:"jpeg",quality:0.98},' +
+                  'html2canvas:{scale:2,useCORS:true,logging:false},' +
+                  'jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}' +
+                '}).from(el).save().then(function(){' +
+                  'if(st){st.style.display="block";st.style.background="#E6F4EA";st.style.color="#1A7F37";st.textContent="✅ PDF 저장 완료! 이 창을 닫아도 됩니다.";}' +
+                '}).catch(function(){' +
+                  'if(st){st.style.display="block";st.style.background="#FFF3CD";st.style.color="#856404";' +
+                    'st.innerHTML="PDF 생성 실패. <button onclick=\\"window.print()\\" style=\\"background:#1273a8;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px\\">🖨️ 인쇄로 저장<\\/button>";}' +
+                '});' +
+              '});' +
+            '};' +
+            's.onerror=function(){' +
+              'var st=document.getElementById("__pdfstatus");' +
+              'if(st){st.style.background="#FFF3CD";st.style.color="#856404";' +
+                'st.innerHTML="라이브러리 로드 실패. <button onclick=\\"window.print()\\" style=\\"background:#1273a8;color:#fff;border:none;padding:8px 20px;border-radius:6px;cursor:pointer;font-size:13px\\">🖨️ 인쇄로 저장<\\/button>";}' +
+            '};' +
+            'document.head.appendChild(s);' +
+          '}' +
+          'if(document.readyState==="complete"){_loadPdf();}else{window.addEventListener("load",_loadPdf);}' +
+        '})()</s' + 'cript>'
+      /* 인쇄 모드: 자동 인쇄 */
+      : '<script>' +
+          'var _ptLabel="'+ esc((S.patientName||'')+(S.patient?'_'+S.patient:''))+'",' +
+          '_today="'+dateStr.replace(/\./g,'')+'",' +
+          'dt=document;dt.title="비급여안내"+((_ptLabel)?"_"+_ptLabel:"")+("_")+_today;' +
+          'window.onload=function(){window.print();};' +
+        '<\/script>') +
   '<\/body><\/html>';
   var w = window.open('', '_blank', 'width=620,height=900');
   if (!w) { alert("팝업이 차단되었습니다. 팝업 차단을 해제한 후 다시 시도해 주세요."); return; }
