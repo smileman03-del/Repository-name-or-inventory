@@ -120,6 +120,20 @@ body.cap .pad-btn{border:0!important;background:transparent!important}
 body.cap .pad-btn.empty span{visibility:hidden}
 body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 @media screen and (max-width:230mm){#wrap{padding-left:0}.page{margin-left:8px;margin-right:auto}}
+
+/* ---------- 환자 정보 입력 패널 ---------- */
+#ptPanel{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;z-index:300;padding:76px 12px 12px;box-sizing:border-box}
+#ptPanel.show{display:flex}
+#ptPanel .box{background:#fff;border-radius:16px;padding:22px 24px 18px;width:min(500px,100%);box-shadow:0 8px 32px rgba(0,0,0,.22);max-height:calc(100vh - 90px);overflow-y:auto}
+#ptPanel h3{margin:0 0 16px;font-size:16px;font-family:'맑은 고딕',sans-serif;color:#1a3a5c;display:flex;justify-content:space-between;align-items:center}
+#ptPanel .frow{display:flex;gap:8px;margin-bottom:11px;align-items:center}
+#ptPanel .frow label{font-size:13px;font-family:'맑은 고딕',sans-serif;white-space:nowrap;width:68px;flex-shrink:0;color:#444;font-weight:600}
+#ptPanel .frow input{flex:1;border:1.5px solid #cdd5df;border-radius:8px;padding:9px 11px;font-size:14px;font-family:'맑은 고딕',sans-serif;outline:none;background:#fafbfc}
+#ptPanel .frow input:focus{border-color:#1273a8;background:#fff;box-shadow:0 0 0 2px rgba(18,115,168,.13)}
+#ptPanel .pbtns{display:flex;gap:8px;margin-top:14px}
+#ptPanel .pbtns .btn{flex:1;font-size:13px;padding:11px 8px}
+#ptStatus{margin-top:10px;font-size:12px;font-family:'맑은 고딕',sans-serif;min-height:18px;text-align:center;padding:4px 0;border-radius:6px}
+.pp-info{font-size:11.5px;color:#666;font-family:'맑은 고딕',sans-serif;margin-bottom:14px;padding:8px 10px;background:#f0f7ff;border-radius:8px;border-left:3px solid #1273a8;line-height:1.5}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -211,6 +225,7 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 
 <div id="bar" class="ui">
   <div class="ttl">📝 수술(마취)동의서</div>
+  <button class="btn" id="btnPtPanel" style="background:#e3f1fb;color:#1a3a5c;font-size:13.5px">👤 환자 정보 입력</button>
   <button class="btn w" id="btnLoad">비급여 앱으로 정보 보내기</button>
   <button class="btn" id="btnReset">새 환자(초기화)</button>
   <button class="btn" id="btnSave" style="background:#e8f5e9;color:#1b7a35">💾 저장</button>
@@ -300,6 +315,28 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
   <div class="chartno">차트번호 : <input class="chartInp" placeholder="차트번호"></div>
 </section>
 
+</div>
+
+<!-- 환자 정보 입력 패널 (구글시트 연동) -->
+<div id="ptPanel" class="ui">
+  <div class="box">
+    <h3>👤 환자 정보 입력
+      <button id="ppClose" style="border:none;background:#f0f0f0;border-radius:50%;width:26px;height:26px;font-size:14px;cursor:pointer;color:#666;line-height:24px;padding:0">✕</button>
+    </h3>
+    <div class="pp-info">
+      💡 <b>PC</b>에서 입력 후 "구글시트 저장" → <b>태블릿</b>에서 같은 페이지를 열면 자동으로 환자 정보가 채워집니다.
+    </div>
+    <div class="frow"><label>환자명</label><input id="pp_ptName" placeholder="홍길동" autocomplete="off"></div>
+    <div class="frow"><label>차트번호</label><input id="pp_chartNo" placeholder="차트번호" autocomplete="off"></div>
+    <div class="frow"><label>생년월일</label><input id="pp_dob" type="date"></div>
+    <div class="frow"><label>수술명</label><input id="pp_surgName" placeholder="수술명" autocomplete="off"></div>
+    <div class="frow"><label>진단명</label><input id="pp_diagnosis" placeholder="진단명" autocomplete="off"></div>
+    <div id="ptStatus"></div>
+    <div class="pbtns">
+      <button class="btn p" id="ppSave">💾 구글시트 저장 → 동의서 자동입력</button>
+      <button class="btn" id="ppLoad" style="background:#e8f5e9;color:#1b7a35">📥 불러오기</button>
+    </div>
+  </div>
 </div>
 
 <!-- 서명 모달 -->
@@ -724,6 +761,113 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
   loadDocs(); renderDocs(); renderCond(); renderSigs(); setToday();
   loadLinked(false);   /* 비급여 앱에서 넘어온 정보가 있으면 자동 채움 */
   updateStorageBadge();
+
+  /* ========================================================
+     구글시트 연동 — 환자 정보 입력 패널
+  ======================================================== */
+
+  /* ★ GAS 배포 후 아래 URL을 실제 주소로 바꿔 주세요 ★ */
+  var CONSENT_GAS_URL = "";
+
+  function ptStatus(t, isErr) {
+    var el = $('ptStatus');
+    if (!el) return;
+    el.textContent = t;
+    el.style.color = isErr ? '#c0392b' : '#1b7a35';
+    el.style.background = isErr ? '#fff0f0' : (t ? '#f0fff4' : '');
+    el.style.padding = t ? '5px 8px' : '0';
+  }
+
+  function ppFillFormFromData(d) {
+    if (!d) return;
+    if (d.ptName)    { $('ptName') && ($('ptName').value = d.ptName);   $('ptInline') && ($('ptInline').value = d.ptName); }
+    if (d.chartNo)   setChart(d.chartNo);
+    if (d.dob)       { $('ptDob') && ($('ptDob').value = d.dob); }
+    if (d.surgName)  { $('surgName') && ($('surgName').value = d.surgName); }
+    if (d.diagnosis) { $('diagnosis') && ($('diagnosis').value = d.diagnosis); }
+  }
+
+  function ppCallGas(action, extra) {
+    if (!CONSENT_GAS_URL) {
+      ptStatus('⚠️ GAS URL이 아직 설정되지 않았습니다. GitHub에 URL을 추가해 주세요.', true);
+      return Promise.reject('no-url');
+    }
+    var body = JSON.stringify(Object.assign({ action: action }, extra || {}));
+    return fetch(CONSENT_GAS_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
+      body: body
+    }).then(function (r) { return r.json(); });
+  }
+
+  function ppSaveToSheets() {
+    var d = {
+      ptName:    ($('pp_ptName')    && $('pp_ptName').value.trim())    || '',
+      chartNo:   ($('pp_chartNo')   && $('pp_chartNo').value.trim())   || '',
+      dob:       ($('pp_dob')       && $('pp_dob').value)              || '',
+      surgName:  ($('pp_surgName')  && $('pp_surgName').value.trim())  || '',
+      diagnosis: ($('pp_diagnosis') && $('pp_diagnosis').value.trim()) || ''
+    };
+    if (!d.ptName && !d.chartNo) { ptStatus('⚠️ 환자명 또는 차트번호를 입력해 주세요.', true); return; }
+    ptStatus('저장 중...');
+    ppCallGas('save', d).then(function (r) {
+      if (r && r.ok) {
+        ppFillFormFromData(d);
+        ptStatus('✅ 저장 완료! 동의서에 자동으로 입력됐습니다.');
+        msg('환자 정보 저장 완료: ' + (d.ptName || d.chartNo));
+        setTimeout(function () { $('ptPanel').className = ''; ptStatus(''); }, 2000);
+      } else {
+        ptStatus('⚠️ 저장 실패: ' + ((r && r.msg) || '오류'), true);
+      }
+    }).catch(function () { ptStatus('⚠️ 연결 오류. 인터넷 확인 후 다시 시도해 주세요.', true); });
+  }
+
+  function ppLoadFromSheets() {
+    ptStatus('불러오는 중...');
+    ppCallGas('load').then(function (r) {
+      if (r && r.ok && r.ptName) {
+        $('pp_ptName')    && ($('pp_ptName').value    = r.ptName    || '');
+        $('pp_chartNo')   && ($('pp_chartNo').value   = r.chartNo   || '');
+        $('pp_dob')       && ($('pp_dob').value       = r.dob       || '');
+        $('pp_surgName')  && ($('pp_surgName').value  = r.surgName  || '');
+        $('pp_diagnosis') && ($('pp_diagnosis').value = r.diagnosis || '');
+        ppFillFormFromData(r);
+        var when = r.savedAt ? ' (' + new Date(r.savedAt).toLocaleString('ko-KR') + ' 저장)' : '';
+        ptStatus('✅ 불러오기 완료: ' + (r.ptName || r.chartNo) + when);
+        msg('구글시트에서 환자 정보를 불러왔습니다: ' + (r.ptName || ''));
+      } else if (r && r.empty) {
+        ptStatus('대기 중인 환자 정보가 없습니다.');
+      } else {
+        ptStatus('⚠️ 불러오기 실패: ' + ((r && r.msg) || '오류'), true);
+      }
+    }).catch(function () { ptStatus('⚠️ 연결 오류. 인터넷 확인 후 다시 시도해 주세요.', true); });
+  }
+
+  /* 패널 열기 */
+  $('btnPtPanel').onclick = function () {
+    $('pp_ptName')    && ($('pp_ptName').value    = ($('ptName')    && $('ptName').value)    || '');
+    $('pp_chartNo')   && ($('pp_chartNo').value   = (document.querySelector('.chartInp') && document.querySelector('.chartInp').value) || '');
+    $('pp_dob')       && ($('pp_dob').value       = ($('ptDob')     && $('ptDob').value)     || '');
+    $('pp_surgName')  && ($('pp_surgName').value  = ($('surgName')  && $('surgName').value)  || '');
+    $('pp_diagnosis') && ($('pp_diagnosis').value = ($('diagnosis') && $('diagnosis').value) || '');
+    ptStatus('');
+    $('ptPanel').className = 'show';
+    if (!CONSENT_GAS_URL) ptStatus('⚠️ GAS URL 미설정 — 현재 기기 내에서만 입력이 가능합니다.', true);
+  };
+  $('ppSave').onclick  = ppSaveToSheets;
+  $('ppLoad').onclick  = ppLoadFromSheets;
+  $('ppClose').onclick = function () { $('ptPanel').className = ''; };
+  $('ptPanel').addEventListener('click', function (e) { if (e.target === $('ptPanel')) $('ptPanel').className = ''; });
+
+  /* 페이지 열릴 때 구글시트에서 자동 불러오기 (태블릿용) */
+  if (CONSENT_GAS_URL) {
+    ppCallGas('load').then(function (r) {
+      if (r && r.ok && r.ptName) {
+        ppFillFormFromData(r);
+        msg('구글시트에서 환자 정보를 불러왔습니다: ' + (r.ptName || ''));
+      }
+    }).catch(function () {});
+  }
 
   /* 검증용 노출 */
   window.__consent = { state: state };
