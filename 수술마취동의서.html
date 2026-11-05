@@ -506,6 +506,12 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     setChart("");
     state.cond = {}; state.sig = { patient: "", guardian: "" };
     renderCond(); renderSigs(); setToday(); $("condEtc").value = "";
+    // localStorage 완전 초기화 (상단 내비바 환자명 포함)
+    try { localStorage.removeItem('cheonan_nav_state'); } catch(e) {}
+    try { localStorage.removeItem('bg_pending_claim'); } catch(e) {}
+    try { localStorage.removeItem('bg_pending_plan'); } catch(e) {}
+    var ptEl = document.getElementById('cnavPt');
+    if (ptEl) ptEl.textContent = '';
     msg("새 동의서로 초기화했습니다.");
   };
   $("btnPrint").onclick = function () { window.print(); };
