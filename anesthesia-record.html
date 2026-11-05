@@ -1268,6 +1268,8 @@ function applyParams(){
   var r={},any=false;
   keys.forEach(function(k){if(q.has(k)){r[k]=q.get(k);any=true}});
   if(!any)return false;
+  // 차트번호가 URL에 없으면 localStorage에서 보완
+  if(!r.p_no){try{var bc=JSON.parse(localStorage.getItem('bg_pending_claim')||'{}');r.p_no=bc.patient||bc.chartNo||'';}catch(e){}if(!r.p_no){try{var bp=JSON.parse(localStorage.getItem('bg_pending_plan')||'{}');r.p_no=bp.chartNo||'';}catch(e){}}}
   var old=store.get('anes:draft');if(old)store.set('anes:draft_prev',old);
   newRecord();fillFromSurgery(r);
   try{history.replaceState(null,'',location.pathname)}catch(e){}
