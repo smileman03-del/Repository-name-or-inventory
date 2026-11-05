@@ -671,7 +671,7 @@ function renderModals(){
       {key:'date', label:'수술일자', kind:'date'},
       {key:'time', label:'수술시간', kind:'time'},
       {key:'doctor', label:'집도의', kind:'text', list:'doctorList'},
-      {key:'chartNo', label:'차트번호', kind:'text'},
+      {key:'chartNo', label:'차트번호', kind:'text', numbersOnly:true},
       {key:'name', label:'환자 이름', kind:'text'},
       {key:'gender', label:'성별', kind:'select', options:GENDER},
       {key:'age', label:'생년월일', kind:'date'},
@@ -717,7 +717,8 @@ function renderModals(){
       } else if (f.kind === 'time') {
         input = `<input type="time" class="formField" data-key="${f.key}" value="${val}" style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
       } else {
-        input = `<input type="text" class="formField" data-key="${f.key}" value="${val}" ${f.list?`list="${f.list}"`:''} style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
+        const extraAttrs = f.numbersOnly ? ' inputmode="numeric" pattern="[0-9]*"' : '';
+        input = `<input type="text" class="formField" data-key="${f.key}" value="${val}" ${f.list?`list="${f.list}"`:''} ${extraAttrs} style="width:100%;padding:9px 10px;font-size:0.95rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>`;
       }
       return `<div style="display:flex;flex-direction:column;gap:6px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -809,6 +810,14 @@ function renderModals(){
 function attachModalHandlers(){
   const q = id => document.getElementById(id);
   document.querySelectorAll('.formField').forEach(el => {
+    el.oninput = (e) => {
+      let val = e.target.value;
+      if (el.getAttribute('data-key') === 'chartNo') {
+        val = val.replace(/[^0-9]/g, '');
+        e.target.value = val;
+      }
+      state.formData[el.getAttribute('data-key')] = val;
+    };
     el.onchange = (e) => { state.formData[el.getAttribute('data-key')] = e.target.value; };
   });
   if (q('btnOpenSurgeryList')) q('btnOpenSurgeryList').onclick = () => { state.surgeryListOpen = true; state.newSurgeryName=''; renderModals(); };
@@ -885,7 +894,7 @@ document.getElementById('app').innerHTML = `
           }
           state.formOpen = true; state.editingId = null;
           state.formData = defaultFormData(state.selectedDate, state.doctors);
-          if (pd.chartNo)  state.formData.chartNo = pd.chartNo;
+          if (pd.chartNo)  state.formData.chartNo = String(pd.chartNo).replace(/[^0-9]/g, '');
           if (pd.name)     state.formData.name    = pd.name;
           if (pd.date)     state.formData.date     = pd.date;
           if (pd.age)      state.formData.age      = pd.age;
