@@ -3568,5 +3568,30 @@ var cloudLoadAll = function(){ return gsLoadAll(false); };
     var url = 'anesthesia-record.html?' + params.toString();
     window.open(url, '_blank');
   }
+
+  // ── URL 파라미터 → 폼 자동입력 (수술계획표·동의서 연동) ──────────────────
+  (function initFromURLParams() {
+      var p = new URLSearchParams(window.location.search);
+      if (!p.toString()) return; // 파라미터 없으면 종료
+
+    // 단순 텍스트/날짜 필드
+      ['p_no','p_name','p_dob','p_doctor','s_date','s_start','s_name','s_diagnosis','s_surgeon'].forEach(function(key) {
+            var v = p.get(key);
+            var el = document.getElementById(key);
+            if (el && v) el.value = v;
+      });
+
+      // 성별 라디오 버튼
+      var sex = p.get('p_sex');
+      if (sex) document.querySelectorAll('input[name="p_sex"]').forEach(function(r){ r.checked = (r.value === sex); });
+
+      // select 필드
+      ['s_category','s_side','s_anes','s_type','n_position'].forEach(function(key) {
+            var v = p.get(key);
+      var el = document.getElementById(key);
+            if (el && v) el.value = v;
+      });
+  })();
+  // ─────────────────────────────────────────────────────────────────────────────
 </script>
 </body></html>
