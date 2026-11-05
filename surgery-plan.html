@@ -897,7 +897,16 @@ document.getElementById('app').innerHTML = `
           if (pd.chartNo)  state.formData.chartNo = String(pd.chartNo).replace(/[^0-9]/g, '');
           if (pd.name)     state.formData.name    = pd.name;
           if (pd.date)     state.formData.date     = pd.date;
-          if (pd.age)      state.formData.age      = pd.age;
+          // 생년월일: bg_pending_plan에는 age 필드 없음 → bg_pending_claim.dob 에서 보완
+          if (pd.age) {
+            state.formData.age = pd.age;
+          } else {
+            try { var bc2=JSON.parse(window.localStorage.getItem('bg_pending_claim')||'{}'); if(bc2.dob) state.formData.age=bc2.dob; } catch(e2){}
+          }
+          // 수술명 연동
+          if (pd.setName)  state.formData.surgeryName = pd.setName;
+          // 진단명 연동
+          if (pd.diagnosis) state.formData.diagnosis = pd.diagnosis;
           if (pd.setName)  state.formData.memo     = (state.formData.memo ? state.formData.memo + '\n' : '') + '[비급여] ' + pd.setName;
           window.localStorage.removeItem('bg_pending_plan');
           if (banner.parentNode) banner.parentNode.removeChild(banner);
