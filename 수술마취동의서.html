@@ -793,11 +793,28 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       return Promise.reject('no-url');
     }
     var body = JSON.stringify(Object.assign({ action: action }, extra || {}));
+    var controller = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, 12000) : null;
     return fetch(CONSENT_GAS_URL, {
       method: 'POST', redirect: 'follow',
       headers: { 'Content-Type': 'text/plain' },
-      body: body
-    }).then(function (r) { return r.json(); });
+      body: body,
+      signal: controller ? controller.signal : undefined
+    }).then(function (r) {
+      if (timer) clearTimeout(timer);
+      return r.text();
+    }).then(function (text) {
+      try {
+        return JSON.parse(text);
+      } catch (e) {
+        /* JSON 파싱 실패 — GAS 측 오류 응답으로 간주 */
+        return { ok: false, msg: (text || '').substring(0, 120) || '서버 응답 오류' };
+      }
+    }).catch(function (e) {
+      if (timer) clearTimeout(timer);
+      if (e && e.name === 'AbortError') throw new Error('요청 시간 초과 (12초)');
+      throw e;
+    });
   }
 
   function ppSaveToSheets() {
@@ -866,7 +883,11 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
         ppFillFormFromData(r);
         msg('구글시트에서 환자 정보를 불러왔습니다: ' + (r.ptName || ''));
       }
-    }).catch(function () {});
+      /* r.ok === false 또는 r.empty 는 조용히 무시 */
+    }).catch(function (e) {
+      /* 페이지 로딩 시 자동 불러오기 오류 — UI에 표시하지 않음 */
+      /* 사용자는 패널의 "📥 불러오기" 버튼으로 직접 불러올 수 있습니다 */
+    });
   }
 
   /* 검증용 노출 */
