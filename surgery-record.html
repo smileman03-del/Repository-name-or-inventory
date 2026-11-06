@@ -1991,22 +1991,22 @@ const DEFAULT_SPECIAL_OPTS = {
             }
             if(hasRollWire){
               rows += `<tr><td style="${labelStyle}">Roll Wire</td><td colspan="3" style="${valueStyle}">`;
-              rows += sp.roll_wires.map(w=>`${esc(w.size||'')}${w.len?' / '+esc(w.len):''}`).join(' &nbsp;|&nbsp; ');
+              rows += sp.roll_wires.map(w=>`${esc(w.size||'')}${w.extra?' / '+esc(w.extra):''}`).join(' &nbsp;|&nbsp; ');
               rows += '</td></tr>';
             }
             if(hasKwire){
               rows += `<tr><td style="${labelStyle}">K-Wire</td><td colspan="3" style="${valueStyle}">`;
-              rows += sp.kwires.map(w=>`${esc(w.size||'')}${w.qty?' / '+esc(w.qty)+'개':''}`).join(' &nbsp;|&nbsp; ');
+              rows += sp.kwires.map(w=>`${esc(w.size||'')}${w.extra?' / '+esc(w.extra)+'개':''}`).join(' &nbsp;|&nbsp; ');
               rows += '</td></tr>';
             }
             if(hasMultifix){
               rows += `<tr><td style="${labelStyle}">Multifix</td><td colspan="3" style="${valueStyle}">`;
-              rows += sp.multifix.map(w=>`${esc(w.size||'')}${w.qty?' / '+esc(w.qty)+'개':''}`).join(' &nbsp;|&nbsp; ');
+              rows += sp.multifix.map(w=>`${esc(w.size||'')}${w.extra?' / '+esc(w.extra)+'개':''}`).join(' &nbsp;|&nbsp; ');
               rows += '</td></tr>';
             }
             if(hasSteinman){
               rows += `<tr><td style="${labelStyle}">Steinman Pin</td><td colspan="3" style="${valueStyle}">`;
-              rows += sp.steinman.map(w=>`${esc(w.size||'')}${w.qty?' / '+esc(w.qty)+'개':''}`).join(' &nbsp;|&nbsp; ');
+              rows += sp.steinman.map(w=>`${esc(w.size||'')}${w.extra?' / '+esc(w.extra)+'개':''}`).join(' &nbsp;|&nbsp; ');
               rows += '</td></tr>';
             }
             if(sp.memo){
