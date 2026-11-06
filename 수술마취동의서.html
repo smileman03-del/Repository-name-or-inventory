@@ -965,7 +965,7 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     if (!d) return;
     if (d.ptName)    { $('ptName') && ($('ptName').value = d.ptName);   $('ptInline') && ($('ptInline').value = d.ptName); }
     if (d.chartNo)   setChart(d.chartNo);
-    if (d.dob)       { $('ptDob') && ($('ptDob').value = d.dob); }
+    if (d.dob)       { var dob=d.dob; if(/^\d{6}$/.test(dob)){var yy=parseInt(dob.substr(0,2));var mm=dob.substr(2,2);var dd=dob.substr(4,2);dob=(yy<=30?'20':'19')+(yy<10?'0'+yy:String(yy))+'-'+mm+'-'+dd;} $('ptDob') && ($('ptDob').value = dob); }
     if (d.surgName)  { $('surgName') && ($('surgName').value = d.surgName); }
     if (d.diagnosis) { $('diagnosis') && ($('diagnosis').value = d.diagnosis); }
   }
@@ -1060,7 +1060,9 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
   $('ptPanel').addEventListener('click', function (e) { if (e.target === $('ptPanel')) $('ptPanel').className = ''; });
 
   /* 페이지 열릴 때 구글시트에서 자동 불러오기 (태블릿용) */
-  if (CONSENT_GAS_URL) {
+  /* bg_pending_claim(앱 연동)이 있으면 GAS 자동 불러오기를 건너뜀 — 연동 데이터 우선 */
+  var _hasPendingClaim = (function(){try{var bc=JSON.parse(localStorage.getItem('bg_pending_claim')||'{}');return !!(bc&&bc.patientName);}catch(e){return false;}})();
+  if (CONSENT_GAS_URL && !_hasPendingClaim) {
     ppCallGas('load').then(function (r) {
       if (r && r.ok && r.ptName) {
         ppFillFormFromData(r);
