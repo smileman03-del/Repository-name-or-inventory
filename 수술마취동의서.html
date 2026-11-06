@@ -301,13 +301,13 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       <th class="lbl">환자명</th>
       <td><div class="sgcell"><input class="f" id="ptName" placeholder="환자명"><button type="button" class="pad-btn empty" data-sig="patient"><span>✍ 서명 또는 날인</span></button></div></td>
       <th class="lbl">주민등록상<br>생년월일</th>
-      <td class="val"><input class="f" id="ptDob" type="date"></td>
+      <td class="val"><input class="f" id="ptDob" type="text" placeholder="예)901231" inputmode="numeric" maxlength="20"></td>
     </tr>
     <tr>
       <th class="lbl">대리인<br>(보호자의 <input class="f" id="relation" style="width:3.6em;display:inline-block;padding:0;text-align:center;border-bottom:1px solid #777" placeholder="관계">)</th>
       <td><div class="sgcell"><input class="f" id="guName" placeholder="대리인 성명"><button type="button" class="pad-btn empty" data-sig="guardian"><span>✍ 서명 또는 날인</span></button></div></td>
       <th class="lbl">주민등록상<br>생년월일</th>
-      <td class="val"><input class="f" id="guDob" type="date"></td>
+      <td class="val"><input class="f" id="guDob" type="text" placeholder="예)901231" inputmode="numeric" maxlength="20"></td>
     </tr>
   </table>
 
@@ -328,7 +328,7 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     </div>
     <div class="frow"><label>환자명</label><input id="pp_ptName" placeholder="홍길동" autocomplete="off"></div>
     <div class="frow"><label>차트번호</label><input id="pp_chartNo" placeholder="차트번호" autocomplete="off"></div>
-    <div class="frow"><label>생년월일</label><input id="pp_dob" type="date"></div>
+    <div class="frow"><label>생년월일</label><input id="pp_dob" type="text" placeholder="예) 901231" inputmode="numeric" maxlength="20"></div>
     <div class="frow"><label>수술명</label><input id="pp_surgName" placeholder="수술명" autocomplete="off"></div>
     <div class="frow"><label>진단명</label><input id="pp_diagnosis" placeholder="진단명" autocomplete="off"></div>
     <div id="ptStatus"></div>
@@ -705,12 +705,25 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
   }
 
   function showSavedList() {
+    /* 기존 목록 오버레이가 열려 있으면 먼저 제거 */
+    var prev = document.getElementById('savedListOverlay');
+    if (prev && prev.parentNode) prev.parentNode.removeChild(prev);
+
     var recs = getAllRecords();
     var overlay = document.createElement('div');
+    overlay.id = 'savedListOverlay';
     overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding-top:60px;box-sizing:border-box;';
     var box = document.createElement('div');
     box.style.cssText = 'background:#fff;border-radius:14px;padding:24px;width:94%;max-width:580px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.18);';
-    var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><strong style="font-size:1.1rem;">📋 저장된 동의서 목록</strong><button id="slClose" style="border:none;background:none;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button></div>';
+
+    var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><strong style="font-size:1.1rem;">📋 저장된 동의서 목록</strong><button id="slClose" style="border:none;background:none;font-size:1.4rem;cursor:pointer;line-height:1;">✕</button></div>';
+    /* 내보내기 / 가져오기 (다른 기기 연동용) */
+    html += '<div style="display:flex;gap:8px;margin-bottom:8px;">';
+    html += '<button id="slExport" style="flex:1;padding:7px 4px;border:1px solid #d1d5db;border-radius:7px;background:#f9fafb;color:#374151;cursor:pointer;font-size:0.82rem;">📤 내보내기</button>';
+    html += '<label style="flex:1;padding:7px 4px;border:1px solid #d1d5db;border-radius:7px;background:#f9fafb;color:#374151;cursor:pointer;font-size:0.82rem;text-align:center;">📥 가져오기<input type="file" id="slImportFile" accept=".json" style="display:none"></label>';
+    html += '</div>';
+    html += '<p style="font-size:0.75rem;color:#6b7280;margin:0 0 12px;padding:6px 8px;background:#f3f4f6;border-radius:6px;">💡 저장목록은 이 기기에만 저장됩니다. 태블릿 등 다른 기기에서 사용하려면 PC에서 <b>내보내기</b>로 파일을 받은 뒤 태블릿에서 <b>가져오기</b>로 불러오세요.</p>';
+
     if (recs.length === 0) {
       html += '<p style="color:#888;text-align:center;padding:24px 0;">저장된 동의서가 없습니다.</p>';
     } else {
@@ -724,16 +737,56 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
         if (r.surgName) html += '<div style="font-size:0.82rem;color:#3b6fa8;margin-top:2px;">' + esc(r.surgName) + '</div>';
         html += '</div>';
         html += '<div style="display:flex;gap:6px;flex-shrink:0;">';
-        html += '<button onclick="window.__consentLoadRec(' + JSON.stringify(r._key) + ')" style="padding:6px 12px;border:none;border-radius:7px;background:#3b6fa8;color:#fff;cursor:pointer;font-size:0.85rem;">불러오기</button>';
-        html += '<button onclick="window.__consentDelRec(' + JSON.stringify(r._key) + ')" style="padding:6px 10px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;cursor:pointer;font-size:0.85rem;">삭제</button>';
+        /* data-key 방식으로 변경 — onclick 내 따옴표 충돌 버그 수정 */
+        html += '<button class="sl-load-btn" data-key="' + esc(r._key) + '" style="padding:6px 12px;border:none;border-radius:7px;background:#3b6fa8;color:#fff;cursor:pointer;font-size:0.85rem;">불러오기</button>';
+        html += '<button class="sl-del-btn" data-key="' + esc(r._key) + '" style="padding:6px 10px;border:none;border-radius:7px;background:#fee2e2;color:#b91c1c;cursor:pointer;font-size:0.85rem;">삭제</button>';
         html += '</div></div>';
       });
     }
     box.innerHTML = html;
     overlay.appendChild(box);
     document.body.appendChild(overlay);
-    overlay.addEventListener('click', function(e){ if (e.target === overlay) document.body.removeChild(overlay); });
-    document.getElementById('slClose').onclick = function(){ document.body.removeChild(overlay); };
+
+    /* 이벤트 위임으로 불러오기·삭제 처리 */
+    box.addEventListener('click', function(e) {
+      var t = e.target;
+      if (t.classList.contains('sl-load-btn')) { window.__consentLoadRec(t.getAttribute('data-key')); }
+      else if (t.classList.contains('sl-del-btn')) { window.__consentDelRec(t.getAttribute('data-key')); }
+    });
+    overlay.addEventListener('click', function(e) { if (e.target === overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); });
+    document.getElementById('slClose').onclick = function() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); };
+
+    /* 내보내기 */
+    document.getElementById('slExport').onclick = function() {
+      var data = getAllRecords().map(function(r){ var c=JSON.parse(JSON.stringify(r)); delete c._key; return c; });
+      if (!data.length) { msg('내보낼 기록이 없습니다.'); return; }
+      var blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a'); a.href = url;
+      a.download = '동의서목록_' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    };
+
+    /* 가져오기 */
+    document.getElementById('slImportFile').onchange = function(e) {
+      var file = e.target.files[0]; if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          var arr = JSON.parse(ev.target.result);
+          if (!Array.isArray(arr)) throw new Error('형식 오류');
+          var cnt = 0;
+          arr.forEach(function(d) {
+            if (!d.ptName && !d.chartNo) return;
+            var k = REC_PREFIX + (d.chartNo||d.ptName||'x') + '_' + (d.dY||'') + (d.dM?('0'+d.dM).slice(-2):'') + (d.dD?('0'+d.dD).slice(-2):'');
+            try { localStorage.setItem(k, JSON.stringify(d)); cnt++; } catch(err){}
+          });
+          updateStorageBadge(); msg(cnt + '건을 가져왔습니다.'); showSavedList();
+        } catch(err) { msg('가져오기 실패: 올바른 파일이 아닙니다.'); }
+      };
+      reader.readAsText(file);
+    };
   }
 
   window.__consentLoadRec = function(key) {
