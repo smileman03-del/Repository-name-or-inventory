@@ -1950,6 +1950,73 @@ const DEFAULT_SPECIAL_OPTS = {
             ${fieldRow('조직검사 검체명', n.biopsy_name)}
             ${fieldRow('특이사항', n.note)}
           </table>
+          ${(()=>{
+            const sp = data.special || {};
+            const hasScrews = sp.screws && sp.screws.length;
+            const hasCannulated = sp.cannulated_screws && sp.cannulated_screws.length;
+            const hasRollWire = sp.roll_wires && sp.roll_wires.length;
+            const hasKwire = sp.kwires && sp.kwires.length;
+            const hasMultifix = sp.multifix && sp.multifix.length;
+            const hasSteinman = sp.steinman && sp.steinman.length;
+            const hasSaw = sp.saw_sagittal || sp.saw_oscillating || sp.saw_reciprocating;
+            const hasPlate = sp.plate_site || sp.plate_type || sp.plate_hole || sp.plate_detail;
+            const hasAnything = hasPlate || hasScrews || hasCannulated || sp.block ||
+              sp.washer_qty || hasSaw || sp.cannula || sp.btn_cannula ||
+              hasRollWire || hasKwire || hasMultifix || hasSteinman || sp.memo;
+            if(!hasAnything) return '';
+            let rows = '';
+            if(hasPlate){
+              rows += fieldRow('삽입 부위', sp.plate_site||'', 'Plate 종류', sp.plate_type||'');
+              rows += fieldRow('홀 수', sp.plate_hole ? sp.plate_hole+' 홀' : '', '상세', sp.plate_detail||'');
+            }
+            if(hasScrews){
+              rows += `<tr><td style="${labelStyle}">각종 Screw</td><td colspan="3" style="${valueStyle}">`;
+              rows += sp.screws.map(s=>`${esc(s.size||'')} / ${esc(s.len||'')} / ${esc(s.qty||'')}개`).join(' &nbsp;|&nbsp; ');
+              rows += '</td></tr>';
+            }
+            if(sp.block){
+              rows += fieldRow('HTO 블록 사이즈', sp.block, '', '');
+            }
+            if(hasCannulated){
+              rows += `<tr><td style="${labelStyle}">Cannulated Screw</td><td colspan="3" style="${valueStyle}">`;
+              rows += sp.cannulated_screws.map(s=>`${esc(s.size||'')} / ${esc(s.len||'')} / ${esc(s.qty||'')}개`).join(' &nbsp;|&nbsp; ');
+              rows += '</td></tr>';
+            }
+            const sawList = [sp.saw_sagittal&&'Sagittal', sp.saw_oscillating&&'Oscillating', sp.saw_reciprocating&&'Reciprocating'].filter(Boolean).join(', ');
+            if(sp.washer_qty || hasSaw){
+              rows += fieldRow('Washer 수량', sp.washer_qty ? sp.washer_qty+'개' : '', 'Saw 종류', sawList);
+            }
+            if(sp.cannula || sp.btn_cannula){
+              rows += fieldRow('Cannula 6.5×7', sp.cannula ? '사용'+(sp.cannula_qty?' '+sp.cannula_qty+'개':'') : '', 'Button Cannula 8×3', sp.btn_cannula ? '사용'+(sp.btn_cannula_qty?' '+sp.btn_cannula_qty+'개':'') : '');
+            }
+            if(hasRollWire){
+              rows += `<tr><td style="${labelStyle}">Roll Wire</td><td colspan="3" style="${valueStyle}">`;
+              rows += sp.roll_wires.map(w=>`${esc(w.size||'')}${w.len?' / '+esc(w.len):''}`).join(' &nbsp;|&nbsp; ');
+              rows += '</td></tr>';
+            }
+            if(hasKwire){
+              rows += `<tr><td style="${labelStyle}">K-Wire</td><td colspan="3" style="${valueStyle}">`;
+              rows += sp.kwires.map(w=>`${esc(w.size||'')}${w.qty?' / '+esc(w.qty)+'개':''}`).join(' &nbsp;|&nbsp; ');
+              rows += '</td></tr>';
+            }
+            if(hasMultifix){
+              rows += `<tr><td style="${labelStyle}">Multifix</td><td colspan="3" style="${valueStyle}">`;
+              rows += sp.multifix.map(w=>`${esc(w.size||'')}${w.qty?' / '+esc(w.qty)+'개':''}`).join(' &nbsp;|&nbsp; ');
+              rows += '</td></tr>';
+            }
+            if(hasSteinman){
+              rows += `<tr><td style="${labelStyle}">Steinman Pin</td><td colspan="3" style="${valueStyle}">`;
+              rows += sp.steinman.map(w=>`${esc(w.size||'')}${w.qty?' / '+esc(w.qty)+'개':''}`).join(' &nbsp;|&nbsp; ');
+              rows += '</td></tr>';
+            }
+            if(sp.memo){
+              rows += fieldRow('특이사항', sp.memo);
+            }
+            return `<table style="width:100%;border-collapse:collapse;margin-top:14px;">
+              ${sectionRow('■ 05 특수 재료 기록')}
+              ${rows}
+            </table>`;
+          })()}
           ${(data.special && data.special.photos && data.special.photos.length) ? `
           <table style="width:100%;border-collapse:collapse;margin-top:14px;">
             ${sectionRow('■ 수술 사진')}
