@@ -96,9 +96,9 @@
     var s=gs();
     function tryGet(arr){for(var i=0;i<arr.length;i++){var el=document.getElementById(arr[i]);if(el&&el.value&&el.value.trim())return el.value.trim();}return '';}
     var n=tryGet(['ptName','p_name']),c=tryGet(['p_no','chartNo']),sn=tryGet(['surgName','s_name']),d=tryGet(['diagnosis','s_diagnosis']);
-    if(n)s.ptName=n;if(c)s.chartNo=c;if(sn)s.surgName=sn;if(d)s.diagnosis=d;
+    if(n)s.ptName=n;if(c)s.chartNo=c;if(sn)s.surgName=sn;if(d)s.diagnosis=d;var ageEl=document.querySelector('.formField[data-key="age"]');if(ageEl&&ageEl.value&&ageEl.value.trim())s.dob=ageEl.value.trim();
     try{var bp=JSON.parse(localStorage.getItem('bg_pending_plan')||'{}');if(bp.name&&!s.ptName)s.ptName=bp.name;if(bp.chartNo&&!s.chartNo)s.chartNo=bp.chartNo;if(bp.setName&&!s.surgName)s.surgName=bp.setName;if(bp.diagnosis&&!s.diagnosis)s.diagnosis=bp.diagnosis;}catch(e){}
-    try{var bc=JSON.parse(localStorage.getItem('bg_pending_claim')||'{}');if(bc.patientName&&!s.ptName)s.ptName=bc.patientName;if(bc.patient&&!s.chartNo)s.chartNo=bc.patient;if(bc.surgName&&!s.surgName)s.surgName=bc.surgName;if(bc.diagnosis&&!s.diagnosis)s.diagnosis=bc.diagnosis;}catch(e){}
+    try{var bc=JSON.parse(localStorage.getItem('bg_pending_claim')||'{}');if(bc.patientName&&!s.ptName)s.ptName=bc.patientName;if(bc.patient&&!s.chartNo)s.chartNo=bc.patient;if(bc.surgName&&!s.surgName)s.surgName=bc.surgName;if(bc.diagnosis&&!s.diagnosis)s.diagnosis=bc.diagnosis;if(bc.dob&&!s.dob)s.dob=bc.dob;}catch(e){}
     return s;
   }
   function goTo(idx){
@@ -115,7 +115,7 @@
       try{localStorage.setItem('bg_pending_plan',JSON.stringify({name:s.ptName||'',chartNo:s.chartNo||'',setName:s.surgName||'',diagnosis:s.diagnosis||''}));}catch(e){}
     }
     if((idx===3||idx===0)&&(s.ptName||s.chartNo)){
-      try{localStorage.setItem('bg_pending_claim',JSON.stringify({patientName:s.ptName||'',patient:s.chartNo||'',surgName:s.surgName||'',diagnosis:s.diagnosis||''}));}catch(e){}
+      try{localStorage.setItem('bg_pending_claim',JSON.stringify({patientName:s.ptName||'',patient:s.chartNo||'',surgName:s.surgName||'',diagnosis:s.diagnosis||'',dob:s.dob||''}));}catch(e){}
     }
     window.location.href=APPS[idx].u;
   }

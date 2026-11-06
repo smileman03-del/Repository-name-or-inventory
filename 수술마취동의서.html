@@ -192,7 +192,7 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     if(idx===2&&(s.ptName||s.chartNo)){
       try{localStorage.setItem('bg_pending_plan',JSON.stringify({name:s.ptName||'',chartNo:s.chartNo||'',setName:s.surgName||'',diagnosis:s.diagnosis||''}));}catch(e){}
     }
-    if((idx===3||idx===1)&&(s.ptName||s.chartNo)){
+    if((idx===3||idx===1||idx===2)&&(s.ptName||s.chartNo)){
       try{localStorage.setItem('bg_pending_claim',JSON.stringify({patientName:s.ptName||'',patient:s.chartNo||'',surgName:s.surgName||'',diagnosis:s.diagnosis||'',dob:s.dob||''}));}catch(e){}
     }
     window.location.href=APPS[idx].u;
@@ -301,13 +301,13 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       <th class="lbl">환자명</th>
       <td><div class="sgcell"><input class="f" id="ptName" placeholder="환자명"><button type="button" class="pad-btn empty" data-sig="patient"><span>✍ 서명 또는 날인</span></button></div></td>
       <th class="lbl">주민등록상<br>생년월일</th>
-      <td class="val"><input class="f" id="ptDob" type="text" placeholder="예)901231" inputmode="numeric" maxlength="20"></td>
+      <td class="val"><input class="f" id="ptDob" type="date"></td>
     </tr>
     <tr>
       <th class="lbl">대리인<br>(보호자의 <input class="f" id="relation" style="width:3.6em;display:inline-block;padding:0;text-align:center;border-bottom:1px solid #777" placeholder="관계">)</th>
       <td><div class="sgcell"><input class="f" id="guName" placeholder="대리인 성명"><button type="button" class="pad-btn empty" data-sig="guardian"><span>✍ 서명 또는 날인</span></button></div></td>
       <th class="lbl">주민등록상<br>생년월일</th>
-      <td class="val"><input class="f" id="guDob" type="text" placeholder="예)901231" inputmode="numeric" maxlength="20"></td>
+      <td class="val"><input class="f" id="guDob" type="date"></td>
     </tr>
   </table>
 
@@ -353,7 +353,7 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
     </div>
     <div class="frow"><label>환자명</label><input id="pp_ptName" placeholder="홍길동" autocomplete="off"></div>
     <div class="frow"><label>차트번호</label><input id="pp_chartNo" placeholder="차트번호" autocomplete="off"></div>
-    <div class="frow"><label>생년월일</label><input id="pp_dob" type="text" placeholder="예) 901231" inputmode="numeric" maxlength="20"></div>
+    <div class="frow"><label>생년월일</label><input id="pp_dob" type="date"></div>
     <div class="frow"><label>수술명</label><input id="pp_surgName" placeholder="수술명" autocomplete="off"></div>
     <div class="frow"><label>진단명</label><input id="pp_diagnosis" placeholder="진단명" autocomplete="off"></div>
     <div id="ptStatus"></div>
