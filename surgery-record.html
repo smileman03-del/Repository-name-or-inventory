@@ -706,65 +706,33 @@
       <!-- Wire 종류 + Steinman Pin 묶음 -->
       <div style="border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px;">
         <div style="font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.06em;margin-bottom:12px;">WIRE &amp; PIN</div>
-        <div class="grid cols-4" style="gap:12px;">
-          <div class="field">
-            <label>Roll-Wire 사이즈</label>
-            <select id="sp_roll_wire">
-              <option value="">선택</option>
-              <option>0.8mm</option>
-              <option>1.0mm</option>
-              <option>1.2mm</option>
-              <option>1.6mm</option>
-              <option>2.0mm</option>
-              <option>기타</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>K-Wire 사이즈</label>
-            <select id="sp_kwire">
-              <option value="">선택</option>
-              <option>0.8mm K-Wire</option>
-              <option>1.0mm K-Wire</option>
-              <option>1.2mm K-Wire</option>
-              <option>1.4mm K-Wire</option>
-              <option>1.6mm K-Wire</option>
-              <option>1.8mm K-Wire</option>
-              <option>2.0mm K-Wire</option>
-              <option>2.4mm K-Wire</option>
-              <option>2.5mm K-Wire</option>
-              <option>기타</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Ball K-Wire 사이즈</label>
-            <select id="sp_ball_kwire">
-              <option value="">선택</option>
-              <option>0.8mm Ball K-Wire</option>
-              <option>1.0mm Ball K-Wire</option>
-              <option>1.2mm Ball K-Wire</option>
-              <option>1.4mm Ball K-Wire</option>
-              <option>1.6mm Ball K-Wire</option>
-              <option>1.8mm Ball K-Wire</option>
-              <option>2.0mm Ball K-Wire</option>
-              <option>2.4mm Ball K-Wire</option>
-              <option>2.5mm Ball K-Wire</option>
-              <option>기타</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Steinman Pin 사이즈</label>
-            <select id="sp_steinman">
-              <option value="">선택</option>
-              <option>2.0mm Steinman</option>
-              <option>2.5mm Steinman</option>
-              <option>3.0mm Steinman</option>
-              <option>3.5mm Steinman</option>
-              <option>4.0mm Steinman</option>
-              <option>4.5mm Steinman</option>
-              <option>5.0mm Steinman</option>
-              <option>기타</option>
-            </select>
-          </div>
+
+        <!-- Roll Wire -->
+        <div class="field" style="margin-bottom:14px;">
+          <label>Roll Wire &nbsp;<span style="font-size:11px;color:var(--muted);font-weight:400;">(사이즈 · 길이)</span></label>
+          <div id="sp_roll_rows" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+          <button type="button" onclick="spAddWireRow('roll')" style="margin-top:6px;padding:5px 14px;font-size:13px;border:1px dashed var(--accent);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;">+ 행 추가</button>
+        </div>
+
+        <!-- K-Wire -->
+        <div class="field" style="margin-bottom:14px;">
+          <label>K-Wire &nbsp;<span style="font-size:11px;color:var(--muted);font-weight:400;">(사이즈 · 사용 갯수)</span></label>
+          <div id="sp_kwire_rows" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+          <button type="button" onclick="spAddWireRow('kwire')" style="margin-top:6px;padding:5px 14px;font-size:13px;border:1px dashed var(--accent);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;">+ 행 추가</button>
+        </div>
+
+        <!-- Multifix (구 Ball K-Wire) -->
+        <div class="field" style="margin-bottom:14px;">
+          <label>Multifix &nbsp;<span style="font-size:11px;color:var(--muted);font-weight:400;">(사이즈 · 사용 갯수)</span></label>
+          <div id="sp_multifix_rows" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+          <button type="button" onclick="spAddWireRow('multifix')" style="margin-top:6px;padding:5px 14px;font-size:13px;border:1px dashed var(--accent);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;">+ 행 추가</button>
+        </div>
+
+        <!-- Steinman Pin -->
+        <div class="field" style="margin-bottom:0;">
+          <label>Steinman Pin &nbsp;<span style="font-size:11px;color:var(--muted);font-weight:400;">(사이즈 · 사용 갯수)</span></label>
+          <div id="sp_steinman_rows" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+          <button type="button" onclick="spAddWireRow('steinman')" style="margin-top:6px;padding:5px 14px;font-size:13px;border:1px dashed var(--accent);border-radius:6px;background:transparent;color:var(--accent);cursor:pointer;">+ 행 추가</button>
         </div>
       </div>
 
@@ -1061,7 +1029,7 @@ const DEFAULT_SPECIAL_OPTS = {
   sp_block: ['6mm Block','8mm Block','10mm Block','12mm Block','14mm Block','16mm Block','18mm Block','20mm Block','기타'],
   sp_roll_wire: ['0.8mm','1.0mm','1.2mm','1.6mm','2.0mm','기타'],
   sp_kwire: ['0.8mm K-Wire','1.0mm K-Wire','1.2mm K-Wire','1.4mm K-Wire','1.6mm K-Wire','1.8mm K-Wire','2.0mm K-Wire','2.4mm K-Wire','2.5mm K-Wire','기타'],
-  sp_ball_kwire: ['0.8mm Ball K-Wire','1.0mm Ball K-Wire','1.2mm Ball K-Wire','1.4mm Ball K-Wire','1.6mm Ball K-Wire','1.8mm Ball K-Wire','2.0mm Ball K-Wire','2.4mm Ball K-Wire','2.5mm Ball K-Wire','기타'],
+  sp_multifix: ['0.8mm Multifix','1.0mm Multifix','1.2mm Multifix','1.4mm Multifix','1.6mm Multifix','1.8mm Multifix','2.0mm Multifix','2.4mm Multifix','2.5mm Multifix','기타'],
   sp_steinman: ['2.0mm Steinman','2.5mm Steinman','3.0mm Steinman','3.5mm Steinman','4.0mm Steinman','4.5mm Steinman','5.0mm Steinman','기타']
 };
 </script>
@@ -1773,14 +1741,14 @@ const DEFAULT_SPECIAL_OPTS = {
         saw_sagittal: document.getElementById('sp_saw_sagittal').checked,
         saw_oscillating: document.getElementById('sp_saw_oscillating').checked,
         saw_reciprocating: document.getElementById('sp_saw_reciprocating').checked,
-        roll_wire: document.getElementById('sp_roll_wire').value,
+        roll_wires: window.spCollectWireRows('roll'),
         cannula: document.getElementById('sp_cannula').checked,
         cannula_qty: document.getElementById('sp_cannula_qty').value,
         btn_cannula: document.getElementById('sp_btn_cannula').checked,
         btn_cannula_qty: document.getElementById('sp_btn_cannula_qty').value,
-        kwire: document.getElementById('sp_kwire').value,
-        ball_kwire: document.getElementById('sp_ball_kwire').value,
-        steinman: document.getElementById('sp_steinman').value,
+        kwires: window.spCollectWireRows('kwire'),
+        multifix: window.spCollectWireRows('multifix'),
+        steinman: window.spCollectWireRows('steinman'),
         memo: document.getElementById('sp_memo').value.trim(),
         photos: window._spPhotos || []
       },
@@ -2101,8 +2069,13 @@ const DEFAULT_SPECIAL_OPTS = {
     if(screwCont){ screwCont.innerHTML=''; window.spAddScrewRow('screw'); }
     var cannCont = document.getElementById('sp_cannulated_rows');
     if(cannCont){ cannCont.innerHTML=''; window.spAddScrewRow('cannulated'); }
-    ['sp_plate_site','sp_plate_type','sp_block','sp_roll_wire','sp_kwire','sp_ball_kwire','sp_steinman'].forEach(id=>{
+    ['sp_plate_site','sp_plate_type','sp_block'].forEach(id=>{
       const el = document.getElementById(id); if(el) el.value='';
+    });
+    // Wire & Pin 행 초기화
+    ['roll','kwire','multifix','steinman'].forEach(function(type){
+      var c = document.getElementById('sp_' + type + '_rows');
+      if(c){ c.innerHTML=''; window.spAddWireRow(type); }
     });
     // 길이 드롭다운 초기화
     ['sp_screw_len','sp_cannulated_screw_len'].forEach(id=>{
@@ -2281,11 +2254,7 @@ const DEFAULT_SPECIAL_OPTS = {
       n_bovie_site:      'n_bovie_site',
       sp_plate_site:     'sp_plate_site',
       sp_plate_type:     'sp_plate_type',
-      sp_block:          'sp_block',
-      sp_roll_wire:      'sp_roll_wire',
-      sp_kwire:          'sp_kwire',
-      sp_ball_kwire:     'sp_ball_kwire',
-      sp_steinman:       'sp_steinman'
+      sp_block:          'sp_block'
     };
     // nursing opts
     const nursingPlaceholders = {n_position:'선택',n_position_device:'선택',n_tourniquet_site:'선택',n_bovie_site:'선택'};
@@ -2298,8 +2267,8 @@ const DEFAULT_SPECIAL_OPTS = {
       if([...el.options].some(o=>o.value===cur)) el.value = cur;
     });
     // special opts
-    const specialPlaceholders = {sp_plate_site:'부위 선택',sp_plate_type:'Plate 종류 선택',sp_block:'선택',sp_roll_wire:'선택',sp_kwire:'선택',sp_ball_kwire:'선택',sp_steinman:'선택'};
-    ['sp_plate_site','sp_plate_type','sp_block','sp_roll_wire','sp_kwire','sp_ball_kwire','sp_steinman'].forEach(key=>{
+    const specialPlaceholders = {sp_plate_site:'부위 선택',sp_plate_type:'Plate 종류 선택',sp_block:'선택'};
+    ['sp_plate_site','sp_plate_type','sp_block'].forEach(key=>{
       const el = document.getElementById(key);
       if(!el || !specialOpts[key]) return;
       const cur = el.value;
@@ -2368,7 +2337,7 @@ const DEFAULT_SPECIAL_OPTS = {
     const labels = {
       sp_plate_site:'Plate 삽입부위', sp_plate_type:'Plate 종류',
       sp_block:'HTO 블록', sp_roll_wire:'Roll-Wire',
-      sp_kwire:'K-Wire', sp_ball_kwire:'Ball K-Wire', sp_steinman:'Steinman Pin'
+      sp_kwire:'K-Wire', sp_multifix:'Multifix', sp_steinman:'Steinman Pin'
     };
     root.innerHTML = Object.keys(labels).map(key=>{
       const opts = (specialOpts[key]||[]);
@@ -2897,10 +2866,77 @@ const DEFAULT_SPECIAL_OPTS = {
     return result;
   };
 
+  // ─── Wire & Pin 행 추가 / 수집 / 복원 ──────────────────────────────
+  var WIRE_OPTS = {
+    roll:     ['0.8mm','1.0mm','1.2mm','1.6mm','2.0mm','기타'],
+    kwire:    ['0.8mm K-Wire','1.0mm K-Wire','1.2mm K-Wire','1.4mm K-Wire','1.6mm K-Wire','1.8mm K-Wire','2.0mm K-Wire','2.4mm K-Wire','2.5mm K-Wire','기타'],
+    multifix: ['0.8mm Multifix','1.0mm Multifix','1.2mm Multifix','1.4mm Multifix','1.6mm Multifix','1.8mm Multifix','2.0mm Multifix','2.4mm Multifix','2.5mm Multifix','기타'],
+    steinman: ['2.0mm Steinman','2.5mm Steinman','3.0mm Steinman','3.5mm Steinman','4.0mm Steinman','4.5mm Steinman','5.0mm Steinman','기타']
+  };
+
+  window.spAddWireRow = function(type, savedSize, savedExtra) {
+    var container = document.getElementById('sp_' + type + '_rows');
+    if(!container) return;
+    var idx = container.children.length;
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;align-items:center;';
+    var sizeId  = 'sp_wire_' + type + '_size_' + idx;
+    var extraId = 'sp_wire_' + type + '_extra_' + idx;
+    var opts = (WIRE_OPTS[type] || []).map(function(o){
+      return '<option' + (o === savedSize ? ' selected' : '') + '>' + o + '</option>';
+    }).join('');
+    var extraVal = savedExtra ? String(savedExtra).replace(/"/g,'&quot;') : '';
+    if(type === 'roll') {
+      row.innerHTML =
+        '<select id="' + sizeId + '" style="flex:2;min-width:120px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">' +
+          '<option value="">사이즈 선택</option>' + opts +
+        '</select>' +
+        '<input type="text" id="' + extraId + '" placeholder="길이 입력 (예: 20cm)" value="' + extraVal + '" style="flex:1.5;min-width:100px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">' +
+        '<button type="button" onclick="this.parentElement.remove()" style="padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;">✕</button>';
+    } else {
+      row.innerHTML =
+        '<select id="' + sizeId + '" style="flex:2;min-width:140px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">' +
+          '<option value="">사이즈 선택</option>' + opts +
+        '</select>' +
+        '<input type="number" id="' + extraId + '" placeholder="갯수" min="1" max="99" value="' + extraVal + '" style="width:70px;padding:5px 6px;border:1px solid var(--border);border-radius:4px;background:var(--surface);color:var(--text);font-size:13px;">' +
+        '<span style="font-size:12px;color:var(--muted);">개</span>' +
+        '<button type="button" onclick="this.parentElement.remove()" style="padding:3px 8px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--muted);cursor:pointer;font-size:12px;">✕</button>';
+    }
+    container.appendChild(row);
+  };
+
+  window.spRestoreWireRows = function(type, rows) {
+    var container = document.getElementById('sp_' + type + '_rows');
+    if(!container) return;
+    container.innerHTML = '';
+    if(!rows || !rows.length) { window.spAddWireRow(type); return; }
+    rows.forEach(function(r){ window.spAddWireRow(type, r.size, r.extra); });
+  };
+
+  window.spCollectWireRows = function(type) {
+    var container = document.getElementById('sp_' + type + '_rows');
+    if(!container) return [];
+    var result = [];
+    Array.from(container.children).forEach(function(row, i) {
+      var sizeEl  = document.getElementById('sp_wire_' + type + '_size_' + i);
+      var extraEl = document.getElementById('sp_wire_' + type + '_extra_' + i);
+      if(sizeEl && sizeEl.value) {
+        result.push({ size: sizeEl.value, extra: extraEl ? extraEl.value : '' });
+      }
+    });
+    return result;
+  };
+  // ────────────────────────────────────────────────────────────────────
+
   // 초기 빈 행 1개씩 + 비급여 연동 자동 알림
   document.addEventListener('DOMContentLoaded', function(){
     spAddScrewRow('screw');
     spAddScrewRow('cannulated');
+    // Wire & Pin 초기 행
+    spAddWireRow('roll');
+    spAddWireRow('kwire');
+    spAddWireRow('multifix');
+    spAddWireRow('steinman');
     // 비급여 계산기에서 연동 데이터가 있으면 배너로 안내
     try {
       var raw = localStorage.getItem('bg_pending_claim');
@@ -3002,10 +3038,16 @@ const DEFAULT_SPECIAL_OPTS = {
       window.spRestoreScrewRows('screw', sp.screws || []);
       window.spRestoreScrewRows('cannulated', sp.cannulated_screws || []);
     }
+    // Wire & Pin 행 복원
+    if(typeof window.spRestoreWireRows === 'function'){
+      window.spRestoreWireRows('roll', sp.roll_wires || []);
+      window.spRestoreWireRows('kwire', sp.kwires || []);
+      window.spRestoreWireRows('multifix', sp.multifix || []);
+      window.spRestoreWireRows('steinman', sp.steinman || []);
+    }
     var map = {
       sp_plate_site:'plate_site', sp_plate_type:'plate_type',
-      sp_block:'block',
-      sp_roll_wire:'roll_wire', sp_kwire:'kwire', sp_ball_kwire:'ball_kwire', sp_steinman:'steinman'
+      sp_block:'block'
     };
     Object.keys(map).forEach(function(id){
       var el = document.getElementById(id);
