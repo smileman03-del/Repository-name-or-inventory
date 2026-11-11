@@ -317,26 +317,155 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 
 <!-- ================= 3 페이지 (수술 설명 그림) ================= -->
 <section class="page" id="p3">
-  <h1 style="margin-bottom:6mm;">수술 설명 그림</h1>
+  <h1 style="margin-bottom:4mm;">수술 설명 그림</h1>
 
-  <div id="drawingSection" style="border:1.5px solid #bbb;border-radius:4px;padding:6px;background:#fafafa;height:calc(100% - 28mm);display:flex;flex-direction:column;">
-    <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
-      <span style="font-size:10pt;font-weight:bold;color:#444;">✏️ 수술 설명 그림</span>
-      <button type="button" id="drawColorBlack" onclick="setDrawColor('#111')" style="width:26px;height:26px;border-radius:50%;background:#111;border:3px solid #0074e8;cursor:pointer;flex-shrink:0;" title="검정"></button>
-      <button type="button" id="drawColorRed" onclick="setDrawColor('#e02020')" style="width:26px;height:26px;border-radius:50%;background:#e02020;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="빨강"></button>
-      <button type="button" id="drawColorBlue" onclick="setDrawColor('#1a5fe0')" style="width:26px;height:26px;border-radius:50%;background:#1a5fe0;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="파랑"></button>
-      <button type="button" id="drawColorGreen" onclick="setDrawColor('#19a832')" style="width:26px;height:26px;border-radius:50%;background:#19a832;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="초록"></button>
-      <button type="button" id="drawEraserBtn" onclick="setDrawEraser()" style="padding:3px 12px;font-size:9pt;border:2px solid #ccc;border-radius:12px;background:#fff;cursor:pointer;" title="지우개">지우개</button>
-      <select id="drawLineWidth" onchange="updateLineWidth()" style="font-size:9pt;border:1px solid #ccc;border-radius:4px;padding:2px 4px;">
+  <div id="drawingSection" style="border:1.5px solid #bbb;border-radius:4px;padding:6px;background:#fafafa;display:flex;flex-direction:column;">
+    <!-- 공통 툴바 -->
+    <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;flex-wrap:wrap;">
+      <span style="font-size:9.5pt;font-weight:bold;color:#444;">✏️ 수술 설명 그림</span>
+      <button type="button" id="drawColorBlack" onclick="setDrawColor('#111')" style="width:24px;height:24px;border-radius:50%;background:#111;border:3px solid #0074e8;cursor:pointer;flex-shrink:0;" title="검정"></button>
+      <button type="button" id="drawColorRed" onclick="setDrawColor('#e02020')" style="width:24px;height:24px;border-radius:50%;background:#e02020;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="빨강"></button>
+      <button type="button" id="drawColorBlue" onclick="setDrawColor('#1a5fe0')" style="width:24px;height:24px;border-radius:50%;background:#1a5fe0;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="파랑"></button>
+      <button type="button" id="drawColorGreen" onclick="setDrawColor('#19a832')" style="width:24px;height:24px;border-radius:50%;background:#19a832;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="초록"></button>
+      <button type="button" id="drawEraserBtn" onclick="setDrawEraser()" style="padding:2px 10px;font-size:8.5pt;border:2px solid #ccc;border-radius:12px;background:#fff;cursor:pointer;">지우개</button>
+      <select id="drawLineWidth" onchange="updateLineWidth()" style="font-size:8.5pt;border:1px solid #ccc;border-radius:4px;padding:2px 4px;">
         <option value="2">가늘게</option>
         <option value="4" selected>보통</option>
         <option value="8">굵게</option>
         <option value="16">매우 굵게</option>
       </select>
-      <button type="button" onclick="clearDrawing()" style="padding:3px 12px;font-size:9pt;border:2px solid #e44;border-radius:12px;background:#fff4f4;color:#c00;cursor:pointer;margin-left:auto;">🗑 초기화</button>
+      <button type="button" onclick="clearDrawing()" style="padding:2px 10px;font-size:8.5pt;border:2px solid #e44;border-radius:12px;background:#fff4f4;color:#c00;cursor:pointer;margin-left:auto;">🗑 초기화</button>
     </div>
-    <canvas id="drawingCanvas" width="740" height="500"
-      style="display:block;width:100%;flex:1;border:1px solid #ddd;border-radius:3px;background:#fff;cursor:crosshair;touch-action:none;"></canvas>
+
+    <!-- 메인 영역: 인체도 + 자유 캔버스 -->
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+      <!-- 왼쪽: 인체 부위 선택 -->
+      <div style="flex-shrink:0;text-align:center;">
+        <div style="font-size:7.5pt;color:#0074e8;margin-bottom:3px;font-weight:bold;">👆 부위 클릭 → 확대 그리기</div>
+        <svg id="bodySvg" viewBox="0 0 220 490" style="width:148px;height:331px;" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <style>
+              .bp{fill:#dbeeff;stroke:#4a90d9;stroke-width:2;cursor:pointer;transition:fill .15s,stroke .15s;}
+              .bp:hover{fill:#93c5fd;stroke:#1d4ed8;}
+              .bp.drawn{fill:#fecaca;stroke:#dc2626;}
+              .bp.drawn:hover{fill:#fca5a5;}
+              .bpl{font-size:8px;fill:#1e3a5f;pointer-events:none;text-anchor:middle;dominant-baseline:middle;font-family:sans-serif;font-weight:bold;}
+            </style>
+          </defs>
+          <!-- 머리 -->
+          <ellipse class="bp" id="bp-head" cx="110" cy="37" rx="29" ry="33" onclick="openBodyPart('머리','bp-head')"><title>머리</title></ellipse>
+          <text class="bpl" x="110" y="37">머리</text>
+          <!-- 목 -->
+          <rect class="bp" id="bp-neck" x="99" y="69" width="22" height="20" rx="5" onclick="openBodyPart('목','bp-neck')"><title>목</title></rect>
+          <text class="bpl" x="110" y="80">목</text>
+          <!-- 가슴 -->
+          <rect class="bp" id="bp-chest" x="77" y="89" width="66" height="52" rx="6" onclick="openBodyPart('가슴/흉추','bp-chest')"><title>가슴/흉추</title></rect>
+          <text class="bpl" x="110" y="116">가슴</text>
+          <!-- 복부/요추 -->
+          <rect class="bp" id="bp-abdomen" x="77" y="141" width="66" height="50" rx="6" onclick="openBodyPart('복부/요추','bp-abdomen')"><title>복부/요추</title></rect>
+          <text class="bpl" x="110" y="167">복부/요추</text>
+          <!-- 오른쪽 어깨 (보는 쪽 왼) -->
+          <ellipse class="bp" id="bp-rshoulder" cx="57" cy="97" rx="24" ry="18" onclick="openBodyPart('오른쪽 어깨','bp-rshoulder')"><title>오른쪽 어깨</title></ellipse>
+          <text class="bpl" x="57" y="97">오른</text>
+          <text class="bpl" x="57" y="107">어깨</text>
+          <!-- 왼쪽 어깨 (보는 쪽 오른) -->
+          <ellipse class="bp" id="bp-lshoulder" cx="163" cy="97" rx="24" ry="18" onclick="openBodyPart('왼쪽 어깨','bp-lshoulder')"><title>왼쪽 어깨</title></ellipse>
+          <text class="bpl" x="163" y="97">왼쪽</text>
+          <text class="bpl" x="163" y="107">어깨</text>
+          <!-- 오른쪽 위팔 -->
+          <rect class="bp" id="bp-ruarm" x="27" y="112" width="34" height="54" rx="12" onclick="openBodyPart('오른쪽 위팔','bp-ruarm')"><title>오른쪽 위팔</title></rect>
+          <text class="bpl" x="44" y="134">오른팔</text>
+          <!-- 왼쪽 위팔 -->
+          <rect class="bp" id="bp-luarm" x="159" y="112" width="34" height="54" rx="12" onclick="openBodyPart('왼쪽 위팔','bp-luarm')"><title>왼쪽 위팔</title></rect>
+          <text class="bpl" x="176" y="134">왼팔</text>
+          <!-- 오른쪽 고관절 -->
+          <rect class="bp" id="bp-rhip" x="77" y="191" width="32" height="40" rx="7" onclick="openBodyPart('오른쪽 고관절','bp-rhip')"><title>오른쪽 고관절</title></rect>
+          <text class="bpl" x="93" y="206">오른쪽</text>
+          <text class="bpl" x="93" y="218">고관절</text>
+          <!-- 왼쪽 고관절 -->
+          <rect class="bp" id="bp-lhip" x="111" y="191" width="32" height="40" rx="7" onclick="openBodyPart('왼쪽 고관절','bp-lhip')"><title>왼쪽 고관절</title></rect>
+          <text class="bpl" x="127" y="206">왼쪽</text>
+          <text class="bpl" x="127" y="218">고관절</text>
+          <!-- 오른쪽 아래팔/손목 -->
+          <rect class="bp" id="bp-rforearm" x="16" y="166" width="32" height="56" rx="10" onclick="openBodyPart('오른쪽 아래팔/손목','bp-rforearm')"><title>오른쪽 아래팔/손목</title></rect>
+          <text class="bpl" x="32" y="189">아래팔</text>
+          <!-- 왼쪽 아래팔/손목 -->
+          <rect class="bp" id="bp-lforearm" x="172" y="166" width="32" height="56" rx="10" onclick="openBodyPart('왼쪽 아래팔/손목','bp-lforearm')"><title>왼쪽 아래팔/손목</title></rect>
+          <text class="bpl" x="188" y="189">아래팔</text>
+          <!-- 오른쪽 손 -->
+          <ellipse class="bp" id="bp-rhand" cx="30" cy="240" rx="20" ry="17" onclick="openBodyPart('오른쪽 손','bp-rhand')"><title>오른쪽 손</title></ellipse>
+          <text class="bpl" x="30" y="240">오른손</text>
+          <!-- 왼쪽 손 -->
+          <ellipse class="bp" id="bp-lhand" cx="190" cy="240" rx="20" ry="17" onclick="openBodyPart('왼쪽 손','bp-lhand')"><title>왼쪽 손</title></ellipse>
+          <text class="bpl" x="190" y="240">왼손</text>
+          <!-- 오른쪽 허벅지 -->
+          <rect class="bp" id="bp-rthigh" x="74" y="231" width="32" height="68" rx="11" onclick="openBodyPart('오른쪽 허벅지','bp-rthigh')"><title>오른쪽 허벅지</title></rect>
+          <text class="bpl" x="90" y="262">오른쪽</text>
+          <text class="bpl" x="90" y="273">허벅지</text>
+          <!-- 왼쪽 허벅지 -->
+          <rect class="bp" id="bp-lthigh" x="114" y="231" width="32" height="68" rx="11" onclick="openBodyPart('왼쪽 허벅지','bp-lthigh')"><title>왼쪽 허벅지</title></rect>
+          <text class="bpl" x="130" y="262">왼쪽</text>
+          <text class="bpl" x="130" y="273">허벅지</text>
+          <!-- 오른쪽 무릎 -->
+          <ellipse class="bp" id="bp-rknee" cx="90" cy="308" rx="22" ry="15" onclick="openBodyPart('오른쪽 무릎','bp-rknee')"><title>오른쪽 무릎</title></ellipse>
+          <text class="bpl" x="90" y="308">오른무릎</text>
+          <!-- 왼쪽 무릎 -->
+          <ellipse class="bp" id="bp-lknee" cx="130" cy="308" rx="22" ry="15" onclick="openBodyPart('왼쪽 무릎','bp-lknee')"><title>왼쪽 무릎</title></ellipse>
+          <text class="bpl" x="130" y="308">왼무릎</text>
+          <!-- 오른쪽 종아리 -->
+          <rect class="bp" id="bp-rcalf" x="71" y="323" width="30" height="66" rx="10" onclick="openBodyPart('오른쪽 종아리','bp-rcalf')"><title>오른쪽 종아리</title></rect>
+          <text class="bpl" x="86" y="352">오른쪽</text>
+          <text class="bpl" x="86" y="363">종아리</text>
+          <!-- 왼쪽 종아리 -->
+          <rect class="bp" id="bp-lcalf" x="119" y="323" width="30" height="66" rx="10" onclick="openBodyPart('왼쪽 종아리','bp-lcalf')"><title>왼쪽 종아리</title></rect>
+          <text class="bpl" x="134" y="352">왼쪽</text>
+          <text class="bpl" x="134" y="363">종아리</text>
+          <!-- 오른쪽 발목/발 -->
+          <ellipse class="bp" id="bp-rfoot" cx="84" cy="400" rx="26" ry="15" onclick="openBodyPart('오른쪽 발목/발','bp-rfoot')"><title>오른쪽 발목/발</title></ellipse>
+          <text class="bpl" x="84" y="400">오른발</text>
+          <!-- 왼쪽 발목/발 -->
+          <ellipse class="bp" id="bp-lfoot" cx="136" cy="400" rx="26" ry="15" onclick="openBodyPart('왼쪽 발목/발','bp-lfoot')"><title>왼쪽 발목/발</title></ellipse>
+          <text class="bpl" x="136" y="400">왼발</text>
+          <!-- 척추 (등) -->
+          <rect class="bp" id="bp-spine" x="99" y="419" width="22" height="52" rx="6" onclick="openBodyPart('척추/등','bp-spine')"><title>척추/등</title></rect>
+          <text class="bpl" x="110" y="445">척추</text>
+        </svg>
+      </div>
+
+      <!-- 오른쪽: 자유 그리기 캔버스 -->
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+        <div style="font-size:7.5pt;color:#666;margin-bottom:3px;">자유 메모 (전체 그림 영역)</div>
+        <canvas id="drawingCanvas" width="600" height="300"
+          style="display:block;width:100%;border:1px solid #ddd;border-radius:3px;background:#fff;cursor:crosshair;touch-action:none;min-height:220px;"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 부위 확대 모달 ===== -->
+  <div id="bodyPartModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9900;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:12px 14px;width:min(96vw,760px);max-height:94vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.35);">
+      <!-- 모달 헤더 -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
+        <span id="bodyPartTitle" style="font-size:13pt;font-weight:bold;color:#1a5fe0;">📍 머리</span>
+        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
+          <button type="button" id="zpBlack" onclick="setZoomColor('#111')" style="width:24px;height:24px;border-radius:50%;background:#111;border:3px solid #0074e8;cursor:pointer;" title="검정"></button>
+          <button type="button" id="zpRed" onclick="setZoomColor('#e02020')" style="width:24px;height:24px;border-radius:50%;background:#e02020;border:2px solid #ccc;cursor:pointer;" title="빨강"></button>
+          <button type="button" id="zpBlue" onclick="setZoomColor('#1a5fe0')" style="width:24px;height:24px;border-radius:50%;background:#1a5fe0;border:2px solid #ccc;cursor:pointer;" title="파랑"></button>
+          <button type="button" id="zpGreen" onclick="setZoomColor('#19a832')" style="width:24px;height:24px;border-radius:50%;background:#19a832;border:2px solid #ccc;cursor:pointer;" title="초록"></button>
+          <button type="button" id="zpEraserBtn" onclick="setZoomEraser()" style="padding:2px 9px;font-size:8.5pt;border:2px solid #ccc;border-radius:12px;background:#fff;cursor:pointer;">지우개</button>
+          <select id="zpLineWidth" onchange="updateZoomLineWidth()" style="font-size:8.5pt;border:1px solid #ccc;border-radius:4px;padding:2px 4px;">
+            <option value="2">가늘게</option>
+            <option value="5" selected>보통</option>
+            <option value="10">굵게</option>
+            <option value="20">매우 굵게</option>
+          </select>
+          <button type="button" onclick="clearZoomCanvas()" style="padding:2px 9px;font-size:8.5pt;border:2px solid #e44;border-radius:12px;background:#fff4f4;color:#c00;cursor:pointer;">🗑 지우기</button>
+          <button type="button" onclick="closeBodyPart()" style="padding:3px 14px;font-size:9pt;border:none;border-radius:12px;background:#1a5fe0;color:#fff;cursor:pointer;font-weight:bold;">💾 저장 후 닫기</button>
+        </div>
+      </div>
+      <!-- 확대 그리기 캔버스 -->
+      <canvas id="zoomCanvas" style="width:100%;border:1.5px solid #bbb;border-radius:6px;background:#fff;cursor:crosshair;touch-action:none;"></canvas>
+    </div>
   </div>
 </section>
 
@@ -840,106 +969,342 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 
   /* ---------- 그림 그리기 캔버스 ---------- */
   (function() {
-    var canvas = document.getElementById('drawingCanvas');
-    if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-    var drawing = false;
+    /* ---- 공통 그리기 상태 ---- */
     var currentColor = '#111';
     var currentWidth = 4;
     var eraser = false;
 
-    function resizeCanvas() {
-      var rect = canvas.parentElement.getBoundingClientRect();
-      var w = Math.floor(rect.width - 10);
-      if (w < 100) return;
-      var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      var tmp = document.createElement('canvas');
-      tmp.width = canvas.width; tmp.height = canvas.height;
-      tmp.getContext('2d').putImageData(imgData, 0, 0);
-      canvas.width = w;
-      canvas.height = Math.round(w * 260 / 740);
-      ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
-    }
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
-    function getPos(e) {
-      var r = canvas.getBoundingClientRect();
-      var scaleX = canvas.width / r.width;
-      var scaleY = canvas.height / r.height;
-      var src = e.touches ? e.touches[0] : e;
-      return { x: (src.clientX - r.left) * scaleX, y: (src.clientY - r.top) * scaleY };
+    /* ---- 색상 버튼 활성화 헬퍼 ---- */
+    function activateColorBtn(activeId, btnIds, eraserBtnId) {
+      btnIds.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.style.border = '2px solid #ccc';
+      });
+      if (activeId && document.getElementById(activeId))
+        document.getElementById(activeId).style.border = '3px solid #0074e8';
+      var eb = document.getElementById(eraserBtnId);
+      if (eb) eb.style.border = '2px solid #ccc';
     }
 
-    function startDraw(e) {
-      e.preventDefault();
-      drawing = true;
-      var p = getPos(e);
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-    }
+    /* ---- 메인 자유 캔버스 ---- */
+    var canvas = document.getElementById('drawingCanvas');
+    if (canvas) {
+      var ctx = canvas.getContext('2d');
+      var pts = [], snapshot = null, drawing = false;
 
-    function doDraw(e) {
-      e.preventDefault();
-      if (!drawing) return;
-      var p = getPos(e);
-      if (eraser) {
-        ctx.clearRect(p.x - currentWidth * 3, p.y - currentWidth * 3, currentWidth * 6, currentWidth * 6);
-      } else {
-        ctx.lineTo(p.x, p.y);
+      (function resizeCanvas() {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.floor(rect.width - 2);
+        if (w < 100) return;
+        var tmp = document.createElement('canvas');
+        tmp.width = canvas.width; tmp.height = canvas.height;
+        tmp.getContext('2d').putImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), 0, 0);
+        canvas.width = w;
+        canvas.height = Math.round(w * 300 / 600);
+        ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
+      })();
+      window.addEventListener('resize', function() {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = Math.floor(rect.width - 2);
+        if (w < 100) return;
+        var tmp = document.createElement('canvas');
+        tmp.width = canvas.width; tmp.height = canvas.height;
+        tmp.getContext('2d').putImageData(ctx.getImageData(0, 0, canvas.width, canvas.height), 0, 0);
+        canvas.width = w;
+        canvas.height = Math.round(w * 300 / 600);
+        ctx.drawImage(tmp, 0, 0, canvas.width, canvas.height);
+      });
+
+      function getPos(e) {
+        var r = canvas.getBoundingClientRect();
+        var src = e.touches ? e.touches[0] : e;
+        return { x: (src.clientX - r.left) * (canvas.width / r.width),
+                 y: (src.clientY - r.top)  * (canvas.height / r.height) };
+      }
+
+      function applyStyle() {
         ctx.strokeStyle = currentColor;
         ctx.lineWidth = currentWidth;
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        ctx.stroke();
+        ctx.lineCap = 'round'; ctx.lineJoin = 'round';
       }
+
+      function drawSmoothPts(c, pArr) {
+        if (pArr.length < 2) return;
+        c.beginPath(); c.moveTo(pArr[0].x, pArr[0].y);
+        for (var i = 1; i < pArr.length - 1; i++) {
+          var mx = (pArr[i].x + pArr[i+1].x) / 2;
+          var my = (pArr[i].y + pArr[i+1].y) / 2;
+          c.quadraticCurveTo(pArr[i].x, pArr[i].y, mx, my);
+        }
+        c.lineTo(pArr[pArr.length-1].x, pArr[pArr.length-1].y);
+        c.stroke();
+      }
+
+      canvas.addEventListener('mousedown', function(e) {
+        e.preventDefault(); drawing = true;
+        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        pts = [getPos(e)];
+        applyStyle();
+      });
+      canvas.addEventListener('mousemove', function(e) {
+        e.preventDefault(); if (!drawing) return;
+        var p = getPos(e); pts.push(p);
+        if (eraser) {
+          ctx.clearRect(p.x - currentWidth*3, p.y - currentWidth*3, currentWidth*6, currentWidth*6);
+        } else {
+          ctx.putImageData(snapshot, 0, 0);
+          applyStyle(); drawSmoothPts(ctx, pts);
+        }
+      });
+      ['mouseup','mouseleave'].forEach(function(n) {
+        canvas.addEventListener(n, function() { drawing = false; pts = []; snapshot = null; });
+      });
+      canvas.addEventListener('touchstart', function(e) {
+        e.preventDefault(); drawing = true;
+        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        pts = [getPos(e)]; applyStyle();
+      }, {passive:false});
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault(); if (!drawing) return;
+        var p = getPos(e); pts.push(p);
+        if (eraser) {
+          ctx.clearRect(p.x - currentWidth*3, p.y - currentWidth*3, currentWidth*6, currentWidth*6);
+        } else {
+          ctx.putImageData(snapshot, 0, 0);
+          applyStyle(); drawSmoothPts(ctx, pts);
+        }
+      }, {passive:false});
+      canvas.addEventListener('touchend', function() { drawing = false; pts = []; snapshot = null; });
     }
 
-    function endDraw(e) { drawing = false; ctx.beginPath(); }
-
-    canvas.addEventListener('mousedown', startDraw);
-    canvas.addEventListener('mousemove', doDraw);
-    canvas.addEventListener('mouseup', endDraw);
-    canvas.addEventListener('mouseleave', endDraw);
-    canvas.addEventListener('touchstart', startDraw, { passive: false });
-    canvas.addEventListener('touchmove', doDraw, { passive: false });
-    canvas.addEventListener('touchend', endDraw);
-
+    /* ---- 메인 캔버스 외부 함수 ---- */
     window.setDrawColor = function(color) {
       currentColor = color; eraser = false;
-      var btns = ['drawColorBlack','drawColorRed','drawColorBlue','drawColorGreen'];
-      var colorMap = { '#111':'drawColorBlack', '#e02020':'drawColorRed', '#1a5fe0':'drawColorBlue', '#19a832':'drawColorGreen' };
-      btns.forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) el.style.border = '2px solid #ccc';
-      });
-      var activeId = colorMap[color];
-      if (activeId && document.getElementById(activeId)) document.getElementById(activeId).style.border = '3px solid #0074e8';
-      var eb = document.getElementById('drawEraserBtn');
-      if (eb) eb.style.border = '2px solid #ccc';
+      var map = {'#111':'drawColorBlack','#e02020':'drawColorRed','#1a5fe0':'drawColorBlue','#19a832':'drawColorGreen'};
+      activateColorBtn(map[color], ['drawColorBlack','drawColorRed','drawColorBlue','drawColorGreen'], 'drawEraserBtn');
     };
-
     window.setDrawEraser = function() {
       eraser = true;
-      var eb = document.getElementById('drawEraserBtn');
-      if (eb) eb.style.border = '3px solid #0074e8';
-      ['drawColorBlack','drawColorRed','drawColorBlue','drawColorGreen'].forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) el.style.border = '2px solid #ccc';
+      ['drawColorBlack','drawColorRed','drawColorBlue','drawColorGreen'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.style.border='2px solid #ccc';
       });
+      var eb=document.getElementById('drawEraserBtn'); if(eb) eb.style.border='3px solid #0074e8';
     };
-
     window.updateLineWidth = function() {
       var sel = document.getElementById('drawLineWidth');
       if (sel) currentWidth = parseInt(sel.value) || 4;
     };
-
     window.clearDrawing = function() {
       if (!confirm('그림을 모두 지울까요?')) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var c = document.getElementById('drawingCanvas');
+      if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
     };
-  })();
 
+    /* ============================================================
+       부위 확대 모달 (인체도 클릭 → 확대 그리기)
+    ============================================================ */
+    var bodyPartDrawings = {};   // {partName: imageData url}
+    var currentPart = null;
+    var zCanvas = document.getElementById('zoomCanvas');
+    var zCtx = zCanvas ? zCanvas.getContext('2d') : null;
+    var zColor = '#111', zWidth = 5, zEraser = false;
+    var zPts = [], zSnap = null, zDrawing = false;
+
+    function zApplyStyle() {
+      zCtx.strokeStyle = zColor; zCtx.lineWidth = zWidth;
+      zCtx.lineCap = 'round'; zCtx.lineJoin = 'round';
+    }
+
+    function zDrawSmooth(pArr) {
+      if (!zCtx || pArr.length < 2) return;
+      zCtx.beginPath(); zCtx.moveTo(pArr[0].x, pArr[0].y);
+      for (var i = 1; i < pArr.length - 1; i++) {
+        var mx = (pArr[i].x + pArr[i+1].x) / 2;
+        var my = (pArr[i].y + pArr[i+1].y) / 2;
+        zCtx.quadraticCurveTo(pArr[i].x, pArr[i].y, mx, my);
+      }
+      zCtx.lineTo(pArr[pArr.length-1].x, pArr[pArr.length-1].y);
+      zCtx.stroke();
+    }
+
+    function zGetPos(e) {
+      var r = zCanvas.getBoundingClientRect();
+      var src = e.touches ? e.touches[0] : e;
+      return { x: (src.clientX - r.left) * (zCanvas.width / r.width),
+               y: (src.clientY - r.top)  * (zCanvas.height / r.height) };
+    }
+
+    if (zCanvas) {
+      zCanvas.addEventListener('mousedown', function(e) {
+        e.preventDefault(); zDrawing = true;
+        zSnap = zCtx.getImageData(0, 0, zCanvas.width, zCanvas.height);
+        zPts = [zGetPos(e)]; zApplyStyle();
+      });
+      zCanvas.addEventListener('mousemove', function(e) {
+        e.preventDefault(); if (!zDrawing) return;
+        var p = zGetPos(e); zPts.push(p);
+        if (zEraser) {
+          zCtx.clearRect(p.x - zWidth*4, p.y - zWidth*4, zWidth*8, zWidth*8);
+        } else {
+          zCtx.putImageData(zSnap, 0, 0); zApplyStyle(); zDrawSmooth(zPts);
+        }
+      });
+      ['mouseup','mouseleave'].forEach(function(n) {
+        zCanvas.addEventListener(n, function() { zDrawing = false; zPts = []; zSnap = null; });
+      });
+      zCanvas.addEventListener('touchstart', function(e) {
+        e.preventDefault(); zDrawing = true;
+        zSnap = zCtx.getImageData(0, 0, zCanvas.width, zCanvas.height);
+        zPts = [zGetPos(e)]; zApplyStyle();
+      }, {passive:false});
+      zCanvas.addEventListener('touchmove', function(e) {
+        e.preventDefault(); if (!zDrawing) return;
+        var p = zGetPos(e); zPts.push(p);
+        if (zEraser) {
+          zCtx.clearRect(p.x - zWidth*4, p.y - zWidth*4, zWidth*8, zWidth*8);
+        } else {
+          zCtx.putImageData(zSnap, 0, 0); zApplyStyle(); zDrawSmooth(zPts);
+        }
+      }, {passive:false});
+      zCanvas.addEventListener('touchend', function() { zDrawing = false; zPts = []; zSnap = null; });
+    }
+
+    /* 부위별 가이드라인 그리기 */
+    function drawPartGuide(partName) {
+      if (!zCtx) return;
+      zCtx.save();
+      zCtx.globalAlpha = 0.07;
+      zCtx.font = 'bold ' + Math.round(zCanvas.height * 0.22) + 'px sans-serif';
+      zCtx.fillStyle = '#1a5fe0';
+      zCtx.textAlign = 'center';
+      zCtx.textBaseline = 'middle';
+      zCtx.fillText(partName, zCanvas.width / 2, zCanvas.height / 2);
+      zCtx.restore();
+      /* 부위별 간단 해부학 가이드 */
+      zCtx.save();
+      zCtx.strokeStyle = '#93c5fd';
+      zCtx.lineWidth = 2;
+      zCtx.setLineDash([6, 4]);
+      var W = zCanvas.width, H = zCanvas.height;
+      var pn = partName.replace(/\s/g,'');
+      if (pn.indexOf('무릎') >= 0) {
+        /* 무릎: 대퇴골 하단 / 경골 상단 / 슬개골 */
+        zCtx.beginPath(); zCtx.arc(W*0.5, H*0.42, W*0.22, 0, Math.PI*2); zCtx.stroke();
+        zCtx.beginPath(); zCtx.ellipse(W*0.5, H*0.3, W*0.1, H*0.1, 0, 0, Math.PI*2); zCtx.stroke();
+        zCtx.beginPath(); zCtx.moveTo(W*0.3, H*0.56); zCtx.lineTo(W*0.7, H*0.56); zCtx.stroke();
+      } else if (pn.indexOf('어깨') >= 0) {
+        /* 어깨: 견관절 */
+        zCtx.beginPath(); zCtx.arc(W*0.5, H*0.5, W*0.2, 0, Math.PI*2); zCtx.stroke();
+        zCtx.beginPath(); zCtx.arc(W*0.5, H*0.5, W*0.1, 0, Math.PI*2); zCtx.stroke();
+      } else if (pn.indexOf('고관절') >= 0) {
+        /* 고관절 */
+        zCtx.beginPath(); zCtx.arc(W*0.5, H*0.4, W*0.25, 0, Math.PI*2); zCtx.stroke();
+        zCtx.beginPath(); zCtx.arc(W*0.5, H*0.4, W*0.1, 0, Math.PI*2); zCtx.stroke();
+        zCtx.beginPath(); zCtx.moveTo(W*0.5, H*0.65); zCtx.lineTo(W*0.5, H*0.85); zCtx.stroke();
+      } else if (pn.indexOf('발') >= 0 || pn.indexOf('발목') >= 0) {
+        /* 발목/발 */
+        zCtx.beginPath(); zCtx.arc(W*0.5, H*0.38, W*0.14, 0, Math.PI*2); zCtx.stroke();
+        zCtx.beginPath(); zCtx.rect(W*0.25, H*0.52, W*0.5, H*0.3); zCtx.stroke();
+      } else if (pn.indexOf('척추') >= 0 || pn.indexOf('요추') >= 0 || pn.indexOf('흉추') >= 0) {
+        /* 척추 세로선 */
+        for (var r = 0; r < 5; r++) {
+          var yy = H*0.2 + r * H*0.14;
+          zCtx.beginPath(); zCtx.rect(W*0.38, yy, W*0.24, H*0.1); zCtx.stroke();
+        }
+      }
+      zCtx.restore();
+    }
+
+    /* 모달 열기 */
+    window.openBodyPart = function(partName, bpId) {
+      if (!zCanvas) return;
+      currentPart = partName;
+      var modal = document.getElementById('bodyPartModal');
+      var title = document.getElementById('bodyPartTitle');
+      if (title) title.textContent = '📍 ' + partName;
+
+      /* 캔버스 크기 설정 */
+      var W = Math.min(window.innerWidth * 0.9, 740);
+      zCanvas.width  = Math.round(W);
+      zCanvas.height = Math.round(W * 0.6);
+      zCtx.clearRect(0, 0, zCanvas.width, zCanvas.height);
+      drawPartGuide(partName);
+
+      /* 이전에 저장된 그림 복원 */
+      if (bodyPartDrawings[partName]) {
+        var img = new Image();
+        img.onload = function() { zCtx.drawImage(img, 0, 0, zCanvas.width, zCanvas.height); };
+        img.src = bodyPartDrawings[partName];
+      }
+
+      /* 줌 색상 초기화 */
+      zColor = '#111'; zEraser = false;
+      ['zpBlack','zpRed','zpBlue','zpGreen'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.style.border='2px solid #ccc';
+      });
+      var zb=document.getElementById('zpBlack'); if(zb) zb.style.border='3px solid #0074e8';
+      var ze=document.getElementById('zpEraserBtn'); if(ze) ze.style.border='2px solid #ccc';
+
+      modal.style.display = 'flex';
+    };
+
+    /* 모달 닫기 + 저장 */
+    window.closeBodyPart = function() {
+      if (!currentPart || !zCanvas) return;
+      /* 그림 데이터 저장 */
+      bodyPartDrawings[currentPart] = zCanvas.toDataURL();
+      /* 인체도 해당 부위 색상 업데이트 */
+      document.querySelectorAll('.bp').forEach(function(el) {
+        if (el.getAttribute('data-part') === currentPart || (el.closest && el.closest('[data-part="'+currentPart+'"]'))) {
+          el.classList.add('drawn');
+        }
+      });
+      /* 부위 ID로 직접 찾아 표시 */
+      var allBp = document.querySelectorAll('.bp');
+      allBp.forEach(function(el) {
+        var title = el.querySelector ? el.querySelector('title') : null;
+        if (title && title.textContent === currentPart) el.classList.add('drawn');
+      });
+      document.getElementById('bodyPartModal').style.display = 'none';
+      currentPart = null;
+    };
+
+    window.clearZoomCanvas = function() {
+      if (!zCtx) return;
+      zCtx.clearRect(0, 0, zCanvas.width, zCanvas.height);
+      drawPartGuide(currentPart || '');
+    };
+
+    window.setZoomColor = function(color) {
+      zColor = color; zEraser = false;
+      var map = {'#111':'zpBlack','#e02020':'zpRed','#1a5fe0':'zpBlue','#19a832':'zpGreen'};
+      ['zpBlack','zpRed','zpBlue','zpGreen'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.style.border='2px solid #ccc';
+      });
+      var activeId = map[color];
+      if (activeId && document.getElementById(activeId)) document.getElementById(activeId).style.border='3px solid #0074e8';
+      var ze=document.getElementById('zpEraserBtn'); if(ze) ze.style.border='2px solid #ccc';
+    };
+    window.setZoomEraser = function() {
+      zEraser = true;
+      ['zpBlack','zpRed','zpBlue','zpGreen'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.style.border='2px solid #ccc';
+      });
+      var ze=document.getElementById('zpEraserBtn'); if(ze) ze.style.border='3px solid #0074e8';
+    };
+    window.updateZoomLineWidth = function() {
+      var sel = document.getElementById('zpLineWidth');
+      if (sel) zWidth = parseInt(sel.value) || 5;
+    };
+
+    /* 모달 바깥 클릭 → 닫기 */
+    var modal = document.getElementById('bodyPartModal');
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeBodyPart();
+      });
+    }
+  })();
   /* ---------- 시작 ---------- */
   loadDocs(); renderDocs(); renderCond(); renderSigs(); setToday();
   loadLinked(false);   /* 비급여 앱에서 넘어온 정보가 있으면 자동 채움 */
