@@ -2675,6 +2675,13 @@ const DEFAULT_SPECIAL_OPTS = {
     await persistCatalog();
     nameInput.value=''; specInput.value='';
     renderManageCatalog(); renderRecordCatalog();
+    // 추가한 카테고리 블록 자동으로 펼치고 새 항목으로 스크롤
+    const addedBlock = Array.from(manageCatalogRoot.querySelectorAll('.cat-block')).find(b => b.dataset.cat === cat);
+    if(addedBlock){
+      addedBlock.classList.add('open');
+      const newRow = addedBlock.querySelector(`tr[data-id="${id}"]`);
+      if(newRow) newRow.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
     showBanner('banner3', `"${name}" 품목을 추가했습니다.`, true);
   });
 
