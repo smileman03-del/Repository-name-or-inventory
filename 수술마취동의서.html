@@ -318,161 +318,831 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
 <!-- ================= 3 페이지 (수술 설명 그림) ================= -->
 <section class="page" id="p3">
   <h1 style="margin-bottom:4mm;">수술 설명 그림</h1>
-
-  <div id="drawingSection" style="border:1.5px solid #bbb;border-radius:4px;padding:6px;background:#fafafa;display:flex;flex-direction:column;">
-    <!-- 공통 툴바 -->
-    <div style="display:flex;align-items:center;gap:5px;margin-bottom:5px;flex-wrap:wrap;">
-      <span style="font-size:9.5pt;font-weight:bold;color:#444;">✏️ 수술 설명 그림</span>
-      <button type="button" id="drawColorBlack" onclick="setDrawColor('#111')" style="width:24px;height:24px;border-radius:50%;background:#111;border:3px solid #0074e8;cursor:pointer;flex-shrink:0;" title="검정"></button>
-      <button type="button" id="drawColorRed" onclick="setDrawColor('#e02020')" style="width:24px;height:24px;border-radius:50%;background:#e02020;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="빨강"></button>
-      <button type="button" id="drawColorBlue" onclick="setDrawColor('#1a5fe0')" style="width:24px;height:24px;border-radius:50%;background:#1a5fe0;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="파랑"></button>
-      <button type="button" id="drawColorGreen" onclick="setDrawColor('#19a832')" style="width:24px;height:24px;border-radius:50%;background:#19a832;border:2px solid #ccc;cursor:pointer;flex-shrink:0;" title="초록"></button>
-      <button type="button" id="drawEraserBtn" onclick="setDrawEraser()" style="padding:2px 10px;font-size:8.5pt;border:2px solid #ccc;border-radius:12px;background:#fff;cursor:pointer;">지우개</button>
-      <select id="drawLineWidth" onchange="updateLineWidth()" style="font-size:8.5pt;border:1px solid #ccc;border-radius:4px;padding:2px 4px;">
-        <option value="2">가늘게</option>
-        <option value="4" selected>보통</option>
-        <option value="8">굵게</option>
-        <option value="16">매우 굵게</option>
-      </select>
-      <button type="button" onclick="clearDrawing()" style="padding:2px 10px;font-size:8.5pt;border:2px solid #e44;border-radius:12px;background:#fff4f4;color:#c00;cursor:pointer;margin-left:auto;">🗑 초기화</button>
-    </div>
-
-    <!-- 메인 영역: 인체도 + 자유 캔버스 -->
-    <div style="display:flex;gap:8px;align-items:flex-start;">
-      <!-- 왼쪽: 인체 부위 선택 -->
-      <div style="flex-shrink:0;text-align:center;">
-        <div style="font-size:7.5pt;color:#0074e8;margin-bottom:3px;font-weight:bold;">👆 부위 클릭 → 확대 그리기</div>
-        <svg id="bodySvg" viewBox="0 0 220 490" style="width:148px;height:331px;" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <style>
-              .bp{fill:#dbeeff;stroke:#4a90d9;stroke-width:2;cursor:pointer;transition:fill .15s,stroke .15s;}
-              .bp:hover{fill:#93c5fd;stroke:#1d4ed8;}
-              .bp.drawn{fill:#fecaca;stroke:#dc2626;}
-              .bp.drawn:hover{fill:#fca5a5;}
-              .bpl{font-size:8px;fill:#1e3a5f;pointer-events:none;text-anchor:middle;dominant-baseline:middle;font-family:sans-serif;font-weight:bold;}
-            </style>
-          </defs>
-          <!-- 머리 -->
-          <ellipse class="bp" id="bp-head" cx="110" cy="37" rx="29" ry="33" onclick="openBodyPart('머리','bp-head')"><title>머리</title></ellipse>
-          <text class="bpl" x="110" y="37">머리</text>
-          <!-- 목 -->
-          <rect class="bp" id="bp-neck" x="99" y="69" width="22" height="20" rx="5" onclick="openBodyPart('목','bp-neck')"><title>목</title></rect>
-          <text class="bpl" x="110" y="80">목</text>
-          <!-- 가슴 -->
-          <rect class="bp" id="bp-chest" x="77" y="89" width="66" height="52" rx="6" onclick="openBodyPart('가슴/흉추','bp-chest')"><title>가슴/흉추</title></rect>
-          <text class="bpl" x="110" y="116">가슴</text>
-          <!-- 복부/요추 -->
-          <rect class="bp" id="bp-abdomen" x="77" y="141" width="66" height="50" rx="6" onclick="openBodyPart('복부/요추','bp-abdomen')"><title>복부/요추</title></rect>
-          <text class="bpl" x="110" y="167">복부/요추</text>
-          <!-- 오른쪽 어깨 (보는 쪽 왼) -->
-          <ellipse class="bp" id="bp-rshoulder" cx="57" cy="97" rx="24" ry="18" onclick="openBodyPart('오른쪽 어깨','bp-rshoulder')"><title>오른쪽 어깨</title></ellipse>
-          <text class="bpl" x="57" y="97">오른</text>
-          <text class="bpl" x="57" y="107">어깨</text>
-          <!-- 왼쪽 어깨 (보는 쪽 오른) -->
-          <ellipse class="bp" id="bp-lshoulder" cx="163" cy="97" rx="24" ry="18" onclick="openBodyPart('왼쪽 어깨','bp-lshoulder')"><title>왼쪽 어깨</title></ellipse>
-          <text class="bpl" x="163" y="97">왼쪽</text>
-          <text class="bpl" x="163" y="107">어깨</text>
-          <!-- 오른쪽 위팔 -->
-          <rect class="bp" id="bp-ruarm" x="27" y="112" width="34" height="54" rx="12" onclick="openBodyPart('오른쪽 위팔','bp-ruarm')"><title>오른쪽 위팔</title></rect>
-          <text class="bpl" x="44" y="134">오른팔</text>
-          <!-- 왼쪽 위팔 -->
-          <rect class="bp" id="bp-luarm" x="159" y="112" width="34" height="54" rx="12" onclick="openBodyPart('왼쪽 위팔','bp-luarm')"><title>왼쪽 위팔</title></rect>
-          <text class="bpl" x="176" y="134">왼팔</text>
-          <!-- 오른쪽 고관절 -->
-          <rect class="bp" id="bp-rhip" x="77" y="191" width="32" height="40" rx="7" onclick="openBodyPart('오른쪽 고관절','bp-rhip')"><title>오른쪽 고관절</title></rect>
-          <text class="bpl" x="93" y="206">오른쪽</text>
-          <text class="bpl" x="93" y="218">고관절</text>
-          <!-- 왼쪽 고관절 -->
-          <rect class="bp" id="bp-lhip" x="111" y="191" width="32" height="40" rx="7" onclick="openBodyPart('왼쪽 고관절','bp-lhip')"><title>왼쪽 고관절</title></rect>
-          <text class="bpl" x="127" y="206">왼쪽</text>
-          <text class="bpl" x="127" y="218">고관절</text>
-          <!-- 오른쪽 아래팔/손목 -->
-          <rect class="bp" id="bp-rforearm" x="16" y="166" width="32" height="56" rx="10" onclick="openBodyPart('오른쪽 아래팔/손목','bp-rforearm')"><title>오른쪽 아래팔/손목</title></rect>
-          <text class="bpl" x="32" y="189">아래팔</text>
-          <!-- 왼쪽 아래팔/손목 -->
-          <rect class="bp" id="bp-lforearm" x="172" y="166" width="32" height="56" rx="10" onclick="openBodyPart('왼쪽 아래팔/손목','bp-lforearm')"><title>왼쪽 아래팔/손목</title></rect>
-          <text class="bpl" x="188" y="189">아래팔</text>
-          <!-- 오른쪽 손 -->
-          <ellipse class="bp" id="bp-rhand" cx="30" cy="240" rx="20" ry="17" onclick="openBodyPart('오른쪽 손','bp-rhand')"><title>오른쪽 손</title></ellipse>
-          <text class="bpl" x="30" y="240">오른손</text>
-          <!-- 왼쪽 손 -->
-          <ellipse class="bp" id="bp-lhand" cx="190" cy="240" rx="20" ry="17" onclick="openBodyPart('왼쪽 손','bp-lhand')"><title>왼쪽 손</title></ellipse>
-          <text class="bpl" x="190" y="240">왼손</text>
-          <!-- 오른쪽 허벅지 -->
-          <rect class="bp" id="bp-rthigh" x="74" y="231" width="32" height="68" rx="11" onclick="openBodyPart('오른쪽 허벅지','bp-rthigh')"><title>오른쪽 허벅지</title></rect>
-          <text class="bpl" x="90" y="262">오른쪽</text>
-          <text class="bpl" x="90" y="273">허벅지</text>
-          <!-- 왼쪽 허벅지 -->
-          <rect class="bp" id="bp-lthigh" x="114" y="231" width="32" height="68" rx="11" onclick="openBodyPart('왼쪽 허벅지','bp-lthigh')"><title>왼쪽 허벅지</title></rect>
-          <text class="bpl" x="130" y="262">왼쪽</text>
-          <text class="bpl" x="130" y="273">허벅지</text>
-          <!-- 오른쪽 무릎 -->
-          <ellipse class="bp" id="bp-rknee" cx="90" cy="308" rx="22" ry="15" onclick="openBodyPart('오른쪽 무릎','bp-rknee')"><title>오른쪽 무릎</title></ellipse>
-          <text class="bpl" x="90" y="308">오른무릎</text>
-          <!-- 왼쪽 무릎 -->
-          <ellipse class="bp" id="bp-lknee" cx="130" cy="308" rx="22" ry="15" onclick="openBodyPart('왼쪽 무릎','bp-lknee')"><title>왼쪽 무릎</title></ellipse>
-          <text class="bpl" x="130" y="308">왼무릎</text>
-          <!-- 오른쪽 종아리 -->
-          <rect class="bp" id="bp-rcalf" x="71" y="323" width="30" height="66" rx="10" onclick="openBodyPart('오른쪽 종아리','bp-rcalf')"><title>오른쪽 종아리</title></rect>
-          <text class="bpl" x="86" y="352">오른쪽</text>
-          <text class="bpl" x="86" y="363">종아리</text>
-          <!-- 왼쪽 종아리 -->
-          <rect class="bp" id="bp-lcalf" x="119" y="323" width="30" height="66" rx="10" onclick="openBodyPart('왼쪽 종아리','bp-lcalf')"><title>왼쪽 종아리</title></rect>
-          <text class="bpl" x="134" y="352">왼쪽</text>
-          <text class="bpl" x="134" y="363">종아리</text>
-          <!-- 오른쪽 발목/발 -->
-          <ellipse class="bp" id="bp-rfoot" cx="84" cy="400" rx="26" ry="15" onclick="openBodyPart('오른쪽 발목/발','bp-rfoot')"><title>오른쪽 발목/발</title></ellipse>
-          <text class="bpl" x="84" y="400">오른발</text>
-          <!-- 왼쪽 발목/발 -->
-          <ellipse class="bp" id="bp-lfoot" cx="136" cy="400" rx="26" ry="15" onclick="openBodyPart('왼쪽 발목/발','bp-lfoot')"><title>왼쪽 발목/발</title></ellipse>
-          <text class="bpl" x="136" y="400">왼발</text>
-          <!-- 척추 (등) -->
-          <rect class="bp" id="bp-spine" x="99" y="419" width="22" height="52" rx="6" onclick="openBodyPart('척추/등','bp-spine')"><title>척추/등</title></rect>
-          <text class="bpl" x="110" y="445">척추</text>
-        </svg>
-      </div>
-
-      <!-- 오른쪽: 자유 그리기 캔버스 -->
-      <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
-        <div style="font-size:7.5pt;color:#666;margin-bottom:3px;">자유 메모 (전체 그림 영역)</div>
-        <canvas id="drawingCanvas" width="600" height="300"
-          style="display:block;width:100%;border:1px solid #ddd;border-radius:3px;background:#fff;cursor:crosshair;touch-action:none;min-height:220px;"></canvas>
-      </div>
-    </div>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <span style="font-size:9.5pt;color:#555;font-family:'맑은 고딕',sans-serif;">신체 부위 선택 → 판서 보드에서 직접 그려 환자에게 설명하세요.</span>
+    <button type="button" class="btn ui noprint"
+      onclick="document.getElementById('sb-overlay').style.display='flex'"
+      style="background:#1a56db;color:#fff;font-size:12px;padding:7px 16px;border:none;border-radius:7px;cursor:pointer;font-weight:600;">
+      🖊 판서 보드 열기
+    </button>
   </div>
-
-  <!-- ===== 부위 확대 모달 ===== -->
-  <div id="bodyPartModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9900;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:12px;padding:12px 14px;width:min(96vw,760px);max-height:94vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.35);">
-      <!-- 모달 헤더 -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
-        <span id="bodyPartTitle" style="font-size:13pt;font-weight:bold;color:#1a5fe0;">📍 머리</span>
-        <!-- 손 앞/뒤 전환 탭 (손 부위 선택 시에만 표시) -->
-        <div id="handViewTabs" style="display:none;gap:4px;align-items:center;">
-          <button id="handTabFront" type="button" onclick="switchHandView('front')" style="padding:3px 10px;font-size:8.5pt;border-radius:10px;border:2px solid #1a5fe0;background:#1a5fe0;color:#fff;cursor:pointer;font-weight:bold;">앞 (손바닥)</button>
-          <button id="handTabBack" type="button" onclick="switchHandView('back')" style="padding:3px 10px;font-size:8.5pt;border-radius:10px;border:2px solid #ccc;background:#fff;color:#666;cursor:pointer;">뒤 (손등)</button>
-        </div>
-        <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
-          <button type="button" id="zpBlack" onclick="setZoomColor('#111')" style="width:24px;height:24px;border-radius:50%;background:#111;border:3px solid #0074e8;cursor:pointer;" title="검정"></button>
-          <button type="button" id="zpRed" onclick="setZoomColor('#e02020')" style="width:24px;height:24px;border-radius:50%;background:#e02020;border:2px solid #ccc;cursor:pointer;" title="빨강"></button>
-          <button type="button" id="zpBlue" onclick="setZoomColor('#1a5fe0')" style="width:24px;height:24px;border-radius:50%;background:#1a5fe0;border:2px solid #ccc;cursor:pointer;" title="파랑"></button>
-          <button type="button" id="zpGreen" onclick="setZoomColor('#19a832')" style="width:24px;height:24px;border-radius:50%;background:#19a832;border:2px solid #ccc;cursor:pointer;" title="초록"></button>
-          <button type="button" id="zpEraserBtn" onclick="setZoomEraser()" style="padding:2px 9px;font-size:8.5pt;border:2px solid #ccc;border-radius:12px;background:#fff;cursor:pointer;">지우개</button>
-          <select id="zpLineWidth" onchange="updateZoomLineWidth()" style="font-size:8.5pt;border:1px solid #ccc;border-radius:4px;padding:2px 4px;">
-            <option value="2">가늘게</option>
-            <option value="5" selected>보통</option>
-            <option value="10">굵게</option>
-            <option value="20">매우 굵게</option>
-          </select>
-          <button type="button" onclick="clearZoomCanvas()" style="padding:2px 9px;font-size:8.5pt;border:2px solid #e44;border-radius:12px;background:#fff4f4;color:#c00;cursor:pointer;">🗑 지우기</button>
-          <button type="button" onclick="closeBodyPart()" style="padding:3px 14px;font-size:9pt;border:none;border-radius:12px;background:#1a5fe0;color:#fff;cursor:pointer;font-weight:bold;">💾 저장 후 닫기</button>
-        </div>
-      </div>
-      <!-- 확대 그리기 캔버스 -->
-      <canvas id="zoomCanvas" style="width:100%;border:1.5px solid #bbb;border-radius:6px;background:#fff;cursor:crosshair;touch-action:none;"></canvas>
-    </div>
+  <div id="sb-preview-wrap"
+    style="width:100%;border:1.5px solid #d0d7e3;border-radius:7px;background:#f7f9fc;min-height:180px;
+           display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+    <canvas id="sb-preview-canvas" style="max-width:100%;max-height:200px;display:none;"></canvas>
+    <span id="sb-preview-hint" style="color:#aaa;font-size:10pt;font-family:'맑은 고딕',sans-serif;">
+      판서 보드에서 그림을 그리면 여기에 미리보기가 표시됩니다
+    </span>
   </div>
 </section>
+
+<!-- ===================== 판서 보드 오버레이 ===================== -->
+<style>
+/* ── 판서 보드 오버레이 (CSS scoped to #sb-overlay) ── */
+#sb-overlay {
+  position: fixed; inset: 0; z-index: 9950;
+  display: none; flex-direction: column;
+  font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  background: #eef1f6; color: #0d1726;
+  --sb-bg: #eef1f6; --sb-surface: #ffffff; --sb-surface2: #f7f9fc;
+  --sb-border: #e3e8f0; --sb-border2: #c8d0de; --sb-text: #0d1726;
+  --sb-text2: #2d3f5a; --sb-text3: #5a6e8a; --sb-text4: #8fa0b8;
+  --sb-accent: #1a56db; --sb-accent-light: #eef3ff; --sb-accent-hover: #1447c5;
+  --sb-header-bg: #0d1726; --sb-danger: #e53935; --sb-success: #0d9668;
+  --sb-warn: #d97706; --sb-canvas-bg: #f2ede4;
+  --sb-shadow: 0 4px 20px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+}
+#sb-overlay * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* header */
+#sb-overlay header {
+  background: var(--sb-header-bg); color: #f1f5f9;
+  padding: 0 20px; height: 52px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-shrink: 0; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.25); z-index: 20;
+}
+#sb-overlay .sb-header-title { display: flex; align-items: center; gap: 10px; overflow: hidden; }
+#sb-overlay header h1 {
+  font-size: 0.95rem; font-weight: 700; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.01em;
+}
+#sb-overlay .sb-badge {
+  background: var(--sb-accent); color: white; font-size: 0.7rem;
+  padding: 3px 10px; border-radius: 20px; font-weight: 600; white-space: nowrap; flex-shrink: 0;
+}
+#sb-overlay .sb-header-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+/* buttons */
+#sb-overlay .sb-btn {
+  padding: 7px 14px; border: none; border-radius: 7px;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: all 0.14s; white-space: nowrap;
+  font-family: inherit; letter-spacing: -0.01em;
+}
+#sb-overlay .sb-btn-primary { background: var(--sb-accent); color: white; }
+#sb-overlay .sb-btn-primary:hover { background: var(--sb-accent-hover); }
+#sb-overlay .sb-btn-secondary { background: #2d3f5a; color: #e8edf5; }
+#sb-overlay .sb-btn-secondary:hover { background: #3d5070; }
+#sb-overlay .sb-btn-danger { background: var(--sb-danger); color: white; }
+#sb-overlay .sb-btn-success { background: var(--sb-success); color: white; }
+#sb-overlay .sb-btn-sm { padding: 5px 10px; font-size: 0.75rem; }
+#sb-overlay .sb-upload-label {
+  background: #3d5070; color: #e8edf5;
+  padding: 7px 12px; border-radius: 7px;
+  font-size: 0.8rem; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: inherit; transition: background 0.14s;
+}
+#sb-overlay .sb-upload-label:hover { background: #4d6080; }
+#sb-overlay input[type="file"] { display: none; }
+
+/* layout */
+#sb-overlay .sb-main-container { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+/* sidebar */
+#sb-overlay .sb-sidebar {
+  width: 230px; background: var(--sb-surface);
+  border-right: 1px solid var(--sb-border);
+  display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0;
+}
+#sb-overlay .sb-body-thumb-area {
+  padding: 12px 10px 10px; border-bottom: 1px solid var(--sb-border);
+  background: var(--sb-surface2); display: flex; justify-content: center; align-items: center;
+  flex-shrink: 0;
+}
+#sb-overlay .sb-body-thumb-wrap { position: relative; display: inline-block; line-height: 0; }
+#sb-overlay #sb-bodyThumbCanvas { display: block; border-radius: 6px; }
+#sb-overlay #sb-bodyThumbHotspots { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+#sb-overlay .sb-thumb-hs {
+  position: absolute; border: 1.5px dashed rgba(26,86,219,0.35);
+  background: transparent; border-radius: 4px; cursor: pointer; transition: all 0.14s;
+}
+#sb-overlay .sb-thumb-hs:hover { background: rgba(26,86,219,0.14); border-color: rgba(26,86,219,0.7); }
+#sb-overlay .sb-thumb-hs.active {
+  background: rgba(26,86,219,0.22); border-color: var(--sb-accent);
+  border-style: solid; border-width: 2px;
+}
+#sb-overlay .sb-region-list-wrap {
+  flex: 1; overflow-y: auto; padding: 10px 8px; display: flex; flex-direction: column; gap: 2px;
+}
+#sb-overlay .sb-region-list-title {
+  font-size: 0.68rem; font-weight: 700; color: var(--sb-text4);
+  text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 4px 8px; flex-shrink: 0;
+}
+#sb-overlay .sb-region-btn {
+  text-align: left; padding: 8px 10px;
+  background: transparent; border: 1.5px solid transparent; border-radius: 7px;
+  font-size: 0.8rem; font-weight: 500; color: var(--sb-text2);
+  cursor: pointer; transition: all 0.12s;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 6px; font-family: inherit; line-height: 1.35;
+}
+#sb-overlay .sb-region-btn:hover { background: var(--sb-accent-light); border-color: rgba(26,86,219,0.18); color: var(--sb-accent); }
+#sb-overlay .sb-region-btn.active { background: var(--sb-accent); border-color: var(--sb-accent); color: white; font-weight: 600; }
+#sb-overlay .sb-region-btn .sb-arr { font-size: 0.75rem; opacity: 0.6; flex-shrink: 0; }
+#sb-overlay .sb-region-btn.active .sb-arr { opacity: 0.9; }
+
+/* workspace */
+#sb-overlay .sb-workspace {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; background: var(--sb-bg);
+}
+#sb-overlay .sb-toolbar {
+  background: var(--sb-surface); padding: 7px 14px; border-bottom: 1px solid var(--sb-border);
+  display: flex; flex-wrap: wrap; gap: 7px; align-items: center; flex-shrink: 0; z-index: 5; min-height: 50px;
+}
+#sb-overlay .sb-tool-sep { width: 1px; height: 26px; background: var(--sb-border2); flex-shrink: 0; }
+#sb-overlay .sb-tool-label { font-size: 0.68rem; font-weight: 700; color: var(--sb-text4); letter-spacing: 0.06em; }
+#sb-overlay .sb-tool-btn {
+  padding: 5px 10px; border: 1.5px solid var(--sb-border2); background: var(--sb-surface);
+  border-radius: 7px; font-size: 0.8rem; cursor: pointer; color: var(--sb-text2); font-weight: 500;
+  transition: all 0.12s; white-space: nowrap; font-family: inherit;
+  display: flex; align-items: center; gap: 4px; height: 32px;
+}
+#sb-overlay .sb-tool-btn:hover { background: var(--sb-accent-light); border-color: rgba(26,86,219,0.3); color: var(--sb-accent); }
+#sb-overlay .sb-tool-btn.active { background: var(--sb-accent-light); border-color: var(--sb-accent); color: var(--sb-accent); font-weight: 700; }
+
+/* color swatches */
+#sb-overlay .sb-color-row { display: flex; gap: 5px; align-items: center; }
+#sb-overlay .sb-color-swatch {
+  width: 24px; height: 24px; border-radius: 50%; border: 2.5px solid transparent;
+  cursor: pointer; transition: transform 0.1s, border-color 0.1s; flex-shrink: 0;
+}
+#sb-overlay .sb-color-swatch:hover { transform: scale(1.1); }
+#sb-overlay .sb-color-swatch.active { border-color: var(--sb-text); transform: scale(1.18); box-shadow: 0 0 0 1px rgba(0,0,0,0.12); }
+
+/* size buttons */
+#sb-overlay .sb-size-btn {
+  width: 30px; height: 30px; border-radius: 7px;
+  border: 1.5px solid var(--sb-border2); background: var(--sb-surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.12s; flex-shrink: 0;
+}
+#sb-overlay .sb-size-btn:hover { background: var(--sb-accent-light); border-color: rgba(26,86,219,0.3); }
+#sb-overlay .sb-size-btn.active { border-color: var(--sb-accent); background: var(--sb-accent-light); }
+#sb-overlay .sb-size-dot { background: var(--sb-text); border-radius: 50%; display: block; }
+
+/* canvas area */
+#sb-overlay .sb-canvas-area {
+  flex: 1; position: relative; display: flex;
+  align-items: center; justify-content: center;
+  padding: 16px; overflow: hidden; min-height: 0;
+}
+#sb-overlay .sb-canvas-wrapper {
+  position: relative; background: var(--sb-canvas-bg);
+  box-shadow: var(--sb-shadow); border-radius: 10px; overflow: hidden;
+}
+#sb-overlay canvas { display: block; touch-action: none; }
+#sb-overlay #sb-baseCanvas { position: relative; z-index: 1; }
+#sb-overlay #sb-drawCanvas { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; }
+#sb-overlay #sb-hotspotOverlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; pointer-events: auto;
+}
+#sb-overlay .sb-hotspot-box {
+  position: absolute; border: 2px dashed rgba(26,86,219,0.45);
+  background: rgba(59,130,246,0.05); border-radius: 8px; cursor: pointer;
+  transition: all 0.14s; display: flex; align-items: flex-end;
+  justify-content: center; padding-bottom: 5px;
+}
+#sb-overlay .sb-hotspot-box:hover { border-color: var(--sb-accent); background: rgba(26,86,219,0.14); }
+#sb-overlay .sb-hotspot-label {
+  background: rgba(13,23,38,0.88); color: white; font-size: 0.7rem;
+  padding: 3px 8px; border-radius: 5px; opacity: 0;
+  transition: opacity 0.14s; pointer-events: none; white-space: nowrap;
+  font-family: 'Noto Sans KR', sans-serif; font-weight: 500;
+}
+#sb-overlay .sb-hotspot-box:hover .sb-hotspot-label { opacity: 1; }
+
+/* notes panel */
+#sb-overlay .sb-notes-panel {
+  width: 265px; background: var(--sb-surface);
+  border-left: 1px solid var(--sb-border); padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  flex-shrink: 0; overflow-y: auto;
+}
+#sb-overlay .sb-panel-section-title {
+  font-size: 0.72rem; font-weight: 700; color: var(--sb-text4);
+  text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 2px;
+}
+#sb-overlay .sb-info-card {
+  background: var(--sb-surface2); border: 1px solid var(--sb-border);
+  border-radius: 8px; padding: 10px 12px; font-size: 0.82rem; line-height: 1.55;
+}
+#sb-overlay .sb-info-card .sb-region-name {
+  color: #1240a8; font-weight: 700; display: block; margin-bottom: 4px; font-size: 0.84rem;
+}
+#sb-overlay .sb-hint-banner {
+  background: #fff9e6; color: #7c5600; font-size: 0.78rem;
+  padding: 8px 10px; border-radius: 7px; border: 1px solid #fde68a; line-height: 1.45;
+}
+#sb-overlay .sb-memo-label { font-size: 0.75rem; font-weight: 700; color: var(--sb-text3); }
+#sb-overlay textarea {
+  width: 100%; border: 1.5px solid var(--sb-border2); border-radius: 8px;
+  padding: 10px; font-family: inherit; font-size: 0.82rem;
+  resize: none; line-height: 1.55; color: var(--sb-text);
+  background: var(--sb-surface); transition: border-color 0.14s; min-height: 110px;
+}
+#sb-overlay textarea:focus { outline: none; border-color: var(--sb-accent); }
+#sb-overlay .sb-action-row { display: flex; gap: 6px; flex-direction: column; }
+
+/* footer */
+#sb-overlay .sb-footer {
+  background: var(--sb-surface2); border-top: 1px solid var(--sb-border);
+  padding: 4px 16px; font-size: 0.68rem; color: var(--sb-text4);
+  text-align: center; flex-shrink: 0; letter-spacing: 0.01em;
+}
+
+/* scrollbar */
+#sb-overlay ::-webkit-scrollbar { width: 5px; height: 5px; }
+#sb-overlay ::-webkit-scrollbar-track { background: transparent; }
+#sb-overlay ::-webkit-scrollbar-thumb { background: var(--sb-border2); border-radius: 10px; }
+#sb-overlay ::-webkit-scrollbar-thumb:hover { background: var(--sb-text4); }
+</style>
+
+<!-- ── 오버레이 본체 ── -->
+<div id="sb-overlay">
+  <header>
+    <div class="sb-header-title">
+      <h1>🩺 수술 환자 설명용 인체 판서 보드</h1>
+      <span class="sb-badge" id="sb-currentRegionBadge">전신 보기</span>
+    </div>
+    <div class="sb-header-actions">
+      <label class="sb-upload-label" title="다른 해부도 이미지 불러오기">
+        📂 이미지 변경
+        <input type="file" id="sb-imgUpload" accept="image/*">
+      </label>
+      <button class="sb-btn sb-btn-secondary" id="sb-resetViewBtn">🔍 전신 보기</button>
+      <button class="sb-btn sb-btn-success" id="sb-saveImgBtn">💾 저장</button>
+      <button class="sb-btn sb-btn-danger" onclick="document.getElementById('sb-overlay').style.display='none'">✕ 닫기</button>
+    </div>
+  </header>
+
+  <div class="sb-main-container">
+    <!-- Left Sidebar -->
+    <aside class="sb-sidebar">
+      <div class="sb-body-thumb-area">
+        <div class="sb-body-thumb-wrap">
+          <canvas id="sb-bodyThumbCanvas" width="150" height="275"></canvas>
+          <div id="sb-bodyThumbHotspots"></div>
+        </div>
+      </div>
+      <div class="sb-region-list-wrap">
+        <div class="sb-region-list-title">부위 선택</div>
+        <div id="sb-regionList"></div>
+      </div>
+    </aside>
+
+    <!-- Main Workspace -->
+    <main class="sb-workspace">
+      <div class="sb-toolbar">
+        <span class="sb-tool-label">도구</span>
+        <button class="sb-tool-btn active" data-sbtool="pen">✏️ 펜</button>
+        <button class="sb-tool-btn" data-sbtool="arrow">↗ 화살표</button>
+        <button class="sb-tool-btn" data-sbtool="circle">⭕ 원</button>
+        <button class="sb-tool-btn" data-sbtool="rect">▭ 사각형</button>
+        <button class="sb-tool-btn" data-sbtool="dashed">✂️ 절개선</button>
+        <button class="sb-tool-btn" data-sbtool="eraser">🧹 지우개</button>
+        <div class="sb-tool-sep"></div>
+        <span class="sb-tool-label">색상</span>
+        <div class="sb-color-row">
+          <button class="sb-color-swatch active" style="background:#e53935" data-sbcolor="#e53935" title="빨강 – 병변/절개"></button>
+          <button class="sb-color-swatch" style="background:#1a56db" data-sbcolor="#1a56db" title="파랑 – 혈관/신경"></button>
+          <button class="sb-color-swatch" style="background:#059669" data-sbcolor="#059669" title="초록 – 이식/정상"></button>
+          <button class="sb-color-swatch" style="background:#d97706" data-sbcolor="#d97706" title="노랑 – 주의"></button>
+          <button class="sb-color-swatch" style="background:#7c3aed" data-sbcolor="#7c3aed" title="보라 – 신경"></button>
+          <button class="sb-color-swatch" style="background:#0d1726" data-sbcolor="#0d1726" title="검정 – 주석"></button>
+          <button class="sb-color-swatch" style="background:#ffffff;border:1.5px solid #ccc" data-sbcolor="#ffffff" title="흰색"></button>
+        </div>
+        <div class="sb-tool-sep"></div>
+        <span class="sb-tool-label">굵기</span>
+        <button class="sb-size-btn" data-sbsize="2" title="가늘게"><span class="sb-size-dot" style="width:3px;height:3px;"></span></button>
+        <button class="sb-size-btn active" data-sbsize="5" title="보통"><span class="sb-size-dot" style="width:7px;height:7px;"></span></button>
+        <button class="sb-size-btn" data-sbsize="10" title="굵게"><span class="sb-size-dot" style="width:12px;height:12px;"></span></button>
+        <button class="sb-size-btn" data-sbsize="20" title="매우 굵게"><span class="sb-size-dot" style="width:18px;height:18px;"></span></button>
+        <div class="sb-tool-sep"></div>
+        <button class="sb-btn sb-btn-secondary sb-btn-sm" id="sb-undoBtn">↩ 실행취소</button>
+        <button class="sb-btn sb-btn-danger sb-btn-sm" id="sb-clearDrawBtn">🗑 모두 지우기</button>
+      </div>
+
+      <div class="sb-canvas-area" id="sb-canvasArea">
+        <div class="sb-canvas-wrapper" id="sb-canvasWrapper">
+          <canvas id="sb-baseCanvas"></canvas>
+          <canvas id="sb-drawCanvas"></canvas>
+          <div id="sb-hotspotOverlay"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Right Notes Panel -->
+    <aside class="sb-notes-panel">
+      <div class="sb-panel-section-title">선택 부위</div>
+      <div class="sb-info-card" id="sb-regionInfoCard">
+        <span class="sb-region-name">전신 근육계 (정면)</span>
+        좌측 목록 또는 그림에서 부위를 클릭하면 확대됩니다.
+      </div>
+      <div class="sb-hint-banner" id="sb-modeHint">
+        💡 <b>전신 모드:</b> 점선 영역 클릭 시 확대됩니다.
+      </div>
+      <div class="sb-panel-section-title">환자 설명 메모</div>
+      <textarea id="sb-patientMemo" placeholder="예) 우측 견관절 회전근개 파열 — 절개 범위 약 5cm, 봉합 후 6주 재활 필요.&#10;&#10;수술 위험 및 합병증:&#10;- 감염, 출혈, 신경 손상 가능성"></textarea>
+      <div class="sb-action-row">
+        <button class="sb-btn sb-btn-success" id="sb-saveImgBtn2" style="justify-content:center">💾 설명 이미지 저장</button>
+        <button class="sb-btn sb-btn-secondary sb-btn-sm" id="sb-copyMemoBtn" style="justify-content:center">📋 메모 복사</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="sb-footer">
+    본 도구는 환자 설명용 보조 자료입니다. 의학적 진단·처방의 근거로 사용할 수 없습니다.
+  </div>
+</div>
+
+<script>
+(function() {
+'use strict';
+// ───────── 판서 보드 IIFE (변수 충돌 방지) ─────────
+const sbREGIONS = [
+  { id:'full',           name:'전신 보기 (전체)',           desc:'전신 정면 해부도입니다. 점선 영역 클릭으로 확대합니다.',
+    box:{x:0,y:0,w:1,h:1} },
+  { id:'head_neck',      name:'두부 · 경부 (머리/목)',      desc:'안면근, 흉쇄유돌근, 경추 전방 및 갑상선·경동맥 인접 부위.',
+    box:{x:0.32,y:0.02,w:0.36,h:0.19} },
+  { id:'chest',          name:'흉부 (가슴/대흉근)',         desc:'대흉근, 흉골, 늑간근 및 흉곽 전면 부위.',
+    box:{x:0.25,y:0.16,w:0.50,h:0.18} },
+  { id:'shoulder_r',     name:'우측 어깨 · 상완',           desc:'우측 삼각근, 견관절, 상완이두근 및 상완 전면.',
+    box:{x:0.14,y:0.16,w:0.28,h:0.25} },
+  { id:'shoulder_l',     name:'좌측 어깨 · 상완',           desc:'좌측 삼각근, 견관절, 상완이두근 및 상완 전면.',
+    box:{x:0.58,y:0.16,w:0.28,h:0.25} },
+  { id:'abdomen',        name:'복부 (복직근/서혜부)',        desc:'복직근, 외복사근, 백선 및 서혜부 인접 복벽 구조.',
+    box:{x:0.29,y:0.30,w:0.42,h:0.22} },
+  { id:'forearm_hand_r', name:'우측 전완 · 손목 · 손',      desc:'우측 전완근, 수근관 및 수부 힘줄·신경 부위.',
+    box:{x:0.08,y:0.36,w:0.26,h:0.26} },
+  { id:'forearm_hand_l', name:'좌측 전완 · 손목 · 손',      desc:'좌측 전완근, 수근관 및 수부 힘줄·신경 부위.',
+    box:{x:0.66,y:0.36,w:0.26,h:0.26} },
+  { id:'pelvis_hip',     name:'골반 · 고관절',              desc:'장요근, 치골근, 대퇴근막장근 및 양측 고관절 전면.',
+    box:{x:0.28,y:0.44,w:0.44,h:0.18} },
+  { id:'thigh',          name:'대퇴부 (허벅지)',             desc:'대퇴직근, 외측광근, 내측광근, 봉공근 등 허벅지 전면 근육군.',
+    box:{x:0.28,y:0.52,w:0.44,h:0.22} },
+  { id:'knee',           name:'슬관절 (무릎)',               desc:'슬개골, 슬개건, 내·외측 인대 및 무릎 관절 전면.',
+    box:{x:0.30,y:0.67,w:0.40,h:0.14} },
+  { id:'lower_leg_foot', name:'하퇴부 · 발목 · 발',         desc:'전경골근, 비복근 전면, 족관절 및 발등 힘줄 부위.',
+    box:{x:0.30,y:0.75,w:0.40,h:0.24} }
+];
+
+let sbCurrentRegion = sbREGIONS[0];
+let sbCurrentTool = 'pen';
+let sbCurrentColor = '#e53935';
+let sbCurrentSize = 5;
+let sbIsDrawing = false;
+let sbStartX = 0, sbStartY = 0;
+let sbHistoryStack = [];
+let sbSnapshotData = null;
+
+const sbBaseCanvas    = document.getElementById('sb-baseCanvas');
+const sbBaseCtx       = sbBaseCanvas.getContext('2d');
+const sbDrawCanvas    = document.getElementById('sb-drawCanvas');
+const sbDrawCtx       = sbDrawCanvas.getContext('2d');
+const sbCanvasArea    = document.getElementById('sb-canvasArea');
+const sbCanvasWrapper = document.getElementById('sb-canvasWrapper');
+const sbHotspotOverlay= document.getElementById('sb-hotspotOverlay');
+const sbBodyThumb     = document.getElementById('sb-bodyThumbCanvas');
+const sbThumbCtx      = sbBodyThumb.getContext('2d');
+const sbThumbHotspots = document.getElementById('sb-bodyThumbHotspots');
+
+const sbAnatomyImg = new Image();
+let sbUseCustomImage = false;
+
+// ── 해부도 캔버스 생성 (900 × 1650) ──
+function sbBuildDefaultAnatomyCanvas() {
+  const W = 900, H = 1650;
+  const off = document.createElement('canvas');
+  off.width = W; off.height = H;
+  const c = off.getContext('2d');
+  c.fillStyle = '#f2ede4'; c.fillRect(0, 0, W, H);
+  c.strokeStyle = 'rgba(160,145,128,0.14)'; c.lineWidth = 1;
+  for (let x = 0; x <= W; x += 50) { c.beginPath(); c.moveTo(x,0); c.lineTo(x,H); c.stroke(); }
+  for (let y = 0; y <= H; y += 50) { c.beginPath(); c.moveTo(0,y); c.lineTo(W,y); c.stroke(); }
+  c.save(); c.translate(450, 0);
+
+  // 머리
+  c.beginPath(); c.ellipse(0, 125, 58, 76, 0, 0, Math.PI*2);
+  c.fillStyle = '#cfc5b6'; c.fill(); c.strokeStyle = '#6b5a4a'; c.lineWidth = 2.5; c.stroke();
+  c.strokeStyle = 'rgba(107,90,74,0.3)'; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(0,54); c.lineTo(0,195); c.stroke();
+  c.beginPath(); c.ellipse(0, 125, 55, 25, 0, 0, Math.PI*2); c.stroke();
+
+  // 목 & 승모근
+  c.beginPath(); c.moveTo(-30,194); c.lineTo(-38,252); c.lineTo(-140,296); c.lineTo(140,296);
+  c.lineTo(38,252); c.lineTo(30,194); c.closePath();
+  c.fillStyle = '#c0b6a6'; c.fill(); c.strokeStyle = '#6b5a4a'; c.lineWidth = 2; c.stroke();
+  for (const s of [-1, 1]) {
+    c.beginPath(); c.moveTo(s*40, 178); c.quadraticCurveTo(s*20, 220, s*14, 285);
+    c.lineTo(s*28, 288); c.quadraticCurveTo(s*32, 222, s*52, 182); c.closePath();
+    c.fillStyle = '#a89880'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.2; c.stroke();
+  }
+
+  // 몸통
+  c.beginPath(); c.moveTo(-140,296);
+  c.quadraticCurveTo(-162,390,-122,470); c.quadraticCurveTo(-108,555,-118,655);
+  c.quadraticCurveTo(-140,748,-126,828); c.lineTo(0,872); c.lineTo(126,828);
+  c.quadraticCurveTo(140,748,118,655); c.quadraticCurveTo(108,555,122,470);
+  c.quadraticCurveTo(162,390,140,296); c.closePath();
+  c.fillStyle = '#cac0b0'; c.fill(); c.strokeStyle = '#6b5a4a'; c.lineWidth = 2.5; c.stroke();
+  c.fillStyle = '#ddd8ce'; c.fillRect(-8, 288, 16, 572);
+
+  // 대흉근
+  for (const s of [-1, 1]) {
+    c.beginPath(); c.moveTo(s*10, 294); c.quadraticCurveTo(s*78, 290, s*134, 328);
+    c.quadraticCurveTo(s*136, 405, s*106, 426); c.quadraticCurveTo(s*58, 436, s*10, 416); c.closePath();
+    c.fillStyle = '#8f8578'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.5; c.stroke();
+    c.strokeStyle = 'rgba(68,58,48,0.22)'; c.lineWidth = 1;
+    for (let y = 302; y <= 415; y += 11) {
+      c.beginPath(); c.moveTo(s*12, y); c.quadraticCurveTo(s*75, y-4, s*126, y+10); c.stroke();
+    }
+  }
+
+  // 삼각근
+  for (const s of [-1, 1]) {
+    c.beginPath(); c.moveTo(s*132, 294); c.quadraticCurveTo(s*196, 308, s*198, 395);
+    c.quadraticCurveTo(s*170, 420, s*142, 410); c.quadraticCurveTo(s*126, 358, s*132, 294); c.closePath();
+    c.fillStyle = '#857d70'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.5; c.stroke();
+  }
+
+  // 복직근
+  for (const s of [-1, 1]) {
+    for (let i = 0; i < 3; i++) {
+      const ty = 436 + i * 70;
+      c.beginPath(); c.roundRect(s*12, ty, s*48, 60, [10,10,10,10]);
+      c.fillStyle = '#968e80'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+    }
+    c.beginPath(); c.moveTo(s*12, 648); c.lineTo(s*58, 648); c.lineTo(s*38, 832); c.lineTo(s*12, 840);
+    c.closePath(); c.fillStyle = '#9e968a'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+  }
+
+  // 외복사근
+  for (const s of [-1, 1]) {
+    c.beginPath(); c.moveTo(s*66, 440); c.lineTo(s*118, 468);
+    c.quadraticCurveTo(s*110, 590, s*118, 672); c.lineTo(s*68, 658); c.closePath();
+    c.fillStyle = '#a8a098'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+  }
+
+  // 팔
+  for (const s of [-1, 1]) {
+    c.beginPath(); c.moveTo(s*138, 296); c.quadraticCurveTo(s*198, 312, s*200, 396);
+    c.quadraticCurveTo(s*202, 476, s*218, 542); c.quadraticCurveTo(s*248, 628, s*275, 735);
+    c.lineTo(s*322, 806); c.lineTo(s*312, 816); c.lineTo(s*282, 786);
+    c.lineTo(s*302, 866); c.lineTo(s*288, 870); c.lineTo(s*268, 802);
+    c.lineTo(s*278, 882); c.lineTo(s*262, 884); c.lineTo(s*248, 806);
+    c.lineTo(s*252, 876); c.lineTo(s*236, 876); c.lineTo(s*234, 802);
+    c.lineTo(s*224, 852); c.lineTo(s*210, 848); c.lineTo(s*222, 748);
+    c.quadraticCurveTo(s*184, 638, s*168, 544); c.quadraticCurveTo(s*144, 476, s*134, 420); c.closePath();
+    c.fillStyle = '#cac0b0'; c.fill(); c.strokeStyle = '#6b5a4a'; c.lineWidth = 2; c.stroke();
+    c.beginPath(); c.moveTo(s*144, 410); c.quadraticCurveTo(s*190, 420, s*190, 505);
+    c.quadraticCurveTo(s*164, 535, s*146, 500); c.closePath();
+    c.fillStyle = '#989088'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+    c.beginPath(); c.moveTo(s*168, 526); c.quadraticCurveTo(s*216, 548, s*244, 702);
+    c.lineTo(s*220, 712); c.quadraticCurveTo(s*184, 604, s*168, 526); c.closePath();
+    c.fillStyle = '#928a82'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.2; c.stroke();
+  }
+
+  // 다리
+  for (const s of [-1, 1]) {
+    c.beginPath(); c.moveTo(s*124, 828);
+    c.quadraticCurveTo(s*152, 948, s*126, 1120); c.quadraticCurveTo(s*120, 1178, s*122, 1224);
+    c.quadraticCurveTo(s*136, 1326, s*106, 1468); c.lineTo(s*110, 1528); c.lineTo(s*128, 1600);
+    c.lineTo(s*44, 1608); c.lineTo(s*48, 1528); c.lineTo(s*50, 1468);
+    c.quadraticCurveTo(s*34, 1342, s*44, 1224); c.quadraticCurveTo(s*46, 1168, s*38, 1120);
+    c.quadraticCurveTo(s*16, 976, s*14, 868); c.closePath();
+    c.fillStyle = '#cac0b0'; c.fill(); c.strokeStyle = '#6b5a4a'; c.lineWidth = 2; c.stroke();
+    c.beginPath(); c.moveTo(s*64, 854); c.quadraticCurveTo(s*98, 964, s*84, 1118);
+    c.lineTo(s*64, 1118); c.quadraticCurveTo(s*50, 964, s*64, 854); c.closePath();
+    c.fillStyle = '#8c8678'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+    c.beginPath(); c.moveTo(s*88, 848); c.quadraticCurveTo(s*142, 930, s*120, 1108);
+    c.lineTo(s*88, 1106); c.closePath();
+    c.fillStyle = '#9a9488'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+    c.beginPath(); c.moveTo(s*48, 928); c.quadraticCurveTo(s*24, 1018, s*46, 1116);
+    c.lineTo(s*62, 1112); c.closePath();
+    c.fillStyle = '#968e82'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+    c.strokeStyle = 'rgba(68,58,48,0.2)'; c.lineWidth = 1;
+    for (let y = 876; y <= 1090; y += 15) {
+      c.beginPath(); c.moveTo(s*56, y); c.lineTo(s*106, y+28); c.stroke();
+    }
+    c.beginPath(); c.ellipse(s*78, 1152, 23, 27, 0, 0, Math.PI*2);
+    c.fillStyle = '#ece6dc'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 2; c.stroke();
+    c.beginPath(); c.moveTo(s*80, 1202); c.quadraticCurveTo(s*120, 1288, s*96, 1456);
+    c.lineTo(s*74, 1456); c.closePath();
+    c.fillStyle = '#8f8980'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.4; c.stroke();
+    c.beginPath(); c.moveTo(s*54, 1210); c.quadraticCurveTo(s*34, 1304, s*54, 1432);
+    c.lineTo(s*70, 1432); c.closePath();
+    c.fillStyle = '#9e988e'; c.fill(); c.strokeStyle = '#5a4a3a'; c.lineWidth = 1.2; c.stroke();
+  }
+
+  c.restore();
+  c.font = 'bold 22px sans-serif'; c.fillStyle = '#3d5070';
+  c.fillText('R (우)', 36, 56); c.fillText('L (좌)', 782, 56);
+  return off;
+}
+
+const sbSrcCanvas = sbBuildDefaultAnatomyCanvas();
+
+// 썸네일
+function sbRenderThumb() {
+  const tw = sbBodyThumb.width, th = sbBodyThumb.height;
+  sbThumbCtx.clearRect(0, 0, tw, th);
+  sbThumbCtx.drawImage(sbSrcCanvas, 0, 0, sbSrcCanvas.width, sbSrcCanvas.height, 0, 0, tw, th);
+  if (sbCurrentRegion.id !== 'full') {
+    const b = sbCurrentRegion.box;
+    sbThumbCtx.fillStyle = 'rgba(26,86,219,0.18)';
+    sbThumbCtx.strokeStyle = 'rgba(26,86,219,0.9)'; sbThumbCtx.lineWidth = 2;
+    sbThumbCtx.beginPath(); sbThumbCtx.roundRect(b.x*tw, b.y*th, b.w*tw, b.h*th, 3);
+    sbThumbCtx.fill(); sbThumbCtx.stroke();
+  }
+  sbThumbHotspots.innerHTML = '';
+  sbREGIONS.filter(r => r.id !== 'full').forEach(reg => {
+    const div = document.createElement('div');
+    div.className = 'sb-thumb-hs' + (reg.id === sbCurrentRegion.id ? ' active' : '');
+    div.style.left = (reg.box.x*100)+'%'; div.style.top = (reg.box.y*100)+'%';
+    div.style.width = (reg.box.w*100)+'%'; div.style.height = (reg.box.h*100)+'%';
+    div.title = reg.name;
+    div.addEventListener('click', () => sbSelectRegion(reg.id));
+    sbThumbHotspots.appendChild(div);
+  });
+}
+
+// 부위 버튼
+const sbRegionListEl = document.getElementById('sb-regionList');
+sbREGIONS.forEach(reg => {
+  const btn = document.createElement('button');
+  btn.className = 'sb-region-btn' + (reg.id === 'full' ? ' active' : '');
+  btn.dataset.sbid = reg.id;
+  btn.innerHTML = `<span>${reg.name}</span><span class="sb-arr">›</span>`;
+  btn.addEventListener('click', () => sbSelectRegion(reg.id));
+  sbRegionListEl.appendChild(btn);
+});
+
+// 핫스팟
+function sbRenderHotspots() {
+  sbHotspotOverlay.innerHTML = '';
+  if (sbCurrentRegion.id !== 'full') { sbHotspotOverlay.style.pointerEvents = 'none'; return; }
+  sbHotspotOverlay.style.pointerEvents = 'auto';
+  sbREGIONS.filter(r => r.id !== 'full').forEach(reg => {
+    const div = document.createElement('div');
+    div.className = 'sb-hotspot-box';
+    div.style.left = (reg.box.x*100)+'%'; div.style.top = (reg.box.y*100)+'%';
+    div.style.width = (reg.box.w*100)+'%'; div.style.height = (reg.box.h*100)+'%';
+    div.innerHTML = `<span class="sb-hotspot-label">🔍 ${reg.name}</span>`;
+    div.addEventListener('click', e => { e.stopPropagation(); sbSelectRegion(reg.id); });
+    sbHotspotOverlay.appendChild(div);
+  });
+}
+
+function sbGetSourceDimensions() {
+  if (sbUseCustomImage && sbAnatomyImg.complete && sbAnatomyImg.naturalWidth > 0)
+    return { w: sbAnatomyImg.naturalWidth, h: sbAnatomyImg.naturalHeight, src: sbAnatomyImg };
+  return { w: sbSrcCanvas.width, h: sbSrcCanvas.height, src: sbSrcCanvas };
+}
+
+// 부위 선택
+function sbSelectRegion(regionId, keepDrawing = false) {
+  const found = sbREGIONS.find(r => r.id === regionId) || sbREGIONS[0];
+  sbCurrentRegion = found;
+  document.querySelectorAll('.sb-region-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.sbid === found.id));
+  document.getElementById('sb-currentRegionBadge').textContent = found.name;
+  document.getElementById('sb-regionInfoCard').innerHTML =
+    `<span class="sb-region-name">${found.name}</span>${found.desc}`;
+  const hintEl = document.getElementById('sb-modeHint');
+  hintEl.innerHTML = found.id === 'full'
+    ? '💡 <b>전신 모드:</b> 점선 영역 클릭 시 확대됩니다.'
+    : '✏️ <b>확대 모드:</b> 펜·화살표·절개선으로 환자에게 직접 설명하세요.';
+  sbResizeAndRender(keepDrawing);
+  sbRenderThumb();
+}
+
+// 캔버스 크기 조정
+function sbResizeAndRender(keepDrawing = false) {
+  const areaRect = sbCanvasArea.getBoundingClientRect();
+  const maxW = Math.max(200, areaRect.width - 32);
+  const maxH = Math.max(200, areaRect.height - 32);
+  const { w: srcW, h: srcH, src } = sbGetSourceDimensions();
+  const sx = sbCurrentRegion.box.x*srcW, sy = sbCurrentRegion.box.y*srcH;
+  const sw = sbCurrentRegion.box.w*srcW, sh = sbCurrentRegion.box.h*srcH;
+  const aspect = sw / sh;
+  let targetW = maxW, targetH = targetW / aspect;
+  if (targetH > maxH) { targetH = maxH; targetW = targetH * aspect; }
+  targetW = Math.max(200, Math.floor(targetW)); targetH = Math.max(200, Math.floor(targetH));
+  let prevDrawing = null;
+  if (keepDrawing && sbDrawCanvas.width > 0) {
+    prevDrawing = document.createElement('canvas');
+    prevDrawing.width = sbDrawCanvas.width; prevDrawing.height = sbDrawCanvas.height;
+    prevDrawing.getContext('2d').drawImage(sbDrawCanvas, 0, 0);
+  }
+  sbBaseCanvas.width = sbDrawCanvas.width = targetW;
+  sbBaseCanvas.height = sbDrawCanvas.height = targetH;
+  sbCanvasWrapper.style.width = targetW+'px'; sbCanvasWrapper.style.height = targetH+'px';
+  sbBaseCtx.clearRect(0, 0, targetW, targetH);
+  sbBaseCtx.drawImage(src, sx, sy, sw, sh, 0, 0, targetW, targetH);
+  if (sbCurrentRegion.id !== 'full') {
+    sbBaseCtx.fillStyle = 'rgba(13,23,38,0.76)';
+    sbBaseCtx.beginPath(); sbBaseCtx.roundRect(10, 10, Math.min(targetW-20, 240), 30, 6);
+    sbBaseCtx.fill(); sbBaseCtx.fillStyle = '#ffffff';
+    sbBaseCtx.font = 'bold 13px "Noto Sans KR", sans-serif';
+    sbBaseCtx.fillText('🔍 ' + sbCurrentRegion.name, 18, 30);
+  }
+  if (prevDrawing) {
+    sbDrawCtx.drawImage(prevDrawing, 0, 0, targetW, targetH);
+  } else { sbHistoryStack = []; sbSaveHistory(); }
+  sbRenderHotspots();
+}
+
+function sbSaveHistory() {
+  if (sbHistoryStack.length > 30) sbHistoryStack.shift();
+  sbHistoryStack.push(sbDrawCtx.getImageData(0, 0, sbDrawCanvas.width, sbDrawCanvas.height));
+}
+
+function sbGetPos(e) {
+  const rect = sbDrawCanvas.getBoundingClientRect();
+  const cx = e.touches ? e.touches[0].clientX : e.clientX;
+  const cy = e.touches ? e.touches[0].clientY : e.clientY;
+  return { x: cx - rect.left, y: cy - rect.top };
+}
+
+function sbStartDraw(e) {
+  e.preventDefault(); sbIsDrawing = true;
+  const pos = sbGetPos(e); sbStartX = pos.x; sbStartY = pos.y;
+  sbSnapshotData = sbDrawCtx.getImageData(0, 0, sbDrawCanvas.width, sbDrawCanvas.height);
+  sbDrawCtx.lineCap = 'round'; sbDrawCtx.lineJoin = 'round'; sbDrawCtx.lineWidth = sbCurrentSize;
+  if (sbCurrentTool === 'eraser') {
+    sbDrawCtx.globalCompositeOperation = 'destination-out'; sbDrawCtx.lineWidth = sbCurrentSize * 3;
+  } else {
+    sbDrawCtx.globalCompositeOperation = 'source-over';
+    sbDrawCtx.strokeStyle = sbCurrentColor; sbDrawCtx.fillStyle = sbCurrentColor;
+  }
+  sbDrawCtx.setLineDash(sbCurrentTool === 'dashed' ? [sbCurrentSize*2.5, sbCurrentSize*1.5] : []);
+  if (['pen','eraser','dashed'].includes(sbCurrentTool)) {
+    sbDrawCtx.beginPath(); sbDrawCtx.moveTo(sbStartX, sbStartY);
+  }
+}
+
+function sbDrawMove(e) {
+  if (!sbIsDrawing) return; e.preventDefault();
+  const pos = sbGetPos(e);
+  if (['pen','eraser','dashed'].includes(sbCurrentTool)) {
+    sbDrawCtx.lineTo(pos.x, pos.y); sbDrawCtx.stroke();
+  } else {
+    sbDrawCtx.putImageData(sbSnapshotData, 0, 0);
+    if (sbCurrentTool === 'circle') {
+      const rx = Math.abs(pos.x-sbStartX)/2, ry = Math.abs(pos.y-sbStartY)/2;
+      const cx = (sbStartX+pos.x)/2, cy = (sbStartY+pos.y)/2;
+      sbDrawCtx.beginPath(); sbDrawCtx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI*2); sbDrawCtx.stroke();
+    } else if (sbCurrentTool === 'rect') {
+      sbDrawCtx.beginPath();
+      sbDrawCtx.rect(sbStartX, sbStartY, pos.x-sbStartX, pos.y-sbStartY); sbDrawCtx.stroke();
+    } else if (sbCurrentTool === 'arrow') {
+      sbDrawArrow(sbDrawCtx, sbStartX, sbStartY, pos.x, pos.y, sbCurrentSize);
+    }
+  }
+}
+
+function sbEndDraw(e) {
+  if (!sbIsDrawing) return; sbIsDrawing = false;
+  sbDrawCtx.globalCompositeOperation = 'source-over'; sbDrawCtx.setLineDash([]); sbSaveHistory();
+  // 미리보기 업데이트
+  sbUpdatePreview();
+}
+
+function sbDrawArrow(ctx, x1, y1, x2, y2, sz) {
+  const hl = Math.max(16, sz*3.5);
+  const angle = Math.atan2(y2-y1, x2-x1);
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hl*Math.cos(angle - Math.PI/6), y2 - hl*Math.sin(angle - Math.PI/6));
+  ctx.lineTo(x2 - hl*Math.cos(angle + Math.PI/6), y2 - hl*Math.sin(angle + Math.PI/6));
+  ctx.closePath(); ctx.fill();
+}
+
+function sbUpdatePreview() {
+  const previewCanvas = document.getElementById('sb-preview-canvas');
+  const hint = document.getElementById('sb-preview-hint');
+  if (!previewCanvas) return;
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width = sbBaseCanvas.width; tmpCanvas.height = sbBaseCanvas.height;
+  const tc = tmpCanvas.getContext('2d');
+  tc.drawImage(sbBaseCanvas, 0, 0); tc.drawImage(sbDrawCanvas, 0, 0);
+  previewCanvas.width = tmpCanvas.width; previewCanvas.height = tmpCanvas.height;
+  previewCanvas.getContext('2d').drawImage(tmpCanvas, 0, 0);
+  previewCanvas.style.display = 'block';
+  if (hint) hint.style.display = 'none';
+}
+
+sbDrawCanvas.addEventListener('mousedown', sbStartDraw);
+sbDrawCanvas.addEventListener('mousemove', sbDrawMove);
+window.addEventListener('mouseup', sbEndDraw);
+sbDrawCanvas.addEventListener('touchstart', sbStartDraw, {passive:false});
+sbDrawCanvas.addEventListener('touchmove', sbDrawMove, {passive:false});
+window.addEventListener('touchend', sbEndDraw);
+
+// 도구 선택
+document.querySelectorAll('.sb-tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sb-tool-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); sbCurrentTool = btn.dataset.sbtool;
+    if (sbCurrentRegion.id === 'full') sbHotspotOverlay.style.pointerEvents = 'none';
+  });
+});
+
+// 색상 선택
+document.querySelectorAll('.sb-color-swatch').forEach(sw => {
+  sw.addEventListener('click', () => {
+    document.querySelectorAll('.sb-color-swatch').forEach(s => s.classList.remove('active'));
+    sw.classList.add('active'); sbCurrentColor = sw.dataset.sbcolor;
+    if (sbCurrentTool === 'eraser') document.querySelector('[data-sbtool="pen"]').click();
+  });
+});
+
+// 굵기 선택
+document.querySelectorAll('.sb-size-btn').forEach(sb => {
+  sb.addEventListener('click', () => {
+    document.querySelectorAll('.sb-size-btn').forEach(s => s.classList.remove('active'));
+    sb.classList.add('active'); sbCurrentSize = parseInt(sb.dataset.sbsize, 10);
+  });
+});
+
+// 실행취소 & 지우기
+document.getElementById('sb-undoBtn').addEventListener('click', () => {
+  if (sbHistoryStack.length > 1) {
+    sbHistoryStack.pop();
+    sbDrawCtx.putImageData(sbHistoryStack[sbHistoryStack.length-1], 0, 0);
+  }
+});
+document.getElementById('sb-clearDrawBtn').addEventListener('click', () => {
+  sbDrawCtx.clearRect(0, 0, sbDrawCanvas.width, sbDrawCanvas.height);
+  sbSaveHistory();
+});
+document.getElementById('sb-resetViewBtn').addEventListener('click', () => sbSelectRegion('full', false));
+
+// 커스텀 이미지
+document.getElementById('sb-imgUpload').addEventListener('change', e => {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    sbAnatomyImg.onload = () => { sbUseCustomImage = true; sbSelectRegion('full', false); };
+    sbAnatomyImg.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+// 이미지 저장
+function sbSaveImage() {
+  const memo = document.getElementById('sb-patientMemo').value.trim();
+  const extraH = memo ? 110 : 36;
+  const out = document.createElement('canvas');
+  out.width = sbBaseCanvas.width; out.height = sbBaseCanvas.height + extraH;
+  const oc = out.getContext('2d');
+  oc.fillStyle = '#ffffff'; oc.fillRect(0, 0, out.width, out.height);
+  oc.drawImage(sbBaseCanvas, 0, 0); oc.drawImage(sbDrawCanvas, 0, 0);
+  oc.fillStyle = '#f7f9fc'; oc.fillRect(0, sbBaseCanvas.height, out.width, extraH);
+  oc.strokeStyle = '#c8d0de'; oc.lineWidth = 1;
+  oc.beginPath(); oc.moveTo(0, sbBaseCanvas.height); oc.lineTo(out.width, sbBaseCanvas.height); oc.stroke();
+  if (memo) {
+    oc.fillStyle = '#0d1726'; oc.font = 'bold 13px sans-serif';
+    oc.fillText('📋 ' + sbCurrentRegion.name + ' — 수술 설명:', 12, sbBaseCanvas.height + 22);
+    oc.font = '12px sans-serif'; oc.fillStyle = '#2d3f5a';
+    memo.split('\n').slice(0, 4).forEach((line, i) =>
+      oc.fillText(line.slice(0, 85), 12, sbBaseCanvas.height + 42 + i*17));
+  }
+  oc.fillStyle = '#8fa0b8'; oc.font = '10px sans-serif';
+  oc.fillText('본 자료는 환자 설명용 보조 자료입니다. 의학적 처방의 근거로 사용 불가.', 12, out.height - 8);
+  const link = document.createElement('a');
+  link.download = `수술설명_${sbCurrentRegion.name.replace(/[\s/·]+/g,'_')}.png`;
+  link.href = out.toDataURL('image/png'); link.click();
+}
+document.getElementById('sb-saveImgBtn').addEventListener('click', sbSaveImage);
+document.getElementById('sb-saveImgBtn2').addEventListener('click', sbSaveImage);
+
+document.getElementById('sb-copyMemoBtn').addEventListener('click', () => {
+  const val = document.getElementById('sb-patientMemo').value;
+  navigator.clipboard.writeText(val).then(() => {
+    const btn = document.getElementById('sb-copyMemoBtn');
+    btn.textContent = '✅ 복사됨!';
+    setTimeout(() => { btn.textContent = '📋 메모 복사'; }, 1800);
+  }).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = val;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+  });
+});
+
+// 리사이즈
+let sbResizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(sbResizeTimer); sbResizeTimer = setTimeout(() => sbResizeAndRender(true), 100);
+});
+
+// 초기 실행
+sbRenderThumb();
+sbSelectRegion('full', false);
+
+})(); // end IIFE
+</script>
 
 </div>
 
