@@ -447,6 +447,11 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       <!-- 모달 헤더 -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:6px;flex-wrap:wrap;">
         <span id="bodyPartTitle" style="font-size:13pt;font-weight:bold;color:#1a5fe0;">📍 머리</span>
+        <!-- 손 앞/뒤 전환 탭 (손 부위 선택 시에만 표시) -->
+        <div id="handViewTabs" style="display:none;gap:4px;align-items:center;">
+          <button id="handTabFront" type="button" onclick="switchHandView('front')" style="padding:3px 10px;font-size:8.5pt;border-radius:10px;border:2px solid #1a5fe0;background:#1a5fe0;color:#fff;cursor:pointer;font-weight:bold;">앞 (손바닥)</button>
+          <button id="handTabBack" type="button" onclick="switchHandView('back')" style="padding:3px 10px;font-size:8.5pt;border-radius:10px;border:2px solid #ccc;background:#fff;color:#666;cursor:pointer;">뒤 (손등)</button>
+        </div>
         <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap;">
           <button type="button" id="zpBlack" onclick="setZoomColor('#111')" style="width:24px;height:24px;border-radius:50%;background:#111;border:3px solid #0074e8;cursor:pointer;" title="검정"></button>
           <button type="button" id="zpRed" onclick="setZoomColor('#e02020')" style="width:24px;height:24px;border-radius:50%;background:#e02020;border:2px solid #ccc;cursor:pointer;" title="빨강"></button>
@@ -1215,6 +1220,122 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       zCtx.restore();
     }
 
+    /* ============================================================
+       손 부위 특수 기능 (앞/뒤 전환 + 손 그림 배경)
+    ============================================================ */
+    var HAND_PART_NAMES = ['왼쪽 손', '오른쪽 손'];
+    var currentHandView = 'front';
+    var handPartName = null;
+    var handDrawings = {};  // {'왼쪽 손_front': dataUrl, '왼쪽 손_back': dataUrl}
+
+    function isHandPart(name) { return HAND_PART_NAMES.indexOf(name) >= 0; }
+
+    /* 손 모양을 캔버스에 직접 그리기 */
+    function drawHandBackground(view, side) {
+      if (!zCtx) return;
+      var W = zCanvas.width, H = zCanvas.height;
+      zCtx.save();
+      zCtx.scale(W / 300, H / 440);
+
+      /* 오른손이면 좌우 반전 */
+      if (side === 'right') { zCtx.translate(300, 0); zCtx.scale(-1, 1); }
+
+      var isFront = (view === 'front');
+      var skinFill = isFront ? '#ffe8d8' : '#ffd8bb';
+      var skinStroke = '#b07850';
+
+      zCtx.fillStyle = skinFill;
+      zCtx.strokeStyle = skinStroke;
+      zCtx.lineWidth = 2.5;
+      zCtx.lineJoin = 'round';
+      zCtx.lineCap = 'round';
+
+      function rrect(x, y, w, h, r) {
+        zCtx.beginPath();
+        zCtx.moveTo(x+r,y); zCtx.lineTo(x+w-r,y);
+        zCtx.quadraticCurveTo(x+w,y,x+w,y+r);
+        zCtx.lineTo(x+w,y+h-r);
+        zCtx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+        zCtx.lineTo(x+r,y+h);
+        zCtx.quadraticCurveTo(x,y+h,x,y+h-r);
+        zCtx.lineTo(x,y+r);
+        zCtx.quadraticCurveTo(x,y,x+r,y);
+        zCtx.closePath(); zCtx.fill(); zCtx.stroke();
+      }
+
+      if (isFront) {
+        /* 손바닥 뷰: 왼손 기준 엄지가 왼쪽 */
+        rrect(84,352,132,62,20);                              /* 손목 */
+        zCtx.beginPath(); zCtx.ellipse(150,298,90,70,0,0,Math.PI*2); zCtx.fill(); zCtx.stroke(); /* 손바닥 */
+        rrect(86,95,37,142,17);                               /* 검지 */
+        rrect(129,70,38,165,17);                              /* 중지 */
+        rrect(173,92,38,143,17);                              /* 약지 */
+        rrect(217,120,30,116,13);                             /* 소지 */
+        zCtx.save(); zCtx.translate(63,255); zCtx.rotate(-0.28); /* 엄지 */
+        zCtx.beginPath(); zCtx.ellipse(0,0,23,54,0,0,Math.PI*2); zCtx.fill(); zCtx.stroke();
+        zCtx.restore();
+        /* 손금 */
+        zCtx.strokeStyle='#c09878'; zCtx.lineWidth=1.4; zCtx.globalAlpha=0.4;
+        zCtx.beginPath(); zCtx.moveTo(100,318); zCtx.quadraticCurveTo(148,298,202,316); zCtx.stroke();
+        zCtx.beginPath(); zCtx.moveTo(90,338); zCtx.quadraticCurveTo(148,318,208,336); zCtx.stroke();
+        zCtx.globalAlpha=1;
+        /* 관절 주름선 */
+        zCtx.strokeStyle='#c09878'; zCtx.lineWidth=1.2; zCtx.globalAlpha=0.35;
+        [[88,228,122,228],[130,228,166,228],[174,228,210,228],[218,232,246,232]].forEach(function(l){
+          zCtx.beginPath(); zCtx.moveTo(l[0],l[1]); zCtx.lineTo(l[2],l[3]); zCtx.stroke();
+        });
+        zCtx.globalAlpha=1;
+      } else {
+        /* 손등 뷰: 왼손 기준 엄지가 오른쪽 */
+        rrect(84,352,132,62,20);                              /* 손목 */
+        zCtx.beginPath(); zCtx.ellipse(150,298,90,70,0,0,Math.PI*2); zCtx.fill(); zCtx.stroke(); /* 손등 */
+        rrect(55,120,30,116,13);                              /* 소지 */
+        rrect(91,92,38,143,17);                               /* 약지 */
+        rrect(135,70,38,165,17);                              /* 중지 */
+        rrect(179,95,37,142,17);                              /* 검지 */
+        zCtx.save(); zCtx.translate(237,255); zCtx.rotate(0.28); /* 엄지 */
+        zCtx.beginPath(); zCtx.ellipse(0,0,23,54,0,0,Math.PI*2); zCtx.fill(); zCtx.stroke();
+        zCtx.restore();
+        /* 힘줄선 */
+        zCtx.strokeStyle='#c09878'; zCtx.lineWidth=1.4; zCtx.globalAlpha=0.4;
+        [[71,230,108,360],[110,226,146,360],[155,222,160,360],[200,228,188,360]].forEach(function(t){
+          zCtx.beginPath(); zCtx.moveTo(t[0],t[1]); zCtx.quadraticCurveTo((t[0]+t[2])/2,(t[1]+t[3])/2-15,t[2],t[3]); zCtx.stroke();
+        });
+        /* 너클 */
+        [[71,232,12,7],[110,228,14,8],[155,224,14,8],[200,228,14,8]].forEach(function(k){
+          zCtx.beginPath(); zCtx.ellipse(k[0],k[1],k[2],k[3],0,0,Math.PI*2); zCtx.stroke();
+        });
+        zCtx.globalAlpha=1;
+      }
+
+      /* 뷰 레이블 */
+      zCtx.fillStyle='#777'; zCtx.font='bold 14px sans-serif'; zCtx.textAlign='center';
+      zCtx.fillText(isFront?'✋ 손바닥 (앞면)':'🤚 손등 (뒷면)',150,432);
+
+      zCtx.restore();
+    }
+
+    /* 앞/뒤 전환 */
+    window.switchHandView = function(view) {
+      if (!handPartName || !zCanvas) return;
+      /* 현재 그림 저장 */
+      handDrawings[handPartName+'_'+currentHandView] = zCanvas.toDataURL();
+      currentHandView = view;
+      /* 탭 버튼 스타일 */
+      var fb=document.getElementById('handTabFront'), bb=document.getElementById('handTabBack');
+      if (fb && bb) {
+        var act=view==='front'?fb:bb, inact=view==='front'?bb:fb;
+        act.style.background='#1a5fe0'; act.style.color='#fff'; act.style.borderColor='#1a5fe0';
+        inact.style.background='#fff'; inact.style.color='#666'; inact.style.borderColor='#ccc';
+      }
+      /* 캔버스 갱신 */
+      var side=handPartName==='왼쪽 손'?'left':'right';
+      zCtx.clearRect(0,0,zCanvas.width,zCanvas.height);
+      drawHandBackground(view,side);
+      var saved=handDrawings[handPartName+'_'+view];
+      if (saved) { var img=new Image(); img.onload=function(){zCtx.drawImage(img,0,0,zCanvas.width,zCanvas.height);}; img.src=saved; }
+    };
+
     /* 모달 열기 */
     window.openBodyPart = function(partName, bpId) {
       if (!zCanvas) return;
@@ -1223,18 +1344,38 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       var title = document.getElementById('bodyPartTitle');
       if (title) title.textContent = '📍 ' + partName;
 
-      /* 캔버스 크기 설정 */
-      var W = Math.min(window.innerWidth * 0.9, 740);
-      zCanvas.width  = Math.round(W);
-      zCanvas.height = Math.round(W * 0.6);
-      zCtx.clearRect(0, 0, zCanvas.width, zCanvas.height);
-      drawPartGuide(partName);
+      /* 손 여부 판단 → 탭 표시/숨김 */
+      var handTabs = document.getElementById('handViewTabs');
+      var isHand = isHandPart(partName);
+      if (handTabs) handTabs.style.display = isHand ? 'flex' : 'none';
 
-      /* 이전에 저장된 그림 복원 */
-      if (bodyPartDrawings[partName]) {
-        var img = new Image();
-        img.onload = function() { zCtx.drawImage(img, 0, 0, zCanvas.width, zCanvas.height); };
-        img.src = bodyPartDrawings[partName];
+      /* 캔버스 크기 설정 (손은 좀 더 세로로) */
+      var W = Math.min(window.innerWidth * 0.9, isHand ? 480 : 740);
+      zCanvas.width  = Math.round(W);
+      zCanvas.height = Math.round(W * (isHand ? 1.47 : 0.6));
+      zCtx.clearRect(0, 0, zCanvas.width, zCanvas.height);
+
+      if (isHand) {
+        handPartName = partName;
+        currentHandView = 'front';
+        /* 탭 초기화 */
+        var fb=document.getElementById('handTabFront'), bb=document.getElementById('handTabBack');
+        if(fb){fb.style.background='#1a5fe0';fb.style.color='#fff';fb.style.borderColor='#1a5fe0';}
+        if(bb){bb.style.background='#fff';bb.style.color='#666';bb.style.borderColor='#ccc';}
+        /* 손 배경 그리기 */
+        var side = partName==='왼쪽 손'?'left':'right';
+        drawHandBackground('front', side);
+        /* 저장된 앞면 그림 복원 */
+        var saved = handDrawings[partName+'_front'];
+        if (saved) { var img2=new Image(); img2.onload=function(){zCtx.drawImage(img2,0,0,zCanvas.width,zCanvas.height);}; img2.src=saved; }
+      } else {
+        handPartName = null;
+        drawPartGuide(partName);
+        if (bodyPartDrawings[partName]) {
+          var img3 = new Image();
+          img3.onload = function() { zCtx.drawImage(img3, 0, 0, zCanvas.width, zCanvas.height); };
+          img3.src = bodyPartDrawings[partName];
+        }
       }
 
       /* 줌 색상 초기화 */
@@ -1248,31 +1389,40 @@ body.cap input::placeholder,body.cap textarea::placeholder{color:transparent}
       modal.style.display = 'flex';
     };
 
-    /* 모달 닫기 + 저장 */
+        /* 모달 닫기 + 저장 */
     window.closeBodyPart = function() {
       if (!currentPart || !zCanvas) return;
-      /* 그림 데이터 저장 */
-      bodyPartDrawings[currentPart] = zCanvas.toDataURL();
-      /* 인체도 해당 부위 색상 업데이트 */
-      document.querySelectorAll('.bp').forEach(function(el) {
-        if (el.getAttribute('data-part') === currentPart || (el.closest && el.closest('[data-part="'+currentPart+'"]'))) {
-          el.classList.add('drawn');
-        }
-      });
-      /* 부위 ID로 직접 찾아 표시 */
-      var allBp = document.querySelectorAll('.bp');
-      allBp.forEach(function(el) {
-        var title = el.querySelector ? el.querySelector('title') : null;
-        if (title && title.textContent === currentPart) el.classList.add('drawn');
-      });
+      if (handPartName) {
+        /* 현재 뷰 그림 저장 */
+        handDrawings[handPartName+'_'+currentHandView] = zCanvas.toDataURL();
+        /* 인체도 표시 갱신 */
+        document.querySelectorAll('.bp').forEach(function(el) {
+          var t=el.querySelector?el.querySelector('title'):null;
+          if(t&&t.textContent===handPartName) el.classList.add('drawn');
+        });
+      } else {
+        /* 그림 데이터 저장 */
+        bodyPartDrawings[currentPart] = zCanvas.toDataURL();
+        document.querySelectorAll('.bp').forEach(function(el) {
+          var title = el.querySelector ? el.querySelector('title') : null;
+          if (title && title.textContent === currentPart) el.classList.add('drawn');
+        });
+      }
       document.getElementById('bodyPartModal').style.display = 'none';
       currentPart = null;
+      handPartName = null;
     };
 
     window.clearZoomCanvas = function() {
       if (!zCtx) return;
       zCtx.clearRect(0, 0, zCanvas.width, zCanvas.height);
-      drawPartGuide(currentPart || '');
+      if (handPartName) {
+        var side=handPartName==='왼쪽 손'?'left':'right';
+        drawHandBackground(currentHandView, side);
+        delete handDrawings[handPartName+'_'+currentHandView];
+      } else {
+        drawPartGuide(currentPart || '');
+      }
     };
 
     window.setZoomColor = function(color) {
