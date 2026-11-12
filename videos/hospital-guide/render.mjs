@@ -239,6 +239,8 @@ function drawStrip(c, time, alpha) {
   c.restore();
 }
 
+function labelTxt(c, x, y, txt, a = 1, size = 44) { c.save(); c.globalAlpha = a; c.font = `${size}px KR`; c.fillStyle = INK; c.textAlign = 'center'; c.fillText(txt, x, y); c.restore(); }
+
 // ---------- 장면 ----------
 function S1(c, t) { // 인트로
   sceneGround(c);
@@ -250,7 +252,7 @@ function S1(c, t) { // 인트로
   const ta = seg(t, 3.4, 4.4); if (ta > 0) { c.save(); c.globalAlpha = ta; c.font = '76px KR'; c.fillStyle = INK; c.textAlign = 'center'; c.fillText('진료 절차 4단계', 640, 200); line(c, [[430, 222], [850, 222]], GOLD, 6); c.restore(); }
 }
 
-function S2(c, t) { // 1 상담 예약: 재진·초진 환자 모두 전화 예약 가능
+function S2(c, t) { // 1 상담 예약: 예약은 전화로만(재진·초진 모두), 온라인은 상담만 가능
   sceneGround(c);
   const tag = (x, txt, a) => { c.save(); c.globalAlpha = a; c.font = '46px KR'; c.fillStyle = INK; c.textAlign = 'center'; c.fillText(txt, x, 296); c.restore(); };
   // 재진 환자: 전화 + 금색 체크
@@ -258,20 +260,28 @@ function S2(c, t) { // 1 상담 예약: 재진·초진 환자 모두 전화 예�
   const h1 = figure(c, 260, GROUND, { ...STAND, armR: { a: lerp(0.12, 1.2, up1), b: lerp(0.2, 2.2, up1) }, face: 'smile' });
   c.save(); c.globalAlpha = up1; phoneI(c, h1.handR.x + 14, h1.handR.y - 30, 1); c.restore();
   tag(260, '재진 환자', seg(t, 0.2, 0.8));
-  if (t < 2.9) waves(c, h1.handR.x + 40, h1.handR.y - 40, t);
-  const ok1 = seg(t, 1.4, 2.0); if (ok1 > 0) { c.save(); c.globalAlpha = ok1; check(c, h1.handR.x + 74, h1.handR.y - 104, 1.3, GOLD, 10); c.restore(); }
+  if (t < 3.4) waves(c, h1.handR.x + 40, h1.handR.y - 40, t);
+  const ok1 = seg(t, 2.0, 2.6); if (ok1 > 0) { c.save(); c.globalAlpha = ok1; check(c, h1.handR.x + 74, h1.handR.y - 104, 1.3, GOLD, 10); c.restore(); }
   // 초진 환자: 전화 + 금색 체크
-  const a2 = seg(t, 3.0, 3.6);
+  const a2 = seg(t, 1.2, 1.8);
   if (a2 > 0) {
-    const up2 = seg(t, 3.2, 3.9);
+    const up2 = seg(t, 1.3, 2.0);
     const h2 = figure(c, 640, GROUND, { ...STAND, armR: { a: lerp(0.12, 1.2, up2), b: lerp(0.2, 2.2, up2) }, face: 'smile' });
     c.save(); c.globalAlpha = a2; phoneI(c, h2.handR.x + 14, h2.handR.y - 30, 1); c.restore();
     tag(640, '초진 환자', a2);
-    if (t < 5.4) waves(c, h2.handR.x + 40, h2.handR.y - 40, t); const nk = seg(t, 4.0, 4.6); if (nk > 0) { c.save(); c.globalAlpha = nk; check(c, h2.handR.x + 74, h2.handR.y - 104, 1.3, GOLD, 10); c.restore(); }
-    // 증상을 미리 알림 → 대기 시간 감소, 검사 안내
-    const bub = seg(t, 5.6, 6.2) * (1 - seg(t, 7.4, 7.8));
+    if (t < 3.4) waves(c, h2.handR.x + 40, h2.handR.y - 40, t);
+    const ok2 = seg(t, 2.4, 3.0); if (ok2 > 0) { c.save(); c.globalAlpha = ok2; check(c, h2.handR.x + 74, h2.handR.y - 104, 1.3, GOLD, 10); c.restore(); }
+    // 증상을 미리 알림
+    const bub = seg(t, 6.6, 7.2) * (1 - seg(t, 8.0, 8.4));
     if (bub > 0) { speech(c, 540, 110, 190, 110, 620, bub); c.save(); c.globalAlpha = bub; flash(c, 635, 168, t); sweat(c, 692, 150); c.restore(); }
   }
+  // 온라인: 상담만 가능, 예약은 불가
+  const on = seg(t, 3.6, 4.4) * (1 - seg(t, 6.2, 6.8));
+  if (on > 0) { c.save(); c.globalAlpha = on;
+    monitorI(c, 900, 240, 1.7); speech(c, 862, 198, 76, 46, 884, 1); line(c, [[876, 218], [900, 218]], '#999999', 4); line(c, [[876, 230], [892, 230]], '#999999', 4);
+    check(c, 990, 168, 1.3, GOLD, 10); labelTxt(c, 900, 376, '온라인 상담', 1, 40);
+    withS(c, 1060, 190, 0.8, (k) => calendar(k, 0, 0)); withS(c, 1128, 250, 0.8, (k) => noSign(k, 0, 0, 1, RED)); labelTxt(c, 1128, 376, '예약 불가', 1, 40);
+    c.restore(); }
   const hg = seg(t, 7.2, 7.8); if (hg > 0) { c.save(); c.globalAlpha = hg; hourglass(c, 960, 270, lerp(1.8, 1.0, seg(t, 7.4, 9.4))); line(c, [[1060, 230], [1060, 300]], GOLD, 7); line(c, [[1040, 282], [1060, 306], [1080, 282]], GOLD, 7); c.restore(); }
   const cb = seg(t, 8.4, 9.0); if (cb > 0) { c.save(); c.globalAlpha = cb; clipboard(c, 1120, 230); check(c, 1143, 262, 0.9, GOLD, 7); c.restore(); }
 }
@@ -320,7 +330,7 @@ function S6(c, t) { // 서류·CD 접수 → 안내 카드
 
 const CAPS = [
   [[0.4, 4.8, '처음 오셨나요? 진료 절차를 안내해 드립니다.'], [5.0, 9.6, '진료는 네 단계로 진행됩니다.']],
-  [[0.3, 2.9, '재진 환자는 전화로 예약하실 수 있습니다.'], [3.0, 5.4, '초진 환자분도 전화로 예약하실 수 있습니다.'], [5.6, 9.8, '예약 시 증상을 미리 알려 주시면 대기 시간을 줄이고, 필요한 검사도 미리 안내해 드립니다.']],
+  [[0.3, 3.4, '재진 환자도 초진 환자도 전화로 예약하실 수 있습니다.'], [3.6, 6.4, '예약은 전화로만 가능하고 온라인은 상담만 가능합니다.'], [6.6, 9.8, '증상을 미리 알려 주시면 대기 시간을 줄이고 검사도 미리 안내합니다.']],
   [[0.3, 4.6, '원장님이 증상과 통증이 시작된 시점,'], [4.8, 9.7, '생활 습관까지 자세히 살펴 원인을 함께 찾아갑니다.']],
   [[0.3, 3.4, '진단 장비로 통증의 원인을 살펴보고,'], [3.6, 6.4, '필요하면 초음파·혈액 검사를 함께 합니다.'], [6.6, 9.8, '결과는 영상 자료와 함께 쉽게 설명해 드립니다.']],
   [[0.3, 5.2, '진단 결과에 따라 수술적·비수술적 치료 계획을 함께 세우고,'], [5.4, 9.7, '회복 단계까지 원장님이 함께합니다.']],
