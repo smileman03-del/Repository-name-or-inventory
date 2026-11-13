@@ -132,6 +132,11 @@
   td.col-check,th.col-check{width:30px;text-align:center;}
   td.col-spec,th.col-spec{width:160px;}
   td.col-location,th.col-location{width:110px;}
+th.col-drag,td.col-drag{width:28px;padding:0 2px;text-align:center;}
+.drag-handle{cursor:grab;font-size:18px;color:var(--ink-faint);user-select:none;display:block;line-height:1.2;}
+.drag-handle:active{cursor:grabbing;}
+tr.drag-over-top td{box-shadow:inset 0 2px 0 var(--accent);}
+tr.drag-over-bottom td{box-shadow:inset 0 -2px 0 var(--accent);}
   td.col-qty,th.col-qty{width:104px;}
   td.col-del,th.col-del{width:100px;text-align:center;}
   table.mat td,table.mat th{overflow:hidden;text-overflow:ellipsis;}
@@ -216,7 +221,7 @@
     table.mat td.col-check{order:1;flex:0 0 22px;}
     table.mat td:nth-child(2){order:2;flex:1 1 auto;min-width:140px;}
     table.mat td.col-spec{order:3;flex:1 1 120px;}
-    table.mat td.col-location{order:4;flex:1 1 100px;}
+    table.mat td.col-drag{order:0;flex:0 0 24px;}table.mat td.col-location{order:4;flex:1 1 100px;}
     table.mat td.col-qty{order:5;flex:0 0 108px;}
     table.mat td:nth-child(4):not(.col-qty):not(.col-del){order:4;flex:1 1 100%;font-size:11px;color:var(--ink-soft);}
     table.mat td.col-del{order:6;flex:0 0 auto;}
@@ -1488,6 +1493,46 @@ const DEFAULT_SPECIAL_OPTS = {
           <td class="col-location"><span class="item-loc" style="font-size:12px;color:var(--ink-soft);">${it.location||''}</span></td>
           <td class="col-qty"><input type="number" class="qty" min="0" placeholder="0" value="${prior?prior.qty:''}"></td>
         `;
+
+          // 드래그&드롭 순서 변경
+          const handle = tr.querySelector('.drag-handle');
+          if(handle){
+            handle.addEventListener('mousedown',()=>{ tr.setAttribute('draggable','true'); });
+            tr.addEventListener('dragend',()=>{ tr.setAttribute('draggable','false'); tr.style.opacity=''; tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom')); });
+            tr.addEventListener('dragstart',e=>{
+              e.dataTransfer.setData('text/x-drag-id', it.id);
+              e.dataTransfer.setData('text/x-drag-cat', catName);
+              e.dataTransfer.effectAllowed='move';
+              tr.style.opacity='0.4';
+            });
+            tr.addEventListener('dragover',e=>{
+              e.preventDefault();
+              e.dataTransfer.dropEffect='move';
+              const rect=tr.getBoundingClientRect();
+              tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom'));
+              tr.classList.add(e.clientY < rect.top+rect.height/2 ? 'drag-over-top':'drag-over-bottom');
+            });
+            tr.addEventListener('dragleave',()=>{ tr.classList.remove('drag-over-top','drag-over-bottom'); });
+            tr.addEventListener('drop',async e=>{
+              e.preventDefault();
+              const draggedId=e.dataTransfer.getData('text/x-drag-id');
+              const draggedCat=e.dataTransfer.getData('text/x-drag-cat');
+              if(!draggedId || draggedCat!==catName || draggedId===it.id) return;
+              const arr=catalog[catName];
+              const fromIdx=arr.findIndex(x=>x.id===draggedId);
+              const toIdx=arr.findIndex(x=>x.id===it.id);
+              if(fromIdx===-1||toIdx===-1) return;
+              const rect=tr.getBoundingClientRect();
+              const insertBefore=e.clientY < rect.top+rect.height/2;
+              const [moved]=arr.splice(fromIdx,1);
+              let ni=arr.findIndex(x=>x.id===it.id);
+              if(!insertBefore) ni++;
+              arr.splice(ni,0,moved);
+              await persistCatalog();
+              renderManageCatalog(); renderRecordCatalog();
+              showBanner('banner3','순서를 저장했습니다.',true);
+            });
+          }
         tbody.appendChild(tr);
         wireRow(tr);
       });
@@ -2583,7 +2628,7 @@ const DEFAULT_SPECIAL_OPTS = {
       block.className = 'cat-block' + ((q || prevOpen.has(catName)) ? ' open':'');
       block.innerHTML = `
         <button type="button" class="cat-header"><span>${catName}</span><span class="cnt">${items.length}/${catalog[catName].length}개 <span class="chev">▾</span></span></button>
-        <div class="cat-body"><table class="mat"><thead><tr><th class="col-check">선택</th><th>품목명</th><th class="col-spec">규격</th><th class="col-location">보관위치</th><th>권장 수술종류</th><th class="col-del">관리</th></tr></thead><tbody></tbody></table></div>`;
+        <div class="cat-body"><table class="mat"><thead><tr><th class="col-drag"></th><th class="col-check">선택</th><th>품목명</th><th class="col-spec">규격</th><th class="col-location">보관위치</th><th>권장 수술종류</th><th class="col-del">관리</th></tr></thead><tbody></tbody></table></div>`;
       const tbody = block.querySelector('tbody');
       items.forEach(it=>{
         const tr = document.createElement('tr');
@@ -2592,7 +2637,7 @@ const DEFAULT_SPECIAL_OPTS = {
         const isEditing = editingItemId === it.id;
         if(isEditing){
           tr.innerHTML = `
-            <td class="col-check"></td>
+            <td class="col-drag"></td><td class="col-check"></td>
             <td><input type="text" class="edit-item-name" value="${(it.name||'').replace(/"/g,'&quot;')}"></td>
             <td class="col-spec"><input type="text" class="edit-item-spec" value="${(it.spec||'').replace(/"/g,'&quot;')}"></td>
             <td class="col-location"><input type="text" class="edit-item-location" value="${(it.location||'').replace(/"/g,'&quot;')}" placeholder="보관위치"></td>
@@ -2618,6 +2663,7 @@ const DEFAULT_SPECIAL_OPTS = {
           });
         }else{
           tr.innerHTML = `
+            <td class="col-drag"><span class="drag-handle" title="드래그해서 순서 변경">⠿</span></td>
             <td class="col-check"><input type="checkbox" class="mng-chk" ${selectedForDelete.has(it.id)?'checked':''}></td>
             <td>${it.name}</td>
             <td class="col-spec">${it.spec||''}</td>
