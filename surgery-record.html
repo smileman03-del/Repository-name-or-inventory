@@ -3823,5 +3823,50 @@ var cloudLoadAll = function(){ return gsLoadAll(false); };
       });
   })();
   // ─────────────────────────────────────────────────────────────────────────────
+
+  // ===== 드래그 자동 스크롤 (drag auto-scroll) =====
+  // 품목을 드래그할 때 화면 위·아래 끝에 가까워지면 자동으로 스크롤되어
+  // 한 번의 드래그로 멀리 있는 위치까지 이동할 수 있습니다.
+  (function(){
+    var ZONE = 80;      // 화면 가장자리에서 이 픽셀 안으로 들어오면 스크롤 시작
+    var MAX_SPEED = 18; // 최대 스크롤 속도 (px/frame)
+    var rafId = null;
+    var currentY = -1;
+
+    function autoScroll() {
+      var vh = window.innerHeight;
+      var speed = 0;
+      if (currentY < ZONE) {
+        // 화면 위쪽 — 위로 스크롤
+        speed = -MAX_SPEED * (1 - currentY / ZONE);
+      } else if (currentY > vh - ZONE) {
+        // 화면 아래쪽 — 아래로 스크롤
+        speed = MAX_SPEED * (1 - (vh - currentY) / ZONE);
+      }
+      if (speed !== 0) {
+        window.scrollBy(0, speed);
+        rafId = requestAnimationFrame(autoScroll);
+      } else {
+        rafId = null;
+      }
+    }
+
+    document.addEventListener('dragover', function(e) {
+      currentY = e.clientY;
+      if (rafId === null) {
+        rafId = requestAnimationFrame(autoScroll);
+      }
+    }, { passive: true });
+
+    document.addEventListener('dragend', function() {
+      currentY = -1;
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+    });
+    document.addEventListener('drop', function() {
+      currentY = -1;
+      if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+    });
+  })();
+  // ===== 드래그 자동 스크롤 끝 =====
 </script>
 </body></html>
