@@ -131,7 +131,7 @@
   table.mat input.qty::placeholder{color:var(--accent);opacity:.55;font-weight:600;}
   td.col-check,th.col-check{width:30px;text-align:center;}
   td.col-spec,th.col-spec{width:160px;}
-  td.col-location,th.col-location{width:110px;}
+
 th.col-drag,td.col-drag{width:28px;padding:0 2px;text-align:center;}
 .drag-handle{cursor:grab;font-size:18px;color:var(--ink-faint);user-select:none;display:block;line-height:1.2;}
 .drag-handle:active{cursor:grabbing;}
@@ -221,12 +221,12 @@ tr.drag-over-bottom td{box-shadow:inset 0 -2px 0 var(--accent);}
     table.mat td.col-check{order:1;flex:0 0 22px;}
     table.mat td:nth-child(2){order:2;flex:1 1 auto;min-width:140px;}
     table.mat td.col-spec{order:3;flex:1 1 120px;}
-    table.mat td.col-drag{order:0;flex:0 0 24px;}table.mat td.col-location{order:4;flex:1 1 100px;}
+    table.mat td.col-drag{order:0;flex:0 0 24px;}
     table.mat td.col-qty{order:5;flex:0 0 108px;}
     table.mat td:nth-child(4):not(.col-qty):not(.col-del){order:4;flex:1 1 100%;font-size:11px;color:var(--ink-soft);}
     table.mat td.col-del{order:6;flex:0 0 auto;}
     table.mat td.col-spec::before{content:'규격';display:block;font-size:10.5px;color:var(--ink-faint);margin-bottom:2px;}
-    table.mat td.col-location::before{content:'보관위치';display:block;font-size:10.5px;color:var(--ink-faint);margin-bottom:2px;}
+    
     table.mat td.col-qty::before{content:'사용수량';display:block;font-size:10.5px;color:var(--ink-faint);margin-bottom:2px;}
     table.mat input[type=number].qty{font-size:15px;font-weight:700;padding:8px 8px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent-dark);}
   }
@@ -458,7 +458,6 @@ tr.drag-over-bottom td{box-shadow:inset 0 -2px 0 var(--accent);}
             <th class="col-check"></th>
             <th>품목명</th>
             <th class="col-spec">규격</th>
-            <th class="col-location">보관위치</th>
             <th class="col-qty">사용수량</th>
           </tr>
         </thead>
@@ -1015,7 +1014,7 @@ tr.drag-over-bottom td{box-shadow:inset 0 -2px 0 var(--accent);}
           <select id="newItemCat"><option value="마취과-소모품">마취과-소모품</option><option value="수술실-의약품">수술실-의약품</option><option value="수술실-소모품">수술실-소모품</option></select>
         </div>
         <div class="field grow"><label>품목명</label><input type="text" id="newItemName" placeholder="예: 척추 스크류 6.0mm"></div>
-        <div class="field"><label>보관위치</label><input type="text" id="newItemLocation" placeholder="예: A창고 1번선반"></div>
+
         <div class="field"><label>규격</label><input type="text" id="newItemSpec" placeholder="규격 (선택)"></div>
         <button class="action primary" id="addItemBtn" style="padding:9px 16px;">+ 품목 추가</button>
       </div>
@@ -1469,7 +1468,7 @@ const DEFAULT_SPECIAL_OPTS = {
         </button>
         <div class="cat-body">
           <table class="mat">
-            <thead><tr><th class="col-check">선택</th><th>품목명</th><th class="col-spec">규격</th><th class="col-location">보관위치</th><th class="col-qty">사용수량</th></tr></thead>
+            <thead><tr><th class="col-check">선택</th><th>품목명</th><th class="col-spec">규격</th><th class="col-qty">사용수량</th></tr></thead>
             <tbody></tbody>
           </table>
         </div>`;
@@ -1479,7 +1478,6 @@ const DEFAULT_SPECIAL_OPTS = {
         tr.dataset.id = it.id;
         tr.dataset.name = it.name;
         tr.dataset.spec = it.spec;
-        tr.dataset.location = it.location||'';
         tr.dataset.cat = catName;
         tr.dataset.presets = JSON.stringify(it.presets);
         const presetTag = it.presets.length
@@ -1490,7 +1488,6 @@ const DEFAULT_SPECIAL_OPTS = {
           <td class="col-check"><input type="checkbox" class="chk" ${prior&&prior.chk?'checked':''}></td>
           <td><span style="font-size:13px;">${it.name}${presetTag}</span></td>
           <td class="col-spec"><input type="text" class="spec" value="${(it.spec||'').replace(/"/g,'&quot;')}" placeholder="규격"></td>
-          <td class="col-location"><span class="item-loc" style="font-size:12px;color:var(--ink-soft);">${it.location||''}</span></td>
           <td class="col-qty"><input type="number" class="qty" min="0" placeholder="0" value="${prior?prior.qty:''}"></td>
         `;
 
@@ -1658,7 +1655,6 @@ const DEFAULT_SPECIAL_OPTS = {
       <td class="col-check"></td>
       <td><input type="text" class="item-name" placeholder="품목명 직접 입력"></td>
       <td class="col-spec"><input type="text" class="spec" placeholder="규격"></td>
-      <td class="col-location"><input type="text" class="location" placeholder="보관위치"></td>
       <td class="col-qty"><input type="number" class="qty" min="0" placeholder="0"></td>
     `;
     extraBody.appendChild(tr);
@@ -1724,16 +1720,14 @@ const DEFAULT_SPECIAL_OPTS = {
       rows.push({
         name: tr.dataset.name, cat: tr.dataset.cat,
         spec: tr.querySelector('.spec').value.trim(),
-        location: tr.dataset.location||'',
         qty: parseFloat(tr.querySelector('.qty').value)||0
       });
     });
     document.querySelectorAll('#extraBody tr').forEach(tr=>{
       const name = tr.querySelector('.item-name').value.trim();
       const spec = tr.querySelector('.spec').value.trim();
-      const location = (tr.querySelector('.location')||{value:''}).value.trim();
       const qty = parseFloat(tr.querySelector('.qty').value)||0;
-      if(name && (spec||qty||location)) rows.push({name, cat:'', spec, location, qty});
+      if(name && (spec||qty)) rows.push({name, cat:'', spec, qty});
     });
     const sex = document.querySelector('input[name=p_sex]:checked').value;
     const side = document.getElementById('s_side').value;
@@ -2325,8 +2319,7 @@ const DEFAULT_SPECIAL_OPTS = {
       if(catalogTr){
         catalogTr.querySelector('.chk').checked=true;
         catalogTr.querySelector('.spec').value=r.spec||'';
-        catalogTr.dataset.location=r.location||'';
-        const locSpan=catalogTr.querySelector('.item-loc'); if(locSpan) locSpan.textContent=r.location||'';
+
         catalogTr.querySelector('.qty').value=r.qty||'';
         catalogTr.closest('.cat-block').classList.add('open');
       }else{
@@ -2334,7 +2327,7 @@ const DEFAULT_SPECIAL_OPTS = {
         const tr = extraBody.lastElementChild;
         tr.querySelector('.item-name').value=r.name||'';
         tr.querySelector('.spec').value=r.spec||'';
-        const locInput=tr.querySelector('.location'); if(locInput) locInput.value=r.location||'';
+
         tr.querySelector('.qty').value=r.qty||'';
       }
     });
@@ -2628,7 +2621,7 @@ const DEFAULT_SPECIAL_OPTS = {
       block.className = 'cat-block' + ((q || prevOpen.has(catName)) ? ' open':'');
       block.innerHTML = `
         <button type="button" class="cat-header"><span>${catName}</span><span class="cnt">${items.length}/${catalog[catName].length}개 <span class="chev">▾</span></span></button>
-        <div class="cat-body"><table class="mat"><thead><tr><th class="col-drag"></th><th class="col-check">선택</th><th>품목명</th><th class="col-spec">규격</th><th class="col-location">보관위치</th><th>권장 수술종류</th><th class="col-del">관리</th></tr></thead><tbody></tbody></table></div>`;
+        <div class="cat-body"><table class="mat"><thead><tr><th class="col-drag"></th><th class="col-check">선택</th><th>품목명</th><th class="col-spec">규격</th><th>권장 수술종류</th><th class="col-del">관리</th></tr></thead><tbody></tbody></table></div>`;
       const tbody = block.querySelector('tbody');
       items.forEach(it=>{
         const tr = document.createElement('tr');
@@ -2640,7 +2633,6 @@ const DEFAULT_SPECIAL_OPTS = {
             <td class="col-drag"></td><td class="col-check"></td>
             <td><input type="text" class="edit-item-name" value="${(it.name||'').replace(/"/g,'&quot;')}"></td>
             <td class="col-spec"><input type="text" class="edit-item-spec" value="${(it.spec||'').replace(/"/g,'&quot;')}"></td>
-            <td class="col-location"><input type="text" class="edit-item-location" value="${(it.location||'').replace(/"/g,'&quot;')}" placeholder="보관위치"></td>
             <td style="font-size:11.5px;color:var(--ink-soft);">${it.presets.length? it.presets.join(', ') : '—'}</td>
             <td class="col-del" style="display:flex;gap:4px;">
               <button class="mini-btn save-item" style="padding:5px 8px;">저장</button>
@@ -2649,9 +2641,8 @@ const DEFAULT_SPECIAL_OPTS = {
           tr.querySelector('.save-item').addEventListener('click', async ()=>{
             const newName = tr.querySelector('.edit-item-name').value.trim();
             const newSpec = tr.querySelector('.edit-item-spec').value.trim();
-            const newLoc = tr.querySelector('.edit-item-location').value.trim();
             if(!newName){ showBanner('banner3', '품목명을 입력해주세요.', false); return; }
-            it.name = newName; it.spec = newSpec; it.location = newLoc;
+            it.name = newName; it.spec = newSpec;
             await persistCatalog();
             editingItemId = null;
             renderManageCatalog(); renderRecordCatalog();
@@ -2667,7 +2658,6 @@ const DEFAULT_SPECIAL_OPTS = {
             <td class="col-check"><input type="checkbox" class="mng-chk" ${selectedForDelete.has(it.id)?'checked':''}></td>
             <td>${it.name}</td>
             <td class="col-spec">${it.spec||''}</td>
-            <td class="col-location" style="font-size:12px;color:var(--ink-soft);">${it.location||''}</td>
             <td style="font-size:11.5px;color:var(--ink-soft);">${it.presets.length? it.presets.join(', ') : '—'}</td>
             <td class="col-del" style="display:flex;gap:4px;">
               <button class="del-btn edit-btn" title="수정" style="border-color:var(--accent);color:var(--accent-dark);background:var(--accent-soft);">✎</button>
@@ -2692,6 +2682,45 @@ const DEFAULT_SPECIAL_OPTS = {
               showBanner('banner3', '품목을 삭제했습니다.', true);
             });
           });
+          // 드래그&드롭 순서 변경
+          const mngHandle = tr.querySelector('.drag-handle');
+          if(mngHandle){
+            mngHandle.addEventListener('mousedown',()=>{ tr.setAttribute('draggable','true'); });
+            tr.addEventListener('dragend',()=>{ tr.setAttribute('draggable','false'); tr.style.opacity=''; tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom')); });
+            tr.addEventListener('dragstart',e=>{
+              e.dataTransfer.setData('text/x-drag-id', it.id);
+              e.dataTransfer.setData('text/x-drag-cat', catName);
+              e.dataTransfer.effectAllowed='move';
+              tr.style.opacity='0.4';
+            });
+            tr.addEventListener('dragover',e=>{
+              e.preventDefault();
+              e.dataTransfer.dropEffect='move';
+              const rect=tr.getBoundingClientRect();
+              tbody.querySelectorAll('tr').forEach(r=>r.classList.remove('drag-over-top','drag-over-bottom'));
+              tr.classList.add(e.clientY < rect.top+rect.height/2 ? 'drag-over-top':'drag-over-bottom');
+            });
+            tr.addEventListener('dragleave',()=>{ tr.classList.remove('drag-over-top','drag-over-bottom'); });
+            tr.addEventListener('drop',async e=>{
+              e.preventDefault();
+              const draggedId=e.dataTransfer.getData('text/x-drag-id');
+              const draggedCat=e.dataTransfer.getData('text/x-drag-cat');
+              if(!draggedId || draggedCat!==catName || draggedId===it.id) return;
+              const arr=catalog[catName];
+              const fromIdx=arr.findIndex(x=>x.id===draggedId);
+              const toIdx=arr.findIndex(x=>x.id===it.id);
+              if(fromIdx===-1||toIdx===-1) return;
+              const rect=tr.getBoundingClientRect();
+              const insertBefore=e.clientY < rect.top+rect.height/2;
+              const [moved]=arr.splice(fromIdx,1);
+              let ni=arr.findIndex(x=>x.id===it.id);
+              if(!insertBefore) ni++;
+              arr.splice(ni,0,moved);
+              await persistCatalog();
+              renderManageCatalog(); renderRecordCatalog();
+              showBanner('banner3','순서를 저장했습니다.',true);
+            });
+          }
         }
         tbody.appendChild(tr);
       });
@@ -2733,11 +2762,9 @@ const DEFAULT_SPECIAL_OPTS = {
     const spec = specInput.value.trim();
     if(!cat || !name){ showBanner('banner3', '카테고리와 품목명을 입력해주세요.', false); return; }
     const id = cat + '__new_' + Date.now();
-    const locInput2 = document.getElementById('newItemLocation');
-    const loc2 = locInput2 ? locInput2.value.trim() : '';
-    catalog[cat].push({id, name, spec, location: loc2, presets: []});
+    catalog[cat].push({id, name, spec, presets: []});
     await persistCatalog();
-    nameInput.value=''; specInput.value=''; if(locInput2) locInput2.value='';
+    nameInput.value=''; specInput.value='';
     renderManageCatalog(); renderRecordCatalog();
     // 추가한 카테고리 블록 자동으로 펼치고 새 항목으로 스크롤
     const addedBlock = Array.from(manageCatalogRoot.querySelectorAll('.cat-block')).find(b => b.dataset.cat === cat);
