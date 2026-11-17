@@ -200,6 +200,8 @@ main{max-width:var(--maxw);margin:0 auto;padding:16px 16px calc(var(--nav-h) + e
 .btn-secondary{background:var(--mint-2);color:var(--pine-2);border:1px solid var(--mint)}
 @media (prefers-color-scheme:dark){.btn-secondary{color:var(--on-pine)}}
 .btn-ghost{background:transparent;color:var(--pine-3);border:1px solid var(--line)}
+.btn-danger{background:var(--red-bg);color:var(--red-ink);border:1px solid var(--red)}
+.history-item.canceled .row1 span:first-child{text-decoration:line-through;color:var(--ink-3)}
 .btn-row{display:flex;gap:9px}
 .btn-row .btn{flex:1}
 .pill-count{display:inline-block;background:rgba(255,255,255,.2);padding:1px 9px;border-radius:100px;font-size:13px;font-weight:800}
@@ -1086,9 +1088,9 @@ function receiptHistoryHtml(){
   const rs = [...STATE.receipts].reverse().slice(0, 15);
   return `<div class="section-title" style="margin-top:26px;">지난 입고 내역</div>` + (rs.length===0 ? `<div class="empty-state" style="padding:26px;"><div class="glyph">📥</div>기록된 입고가 없어요</div>` :
     rs.map(r=>`
-      <button class="history-item" data-rcid="${esc(r.id)}">
+      <button class="history-item ${r.canceled ? 'canceled' : ''}" data-rcid="${esc(r.id)}">
         <div class="row1"><span>${r.items.length}개 품목 입고</span><span>${fmtDate(r.date)}</span></div>
-        <div class="row2"><span>${r.memo ? esc(r.memo) : (r.requestId ? '청구서 기준' : '직접 입고')}</span><span>${r.requestId ? '청구서 연결' : ''}</span></div>
+        <div class="row2"><span>${r.memo ? esc(r.memo) : (r.requestId ? '청구서 기준' : '직접 입고')}</span>${r.canceled ? '<span class="badge warn">취소됨</span>' : `<span>${r.requestId ? '청구서 연결' : ''}</span>`}</div>
       </button>`).join(''));
 }
 function bindReceiveCommon(main){
@@ -1140,22 +1142,41 @@ async function submitReceive(){
 }
 function showReceiptModal(rc){
   if(!rc) return;
-  openSheet(`
+  const sheet = openSheet(`
     ${modalHead(`입고 내역`)}
     <div class="muted doc-meta" style="font-size:12.5px;">입고일 ${fmtDate(rc.date)}${rc.requestId ? ' · 청구서 연결' : ' · 직접 입고'}</div>
-    <div class="doc-id">입고번호 ${esc(rc.id)}${rc.memo ? ' · ' + esc(rc.memo) : ''}</div>
+    <div class="doc-id">입고번호 ${esc(rc.id)}${rc.memo ? ' · ' + esc(rc.memo) : ''}${rc.canceled ? ` · <span class="badge warn">취소됨 ${fmtDate(rc.canceled)}</span>` : ''}</div>
     <div class="doc">
       ${rc.items.map(i=>`
-        <div class="item-row ok">
+        <div class="item-row ${rc.canceled ? 'low' : 'ok'}">
           <span class="rail"></span>
           <div class="item-main">
             <div class="item-name">${esc(i.name)}</div>
             <div class="item-sub"><span class="tag">${esc(i.dept)}</span><span class="tag">${esc(i.cat)}</span>${i.spec?`<span>${esc(i.spec)}</span>`:''}</div>
             <div class="item-sub"><span>재고 ${i.before} → <b>${i.after}</b></span></div>
           </div>
-          <div class="item-stock"><div class="n mono">+${i.qty}</div><div class="p">입고수량</div></div>
+          <div class="item-stock"><div class="n mono">${rc.canceled ? '' : '+'}${i.qty}</div><div class="p">${rc.canceled ? '취소됨' : '입고수량'}</div></div>
         </div>`).join('')}
-    </div>`);
+    </div>
+    ${rc.canceled ? '' : `<div class="btn-row no-print"><button class="btn btn-danger" id="cancelReceipt">${ic('x')}이 입고 취소</button></div>
+    <div class="fab-note">잘못 입력한 입고를 되돌립니다. 입고했던 수량만큼 현재재고가 줄고, 기록은 "취소됨"으로 남아요.</div>`}`);
+  const cb = $('cancelReceipt');
+  if(cb) cb.addEventListener('click', ()=> cancelReceipt(rc, sheet));
+}
+async function cancelReceipt(rc, sheet){
+  if(!confirm(`이 입고를 취소할까요?\n입고했던 ${rc.items.length}개 품목의 재고가 입고 수량만큼 줄어들어요.`)) return;
+  setSyncing(true);
+  try{
+    const r = await apiPost({ action:'receiptCancel', id: rc.id });
+    sheet.close();
+    await reloadQuiet();
+    toast(`입고 취소 · ${r.count}개 품목을 재고에서 뺐어요` + ((r.clamped||[]).length ? ` · 재고가 모자라 0으로 맞춘 품목: ${r.clamped.join(', ')}` : '') + ((r.skipped||[]).length ? ` · 시트에서 못 찾은 ${r.skipped.length}개는 제외됐어요` : ''));
+  }catch(e){
+    console.error(e);
+    toast(errMsg(e, '입고 취소 실패 — 구글시트 연결을 확인해주세요'));
+  }
+  setSyncing(false);
+  render();
 }
 
 // ================= 품목관리 =================

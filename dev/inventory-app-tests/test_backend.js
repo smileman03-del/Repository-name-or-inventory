@@ -118,6 +118,34 @@ assert(e.post({ action: 'receiveSubmit', requestId: 'R없는번호', items: [{ i
 { const before = byName(e, '멸균 수술장갑 7.0').stock; e.post({ action: 'receiveSubmit', requestId: 'R없는번호', items: [{ id: 1, qty: 1 }] }); assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, before); }
 assert.deepStrictEqual(all(e).receipts.map(x => x.id).length, new Set(all(e).receipts.map(x => x.id)).size); ok('입고번호는 모두 고유(같은 초에 여러 번 입고해도 합쳐지지 않음)');
 
+// ---- 입고 취소 ----
+e = sample();
+r = e.post({ action: 'receiveSubmit', items: [{ id: 1, qty: 6 }, { id: 6, qty: 5 }], memo: '취소 시험' }); const inId = r.data.id;
+assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, 10); assert.strictEqual(byName(e, '일회용 주사기 5cc').stock, 8);
+r = e.post({ action: 'receiptCancel', id: inId });
+assert(r.success && r.data.count === 2 && r.data.skipped.length === 0 && r.data.clamped.length === 0 && /^\d{4}-\d{2}-\d{2}$/.test(r.data.date)); assert.deepStrictEqual(r.data.stocks, { 1: 4, 6: 3 }); ok('입고 취소: 입고했던 수량만큼 재고에서 빠져 원래대로 돌아감(10→4, 8→3)');
+assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, 4); assert.strictEqual(byName(e, '일회용 주사기 5cc').stock, 3); assert.strictEqual(byName(e, '알코올 솜').stock, 20); ok('시트의 현재재고가 되돌려지고 다른 품목은 그대로');
+rc = all(e).receipts; assert.strictEqual(rc.length, 1); assert(/^\d{4}-\d{2}-\d{2}$/.test(rc[0].canceled)); assert.strictEqual(rc[0].items.length, 2); assert.strictEqual(rc[0].memo, '취소 시험'); assert.strictEqual(e.sheet('입고 기록').d.length, 3); assert.strictEqual(e.sheet('입고 기록').d[0][12], '취소일'); ok('입고 기록은 지우지 않고 남기고 "취소일"만 표시됨(감사 기록 보존, 머리글 "취소일" 추가)');
+r = e.post({ action: 'receiptCancel', id: inId }); assert(r.success === false && /이미 취소/.test(r.error)); assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, 4); ok('이미 취소한 입고를 또 취소하면 거부(재고는 두 번 빠지지 않음)');
+r = e.post({ action: 'receiptCancel', id: 'IN없는번호' }); assert(r.success === false && /찾을 수 없습니다/.test(r.error) && /새로고침/.test(r.error)); assert(e.post({ action: 'receiptCancel' }).success === false); ok('없는 입고번호·번호 없음 → 안내');
+// 청구서 입고 현황이 되돌아가는지
+e = sample(); const rqA = e.post({ action: 'requestCreate', dept: '전체', items: [{ id: 1, name: 'a', spec: '', dept: '수술실', cat: '소모품', stock: 4, par: 10, qty: 6 }, { id: 6, name: 'b', spec: '', dept: '처치실', cat: '소모품', stock: 3, par: 8, qty: 5 }] }).data.id;
+const in1 = e.post({ action: 'receiveSubmit', requestId: rqA, items: [{ id: 1, qty: 6 }] }).data.id; const in2 = e.post({ action: 'receiveSubmit', requestId: rqA, items: [{ id: 6, qty: 5 }] }).data.id;
+assert.strictEqual(all(e).requests[0].status, 'done');
+e.post({ action: 'receiptCancel', id: in2 }); let q2 = all(e).requests[0]; assert.strictEqual(q2.status, 'partial'); assert.strictEqual(q2.items.find(i => i.id === 6).received, 0); assert.strictEqual(q2.items.find(i => i.id === 1).received, 6); ok('입고 완료였던 청구서가 일부 입고로 돌아가고, 취소한 품목의 입고수량만 0으로 돌아감');
+e.post({ action: 'receiptCancel', id: in1 }); q2 = all(e).requests[0]; assert.strictEqual(q2.status, 'none'); assert(q2.items.every(i => i.received === 0)); ok('모두 취소하면 청구서는 입고 전으로 복귀');
+r = e.post({ action: 'receiveSubmit', requestId: rqA, items: [{ id: 1, qty: 6 }, { id: 6, qty: 5 }] }); assert(r.success); assert.strictEqual(all(e).requests[0].status, 'done'); assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, 10); ok('취소한 뒤 같은 청구서로 다시 입고하면 정상 처리(취소분은 입고수량에 섞이지 않음)');
+// 그 사이 재고가 줄어든 경우 / 품목이 지워진 경우
+e = sample(); const inC = e.post({ action: 'receiveSubmit', items: [{ id: 1, qty: 6 }, { id: 2, qty: 3 }, { id: 3, qty: 2 }] }).data.id;
+e.post({ action: 'auditSubmit', dept: '수술실', updates: [{ id: 1, name: 'x', stock: 2 }] });   // 실사로 재고가 2까지 줄어듦(취소하려는 수량 6보다 적음)
+e.post({ action: 'itemDelete', id: 3 });
+r = e.post({ action: 'receiptCancel', id: inC }); assert(r.success); assert.deepStrictEqual(r.data.clamped, ['멸균 수술장갑 7.0']); assert.deepStrictEqual(r.data.skipped, ['일회용 수술가운']);
+assert.strictEqual(byName(e, '멸균 수술장갑 7.0').stock, 0); assert.strictEqual(byName(e, '멸균 수술장갑 7.5').stock, 9); ok('그 사이 재고가 줄어 뺄 수량이 모자라면 음수가 아니라 0으로 맞추고(clamped), 지워진 품목은 건너뛰며(skipped) 이름을 알려줌');
+assert(all(e).receipts[0].canceled); ok('그래도 입고 자체는 취소됨으로 기록되어 다시 취소할 수 없음');
+{ const x = sample(); const idc = x.post({ action: 'receiveSubmit', items: [{ id: 1, qty: 3 }] }).data.id; x.sheet('품목 마스터').d[3][5] = '=E4'; x.post({ action: 'receiptCancel', id: idc }); assert.strictEqual(x.sheet('품목 마스터').d[3][5], '=E4'); assert.strictEqual(byName(x, '멸균 수술장갑 7.0').stock, 4); ok('취소 대상이 아닌 품목의 현재재고 수식은 지우지 않고 보존'); }
+{ const x = sample(); x.post({ action: 'receiveSubmit', items: [{ id: 1, qty: 3 }] }); const idc = x.post({ action: 'receiveSubmit', items: [{ id: 2, qty: 4 }] }).data.id; x.post({ action: 'receiptCancel', id: idc }); const rcs = all(x).receipts; assert.strictEqual(rcs.length, 2); assert.strictEqual(rcs.filter(c => c.canceled).length, 1); assert.strictEqual(byName(x, '멸균 수술장갑 7.0').stock, 7); assert.strictEqual(byName(x, '멸균 수술장갑 7.5').stock, 9); ok('입고가 여러 건이어도 취소한 한 건만 되돌려지고 나머지 입고는 그대로'); }
+{ const x = sample(); x.post({ action: 'receiveSubmit', items: [{ id: 1, qty: 3 }] }); x.run('clearSampleData_()'); assert.strictEqual(all(x).receipts.length, 0); ok('예제 데이터 지우기가 취소된 입고 기록까지 포함해 입고 기록을 모두 비움'); }
+
 // ---- 시트 메뉴 ----
 e = sample();
 e.run('showDashboard()'); assert(/전체 품목: 15개/.test(e.alerts.at(-1)) && /재고부족: 9개/.test(e.alerts.at(-1)) && /수술실: 5개 중 부족 4개/.test(e.alerts.at(-1))); ok('현황 대시보드: 전체·부족 숫자와 대분류별 현황');

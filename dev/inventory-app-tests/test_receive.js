@@ -101,7 +101,38 @@ const all = () => env.get('getAll').data; const item = nm => all().items.find(i 
   await p.locator(`.stp-minus[data-for="${aid}"]`).click(); await p.locator(`.stp-minus[data-for="${aid}"]`).click(); await p.locator(`.audit-input[data-id="${idOf('포비돈 용액 500ml')}"]`).fill('4'); assert.strictEqual(await p.locator('.audit-row.changed').count(), 0); assert(/변경 없음/.test(await p.innerText('#saveAudit'))); ok('원래 값으로 되돌리면 강조와 변경 건수가 사라짐');
   await p.close();
 
+  // ===== 입고 취소 =====
+  fresh(); const rqX = mkReq('전체', ['멸균 수술장갑 7.0', '일회용 주사기 5cc']);
+  env.post({ action: 'receiveSubmit', requestId: rqX, items: [{ id: idOf('멸균 수술장갑 7.0'), qty: 6 }, { id: idOf('일회용 주사기 5cc'), qty: 5 }], memo: '잘못 입력' });
+  p = await open(); await go(p, 'receive');
+  assert.strictEqual(await p.locator('.pending-card').count(), 0); assert.strictEqual(await p.locator('.nav-btn[data-screen=receive][data-badge]').count(), 0);
+  await p.locator('.history-item[data-rcid]').first().click(); await p.waitForTimeout(150);
+  assert.strictEqual(await p.locator('#cancelReceipt').count(), 1); assert(/입고했던 수량만큼 현재재고가 줄고/.test(await p.innerText('.modal-sheet'))); await p.screenshot({ path: OUT + '/after_9_cancel_modal.png' }); ok('입고 내역 상세에 "이 입고 취소" 버튼과 안내 문구가 보임');
+  p.answer = false; await p.click('#cancelReceipt'); await p.waitForTimeout(150);
+  assert(/이 입고를 취소할까요/.test(p.dialogs.at(-1)) && /2개 품목/.test(p.dialogs.at(-1))); assert.strictEqual(item('멸균 수술장갑 7.0').stock, 10); assert.strictEqual(all().receipts[0].canceled, ''); assert.strictEqual(await p.locator('#cancelReceipt').count(), 1); ok('확인 창에서 "취소"를 누르면 아무것도 바뀌지 않음(재고 10 유지, 모달 유지)');
+  p.answer = true; await p.click('#cancelReceipt'); await wait(p);
+  assert.strictEqual(await p.locator('.modal-sheet').count(), 0); assert(/입고 취소 · 2개 품목을 재고에서 뺐어요/.test(await toast(p)), await toast(p));
+  assert.strictEqual(item('멸균 수술장갑 7.0').stock, 4); assert.strictEqual(item('일회용 주사기 5cc').stock, 3); assert(all().receipts[0].canceled); ok('확인하면 입고가 취소되어 재고가 원래대로(10→4, 8→3) 돌아가고 모달이 닫힘');
+  assert.strictEqual(await p.locator('.history-item.canceled').count(), 1); assert(/취소됨/.test(await p.innerText('.history-item.canceled'))); ok('입고 내역에 "취소됨" 표시(줄 긋고 흐리게)');
+  assert.strictEqual(await p.locator('.pending-card').count(), 1); assert(/입고 0\/2/.test(await p.innerText('.pending-card'))); assert.strictEqual(await p.locator('.nav-btn[data-screen=receive]').getAttribute('data-badge'), '1'); ok('취소하면 청구서가 다시 "입고 대기"(입고 0/2)로 돌아오고 메뉴 배지도 다시 켜짐');
+  await p.locator('.history-item.canceled').click(); await p.waitForTimeout(150);
+  assert.strictEqual(await p.locator('#cancelReceipt').count(), 0); assert(/취소됨/.test(await p.innerText('.doc-id'))); await p.screenshot({ path: OUT + '/after_10_canceled_modal.png' }); ok('취소된 입고의 상세에는 "취소됨 날짜"가 표시되고 취소 버튼은 없음(두 번 취소 불가)');
+  await p.click('#closeModal');
+  await p.click('.pending-card'); await p.waitForTimeout(120); assert.strictEqual(+await p.locator(`.rcvQty[data-id="${idOf('멸균 수술장갑 7.0')}"]`).inputValue(), 6); await p.click('#saveReceive'); await wait(p);
+  assert.strictEqual(item('멸균 수술장갑 7.0').stock, 10); ok('취소한 뒤 같은 청구서로 다시 입고하면 남은 수량(6)이 다시 채워지고 정상 입고');
+  await p.close();
+  // 그 사이 재고가 줄어든 경우의 안내
+  fresh(); env.post({ action: 'receiveSubmit', items: [{ id: idOf('멸균 수술장갑 7.0'), qty: 6 }] }); env.post({ action: 'auditSubmit', dept: '수술실', updates: [{ id: idOf('멸균 수술장갑 7.0'), name: 'x', stock: 2 }] });
+  p = await open(); await go(p, 'receive'); await p.locator('.history-item[data-rcid]').first().click(); await p.waitForTimeout(150); await p.click('#cancelReceipt'); await wait(p);
+  assert(/재고가 모자라 0으로 맞춘 품목: 멸균 수술장갑 7.0/.test(await toast(p)), await toast(p)); assert.strictEqual(item('멸균 수술장갑 7.0').stock, 0); ok('그 사이 재고가 줄어 되돌릴 수량이 모자라면 0으로 맞추고 "재고가 모자라 0으로 맞춘 품목: …"을 알림');
+  await p.close();
+  // 이미 취소된 입고를 다른 기기에서 먼저 취소한 경우 → 서버 이유를 그대로 표시
+  fresh(); const idZ = env.post({ action: 'receiveSubmit', items: [{ id: idOf('초음파 젤'), qty: 3 }] }).data.id;
+  p = await open(); await go(p, 'receive'); await p.locator('.history-item[data-rcid]').first().click(); await p.waitForTimeout(150); env.post({ action: 'receiptCancel', id: idZ });
+  await p.click('#cancelReceipt'); await wait(p); assert(/이미 취소된 입고입니다/.test(await toast(p)), await toast(p)); assert.strictEqual(item('초음파 젤').stock, 2); ok('다른 기기에서 이미 취소했다면 "이미 취소된 입고입니다"를 그대로 알리고 재고는 두 번 빠지지 않음');
+  await p.close();
+
   assert.deepStrictEqual(pageErrs, []);
-  assert.deepStrictEqual(consoleErrs.filter(e => !/시트에서 찾을 수 없는 품목입니다|Failed to fetch|Failed to load resource|net::ERR/.test(e)), []); ok('스크립트 오류 0건 (콘솔 기록은 시험이 일부러 일으킨 서버 거부뿐)');
+  assert.deepStrictEqual(consoleErrs.filter(e => !/시트에서 찾을 수 없는 품목입니다|이미 취소된 입고입니다|Failed to fetch|Failed to load resource|net::ERR/.test(e)), []); ok('스크립트 오류 0건 (콘솔 기록은 시험이 일부러 일으킨 서버 거부뿐)');
   await b.close(); console.log('\n전체 ' + n + '개 통과');
 })().catch(e => { console.error('\n실패:', e.message); process.exit(1); });

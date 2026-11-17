@@ -12,6 +12,7 @@ function makeEnv() {
   const it = nm => env.get('getAll').data.items.find(i => i.name === nm);
   const mk = (dept, names) => env.post({ action: 'requestCreate', dept, items: names.map(nm => { const i = it(nm); return { id: i.id, name: i.name, spec: i.spec, dept: i.dept, cat: i.cat, stock: i.stock, par: i.par, qty: i.par - i.stock }; }) }).data.id;
   const r1 = mk('전체', ['멸균 수술장갑 7.0', '일회용 주사기 5cc', '봉합사 Vicryl 2-0']); env.post({ action: 'receiveSubmit', requestId: r1, items: [{ id: it('멸균 수술장갑 7.0').id, qty: 4 }], memo: '납품' }); mk('병동', ['탄력붕대 4인치']);
+  const rc2 = env.post({ action: 'receiveSubmit', items: [{ id: it('초음파 젤').id, qty: 2 }], memo: '취소된 입고' }).data.id; env.post({ action: 'receiptCancel', id: rc2 });   // 취소된 입고 1건
   return env;
 }
 const env = makeEnv();
@@ -57,6 +58,10 @@ const MEASURE = sels => sels.map(([sel, bgOverride]) => {
     }
     await p.click('.nav-btn[data-screen=request]'); await p.waitForTimeout(600); await p.click('.history-item'); await p.waitForTimeout(500);
     const mres = await p.evaluate(MEASURE, [['.modal-title'], ['.doc-id'], ['.muted.doc-meta'], ['.modal-sheet .item-name'], ['.modal-sheet .item-sub .tag'], ['.modal-sheet .item-stock .n'], ['.modal-sheet .item-stock .p'], ['.btn-secondary'], ['.rcv-chip']]); for (const r of mres) { if (r.missing) continue; count++; if (r.ratio < r.need) bad.push(`모달 ${r.sel} "${r.text}" ${r.px}px → ${r.ratio}:1 (필요 ${r.need})`); }
+    await p.click('#closeModal'); await p.click('.nav-btn[data-screen=receive]'); await p.waitForTimeout(600);
+    const hres = await p.evaluate(MEASURE, [['.history-item.canceled .row1 span:first-child'], ['.history-item.canceled .row2'], ['.history-item.canceled .badge.warn'], ['.history-item:not(.canceled) .row1']]); for (const r of hres) { if (r.missing) continue; count++; if (r.ratio < r.need) bad.push(`입고 내역 ${r.sel} "${r.text}" ${r.px}px → ${r.ratio}:1 (필요 ${r.need})`); }
+    await p.locator('.history-item:not(.canceled)').first().click(); await p.waitForTimeout(500);
+    const cres = await p.evaluate(MEASURE, [['.btn-danger'], ['.fab-note'], ['.doc-id'], ['.modal-sheet .item-name']]); for (const r of cres) { if (r.missing) continue; count++; if (r.ratio < r.need) bad.push(`입고 취소 ${r.sel} "${r.text}" ${r.px}px → ${r.ratio}:1 (필요 ${r.need})`); }
     if (bad.length) console.log('  [' + scheme + '] 대비 부족:\n   - ' + bad.join('\n   - '));
     assert.strictEqual(bad.length, 0, `${scheme}: 글자 대비 기준 미달 ${bad.length}건`); ok(`${scheme === 'light' ? '라이트' : '다크'} 모드: 주요 글자 ${count}곳이 WCAG AA 대비(일반 4.5:1, 큰 글자 3:1)를 모두 만족`);
     await c.close();

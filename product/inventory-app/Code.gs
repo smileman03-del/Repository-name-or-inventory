@@ -20,7 +20,8 @@ var HEAD_MASTER = ['대분류(부서)', '소분류', '품목명', '규격/단위
 var HEAD_AUDIT = ['실사일', '대분류(부서)', '변경건수', '변경내역'];
 var HEAD_REQUEST = ['청구번호', '청구일', '청구 대상', '대분류(부서)', '소분류', '품목번호', '품목명', '규격/단위', '현재재고', '적정재고', '청구수량'];
 // 입고 기록: 한 번의 입고(입고번호)에 품목별로 한 줄씩. 청구번호는 청구서를 보고 입고했을 때만 채워진다.
-var HEAD_RECEIPT = ['입고번호', '입고일', '청구번호', '대분류(부서)', '소분류', '품목번호', '품목명', '규격/단위', '입고수량', '입고 전 재고', '입고 후 재고', '메모'];
+// 취소일이 있으면 취소된 입고다(기록은 지우지 않고 남긴다).
+var HEAD_RECEIPT = ['입고번호', '입고일', '청구번호', '대분류(부서)', '소분류', '품목번호', '품목명', '규격/단위', '입고수량', '입고 전 재고', '입고 후 재고', '메모', '취소일'];
 
 // 상태 열: 머리글 칸(I1) 하나로 모든 행의 상태를 자동 계산한다.
 // (2행에 두면 첫 품목을 삭제할 때 수식이 같이 사라지므로 머리글 칸에 둔다)
@@ -148,6 +149,7 @@ function doPost(e) {
     else if (p.action === 'auditSubmit') data = auditSubmit_(p);
     else if (p.action === 'requestCreate') data = requestCreate_(p);
     else if (p.action === 'receiveSubmit') data = receiveSubmit_(p);
+    else if (p.action === 'receiptCancel') data = receiptCancel_(p);
     else return json_({ success: false, error: '알 수 없는 action: ' + p.action });
     return json_({ success: true, data: data });
   } catch (err) {
@@ -190,13 +192,14 @@ function receiptData_() {
   var out = { list: [], received: {} };
   if (last < 2) return out;
   var byId = {};
-  sh.getRange(2, 1, last - 1, 12).getValues().forEach(function (r) {
+  sh.getRange(2, 1, last - 1, 13).getValues().forEach(function (r) {
     var id = String(r[0]);
     if (!id) return;
-    if (!byId[id]) { byId[id] = { id: id, date: dateStr_(r[1]), requestId: String(r[2]), memo: String(r[11]), items: [] }; out.list.push(byId[id]); }
+    var canceled = r[12] ? dateStr_(r[12]) : '';
+    if (!byId[id]) { byId[id] = { id: id, date: dateStr_(r[1]), requestId: String(r[2]), memo: String(r[11]), canceled: canceled, items: [] }; out.list.push(byId[id]); }
     byId[id].items.push({ id: Number(r[5]) || 0, dept: String(r[3]), cat: String(r[4]), name: String(r[6]), spec: String(r[7]), qty: num_(r[8]), before: num_(r[9]), after: num_(r[10]) });
     var rid = String(r[2]);
-    if (rid) { var k = rid + '|' + (Number(r[5]) || 0); out.received[k] = (out.received[k] || 0) + num_(r[8]); }
+    if (rid && !canceled) { var k = rid + '|' + (Number(r[5]) || 0); out.received[k] = (out.received[k] || 0) + num_(r[8]); }
   });
   return out;
 }
@@ -332,6 +335,43 @@ function receiveSubmit_(p) {
   return { id: rid, date: date, count: rows.length, skipped: skipped, stocks: stocks };
 }
 
+// 입고 취소: 입고했던 수량만큼 현재재고에서 빼고, 입고 기록은 지우지 않고 "취소일"을 남긴다.
+// 그 사이 재고가 줄어 뺄 수량이 모자라면 0으로 맞추고(clamped) 알려 준다. 시트에서 지워진 품목은 건너뛴다(skipped).
+function receiptCancel_(p) {
+  var id = String(p.id || '').trim();
+  if (!id) throw new Error('취소할 입고번호가 없습니다.');
+  var sh = tab_(TAB_RECEIPT);
+  var last = lastRowByCol_(sh, 1);
+  var rows = last < 2 ? [] : sh.getRange(2, 1, last - 1, 13).getValues();
+  var mine = [];
+  rows.forEach(function (r, i) { if (String(r[0]) === id) mine.push({ row: i + 2, r: r }); });
+  if (!mine.length) throw new Error('입고 내역을 찾을 수 없습니다: ' + id + ' (앱을 새로고침해 주세요)');
+  if (mine.some(function (m) { return m.r[12]; })) throw new Error('이미 취소된 입고입니다.');
+
+  var take = {}, names = {};   // 품목번호 → 빼야 할 수량 / 이름
+  mine.forEach(function (m) {
+    var iid = Number(m.r[5]) || 0;
+    take[iid] = (take[iid] || 0) + num_(m.r[8]);
+    names[iid] = String(m.r[6]);
+  });
+  var idx = masterIndexFixed_();
+  var changes = [], skipped = [], clamped = [], stocks = {};
+  Object.keys(take).forEach(function (k) {
+    var iid = Number(k), row = idx.rowById[iid];
+    if (!row) { skipped.push(names[iid]); return; }
+    var now = num_(idx.data[row - 2][5]), after = Math.max(0, now - take[iid]);
+    if (take[iid] > now) clamped.push(names[iid]);
+    changes.push({ row: row, qty: after });
+    stocks[iid] = after;
+  });
+  if (changes.length) writeStock_(idx, changes);
+
+  var date = today_();
+  if (!String(sh.getRange(1, 13, 1, 1).getValues()[0][0] || '').trim()) sh.getRange(1, 13).setValue('취소일');
+  mine.forEach(function (m) { sh.getRange(m.row, 13).setValue(date); });
+  return { id: id, date: date, count: mine.length, skipped: skipped, clamped: clamped, stocks: stocks };
+}
+
 function requestExists_(requestId) {
   var sh = tab_(TAB_REQUEST);
   var last = lastRowByCol_(sh, 1);
@@ -419,7 +459,7 @@ function clearSampleData_() {
   if (others.length) {
     throw new Error('예제가 아닌 품목이 있습니다 (' + others.slice(0, 3).join(', ') + (others.length > 3 ? ' 외 ' + (others.length - 3) + '개' : '') + '). 직접 지워 주세요.');
   }
-  [[TAB_MASTER, 8, 3], [TAB_AUDIT, 4, 2], [TAB_REQUEST, 11, 1], [TAB_RECEIPT, 12, 1]].forEach(function (t) {
+  [[TAB_MASTER, 8, 3], [TAB_AUDIT, 4, 2], [TAB_REQUEST, 11, 1], [TAB_RECEIPT, 13, 1]].forEach(function (t) {
     var sh = tab_(t[0]);
     var last = lastRowByCol_(sh, t[2]);
     if (last > 1) sh.getRange(2, 1, last - 1, t[1]).clearContent();
