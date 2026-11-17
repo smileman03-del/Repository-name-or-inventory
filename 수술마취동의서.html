@@ -685,7 +685,7 @@ const sbREGIONS = [
   { id:'knee',           name:'슬관절 (무릎)',               desc:'슬개골, 슬개건, 내·외측 인대 및 무릎 관절 전면.',
     box:{x:0.30,y:0.67,w:0.40,h:0.14} },
   { id:'lower_leg_foot', name:'하퇴부 · 발목 · 발',         desc:'전경골근, 비복근 전면, 족관절 및 발등 힘줄 부위.',
-    box:{x:0.30,y:0.75,w:0.40,h:0.24} }
+    box:{x:0.30,y:0.75,w:0.40,h:0.25} }
 ];
 
 let sbCurrentRegion = sbREGIONS[0];
@@ -787,13 +787,30 @@ function sbBuildDefaultAnatomyCanvas() {
 
   // 팔
   for (const s of [-1, 1]) {
+    // 손가락 (둥근 곡선형) - 손바닥보다 먼저 그려 연결부를 자연스럽게 가림
+    const fingers = [
+      { b:[223,806], m:[220,834], t:[217,862], w:12 },   // 소지 (몸 쪽)
+      { b:[239,806], m:[238,840], t:[236,876], w:14 },   // 약지
+      { b:[255,806], m:[255,844], t:[255,882], w:15 },   // 중지
+      { b:[271,806], m:[273,840], t:[275,874], w:14 },   // 검지
+      { b:[279,764], m:[301,780], t:[307,816], w:17 }    // 엄지 (바깥쪽)
+    ];
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    for (const f of fingers) {
+      c.beginPath();
+      c.moveTo(s*f.b[0], f.b[1]);
+      c.quadraticCurveTo(s*f.m[0], f.m[1], s*f.t[0], f.t[1]);
+      c.strokeStyle = '#6b5a4a'; c.lineWidth = f.w + 3.6; c.stroke();
+      c.strokeStyle = '#cac0b0'; c.lineWidth = f.w;       c.stroke();
+    }
+    c.lineCap = 'butt'; c.lineJoin = 'miter';
     c.beginPath(); c.moveTo(s*138, 296); c.quadraticCurveTo(s*198, 312, s*200, 396);
     c.quadraticCurveTo(s*202, 476, s*218, 542); c.quadraticCurveTo(s*248, 628, s*275, 735);
-    c.lineTo(s*322, 806); c.lineTo(s*312, 816); c.lineTo(s*282, 786);
-    c.lineTo(s*302, 866); c.lineTo(s*288, 870); c.lineTo(s*268, 802);
-    c.lineTo(s*278, 882); c.lineTo(s*262, 884); c.lineTo(s*248, 806);
-    c.lineTo(s*252, 876); c.lineTo(s*236, 876); c.lineTo(s*234, 802);
-    c.lineTo(s*224, 852); c.lineTo(s*210, 848); c.lineTo(s*222, 748);
+    c.quadraticCurveTo(s*288, 764, s*285, 798);
+    c.quadraticCurveTo(s*285, 822, s*268, 822);
+    c.lineTo(s*230, 822);
+    c.quadraticCurveTo(s*213, 822, s*213, 800);
+    c.quadraticCurveTo(s*212, 770, s*222, 748);
     c.quadraticCurveTo(s*184, 638, s*168, 544); c.quadraticCurveTo(s*144, 476, s*134, 420); c.closePath();
     c.fillStyle = '#cac0b0'; c.fill(); c.strokeStyle = '#6b5a4a'; c.lineWidth = 2; c.stroke();
     c.beginPath(); c.moveTo(s*144, 410); c.quadraticCurveTo(s*190, 420, s*190, 505);
@@ -806,10 +823,26 @@ function sbBuildDefaultAnatomyCanvas() {
 
   // 다리
   for (const s of [-1, 1]) {
+    // 발가락 (둥근 타원형 5개) - 발등보다 먼저 그려 연결부를 가림
+    const toes = [
+      [57, 1622, 17, 21], [80, 1623, 11.5, 18], [98, 1619, 10.5, 15.5],
+      [112, 1614, 9.5, 14], [123, 1607, 8.5, 12.5]
+    ];
+    for (const [tx, ty, rx, ry] of toes) {
+      c.beginPath(); c.ellipse(s*tx, ty, rx, ry, 0, 0, Math.PI*2);
+      c.fillStyle = '#cac0b0'; c.fill();
+      c.strokeStyle = '#6b5a4a'; c.lineWidth = 1.8; c.stroke();
+    }
     c.beginPath(); c.moveTo(s*124, 828);
     c.quadraticCurveTo(s*152, 948, s*126, 1120); c.quadraticCurveTo(s*120, 1178, s*122, 1224);
-    c.quadraticCurveTo(s*136, 1326, s*106, 1468); c.lineTo(s*110, 1528); c.lineTo(s*128, 1600);
-    c.lineTo(s*44, 1608); c.lineTo(s*48, 1528); c.lineTo(s*50, 1468);
+    c.quadraticCurveTo(s*136, 1326, s*106, 1468);
+    c.quadraticCurveTo(s*104, 1496, s*106, 1520);
+    c.quadraticCurveTo(s*108, 1548, s*120, 1580);
+    c.quadraticCurveTo(s*128, 1602, s*112, 1614);
+    c.quadraticCurveTo(s*82, 1624, s*56, 1616);
+    c.quadraticCurveTo(s*40, 1610, s*42, 1590);
+    c.quadraticCurveTo(s*44, 1556, s*48, 1524);
+    c.quadraticCurveTo(s*52, 1496, s*50, 1468);
     c.quadraticCurveTo(s*34, 1342, s*44, 1224); c.quadraticCurveTo(s*46, 1168, s*38, 1120);
     c.quadraticCurveTo(s*16, 976, s*14, 868); c.closePath();
     c.fillStyle = '#cac0b0'; c.fill(); c.strokeStyle = '#6b5a4a'; c.lineWidth = 2; c.stroke();
