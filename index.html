@@ -1053,7 +1053,7 @@
       }
     } else {
       items = loadedItems;
-    }
+ h   }
 
     counts = await getJSON('counts:'+todayKey, true, {});
 
@@ -1079,6 +1079,80 @@
   }
 
   init();
+})();
+</script>
+  
+<script>
+(function(){
+  'use strict';
+  const ORDER_KEY = 'bg_cat_order';
+  function getSavedOrder(){try{return JSON.parse(localStorage.getItem(ORDER_KEY))||[];}catch(e){return [];}}
+  function saveOrder(order){localStorage.setItem(ORDER_KEY,JSON.stringify(order));}
+  function getContainer(){return document.getElementById('categoryList');}
+  function applyOrder(container,order){
+    if(!order||!order.length)return;
+    const sections=Array.from(container.querySelectorAll('section.category'));
+    const sectionMap={};
+    sections.forEach(s=>sectionMap[s.getAttribute('data-cat')]=s);
+    const ordered=[];
+    order.forEach(cat=>{if(sectionMap[cat])ordered.push(sectionMap[cat]);});
+    sections.forEach(s=>{const c=s.getAttribute('data-cat');if(!order.includes(c))ordered.push(s);});
+    const addBtn=container.querySelector('.add-group-btn,.add-category-btn,button');
+    ordered.forEach(s=>container.insertBefore(s,addBtn||null));
+  }
+  if(!document.getElementById('drag-style')){
+    const style=document.createElement('style');
+    style.id='drag-style';
+    style.textContent='.drag-handle{cursor:grab;font-size:20px;color:#bbb;padding:2px 8px 2px 4px;display:inline-flex;align-items:center;user-select:none;touch-action:none;line-height:1;flex-shrink:0;transition:color .15s;}.drag-handle:hover{color:#888;}.drag-handle:active{cursor:grabbing;}section.category.is-dragging{opacity:0.3;box-shadow:none!important;}section.category.drag-over-top{border-top:3px solid #4caf50!important;margin-top:-3px;}section.category.drag-over-bot{border-bottom:3px solid #4caf50!important;}.category-head{display:flex;align-items:center;}';
+    document.head.appendChild(style);
+  }
+  let dragSrc=null,touchDragEl=null,touchClone=null,touchOffX=0,touchOffY=0;
+  function getOrder(container){return Array.from(container.querySelectorAll('section.category')).map(s=>s.getAttribute('data-cat'));}
+  function ensureHandle(section){
+    const head=section.querySelector('.category-head');
+    if(!head||head.querySelector('.drag-handle'))return;
+    const handle=document.createElement('span');
+    handle.className='drag-handle';
+    handle.setAttribute('aria-label','순서 변경 (드래그)');
+    handle.title='드래그하여 순서 변경';
+    handle.textContent='⠿';
+    head.insertBefore(handle,head.firstChild);
+  }
+  function bindDragEvents(section){
+    section.setAttribute('draggable','true');
+    section.addEventListener('dragstart',function(e){dragSrc=this;e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',this.getAttribute('data-cat'));requestAnimationFrame(()=>this.classList.add('is-dragging'));},false);
+    section.addEventListener('dragend',function(){this.classList.remove('is-dragging');const c=getContainer();if(c)c.querySelectorAll('section.category').forEach(s=>s.classList.remove('drag-over-top','drag-over-bot'));if(dragSrc===null)return;dragSrc=null;const container=getContainer();if(container)saveOrder(getOrder(container));},false);
+    section.addEventListener('dragover',function(e){e.preventDefault();if(!dragSrc||dragSrc===this)return;const c=getContainer();c.querySelectorAll('section.category').forEach(s=>s.classList.remove('drag-over-top','drag-over-bot'));const rect=this.getBoundingClientRect();const half=rect.top+rect.height/2;this.classList.add(e.clientY<half?'drag-over-top':'drag-over-bot');},false);
+    section.addEventListener('drop',function(e){e.stopPropagation();e.preventDefault();if(!dragSrc||dragSrc===this)return;const c=getContainer();c.querySelectorAll('section.category').forEach(s=>s.classList.remove('drag-over-top','drag-over-bot'));const rect=this.getBoundingClientRect();const before=e.clientY<rect.top+rect.height/2;c.insertBefore(dragSrc,before?this:(this.nextElementSibling||null));saveOrder(getOrder(c));},false);
+  }
+  function bindTouchEvents(section){
+    let handle=section.querySelector('.drag-handle');
+    if(!handle)return;
+    handle.addEventListener('touchstart',function(e){touchDragEl=section;const touch=e.touches[0];const rect=section.getBoundingClientRect();touchOffX=touch.clientX-rect.left;touchOffY=touch.clientY-rect.top;touchClone=section.cloneNode(true);touchClone.style.cssText='position:fixed;width:'+rect.width+'px;opacity:0.85;pointer-events:none;z-index:9999;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);';touchClone.style.left=(touch.clientX-touchOffX)+'px';touchClone.style.top=(touch.clientY-touchOffY)+'px';document.body.appendChild(touchClone);requestAnimationFrame(()=>section.classList.add('is-dragging'));e.preventDefault();},{passive:false});
+    handle.addEventListener('touchmove',function(e){if(!touchDragEl||!touchClone)return;const touch=e.touches[0];touchClone.style.left=(touch.clientX-touchOffX)+'px';touchClone.style.top=(touch.clientY-touchOffY)+'px';const c=getContainer();c.querySelectorAll('section.category').forEach(s=>s.classList.remove('drag-over-top','drag-over-bot'));const target=document.elementFromPoint(touch.clientX,touch.clientY)?.closest('section.category');if(target&&target!==touchDragEl){const rect=target.getBoundingClientRect();target.classList.add(touch.clientY<rect.top+rect.height/2?'drag-over-top':'drag-over-bot');}e.preventDefault();},{passive:false});
+    handle.addEventListener('touchend',function(e){if(!touchDragEl||!touchClone)return;const touch=e.changedTouches[0];touchClone.remove();touchClone=null;touchDragEl.classList.remove('is-dragging');const c=getContainer();c.querySelectorAll('section.category').forEach(s=>s.classList.remove('drag-over-top','drag-over-bot'));const target=document.elementFromPoint(touch.clientX,touch.clientY)?.closest('section.category');if(target&&target!==touchDragEl){const rect=target.getBoundingClientRect();const before=touch.clientY<rect.top+rect.height/2;c.insertBefore(touchDragEl,before?target:(target.nextElementSibling||null));saveOrder(getOrder(c));}touchDragEl=null;},{passive:false});
+  }
+  function activateSection(section){
+    if(section.dataset.dragEnabled)return;
+    section.dataset.dragEnabled='1';
+    ensureHandle(section);
+    bindDragEvents(section);
+    bindTouchEvents(section);
+  }
+  const container=getContainer();
+  if(!container){console.warn('categoryList 없음');return;}
+  const saved=getSavedOrder();
+  if(saved.length)applyOrder(container,saved);
+  container.querySelectorAll('section.category').forEach(activateSection);
+  const obs=new MutationObserver(function(mutations){
+    const hasAdded=mutations.some(m=>m.addedNodes.length);
+    if(!hasAdded)return;
+    const c=getContainer();if(!c)return;
+    const ord=getSavedOrder();
+    if(ord.length)applyOrder(c,ord);
+    c.querySelectorAll('section.category').forEach(activateSection);
+  });
+  obs.observe(container,{childList:true});
 })();
 </script>
 </body>
