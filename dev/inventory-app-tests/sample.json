@@ -1,0 +1,137 @@
+[
+ {
+  "dept": "수술실",
+  "cat": "소모품",
+  "name": "멸균 수술장갑 7.0",
+  "spec": "Box(50쌍)",
+  "par": 10,
+  "stock": 4,
+  "memo": ""
+ },
+ {
+  "dept": "수술실",
+  "cat": "소모품",
+  "name": "멸균 수술장갑 7.5",
+  "spec": "Box(50쌍)",
+  "par": 10,
+  "stock": 9,
+  "memo": ""
+ },
+ {
+  "dept": "수술실",
+  "cat": "소모품",
+  "name": "일회용 수술가운",
+  "spec": "EA",
+  "par": 40,
+  "stock": 26,
+  "memo": ""
+ },
+ {
+  "dept": "수술실",
+  "cat": "소모품",
+  "name": "봉합사 Vicryl 2-0",
+  "spec": "Box(36개)",
+  "par": 6,
+  "stock": 2,
+  "memo": "유효기간 확인"
+ },
+ {
+  "dept": "수술실",
+  "cat": "의약품",
+  "name": "생리식염수 1L",
+  "spec": "EA",
+  "par": 40,
+  "stock": 52,
+  "memo": ""
+ },
+ {
+  "dept": "처치실",
+  "cat": "소모품",
+  "name": "일회용 주사기 5cc",
+  "spec": "Box(100개)",
+  "par": 8,
+  "stock": 3,
+  "memo": ""
+ },
+ {
+  "dept": "처치실",
+  "cat": "소모품",
+  "name": "주사바늘 23G",
+  "spec": "Box(100개)",
+  "par": 6,
+  "stock": 6,
+  "memo": ""
+ },
+ {
+  "dept": "처치실",
+  "cat": "소모품",
+  "name": "알코올 솜",
+  "spec": "Pack(100매)",
+  "par": 20,
+  "stock": 20,
+  "memo": ""
+ },
+ {
+  "dept": "처치실",
+  "cat": "의약품",
+  "name": "포비돈 용액 500ml",
+  "spec": "병",
+  "par": 10,
+  "stock": 4,
+  "memo": "냉암소 보관"
+ },
+ {
+  "dept": "병동",
+  "cat": "소모품",
+  "name": "탄력붕대 4인치",
+  "spec": "Roll",
+  "par": 30,
+  "stock": 11,
+  "memo": ""
+ },
+ {
+  "dept": "병동",
+  "cat": "보조기",
+  "name": "무릎 보조기 M",
+  "spec": "EA",
+  "par": 5,
+  "stock": 5,
+  "memo": ""
+ },
+ {
+  "dept": "병동",
+  "cat": "문구",
+  "name": "차트 용지 A4",
+  "spec": "Pack",
+  "par": 10,
+  "stock": 12,
+  "memo": ""
+ },
+ {
+  "dept": "물리치료실",
+  "cat": "소모품",
+  "name": "일회용 베드시트",
+  "spec": "Roll",
+  "par": 12,
+  "stock": 7,
+  "memo": ""
+ },
+ {
+  "dept": "물리치료실",
+  "cat": "소모품",
+  "name": "초음파 젤",
+  "spec": "병(250ml)",
+  "par": 6,
+  "stock": 2,
+  "memo": ""
+ },
+ {
+  "dept": "물리치료실",
+  "cat": "소모품",
+  "name": "전극 패드",
+  "spec": "Pack",
+  "par": 10,
+  "stock": 12,
+  "memo": ""
+ }
+]

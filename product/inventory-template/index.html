@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>병원 재고 관리</title>
+<style>
+  @font-face {
+    font-family: 'Pretendard';
+    src: local('Pretendard');
+  }
+  :root{
+    --bg:#F5F7F5;
+    --surface:#FFFFFF;
+    --surface-2:#EEF2F0;
+    --line:#E1E7E3;
+    --ink:#1A2422;
+    --ink-soft:#5C6B66;
+    --ink-faint:#8B9791;
+    --teal:#0E5C56;
+    --teal-dark:#093F3B;
+    --teal-tint:#E4EFED;
+    --amber:#C97B24;
+    --amber-tint:#FBEEDD;
+    --brick:#B8402F;
+    --brick-tint:#F7E6E2;
+    --green:#2C7A4B;
+    --green-tint:#E4F1E7;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(20,30,28,0.05), 0 4px 14px rgba(20,30,28,0.06);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:78px;
+    min-height:100vh;
+  }
+  .mono{ font-family:'SFMono-Regular','JetBrains Mono',Menlo,Consolas,monospace; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Header ---------- */
+  header.app-header{
+    position:sticky; top:0; z-index:20;
+    background:var(--teal);
+    background-image: linear-gradient(135deg, var(--teal) 0%, var(--teal-dark) 130%);
+    color:#fff;
+    padding:16px 16px 0 16px;
+    border-radius:0 0 20px 20px;
+    box-shadow: var(--shadow);
+  }
+  .brand{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:12px;
+  }
+  .brand-left{ display:flex; align-items:center; gap:11px; min-width:0; }
+  .logo-badge{
+    background:#fff; border-radius:11px; padding:7px 12px; display:flex; align-items:center;
+    box-shadow:0 1px 4px rgba(9,20,18,0.18); flex-shrink:0;
+  }
+  .logo-badge img{ height:34px; width:auto; display:block; }
+  .brand-sub{
+    font-weight:800; font-size:17px; color:rgba(255,255,255,0.92); letter-spacing:0.02em;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .sync-pill{
+    font-size:10.5px; padding:4px 9px; border-radius:100px;
+    background:rgba(255,255,255,0.14); color:#fff; display:flex; align-items:center; gap:5px;
+    white-space:nowrap;
+  }
+  .sync-dot{ width:6px; height:6px; border-radius:50%; background:#7BDCA0; flex-shrink:0; }
+  .sync-dot.busy{ background:#F0C572; animation:pulse 1s infinite ease-in-out; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  .dept-scroll{
+    display:flex; gap:6px; overflow-x:auto; padding-bottom:12px;
+    scrollbar-width:none;
+  }
+  .dept-scroll::-webkit-scrollbar{ display:none; }
+  .dept-chip{
+    flex:0 0 auto; padding:7px 14px; border-radius:100px; font-size:15px; font-weight:700;
+    background:rgba(255,255,255,0.12); color:rgba(255,255,255,0.85); border:1px solid rgba(255,255,255,0.16);
+    cursor:pointer; white-space:nowrap; transition:0.15s;
+  }
+  .dept-chip.active{ background:#fff; color:var(--teal-dark); border-color:#fff; }
+
+  main{ padding:16px; max-width:640px; margin:0 auto; }
+
+  /* ---------- Cards / generic ---------- */
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-bottom:12px; box-shadow: var(--shadow);
+  }
+  .section-title{
+    font-size:13px; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:0.04em;
+    margin: 4px 2px 10px 2px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .muted{ color:var(--ink-faint); }
+
+  /* ---------- Dashboard ring summary ---------- */
+  .ring-row{ display:flex; align-items:center; gap:18px; }
+  .ring-wrap{ position:relative; width:88px; height:88px; flex-shrink:0; }
+  .ring-wrap svg{ transform:rotate(-90deg); width:88px; height:88px; }
+  .ring-center{
+    position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+  .ring-center .num{ font-size:24px; font-weight:900; line-height:1; }
+  .ring-center .lbl{ font-size:12px; color:var(--ink-faint); margin-top:2px; font-weight:600; }
+  .ring-stats{ display:flex; flex-direction:column; gap:8px; flex:1; }
+  .ring-stat-line{ display:flex; align-items:center; justify-content:space-between; font-size:15px; }
+  .ring-stat-line .k{ display:flex; align-items:center; gap:7px; color:var(--ink-soft); font-weight:700;}
+  .swatch{ width:9px; height:9px; border-radius:3px; display:inline-block; }
+  .ring-stat-line .v{ font-weight:900; font-size:18px; }
+
+  /* ---------- Search / filter bar ---------- */
+  .search-bar{
+    display:flex; gap:8px; margin-bottom:12px;
+  }
+  .search-bar input[type=text]{
+    flex:1; border:1px solid var(--line); background:var(--surface); border-radius:10px;
+    padding:10px 12px; font-size:14px; color:var(--ink); outline:none;
+  }
+  .search-bar input[type=text]:focus{ border-color:var(--teal); }
+  .cat-filter{ display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+  .cat-chip{
+    padding:6px 12px; border-radius:100px; font-size:14.5px; font-weight:700;
+    background:var(--surface-2); color:var(--ink-soft); border:1px solid transparent; cursor:pointer;
+  }
+  .cat-chip.active{ background:var(--teal-tint); color:var(--teal-dark); border-color:var(--teal); }
+
+  /* ---------- Item list ---------- */
+  .item-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:12px 4px; border-bottom:1px solid var(--line);
+  }
+  .item-row:last-child{ border-bottom:none; }
+  .item-main{ min-width:0; flex:1; }
+  .item-name{ font-size:17px; font-weight:800; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .item-sub{ font-size:14px; color:var(--ink-faint); margin-top:2px; display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .tag{ background:var(--surface-2); border-radius:5px; padding:1px 6px; font-size:13px; font-weight:700; color:var(--ink-soft); }
+  .item-stock{ text-align:right; flex-shrink:0; }
+  .item-stock .n{ font-size:19px; font-weight:900; }
+  .item-stock .p{ font-size:13px; color:var(--ink-faint); font-weight:600; }
+  .badge{ font-size:13px; font-weight:800; padding:2px 7px; border-radius:100px; display:inline-block; margin-top:3px;}
+  .badge.low{ background:var(--brick-tint); color:var(--brick); }
+  .badge.ok{ background:var(--green-tint); color:var(--green); }
+
+  .empty-state{ text-align:center; padding:40px 20px; color:var(--ink-faint); }
+  .empty-state .glyph{ font-size:30px; margin-bottom:10px; }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    border:none; border-radius:11px; padding:12px 16px; font-size:14.5px; font-weight:700;
+    cursor:pointer; transition:0.12s; width:100%;
+  }
+  .btn-primary{ background:var(--teal); color:#fff; }
+  .btn-primary:active{ background:var(--teal-dark); }
+  .btn-secondary{ background:var(--surface-2); color:var(--ink); }
+  .btn-ghost{ background:transparent; color:var(--teal); border:1px solid var(--teal); }
+  .btn-danger{ background:var(--brick-tint); color:var(--brick); }
+  .btn-sm{ padding:7px 12px; font-size:12.5px; width:auto; border-radius:9px; }
+  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
+  .btn-row{ display:flex; gap:8px; }
+
+  /* ---------- Forms ---------- */
+  label.field-label{ font-size:12px; font-weight:700; color:var(--ink-soft); display:block; margin:12px 0 5px 0; }
+  label.field-label:first-child{ margin-top:0; }
+  input[type=text], input[type=number], select, textarea{
+    width:100%; border:1px solid var(--line); background:var(--surface); border-radius:10px;
+    padding:10px 12px; font-size:14.5px; color:var(--ink); outline:none; font-family:inherit;
+  }
+  input:focus, select:focus, textarea:focus{ border-color:var(--teal); }
+  .qty-stepper{ display:flex; align-items:center; gap:10px; }
+  .qty-stepper button{
+    width:42px; height:42px; border-radius:11px; border:1px solid var(--line); background:var(--surface-2);
+    font-size:18px; font-weight:700; color:var(--ink); cursor:pointer;
+  }
+  .qty-stepper input{ text-align:center; font-size:19px; font-weight:800; }
+
+  .toggle-row{ display:flex; background:var(--surface-2); border-radius:11px; padding:3px; margin-bottom:14px; }
+  .toggle-opt{ flex:1; text-align:center; padding:9px; border-radius:9px; font-size:14px; font-weight:700; color:var(--ink-soft); cursor:pointer; }
+  .toggle-opt.active.in{ background:var(--green); color:#fff; }
+  .toggle-opt.active.out{ background:var(--brick); color:#fff; }
+
+  /* ---------- Selectable item picker ---------- */
+  .picker-list{ max-height:260px; overflow-y:auto; border:1px solid var(--line); border-radius:11px; margin-top:4px; }
+  .picker-item{ padding:10px 12px; border-bottom:1px solid var(--line); cursor:pointer; font-size:13.5px; }
+  .picker-item:last-child{ border-bottom:none; }
+  .picker-item:active, .picker-item.hover{ background:var(--teal-tint); }
+  .picker-item .pn{ font-weight:700; }
+  .picker-item .ps{ color:var(--ink-faint); font-size:11.5px; }
+  .picker-group-header{
+    position:sticky; top:0; z-index:1; background:var(--teal-dark); color:#fff;
+    font-weight:800; font-size:11.5px; letter-spacing:0.03em; padding:7px 12px;
+  }
+  .picker-subheader{
+    background:var(--surface-2); color:var(--ink-soft); font-weight:700; font-size:11px;
+    padding:5px 12px; border-bottom:1px solid var(--line);
+  }
+
+  .selected-item-box{
+    background:var(--teal-tint); border:1px solid var(--teal); border-radius:12px; padding:12px 14px; margin:10px 0 14px 0;
+  }
+  .selected-item-box .n{ font-weight:800; font-size:15px; color:var(--teal-dark); }
+  .selected-item-box .s{ font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .selected-item-box .cur{ font-size:12px; margin-top:6px; color:var(--ink-soft); }
+
+  /* ---------- Audit table ---------- */
+  .audit-banner{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--teal-tint); border:1px solid var(--teal); border-radius:12px; padding:12px 14px; margin-bottom:14px;
+  }
+  .audit-banner.overdue{ background:var(--brick-tint); border-color:var(--brick); }
+  .audit-banner .t1{ font-size:11.5px; color:var(--ink-soft); }
+  .audit-banner .t2{ font-size:15px; font-weight:800; margin-top:2px; }
+  .audit-row{ display:flex; align-items:center; gap:10px; padding:10px 4px; border-bottom:1px solid var(--line); }
+  .audit-row:last-child{ border-bottom:none; }
+  .audit-row .info{ flex:1; min-width:0; }
+  .audit-row .name{ font-size:13.5px; font-weight:700; }
+  .audit-row .spec{ font-size:11.5px; color:var(--ink-faint); }
+  .audit-row .old{ font-size:10.5px; color:var(--ink-faint); }
+  .audit-row input{ width:64px; text-align:center; padding:8px 4px; flex-shrink:0; }
+
+  /* ---------- Request ---------- */
+  .req-item{ display:flex; align-items:center; gap:10px; padding:11px 4px; border-bottom:1px solid var(--line); }
+  .req-item:last-child{ border-bottom:none; }
+  .req-item input[type=checkbox]{ width:18px; height:18px; accent-color:var(--teal); flex-shrink:0; }
+  .req-item .info{ flex:1; min-width:0; }
+  .req-item .name{ font-size:13.5px; font-weight:700; }
+  .req-item .spec{ font-size:11.5px; color:var(--ink-faint); }
+  .req-item .shortage{ font-size:11px; color:var(--brick); font-weight:700; margin-top:2px; }
+  .req-item .qty-stepper button{ width:32px; height:32px; font-size:15px; border-radius:8px;}
+  .req-item .qty-stepper input{ width:44px; font-size:15px; padding:6px 2px;}
+
+  .history-item{ padding:11px 4px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .history-item:last-child{ border-bottom:none; }
+  .history-item .row1{ display:flex; justify-content:space-between; font-size:13.5px; font-weight:700; }
+  .history-item .row2{ font-size:11.5px; color:var(--ink-faint); margin-top:2px; }
+
+  /* ---------- Manage / list edit ---------- */
+  .manage-item{ padding:12px 4px; border-bottom:1px solid var(--line); }
+  .manage-item:last-child{ border-bottom:none; }
+  .manage-item .top{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .manage-item .name{ font-weight:700; font-size:14px; }
+  .manage-item .spec{ font-size:11.5px; color:var(--ink-faint); }
+  .manage-item .edit-row{ display:flex; gap:8px; margin-top:8px; align-items:center; }
+  .manage-item .edit-row .par-field{ display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-soft); }
+  .manage-item .edit-row input{ width:56px; padding:6px 4px; text-align:center; font-size:13px; }
+  .icon-btn{
+    width:34px; height:34px; border-radius:9px; border:1px solid var(--line); background:var(--surface);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .icon-btn.danger{ color:var(--brick); border-color:var(--brick-tint); }
+
+  /* ---------- Bottom Nav ---------- */
+  nav.bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:30;
+    background:rgba(255,255,255,0.96); backdrop-filter:blur(8px);
+    border-top:1px solid var(--line);
+    display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom)) 4px;
+  }
+  .nav-btn{
+    flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:6px 2px;
+    color:var(--ink-faint); cursor:pointer; border-radius:10px; font-size:10.5px; font-weight:700;
+  }
+  .nav-btn.active{ color:var(--teal); }
+  .nav-btn svg{ width:21px; height:21px; }
+
+  .fab-note{ font-size:11.5px; color:var(--ink-faint); text-align:center; margin:10px 0 4px; }
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(15,25,23,0.45); z-index:50;
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .modal-sheet{
+    background:var(--surface); width:100%; max-width:640px; border-radius:20px 20px 0 0;
+    padding:20px 16px calc(20px + env(safe-area-inset-bottom)) 16px; max-height:85vh; overflow-y:auto;
+  }
+  .modal-title{ font-size:16px; font-weight:800; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; }
+  .modal-close{ font-size:20px; color:var(--ink-faint); cursor:pointer; padding:2px 8px; }
+
+  .toast{
+    position:fixed; bottom:92px; left:50%; transform:translateX(-50%); z-index:60;
+    background:var(--teal-dark); color:#fff; padding:11px 18px; border-radius:100px; font-size:13px; font-weight:600;
+    box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:0.25s;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(-4px); }
+
+  @media print{
+    header.app-header, nav.bottom-nav, .no-print{ display:none !important; }
+    body{ padding:0; background:#fff; }
+    main{ max-width:100%; }
+  }
+
+  ::-webkit-scrollbar{ width:6px; height:6px; }
+  ::-webkit-scrollbar-thumb{ background:#D3DAD6; border-radius:10px; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-left">
+      <div class="logo-badge"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#0E5C56" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+      <div class="brand-sub">재고 관리</div>
+    </div>
+    <div class="sync-pill" id="syncPill"><span class="sync-dot" id="syncDot"></span><span id="syncText">동기화됨</span></div>
+  </div>
+  <div class="dept-scroll" id="deptScroll"></div>
+</header>
+
+<main id="main"></main>
+
+<nav class="bottom-nav">
+  <div class="nav-btn" data-screen="dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+    <span>재고현황</span>
+  </div>
+  <div class="nav-btn" data-screen="audit">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
+    <span>재고파악</span>
+  </div>
+  <div class="nav-btn" data-screen="request">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>
+    <span>물품청구</span>
+  </div>
+  <div class="nav-btn" data-screen="manage">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span>품목관리</span>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const DEPTS = ["수술실", "처치실", "병동", "물리치료실"];
+// 예전에 "마취과"/"수술실", "처치실"/"통증"으로 따로 저장돼 있던 데이터를 합쳐진 대분류로 자동 변환
+const DEPT_MERGE_MAP = { "마취과": "수술실", "수술실": "수술실", "통증": "처치실", "처치실": "처치실" };
+function normalizeDept(dept){ return DEPT_MERGE_MAP[dept] || dept; }
+
+// ⚠️ 아래 SCRIPT_URL을 구글 Apps Script 배포 후 발급받은 웹앱 URL로 교체하세요.
+// README.md의 "Apps Script 배포" 단계를 참고하세요.
+const SCRIPT_URL = "SCRIPT_URL_HERE";
+
+let STATE = {
+  screen: 'dashboard',
+  dept: '전체',
+  cat: '전체',
+  search: '',
+  items: [],
+  audits: {},
+  requests: [],
+  loaded: false, // false | true | 'error'
+  // transient per-screen state
+  auditDept: null,
+  auditDraft: {},
+  reqDept: '전체',
+  reqSel: {},
+  reqQty: {},
+};
+
+// ---------- Apps Script API helpers ----------
+async function apiGet(action){
+  const res = await fetch(`${SCRIPT_URL}?action=${encodeURIComponent(action)}`);
+  const data = await res.json();
+  if(!data.success) throw new Error(data.error || 'API 오류');
+  return data.data;
+}
+async function apiPost(payload){
+  const res = await fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if(!data.success) throw new Error(data.error || 'API 오류');
+  return data.data;
+}
+function toDateStr(v){
+  if(!v) return null;
+  const d = new Date(v);
+  if(isNaN(d.getTime())) return String(v).slice(0,10);
+  return d.toISOString().slice(0,10);
+}
+
+async function loadAll(){
+  if(!SCRIPT_URL || SCRIPT_URL === "SCRIPT_URL_HERE"){
+    STATE.loaded = 'error';
+    setConnected(false, '연결 안 됨');
+    render();
+    return;
+  }
+  setSyncing(true);
+  try{
+    const data = await apiGet('getAll');
+    STATE.items = (data.items||[]).map(i=>({
+      id: i.id, dept: normalizeDept(i.dept), cat: i.cat, name: i.name,
+      spec: i.spec || '', par: Number(i.par)||0, stock: Number(i.stock)||0, memo: i.memo || ''
+    }));
+    STATE.audits = {};
+    Object.entries(data.audits || {}).forEach(([d, date])=>{
+      const nd = normalizeDept(d);
+      // 같은 병합 부서에 기록이 여러 개면 더 최근 날짜를 사용
+      if(!STATE.audits[nd] || date > STATE.audits[nd]) STATE.audits[nd] = date;
+    });
+    STATE.requests = (data.requests||[]).map(r=>({ id: r.id, date: r.date, dept: normalizeDept(r.dept), items: r.items||[] }));
+    STATE.loaded = true;
+    setConnected(true, '연결됨');
+  }catch(e){
+    console.error('load error', e);
+    STATE.loaded = 'error';
+    setConnected(false, '연결 실패');
+    toast('구글시트 연결 실패 — URL과 배포 설정을 확인해주세요');
+  }
+  setSyncing(false);
+  render();
+}
+function setSyncing(b){
+  if(b) setConnected(null, '동기화 중…');
+  else if(STATE.loaded===true) setConnected(true, '연결됨');
+}
+function setConnected(state, label){
+  const dot = document.getElementById('syncDot');
+  const text = document.getElementById('syncText');
+  if(!dot || !text) return;
+  dot.classList.toggle('busy', state===null);
+  dot.style.background = state===true ? '#7BDCA0' : state===false ? '#E8735E' : '#F0C572';
+  text.textContent = label;
+}
+
+// ---------- utils ----------
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(d){
+  if(!d) return '-';
+  const dt = new Date(d+'T00:00:00');
+  return `${dt.getFullYear()}.${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')}`;
+}
+function daysBetween(a,b){
+  const A = new Date(a+'T00:00:00'), B = new Date(b+'T00:00:00');
+  return Math.round((B-A)/86400000);
+}
+function addDays(d, n){
+  const dt = new Date(d+'T00:00:00'); dt.setDate(dt.getDate()+n);
+  return dt.toISOString().slice(0,10);
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function uid(){ return Date.now() + Math.floor(Math.random()*1000); }
+let toastTimer;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> el.classList.remove('show'), 2200);
+}
+// 소분류(카테고리) 정렬 기준: 새 품목이 항상 같은 카테고리 아래로 들어가도록
+const CAT_ORDER = ['의약품', '소모품', '보조기', '문구'];
+function catRank(cat){
+  const idx = CAT_ORDER.indexOf(cat);
+  return idx === -1 ? CAT_ORDER.length : idx;
+}
+function deptRank(dept){
+  const idx = DEPTS.indexOf(dept);
+  return idx === -1 ? DEPTS.length : idx;
+}
+function itemsForDept(dept){
+  const list = dept === '전체' ? STATE.items.slice() : STATE.items.filter(i=>i.dept===dept);
+  // 부서(전체보기일 때만) → 소분류 순으로 정렬. 같은 소분류 안에서는 원래 순서 유지(안정 정렬).
+  return list.sort((a, b)=>{
+    if(dept === '전체'){
+      const d = deptRank(a.dept) - deptRank(b.dept);
+      if(d !== 0) return d;
+    }
+    return catRank(a.cat) - catRank(b.cat);
+  });
+}
+function catsForDept(dept){
+  const set = new Set(itemsForDept(dept).map(i=>i.cat));
+  return ['전체', ...Array.from(set)];
+}
+function isLow(item){ return item.stock < item.par; }
+
+// ---------- header dept chips ----------
+function renderDeptChips(){
+  const wrap = document.getElementById('deptScroll');
+  const all = ['전체', ...DEPTS];
+  wrap.innerHTML = all.map(d=>{
+    const active = d===STATE.dept ? 'active' : '';
+    return `<div class="dept-chip ${active}" data-dept="${esc(d)}">${esc(d)}</div>`;
+  }).join('');
+  wrap.querySelectorAll('.dept-chip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      STATE.dept = el.dataset.dept;
+      STATE.cat = '전체';
+      render();
+    });
+  });
+}
+
+// ---------- bottom nav ----------
+function renderNav(){
+  document.querySelectorAll('.nav-btn').forEach(el=>{
+    el.classList.toggle('active', el.dataset.screen === STATE.screen);
+  });
+}
+document.querySelectorAll('.nav-btn').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    STATE.screen = el.dataset.screen;
+    if(STATE.screen === 'audit' && !STATE.auditDept && STATE.dept !== '전체') STATE.auditDept = STATE.dept;
+    render();
+  });
+});
+
+// ---------- MAIN RENDER ----------
+function render(){
+  renderDeptChips();
+  renderNav();
+  const main = document.getElementById('main');
+  if(STATE.loaded===false){ main.innerHTML = `<div class="empty-state"><div class="glyph">⏳</div>구글시트에서 불러오는 중…</div>`; return; }
+  if(STATE.loaded==='error'){
+    const notSet = !SCRIPT_URL || SCRIPT_URL==='SCRIPT_URL_HERE';
+    main.innerHTML = `
+      <div class="card">
+        <div class="section-title">구글시트 연결 안 됨</div>
+        <div class="muted" style="font-size:13px;line-height:1.6;margin-bottom:14px;">
+          ${notSet
+            ? '이 파일 안의 <b>SCRIPT_URL</b> 값이 아직 설정되지 않았어요. Apps Script를 배포한 뒤 발급받은 웹앱 URL로 교체해주세요. (README.md 참고)'
+            : '구글시트에 연결할 수 없어요. Apps Script 배포 상태(액세스 권한: 모든 사용자)와 URL을 확인해주세요.'}
+        </div>
+        <button class="btn btn-primary" id="retryConn">다시 연결 시도</button>
+      </div>`;
+    document.getElementById('retryConn').addEventListener('click', loadAll);
+    return;
+  }
+  if(STATE.screen==='dashboard') return renderDashboard(main);
+  if(STATE.screen==='audit') return renderAudit(main);
+  if(STATE.screen==='request') return renderRequest(main);
+  if(STATE.screen==='manage') return renderManage(main);
+}
+
+// ================= DASHBOARD =================
+function dashboardListHtml(){
+  const list = itemsForDept(STATE.dept).filter(i=> STATE.cat==='전체' || i.cat===STATE.cat)
+    .filter(i=> !STATE.search || i.name.includes(STATE.search) || i.spec.includes(STATE.search));
+  return list.length===0 ? `<div class="empty-state"><div class="glyph">📦</div>조건에 맞는 품목이 없어요</div>` :
+    list.map(i=>`
+    <div class="item-row">
+      <div class="item-main">
+        <div class="item-name">${esc(i.name)}</div>
+        <div class="item-sub">
+          ${STATE.dept==='전체' ? `<span class="tag">${esc(i.dept)}</span>` : ''}
+          <span class="tag">${esc(i.cat)}</span>
+          ${i.spec ? `<span>${esc(i.spec)}</span>` : ''}
+        </div>
+      </div>
+      <div class="item-stock">
+        <div class="n mono">${i.stock}<span style="font-size:11px;color:var(--ink-faint)"> / ${i.par}</span></div>
+        <div class="badge ${isLow(i)?'low':'ok'}">${isLow(i)?'부족':'정상'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+function renderDashboard(main){
+  const scope = itemsForDept(STATE.dept);
+  const lowCount = scope.filter(isLow).length;
+  const okCount = scope.length - lowCount;
+  const total = scope.length || 1;
+  const pct = Math.round((okCount/total)*100);
+  const circumference = 2*Math.PI*36;
+  const dash = circumference * pct/100;
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="ring-row">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 84 84">
+            <circle cx="42" cy="42" r="36" fill="none" stroke="#EEF2F0" stroke-width="9"/>
+            <circle cx="42" cy="42" r="36" fill="none" stroke="${lowCount>0 ? '#0E5C56' : '#2C7A4B'}" stroke-width="9"
+              stroke-dasharray="${dash} ${circumference}" stroke-linecap="round"/>
+          </svg>
+          <div class="ring-center"><div class="num">${pct}%</div><div class="lbl">정상 비율</div></div>
+        </div>
+        <div class="ring-stats">
+          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#0E5C56"></span>전체 품목</span><span class="v">${scope.length}</span></div>
+          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#2C7A4B"></span>정상</span><span class="v" style="color:#2C7A4B">${okCount}</span></div>
+          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#B8402F"></span>재고부족</span><span class="v" style="color:#B8402F">${lowCount}</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="품목명 또는 규격 검색" value="${esc(STATE.search)}">
+    </div>
+    <div class="cat-filter" id="catFilter"></div>
+
+    <div class="card" style="padding:6px 12px;" id="itemListCard">
+      ${dashboardListHtml()}
+    </div>
+  `;
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    STATE.search = e.target.value;
+    if(e.isComposing) return; // 한글 조합(자모 결합) 중에는 다시 그리지 않음 — 안 그러면 자음/모음이 끊겨 보임
+    renderDashboardListOnly();
+  });
+  document.getElementById('searchInput').addEventListener('compositionend', e=>{
+    STATE.search = e.target.value;
+    renderDashboardListOnly();
+  });
+  renderCatFilter();
+}
+function renderDashboardListOnly(){
+  // 검색창은 그대로 두고 목록만 갱신 (입력창을 다시 만들지 않아 타이핑이 끊기지 않음)
+  const card = document.getElementById('itemListCard');
+  if(card) card.innerHTML = dashboardListHtml();
+}
+function renderCatFilter(){
+  const el = document.getElementById('catFilter');
+  const cats = catsForDept(STATE.dept);
+  el.innerHTML = cats.map(c=>`<div class="cat-chip ${c===STATE.cat?'active':''}" data-cat="${esc(c)}">${esc(c)}</div>`).join('');
+  el.querySelectorAll('.cat-chip').forEach(c=> c.addEventListener('click', ()=>{ STATE.cat = c.dataset.cat; render(); }));
+}
+
+// ================= AUDIT (재고파악) =================
+function renderAudit(main){
+  const dept = STATE.auditDept;
+  if(!dept || dept==='전체'){
+    main.innerHTML = `
+      <div class="card">
+        <div class="section-title">부서를 선택하세요</div>
+        <div class="muted" style="font-size:12.5px;margin-bottom:12px;">2주 재고파악은 부서 단위로 진행해요. 실사할 부서를 골라주세요.</div>
+        <div class="btn-row" style="flex-wrap:wrap; gap:8px;">
+          ${DEPTS.map(d=>`<button class="btn btn-secondary" data-d="${esc(d)}" style="width:auto; flex:1 1 40%;">${esc(d)}</button>`).join('')}
+        </div>
+      </div>`;
+    main.querySelectorAll('[data-d]').forEach(b=> b.addEventListener('click', ()=>{ STATE.auditDept = b.dataset.d; STATE.dept = b.dataset.d; STATE.auditDraft={}; render(); }));
+    return;
+  }
+  const last = STATE.audits[dept];
+  const next = last ? addDays(last, 14) : null;
+  const overdue = next ? daysBetween(next, todayStr()) > 0 : false;
+  const list = itemsForDept(dept).filter(i=> STATE.cat==='전체' || i.cat===STATE.cat);
+
+  main.innerHTML = `
+    <div class="audit-banner ${overdue?'overdue':''}">
+      <div>
+        <div class="t1">${esc(dept)} · 최근 실사일</div>
+        <div class="t2">${last ? fmtDate(last) : '기록 없음'}</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="t1">다음 실사 예정</div>
+        <div class="t2">${next ? fmtDate(next) + (overdue? ' (지남)':'') : '실사 후 안내'}</div>
+      </div>
+    </div>
+
+    <div class="cat-filter" id="catFilter"></div>
+
+    <div class="card" style="padding:6px 12px;">
+      <div class="section-title" style="margin-top:4px;">실사 수량 입력 <span class="muted" style="font-weight:500;text-transform:none;">${list.length}개 품목</span></div>
+      ${list.map(i=>`
+        <div class="audit-row">
+          <div class="info">
+            <div class="name">${esc(i.name)}</div>
+            <div class="spec">${esc(i.cat)} ${i.spec?('· '+esc(i.spec)):''}</div>
+            <div class="old">현재고 ${i.stock} · 적정 ${i.par}</div>
+          </div>
+          <input type="number" min="0" class="mono audit-input" data-id="${i.id}" value="${STATE.auditDraft[i.id] !== undefined ? STATE.auditDraft[i.id] : i.stock}">
+        </div>
+      `).join('')}
+    </div>
+    <button class="btn btn-primary" id="saveAudit" style="margin-top:4px;">실사 결과 저장 (${esc(dept)})</button>
+    <div class="fab-note">입력한 수량으로 현재 재고가 갱신되고, 다음 실사일이 14일 후로 설정돼요.</div>
+    <button class="btn btn-ghost" id="changeDept" style="margin-top:10px;">다른 부서 선택</button>
+  `;
+  renderCatFilterFor(dept);
+  main.querySelectorAll('.audit-input').forEach(inp=>{
+    inp.addEventListener('input', e=>{ STATE.auditDraft[e.target.dataset.id] = e.target.value; });
+  });
+  document.getElementById('saveAudit').addEventListener('click', ()=> submitAudit(dept, list));
+  document.getElementById('changeDept').addEventListener('click', ()=>{ STATE.auditDept=null; render(); });
+}
+function renderCatFilterFor(dept){
+  const el = document.getElementById('catFilter');
+  const cats = catsForDept(dept);
+  el.innerHTML = cats.map(c=>`<div class="cat-chip ${c===STATE.cat?'active':''}" data-cat="${esc(c)}">${esc(c)}</div>`).join('');
+  el.querySelectorAll('.cat-chip').forEach(c=> c.addEventListener('click', ()=>{ STATE.cat = c.dataset.cat; render(); }));
+}
+async function submitAudit(dept, list){
+  const updates = [];
+  list.forEach(i=>{
+    const draft = STATE.auditDraft[i.id];
+    if(draft === undefined) return;
+    const newVal = Math.max(0, parseInt(draft)||0);
+    if(newVal !== i.stock) updates.push({ id:i.id, name:i.name, stock:newVal });
+  });
+  if(updates.length===0){ toast('변경된 품목이 없어요'); return; }
+  setSyncing(true);
+  try{
+    const result = await apiPost({ action:'auditSubmit', dept, updates });
+    updates.forEach(u=>{
+      const it = STATE.items.find(x=>x.id===u.id);
+      if(it) it.stock = u.stock;
+    });
+    STATE.audits[dept] = result.date;
+    STATE.auditDraft = {};
+    toast(`${dept} 실사 완료 · ${result.changed}건 변경 · 다음 실사 ${fmtDate(addDays(result.date,14))}`);
+  }catch(e){
+    console.error(e);
+    toast('저장 실패 — 구글시트 연결을 확인해주세요');
+  }
+  setSyncing(false);
+  render();
+}
+
+// ================= REQUEST (물품청구) =================
+function renderRequest(main){
+  const dept = STATE.reqDept;
+  const pool = (dept==='전체' ? STATE.items : itemsForDept(dept)).filter(isLow);
+  const pastRequests = [...STATE.requests].reverse();
+
+  main.innerHTML = `
+    <div class="card">
+      <div class="section-title">청구 대상 부서</div>
+      <div class="dept-scroll" id="reqDeptScroll" style="padding-bottom:2px;"></div>
+    </div>
+
+    <div class="section-title">부족 품목 (${pool.length})</div>
+    <div class="card" style="padding:6px 12px;">
+      ${pool.length===0 ? `<div class="empty-state"><div class="glyph">✅</div>재고 부족 품목이 없어요</div>` :
+      pool.map(i=>{
+        const checked = STATE.reqSel[i.id] !== false; // default checked
+        const suggested = Math.max(1, i.par - i.stock);
+        const qty = STATE.reqQty[i.id] !== undefined ? STATE.reqQty[i.id] : suggested;
+        STATE.reqQty[i.id] = qty;
+        return `
+        <div class="req-item">
+          <input type="checkbox" data-id="${i.id}" class="reqChk" ${checked?'checked':''}>
+          <div class="info">
+            <div class="name">${esc(i.name)}</div>
+            <div class="spec">${esc(i.dept)} · ${esc(i.cat)} ${i.spec?('· '+esc(i.spec)):''}</div>
+            <div class="shortage">현재 ${i.stock} / 적정 ${i.par}</div>
+          </div>
+          <div class="qty-stepper">
+            <button class="reqMinus" data-id="${i.id}">−</button>
+            <input type="number" class="mono reqQty" data-id="${i.id}" value="${qty}" min="1">
+            <button class="reqPlus" data-id="${i.id}">+</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    ${pool.length>0 ? `<button class="btn btn-primary" id="genRequest">청구서 생성</button>` : ''}
+
+    <div class="section-title" style="margin-top:22px;">지난 청구 내역</div>
+    <div class="card" style="padding:4px 12px;">
+      ${pastRequests.length===0 ? `<div class="empty-state" style="padding:24px;"><div class="glyph">📄</div>생성된 청구서가 없어요</div>` :
+        pastRequests.map(r=>`
+        <div class="history-item" data-rid="${r.id}">
+          <div class="row1"><span>${esc(r.dept)} 청구서</span><span>${fmtDate(r.date)}</span></div>
+          <div class="row2">${r.items.length}개 품목</div>
+        </div>`).join('')}
+    </div>
+  `;
+
+  const rs = document.getElementById('reqDeptScroll');
+  rs.innerHTML = ['전체', ...DEPTS].map(d=>`<div class="dept-chip" style="background:${d===dept?'var(--teal)':'var(--surface-2)'};color:${d===dept?'#fff':'var(--ink-soft)'};border-color:transparent;" data-d="${esc(d)}">${esc(d)}</div>`).join('');
+  rs.querySelectorAll('[data-d]').forEach(el=> el.addEventListener('click', ()=>{ STATE.reqDept = el.dataset.d; render(); }));
+
+  main.querySelectorAll('.reqChk').forEach(el=> el.addEventListener('change', e=>{ STATE.reqSel[e.target.dataset.id] = e.target.checked; }));
+  main.querySelectorAll('.reqMinus').forEach(el=> el.addEventListener('click', ()=>{ const id=el.dataset.id; STATE.reqQty[id]=Math.max(1,(STATE.reqQty[id]||1)-1); render(); }));
+  main.querySelectorAll('.reqPlus').forEach(el=> el.addEventListener('click', ()=>{ const id=el.dataset.id; STATE.reqQty[id]=(STATE.reqQty[id]||1)+1; render(); }));
+  main.querySelectorAll('.reqQty').forEach(el=> el.addEventListener('change', e=>{ STATE.reqQty[e.target.dataset.id]=Math.max(1,parseInt(e.target.value)||1); }));
+  const genBtn = document.getElementById('genRequest');
+  if(genBtn) genBtn.addEventListener('click', ()=> generateRequest(pool));
+  main.querySelectorAll('.history-item[data-rid]').forEach(el=>{
+    el.addEventListener('click', ()=> showRequestModal(STATE.requests.find(r=>r.id==el.dataset.rid)));
+  });
+}
+async function generateRequest(pool){
+  const chosen = pool.filter(i=> STATE.reqSel[i.id] !== false);
+  if(chosen.length===0){ toast('선택된 품목이 없어요'); return; }
+  const items = chosen.map(i=>({ id:i.id, name:i.name, spec:i.spec, dept:i.dept, cat:i.cat, stock:i.stock, par:i.par, qty: STATE.reqQty[i.id] || Math.max(1,i.par-i.stock) }));
+  setSyncing(true);
+  try{
+    const result = await apiPost({ action:'requestCreate', dept: STATE.reqDept, items });
+    const req = { id: result.id, date: result.date, dept: STATE.reqDept, items };
+    STATE.requests.push(req);
+    STATE.reqSel = {}; STATE.reqQty = {};
+    toast('청구서가 생성됐어요');
+    showRequestModal(req);
+  }catch(e){
+    console.error(e);
+    toast('생성 실패 — 구글시트 연결을 확인해주세요');
+  }
+  setSyncing(false);
+  render();
+}
+function showRequestModal(req){
+  if(!req) return;
+  const backdrop = document.createElement('div');
+  backdrop.className='modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-title"><span>${esc(req.dept)} 물품청구서</span><span class="modal-close" id="closeModal">✕</span></div>
+      <div class="muted" style="font-size:12px;margin-bottom:10px;">청구일 ${fmtDate(req.date)} · (병원명)</div>
+      <div class="card" style="padding:6px 12px;">
+        ${req.items.map(i=>`
+          <div class="item-row">
+            <div class="item-main">
+              <div class="item-name">${esc(i.name)}</div>
+              <div class="item-sub"><span class="tag">${esc(i.dept)}</span><span class="tag">${esc(i.cat)}</span>${i.spec?`<span>${esc(i.spec)}</span>`:''}</div>
+              <div class="item-sub">현재고 ${i.stock} / 적정 ${i.par}</div>
+            </div>
+            <div class="item-stock"><div class="n mono">${i.qty}</div><div class="p">청구수량</div></div>
+          </div>`).join('')}
+      </div>
+      <div class="btn-row no-print" style="margin-top:14px;">
+        <button class="btn btn-secondary" id="printReq">인쇄 / PDF 저장</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  backdrop.addEventListener('click', e=>{ if(e.target===backdrop) backdrop.remove(); });
+  document.getElementById('closeModal').addEventListener('click', ()=> backdrop.remove());
+  document.getElementById('printReq').addEventListener('click', ()=> window.print());
+}
+
+// ================= MANAGE (품목 관리) =================
+function manageListHtml(){
+  const list = itemsForDept(STATE.dept).filter(i=> STATE.cat==='전체' || i.cat===STATE.cat)
+    .filter(i=> !STATE.search || i.name.includes(STATE.search) || i.spec.includes(STATE.search));
+  return list.length===0 ? `<div class="empty-state"><div class="glyph">🗂️</div>등록된 품목이 없어요</div>` :
+    list.map(i=>`
+      <div class="manage-item" data-id="${i.id}">
+        <div class="top">
+          <div>
+            <div class="name">${esc(i.name)}</div>
+            <div class="spec">${esc(i.dept)} · ${esc(i.cat)} ${i.spec?('· '+esc(i.spec)):''}</div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <div class="icon-btn editBtn" data-id="${i.id}" title="수정">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </div>
+            <div class="icon-btn danger delBtn" data-id="${i.id}" title="삭제">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="edit-row">
+          <div class="par-field">적정재고
+            <input type="number" min="0" class="mono parInput" data-id="${i.id}" value="${i.par}">
+          </div>
+          <div class="par-field">현재고
+            <input type="number" min="0" class="mono stockInput" data-id="${i.id}" value="${i.stock}">
+          </div>
+        </div>
+      </div>
+    `).join('');
+}
+function bindManageListEvents(){
+  const card = document.getElementById('itemListCard');
+  if(!card) return;
+  card.querySelectorAll('.editBtn').forEach(b=> b.addEventListener('click', ()=> openItemModal(STATE.items.find(i=>i.id==b.dataset.id))));
+  card.querySelectorAll('.delBtn').forEach(b=> b.addEventListener('click', ()=> deleteItem(parseInt(b.dataset.id))));
+  card.querySelectorAll('.parInput').forEach(inp=>{
+    inp.addEventListener('change', async e=>{
+      const it = STATE.items.find(i=>i.id==e.target.dataset.id);
+      const newPar = Math.max(0, parseInt(e.target.value)||0);
+      setSyncing(true);
+      try{
+        await apiPost({ action:'itemUpdate', id: it.id, par: newPar });
+        it.par = newPar;
+        toast(`${it.name} 적정재고 ${it.par}로 변경`);
+      }catch(e2){
+        console.error(e2);
+        toast('변경 실패 — 구글시트 연결을 확인해주세요');
+      }
+      setSyncing(false);
+      render();
+    });
+  });
+  card.querySelectorAll('.stockInput').forEach(inp=>{
+    inp.addEventListener('change', async e=>{
+      const it = STATE.items.find(i=>i.id==e.target.dataset.id);
+      const newStock = Math.max(0, parseInt(e.target.value)||0);
+      if(newStock === it.stock) return;
+      setSyncing(true);
+      try{
+        await apiPost({ action:'itemUpdate', id: it.id, stock: newStock });
+        it.stock = newStock;
+        toast(`${it.name} 현재고 ${it.stock}로 변경`);
+      }catch(e2){
+        console.error(e2);
+        toast('변경 실패 — 구글시트 연결을 확인해주세요');
+      }
+      setSyncing(false);
+      render();
+    });
+  });
+}
+function renderManage(main){
+  main.innerHTML = `
+    <div class="btn-row" style="margin-bottom:14px;gap:8px;">
+      <button class="btn btn-primary" id="addItemBtn" style="flex:1;">+ 새 품목 추가</button>
+      <button class="btn btn-secondary" id="bulkCatBtn" style="flex:1;">소분류 일괄 변경</button>
+    </div>
+    <div class="search-bar"><input type="text" id="searchInput" placeholder="품목명 검색" value="${esc(STATE.search)}"></div>
+    <div class="cat-filter" id="catFilter"></div>
+    <div class="card" style="padding:4px 12px;" id="itemListCard">
+      ${manageListHtml()}
+    </div>
+  `;
+  document.getElementById('bulkCatBtn').addEventListener('click', ()=> openBulkCatModal());
+  document.getElementById('searchInput').addEventListener('input', e=>{
+    STATE.search = e.target.value;
+    if(e.isComposing) return; // 한글 조합(자모 결합) 중에는 다시 그리지 않음 — 안 그러면 자음/모음이 끊겨 보임
+    renderManageListOnly();
+  });
+  document.getElementById('searchInput').addEventListener('compositionend', e=>{
+    STATE.search = e.target.value;
+    renderManageListOnly();
+  });
+  renderCatFilter();
+  document.getElementById('addItemBtn').addEventListener('click', ()=> openItemModal(null));
+  bindManageListEvents();
+}
+function renderManageListOnly(){
+  // 검색창은 그대로 두고 목록만 갱신 (입력창을 다시 만들지 않아 타이핑이 끊기지 않음)
+  const card = document.getElementById('itemListCard');
+  if(card) card.innerHTML = manageListHtml();
+  bindManageListEvents();
+}
+async function deleteItem(id){
+  const it = STATE.items.find(i=>i.id===id);
+  if(!it) return;
+  if(!confirm(`'${it.name}' 품목을 삭제할까요? 이 작업은 되돌릴 수 없어요.`)) return;
+  setSyncing(true);
+  try{
+    await apiPost({ action:'itemDelete', id });
+    STATE.items = STATE.items.filter(i=>i.id!==id);
+    toast('삭제됐어요');
+  }catch(e){
+    console.error(e);
+    toast('삭제 실패 — 구글시트 연결을 확인해주세요');
+  }
+  setSyncing(false);
+  render();
+}
+// 새 품목을 같은 부서·같은 소분류(카테고리) 품목들 바로 아래에 끼워 넣기 위한 함수
+function insertItemInOrder(newItem){
+  let insertAt = -1;
+  // 1순위: 같은 부서 + 같은 소분류의 마지막 품목 위치
+  for(let idx=0; idx<STATE.items.length; idx++){
+    const it = STATE.items[idx];
+    if(it.dept === newItem.dept && it.cat === newItem.cat) insertAt = idx;
+  }
+  // 2순위: 같은 소분류가 없으면 같은 부서의 마지막 품목 위치
+  if(insertAt === -1){
+    for(let idx=0; idx<STATE.items.length; idx++){
+      const it = STATE.items[idx];
+      if(it.dept === newItem.dept) insertAt = idx;
+    }
+  }
+  if(insertAt === -1){
+    STATE.items.push(newItem);
+  } else {
+    STATE.items.splice(insertAt + 1, 0, newItem);
+  }
+}
+function openBulkCatModal(){
+  const dept = STATE.dept === '전체' ? DEPTS[0] : STATE.dept;
+  const backdrop = document.createElement('div');
+  backdrop.className='modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-title"><span>소분류 일괄 변경</span><span class="modal-close" id="closeModal">✕</span></div>
+      <label class="field-label">대분류 (부서)</label>
+      <select id="bDept">${DEPTS.map(d=>`<option value="${esc(d)}" ${dept===d?'selected':''}>${esc(d)}</option>`).join('')}</select>
+      <label class="field-label">바꿀 소분류</label>
+      <select id="bCat">
+        <option value="의약품">의약품</option>
+        <option value="소모품">소모품</option>
+        <option value="보조기">보조기</option>
+        <option value="문구">문구</option>
+      </select>
+      <label class="field-label">품목명 목록 (한 줄에 하나씩, 또는 쉼표로 구분 · 앞글자가 같으면 자동으로 찾아서 반영돼요)</label>
+      <textarea id="bNames" rows="8" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:14px;" placeholder="예:&#10;M-splint&#10;JS-Tap EB&#10;목발"></textarea>
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-secondary" id="cancelBulk">취소</button>
+        <button class="btn btn-primary" id="applyBulk">적용</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  const close = ()=> backdrop.remove();
+  backdrop.addEventListener('click', e=>{ if(e.target===backdrop) close(); });
+  document.getElementById('closeModal').addEventListener('click', close);
+  document.getElementById('cancelBulk').addEventListener('click', close);
+  document.getElementById('applyBulk').addEventListener('click', async ()=>{
+    const targetDept = document.getElementById('bDept').value;
+    const targetCat = document.getElementById('bCat').value;
+    const raw = document.getElementById('bNames').value;
+    const names = raw.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+    if(names.length===0){ toast('품목명을 입력해주세요'); return; }
+    const applyBtn = document.getElementById('applyBulk');
+    applyBtn.disabled = true;
+    setSyncing(true);
+    const notFound = [];
+    let changed = 0;
+    for(const nm of names){
+      const needle = nm.toLowerCase();
+      // 완전 일치가 아니라 "앞부분이 같은" 품목까지 모두 찾아서 반영 (띄어쓰기·뒤에 붙은 규격 등 차이 허용)
+      const matches = STATE.items.filter(i=> i.dept===targetDept && i.name.trim().toLowerCase().startsWith(needle));
+      if(matches.length===0){ notFound.push(nm); continue; }
+      for(const match of matches){
+        if(match.cat === targetCat){ changed++; continue; } // 이미 해당 소분류면 통과
+        try{
+          await apiPost({ action:'itemUpdate', id: match.id, cat: targetCat });
+          match.cat = targetCat;
+          changed++;
+        }catch(e2){
+          console.error(e2);
+          notFound.push(`${match.name} (저장 실패)`);
+        }
+      }
+    }
+    setSyncing(false);
+    applyBtn.disabled = false;
+    close();
+    if(notFound.length===0){
+      toast(`${changed}개 품목의 소분류를 '${targetCat}'로 변경했어요`);
+    }else{
+      toast(`${changed}개 변경, ${notFound.length}개는 못 찾았어요: ${notFound.join(', ')}`);
+    }
+    render();
+  });
+}
+function openItemModal(item){
+  const isNew = !item;
+  const backdrop = document.createElement('div');
+  backdrop.className='modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-title"><span>${isNew?'새 품목 추가':'품목 수정'}</span><span class="modal-close" id="closeModal">✕</span></div>
+      <label class="field-label">대분류 (부서)</label>
+      <select id="fDept">${DEPTS.map(d=>`<option value="${esc(d)}" ${item&&item.dept===d?'selected':''} ${!item&&STATE.dept===d?'selected':''}>${esc(d)}</option>`).join('')}</select>
+      <label class="field-label">소분류</label>
+      <select id="fCat">
+        <option value="의약품" ${item&&item.cat==='의약품'?'selected':''}>의약품</option>
+        <option value="소모품" ${item&&item.cat==='소모품'?'selected':''}>소모품</option>
+        <option value="보조기" ${item&&item.cat==='보조기'?'selected':''}>보조기</option>
+        <option value="문구" ${item&&item.cat==='문구'?'selected':''}>문구</option>
+      </select>
+      <label class="field-label">품목명</label>
+      <input type="text" id="fName" value="${item?esc(item.name):''}" placeholder="예: 라텍스 장갑">
+      <label class="field-label">규격 / 단위</label>
+      <input type="text" id="fSpec" value="${item?esc(item.spec):''}" placeholder="예: 7.5 / BOX">
+      <label class="field-label">적정재고 기준값</label>
+      <input type="number" id="fPar" min="0" value="${item?item.par:5}">
+      ${isNew? `<label class="field-label">초기 재고</label><input type="number" id="fStock" min="0" value="0">` : ''}
+      <label class="field-label">메모</label>
+      <input type="text" id="fMemo" value="${item?esc(item.memo||''):''}" placeholder="선택 입력">
+      <div class="btn-row" style="margin-top:16px;">
+        <button class="btn btn-secondary" id="cancelItem">취소</button>
+        <button class="btn btn-primary" id="saveItem">저장</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+  const close = ()=> backdrop.remove();
+  backdrop.addEventListener('click', e=>{ if(e.target===backdrop) close(); });
+  document.getElementById('closeModal').addEventListener('click', close);
+  document.getElementById('cancelItem').addEventListener('click', close);
+  document.getElementById('saveItem').addEventListener('click', async ()=>{
+    const name = document.getElementById('fName').value.trim();
+    if(!name){ toast('품목명을 입력해주세요'); return; }
+    const dept = document.getElementById('fDept').value;
+    const cat = document.getElementById('fCat').value;
+    const spec = document.getElementById('fSpec').value.trim();
+    const par = Math.max(0, parseInt(document.getElementById('fPar').value)||0);
+    const memo = document.getElementById('fMemo').value.trim();
+    const saveBtn = document.getElementById('saveItem');
+    saveBtn.disabled = true;
+    setSyncing(true);
+    try{
+      if(isNew){
+        const stock = Math.max(0, parseInt(document.getElementById('fStock').value)||0);
+        const result = await apiPost({ action:'itemAdd', dept, cat, name, spec, par, stock, memo });
+        insertItemInOrder({ id: result.id, dept, cat, name, spec, par, stock, memo });
+        toast('품목이 추가됐어요');
+      } else {
+        await apiPost({ action:'itemUpdate', id: item.id, dept, cat, name, spec, par, memo });
+        Object.assign(item, { dept, cat, name, spec, par, memo });
+        toast('품목이 수정됐어요');
+      }
+      close();
+    }catch(e){
+      console.error(e);
+      toast('저장 실패 — 구글시트 연결을 확인해주세요');
+      saveBtn.disabled = false;
+    }
+    setSyncing(false);
+    render();
+  });
+}
+
+// ---------- init ----------
+loadAll();
+</script>
+</body>
+</html>

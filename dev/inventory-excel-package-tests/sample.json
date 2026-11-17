@@ -1,0 +1,107 @@
+[
+ {
+  "name": "멸균 수술장갑 7.0",
+  "loc": "수술실",
+  "spec": "Box(50쌍)",
+  "par": 10,
+  "stock": 4
+ },
+ {
+  "name": "멸균 수술장갑 7.5",
+  "loc": "수술실",
+  "spec": "Box(50쌍)",
+  "par": 10,
+  "stock": 9
+ },
+ {
+  "name": "일회용 수술가운",
+  "loc": "수술실",
+  "spec": "EA",
+  "par": 40,
+  "stock": 26
+ },
+ {
+  "name": "봉합사 Vicryl 2-0",
+  "loc": "수술실",
+  "spec": "Box(36개)",
+  "par": 6,
+  "stock": 2
+ },
+ {
+  "name": "생리식염수 1L",
+  "loc": "수술실",
+  "spec": "EA",
+  "par": 40,
+  "stock": 52
+ },
+ {
+  "name": "일회용 주사기 5cc",
+  "loc": "처치실",
+  "spec": "Box(100개)",
+  "par": 8,
+  "stock": 3
+ },
+ {
+  "name": "주사바늘 23G",
+  "loc": "처치실",
+  "spec": "Box(100개)",
+  "par": 6,
+  "stock": 6
+ },
+ {
+  "name": "알코올 솜",
+  "loc": "처치실",
+  "spec": "Pack(100매)",
+  "par": 20,
+  "stock": 20
+ },
+ {
+  "name": "포비돈 용액 500ml",
+  "loc": "처치실",
+  "spec": "병",
+  "par": 10,
+  "stock": 4
+ },
+ {
+  "name": "탄력붕대 4인치",
+  "loc": "병동",
+  "spec": "Roll",
+  "par": 30,
+  "stock": 11
+ },
+ {
+  "name": "부직포 반창고",
+  "loc": "병동",
+  "spec": "Box",
+  "par": 8,
+  "stock": 10
+ },
+ {
+  "name": "무릎 보조기 M",
+  "loc": "병동",
+  "spec": "EA",
+  "par": 5,
+  "stock": 5
+ },
+ {
+  "name": "일회용 베드시트",
+  "loc": "물리치료실",
+  "spec": "Roll",
+  "par": 12,
+  "stock": 7
+ },
+ {
+  "name": "초음파 젤",
+  "loc": "물리치료실",
+  "spec": "병(250ml)",
+  "par": 6,
+  "stock": 2
+ },
+ {
+  "name": "전극 패드",
+  "loc": "물리치료실",
+  "spec": "Pack",
+  "par": 10,
+  "stock": 12
+ }
+]
