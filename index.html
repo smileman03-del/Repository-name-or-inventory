@@ -1106,7 +1106,7 @@
   if(!document.getElementById('drag-style')){
     const style=document.createElement('style');
     style.id='drag-style';
-    style.textContent='.drag-handle{display:none!important;}body.order-edit .drag-handle{display:inline-flex!important;}.order-edit-btn{position:fixed;right:14px;bottom:14px;z-index:9998;padding:10px 16px;border:0;border-radius:24px;background:#2e7d32;color:#fff;font-weight:700;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,.25);}.drag-handle{cursor:grab;font-size:20px;color:#bbb;padding:2px 8px 2px 4px;display:inline-flex;align-items:center;user-select:none;touch-action:none;line-height:1;flex-shrink:0;transition:color .15s;}.drag-handle:hover{color:#888;}.drag-handle:active{cursor:grabbing;}section.category.is-dragging{opacity:0.3;box-shadow:none!important;}section.category.drag-over-top{border-top:3px solid #4caf50!important;margin-top:-3px;}section.category.drag-over-bot{border-bottom:3px solid #4caf50!important;}.category-head{display:flex;align-items:center;}';
+    style.textContent='.drag-handle{display:none!important;}body.order-edit .drag-handle{display:inline-flex!important;}.move-btn{display:none;border:1px solid #bbb;background:#fff;color:#333;border-radius:8px;width:36px;height:36px;font-size:16px;line-height:1;margin-right:4px;flex-shrink:0;}body.order-edit .move-btn{display:inline-flex;align-items:center;justify-content:center;}.order-edit-btn{position:fixed;right:14px;bottom:14px;z-index:9998;padding:10px 16px;border:0;border-radius:24px;background:#2e7d32;color:#fff;font-weight:700;font-size:15px;box-shadow:0 4px 14px rgba(0,0,0,.25);}.drag-handle{cursor:grab;font-size:20px;color:#bbb;padding:2px 8px 2px 4px;display:inline-flex;align-items:center;user-select:none;touch-action:none;line-height:1;flex-shrink:0;transition:color .15s;}.drag-handle:hover{color:#888;}.drag-handle:active{cursor:grabbing;}section.category.is-dragging{opacity:0.3;box-shadow:none!important;}section.category.drag-over-top{border-top:3px solid #4caf50!important;margin-top:-3px;}section.category.drag-over-bot{border-bottom:3px solid #4caf50!important;}.category-head{display:flex;align-items:center;}';
     document.head.appendChild(style);
   }
   let dragSrc=null,touchDragEl=null,touchClone=null,touchOffX=0,touchOffY=0;
@@ -1120,6 +1120,22 @@
     handle.title='드래그하여 순서 변경';
     handle.textContent='⠿';
     head.insertBefore(handle,head.firstChild);
+    let ref=handle;
+    [['▲','위로',-1],['▼','아래로',1]].forEach(function(d){
+      const b=document.createElement('button');
+      b.type='button';b.className='move-btn';b.textContent=d[0];b.setAttribute('aria-label',d[1]+' 이동');
+      b.addEventListener('click',function(e){
+        e.stopPropagation();
+        let t=section;
+        do{t=d[2]<0?t.previousElementSibling:t.nextElementSibling;}while(t&&!t.matches('section.category'));
+        if(!t)return;
+        const c=getContainer();
+        if(d[2]<0)c.insertBefore(section,t);else c.insertBefore(section,t.nextElementSibling);
+        saveOrder(getOrder(c));
+        section.scrollIntoView({block:'nearest',behavior:'smooth'});
+      });
+      ref.after(b);ref=b;
+    });
   }
   function bindDragEvents(section){
     section.setAttribute('draggable',document.body.classList.contains('order-edit')?'true':'false');
