@@ -521,11 +521,23 @@ function renderMonthView(){
     const dateColor = isToday ? '#3B6FA8' : (isSunday || isHoliday) ? '#E0384A' : '#1F2430';
     if (inMonth) { monthTotalCount += active.length; monthCancelledCount += cancelled.length; monthCompletedCount += recs.filter(r => r.status === '완료').length; }
     cellsHtml += `
-      <div class="dayCell" data-date="${dateStr}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:140px;border-radius:10px;padding:10px;overflow:hidden;box-sizing:border-box;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
-        <div style="font-size:2.1rem;font-weight:${isToday?900:700};color:${dateColor};line-height:1.2;">${d.getDate()}</div>
-        ${active.length>0?`<div style="margin-top:5px;background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:3px 8px;font-size:0.88rem;font-weight:800;display:inline-block;">${active.length}건</div>`:''}
-        ${cancelled.length>0?`<div style="margin-top:4px;color:#8A8F98;font-size:0.82rem;font-weight:700;">취소 ${cancelled.length}</div>`:''}
-        ${hasEmergency?`<div style="margin-top:4px;color:#E0384A;font-size:0.82rem;font-weight:800;">응급 있음</div>`:''}
+      <div class="dayCell" data-date="${dateStr}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:160px;border-radius:10px;padding:8px;overflow:hidden;box-sizing:border-box;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <div style="font-size:1.6rem;font-weight:${isToday?900:700};color:${dateColor};line-height:1.1;">${d.getDate()}</div>
+          ${active.length>0?`<div style="background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:1px 6px;font-size:0.8rem;font-weight:800;">${active.length}건</div>`:''}
+          ${hasEmergency?`<div style="color:#E0384A;font-size:0.75rem;font-weight:800;">응급</div>`:''}
+          ${cancelled.length>0?`<div style="color:#8A8F98;font-size:0.75rem;font-weight:700;">취소${cancelled.length}</div>`:''}
+        </div>
+        ${active.slice(0,3).map(r => {
+          const st = r.status === '완료' ? '완료' : (r.status === '진행 중' ? '진행' : '예정');
+          const stColor = r.status === '완료' ? '#22A55B' : (r.status === '진행 중' ? '#E08A2B' : '#3B6FA8');
+          return `<div style="display:flex;gap:4px;align-items:center;margin-top:2px;font-size:0.74rem;line-height:1.25;white-space:nowrap;overflow:hidden;">
+            <span style="font-weight:800;color:#1F2430;flex:0 0 auto;">${esc(r.name)||'-'}</span>
+            <span style="color:#6B7280;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0;">${esc(r.surgeryName)}</span>
+            <span style="color:${stColor};font-weight:800;flex:0 0 auto;">${st}</span>
+          </div>`;
+        }).join('')}
+        ${active.length>3?`<div style="margin-top:2px;color:#8A8F98;font-size:0.72rem;font-weight:700;">+${active.length-3}건 더</div>`:''}
       </div>`;
   }
 
