@@ -1093,14 +1093,15 @@
   function saveOrder(order){localStorage.setItem(ORDER_KEY,JSON.stringify(order));if(!IS_EDITOR)return;try{window.storage.set(SHARED_ORDER_KEY,JSON.stringify(order)).catch(function(e){console.warn('순서 공유 저장 실패',e);});}catch(e){}}
   function getContainer(){return document.getElementById('categoryList');}
   function applyOrder(container,order){
-    if(!order||!order.length)return;
+    if(!Array.isArray(order)||!order.length)return;
     const sections=Array.from(container.querySelectorAll('section.category'));
-    const sectionMap={};
-    sections.forEach(s=>sectionMap[s.getAttribute('data-cat')]=s);
+    const sectionMap=new Map();
+    sections.forEach(s=>sectionMap.set(s.getAttribute('data-cat'),s));
+    const used=new Set();
     const ordered=[];
-    order.forEach(cat=>{if(sectionMap[cat])ordered.push(sectionMap[cat]);});
-    sections.forEach(s=>{const c=s.getAttribute('data-cat');if(!order.includes(c))ordered.push(s);});
-    if(ordered.length===sections.length&&ordered.every(function(s,i){return s===sections[i];}))return;
+    order.forEach(cat=>{const s=sectionMap.get(cat);if(s&&!used.has(s)){used.add(s);ordered.push(s);}});
+    sections.forEach(s=>{if(!used.has(s)){used.add(s);ordered.push(s);}});
+    if(ordered.every(function(s,i){return s===sections[i];}))return;
     const addBtn=Array.from(container.children).find(function(el){return !el.matches('section.category');});
     ordered.forEach(s=>container.insertBefore(s,addBtn||null));
   }
