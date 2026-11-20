@@ -330,6 +330,7 @@
         <span class="num" id="totalCount">0</span>
         <span class="lbl">오늘 총 사용</span>
       </div>
+      <button class="btn" id="manageBtn">품목관리</button>
       <button class="btn" id="historyBtn">지난 기록</button>
       <button class="btn" id="biweekBtn">2주 통계</button>
       <button class="btn danger" id="resetBtn">오늘 초기화</button>
@@ -1087,7 +1088,7 @@
   'use strict';
   const ORDER_KEY = 'bg_cat_order';
   const SHARED_ORDER_KEY='catOrder';
-  const IS_EDITOR=(location.hash==='#edit');
+  const IS_EDITOR=true;
   function getSavedOrder(){try{return JSON.parse(localStorage.getItem(ORDER_KEY))||[];}catch(e){return [];}}
   function saveOrder(order){localStorage.setItem(ORDER_KEY,JSON.stringify(order));if(!IS_EDITOR)return;try{window.storage.set(SHARED_ORDER_KEY,JSON.stringify(order)).catch(function(e){console.warn('순서 공유 저장 실패',e);});}catch(e){}}
   function getContainer(){return document.getElementById('categoryList');}
@@ -1163,18 +1164,20 @@
   const saved=getSavedOrder();
   if(saved.length)applyOrder(container,saved);
   container.querySelectorAll('section.category').forEach(activateSection);
-  if(IS_EDITOR){
-    const eb=document.createElement('button');
-    eb.type='button';eb.className='order-edit-btn';eb.textContent='순서 편집';
-    eb.addEventListener('click',function(){
-      const on=!document.body.classList.contains('order-edit');
-      document.body.classList.toggle('order-edit',on);
-      eb.textContent=on?'완료':'순서 편집';
-      getContainer().querySelectorAll('section.category').forEach(function(s){s.setAttribute('draggable',on?'true':'false');});
-      if(!on){saveOrder(getOrder(getContainer()));}
-    });
-    document.body.appendChild(eb);
+  const mb=document.getElementById('manageBtn');
+  const eb=document.createElement('button');
+  eb.type='button';eb.className='order-edit-btn';eb.textContent='완료';eb.style.display='none';
+  document.body.appendChild(eb);
+  function setEdit(on){
+    document.body.classList.toggle('order-edit',on);
+    if(mb)mb.textContent=on?'관리 완료':'품목관리';
+    eb.style.display=on?'':'none';
+    getContainer().querySelectorAll('section.category').forEach(function(s){s.setAttribute('draggable',on?'true':'false');});
+    if(!on){saveOrder(getOrder(getContainer()));}
   }
+  function toggleEdit(){setEdit(!document.body.classList.contains('order-edit'));}
+  if(mb)mb.addEventListener('click',toggleEdit);
+  eb.addEventListener('click',toggleEdit);
   (async function(){
     try{
       const res=await window.storage.get(SHARED_ORDER_KEY);
