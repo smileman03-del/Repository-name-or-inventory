@@ -1534,7 +1534,7 @@ document.addEventListener('click', e=>{
   function apply(){
     const z = base() * FS[idx];
     document.body.style.zoom = z.toFixed(3);
-    document.body.classList.toggle('wide', window.innerWidth / z >= 860);
+    document.body.classList.toggle('wide', window.innerWidth / base() >= 860);
     const dn = document.getElementById('fsDown'), up = document.getElementById('fsUp');
     if(dn) dn.disabled = idx<=0;
     if(up) up.disabled = idx>=FS.length-1;
