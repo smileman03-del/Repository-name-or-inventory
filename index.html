@@ -32,7 +32,7 @@
     -webkit-font-smoothing:antialiased;
     padding-bottom:80px;
   }
-  @media (prefers-reduced-motion: reduce){
+  .fs-ctl{display:flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:100px;padding:3px 4px 3px 12px;font-size:0.8rem;font-weight:700;color:var(--text)} .fs-ctl button{width:38px;height:34px;border-radius:100px;border:1px solid var(--border);background:var(--panel);color:var(--text);font-weight:800;font-size:0.9rem;cursor:pointer;font-family:inherit;padding:0;line-height:1} .fs-ctl button:disabled{opacity:.35;cursor:default} @media print{.fs-ctl{display:none !important}} @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
   }
 
@@ -372,7 +372,7 @@
       <button class="btn" id="manageBtn">품목관리</button>
       <button class="btn" id="historyBtn">지난 기록</button>
       <button class="btn" id="biweekBtn">2주 통계</button>
-      <button class="btn danger" id="resetBtn">오늘 초기화</button>
+      <button class="btn danger" id="resetBtn">오늘 초기화</button><div class="fs-ctl" role="group" aria-label="글씨 크기"><span>글씨 크기</span><button type="button" id="fsDown" aria-label="글씨 작게">A−</button><button type="button" id="fsUp" aria-label="글씨 크게">A+</button></div>
     </div>
   </div>
 
@@ -1239,5 +1239,5 @@
   obs.observe(container,{childList:true});
 })();
 </script>
-</body>
+<script>(function(){var FS=[0.9,1,1.15,1.3,1.5],KEY='bone_cnt_fs',idx=1;try{var v=parseInt(localStorage.getItem(KEY),10);if(v>=0&&v<FS.length)idx=v;}catch(e){}function base(){var w=window.innerWidth;return w>=1800?1.45:w>=1500?1.3:w>=1200?1.2:w>=900?1.15:w>=700?1.25:1;}function apply(){document.body.style.zoom=(base()*FS[idx]).toFixed(3);var dn=document.getElementById('fsDown'),up=document.getElementById('fsUp');if(dn)dn.disabled=idx<=0;if(up)up.disabled=idx>=FS.length-1;}function set(n){idx=n;try{localStorage.setItem(KEY,String(idx));}catch(e){}apply();}var d=document.getElementById('fsDown'),u=document.getElementById('fsUp');if(d)d.addEventListener('click',function(){if(idx>0)set(idx-1);});if(u)u.addEventListener('click',function(){if(idx<FS.length-1)set(idx+1);});window.addEventListener('resize',apply);apply();})();</script></body>
 </html>
