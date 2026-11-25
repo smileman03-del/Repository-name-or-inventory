@@ -299,6 +299,159 @@
   ::-webkit-scrollbar-thumb{ background:#D3DAD6; border-radius:10px; }
 </style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/pretendard.min.css">
+<style id="v2-large-screen">
+/* ===== v2: 큰 화면 가독성 + 입고 ===== */
+body{min-height:0}
+
+/* 헤더 도구 (글씨 크기) */
+.v2-tools{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.fs-ctl{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.14);border-radius:100px;padding:3px 4px 3px 12px;color:#fff;font-size:12px;font-weight:700}
+.fs-ctl button{width:34px;height:30px;border-radius:100px;border:0;background:#fff;color:var(--teal-dark);font-weight:800;font-size:13px;cursor:pointer;font-family:inherit;padding:0;white-space:nowrap;line-height:1}
+.fs-ctl button:disabled{opacity:.4;cursor:default}
+@media (max-width:640px){ .fs-ctl{display:none} }
+
+/* 요약 카드 */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--teal);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;justify-content:center}
+.kpi .lbl{font-size:12.5px;font-weight:700;color:var(--ink-soft)}
+.kpi .ring-center .lbl{display:none}
+.kpi .val{font-size:30px;font-weight:900;line-height:1.15}
+.kpi.ok{border-top-color:var(--green)} .kpi.ok .val{color:var(--green)}
+.kpi.low{border-top-color:var(--brick)} .kpi.low .val{color:var(--brick)}
+.kpi.donut{grid-column:1 / -1;flex-direction:row;align-items:center;gap:14px;border-top-color:var(--teal-dark)}
+.donut-txt .lbl{font-size:15px;color:var(--ink)}
+.donut-txt .sub{font-size:13px;color:var(--ink-soft);font-weight:600;margin-top:2px}
+
+/* 검색줄 / 부족만 */
+.search-bar input[type=text]{min-width:0}
+.toggle-low{flex:0 0 auto;border:2px solid var(--line);background:var(--surface);color:var(--brick);border-radius:10px;padding:0 12px;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit}
+.toggle-low[aria-pressed="true"]{background:var(--brick);border-color:var(--brick);color:#fff}
+
+/* 목록 행 */
+.badge.low{background:var(--brick);color:#fff}
+.badge.ok{color:#1E6B40}
+.item-row.low .item-stock .n{color:var(--brick)}
+.btn-in{flex:0 0 auto;border:2px solid var(--teal);background:#fff;color:var(--teal-dark);border-radius:10px;padding:8px 11px;font-weight:800;font-size:13.5px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn-in:hover,.btn-in:active{background:var(--teal-tint)}
+.item-row{gap:10px}
+
+/* ===== 입고 화면 ===== */
+.in-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.in-panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.in-title{font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px;margin:0 0 12px}
+.in-title.next{margin-top:22px}
+.step{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--teal-dark);color:#fff;font-size:14px;font-weight:900;flex:0 0 auto}
+.in-picklist{margin-top:8px;border:2px solid var(--line);border-radius:12px;overflow:hidden}
+.pick-hint{background:var(--surface-2);padding:7px 12px;font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+.in-pick-row{display:grid;grid-template-columns:1fr auto;gap:2px 12px;width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:#fff;padding:11px 12px;align-items:center;cursor:pointer;font-family:inherit;color:var(--ink)}
+.in-pick-row:hover,.in-pick-row:active{background:var(--teal-tint)}
+.in-pick-row .pn{font-size:16px;font-weight:800}
+.in-pick-row .pm{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+.in-pick-row .pq{font-size:15px;font-weight:800;text-align:right}
+.in-pick-row .pq.low{color:var(--brick)}
+.in-picked{border:3px solid var(--teal);background:var(--teal-tint);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.in-picked .pn{font-size:19px;font-weight:900;color:var(--teal-dark)}
+.in-picked .pm{font-size:13px;color:var(--ink-soft);font-weight:700}
+.in-picked button{border:2px solid var(--teal);background:#fff;color:var(--teal-dark);border-radius:10px;padding:8px 12px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit}
+.in-stepper{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.in-stepper .sbtn{width:54px;height:54px;border-radius:14px;border:0;background:var(--teal-dark);color:#fff;font-size:26px;font-weight:900;cursor:pointer;line-height:1;font-family:inherit}
+.in-stepper input{width:110px;height:54px;text-align:center;font-size:28px;font-weight:900;border:3px solid var(--teal);border-radius:14px;padding:0}
+.in-quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.in-quick button{border:2px solid var(--teal);background:#fff;color:var(--teal-dark);border-radius:10px;padding:8px 14px;font-weight:800;font-size:15px;cursor:pointer;font-family:inherit}
+.in-quick button:hover{background:var(--teal-tint)}
+.in-preview{margin-top:12px;background:var(--green-tint);color:#1E6B40;border-radius:12px;padding:12px 14px;font-size:16px;font-weight:800}
+.in-preview.warn{background:var(--amber-tint);color:#8A4A00}
+.in-preview.idle{background:var(--surface-2);color:var(--ink-soft)}
+.in-row2{display:grid;grid-template-columns:minmax(0,1fr);gap:0 14px}
+.in-label{display:block;font-size:13px;font-weight:800;margin:10px 0 5px}
+.in-submit-wrap{position:sticky;bottom:64px;padding:14px 0 2px;margin-top:6px;background:linear-gradient(to top,#fff 72%,rgba(255,255,255,0))}
+.in-submit{width:100%;min-height:58px;border:0;border-radius:14px;background:var(--green);color:#fff;font-size:20px;font-weight:900;cursor:pointer;font-family:inherit}
+.in-submit:disabled{background:#B9C4D2;cursor:not-allowed}
+.in-today{display:flex;gap:10px;margin-bottom:12px}
+.in-today > div{flex:1;background:var(--teal-tint);border-radius:12px;padding:10px 12px}
+.in-today b{display:block;font-size:28px;font-weight:900;color:var(--teal-dark);line-height:1.1}
+.in-today span{font-size:12.5px;font-weight:800;color:var(--ink-soft)}
+.in-loglist{display:flex;flex-direction:column;gap:10px}
+.in-log{border:2px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 10px;align-items:center}
+.in-log.fresh{border-color:var(--green);background:var(--green-tint)}
+.in-log.undone{opacity:.55}
+.in-log.undone .ln{text-decoration:line-through}
+.in-log .ln{font-size:16px;font-weight:800}
+.in-log .lm{font-size:12.5px;color:var(--ink-soft);font-weight:600}
+.in-log .lq{font-size:24px;font-weight:900;color:#1E6B40;text-align:right}
+.in-log .lu{grid-column:1 / -1;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.in-undo{border:2px solid var(--line);background:#fff;color:var(--brick);border-radius:9px;padding:5px 12px;font-weight:800;font-size:13px;cursor:pointer;font-family:inherit}
+.in-note{font-size:12.5px;color:var(--ink-soft);margin-top:12px;line-height:1.5}
+.in-empty{text-align:center;color:var(--ink-faint);padding:22px 8px;font-weight:700}
+
+/* ===== 큰 화면 (JS가 body.wide 를 붙임) ===== */
+body.wide{padding-bottom:28px}
+body.wide header.app-header{position:static;padding:14px max(28px, calc((100% - 1180px) / 2 + 20px)) 0;border-radius:0 0 22px 22px}
+body.wide .brand{margin-bottom:12px}
+body.wide .dept-chip{font-size:17px;padding:9px 20px}
+body.wide nav.bottom-nav{position:static;left:auto;right:auto;bottom:auto;z-index:auto;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;border-top:0;padding:6px 0 0;gap:6px;justify-content:flex-start}
+body.wide .nav-btn{flex:0 0 auto;flex-direction:row;gap:8px;padding:12px 24px;font-size:17px;color:rgba(255,255,255,.88);border-radius:12px 12px 0 0}
+body.wide .nav-btn:hover{background:rgba(255,255,255,.12)}
+body.wide .nav-btn.active{background:var(--bg);color:var(--teal-dark)}
+body.wide .nav-btn svg{width:22px;height:22px}
+body.wide main{max-width:1180px;padding:20px}
+body.wide .toast{bottom:40px;font-size:16px;padding:14px 24px}
+body.wide .kpis{grid-template-columns:1.2fr 1fr 1fr 1fr;gap:14px}
+body.wide .kpi{padding:16px 20px}
+body.wide .kpi.donut{grid-column:auto}
+body.wide .kpi .lbl{font-size:16px}
+body.wide .kpi .val{font-size:44px}
+body.wide .donut-txt .lbl{font-size:18px}
+body.wide .donut-txt .sub{font-size:15px}
+body.wide .search-bar{gap:12px}
+body.wide .search-bar input[type=text]{padding:14px 16px;font-size:18px;border-width:2px;border-radius:12px}
+body.wide .toggle-low{font-size:17px;padding:0 20px;border-radius:12px}
+body.wide .cat-filter{gap:8px}
+body.wide .cat-chip{font-size:16px;padding:9px 20px}
+body.wide #itemListCard{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body.wide #itemListCard .item-row{background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--green);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;gap:14px}
+body.wide #itemListCard .item-row.low{border-left-color:var(--brick);background:linear-gradient(90deg,var(--brick-tint),var(--surface) 55%)}
+body.wide #itemListCard .item-row:last-child{border-bottom:1px solid var(--line)}
+body.wide #itemListCard .empty-state{grid-column:1 / -1}
+body.wide .item-name{white-space:normal;font-size:20px;line-height:1.25}
+body.wide .item-sub{font-size:15px}
+body.wide .tag{font-size:14px;padding:2px 8px}
+body.wide .item-stock .n{font-size:30px}
+body.wide .item-stock .n span{font-size:15px !important}
+body.wide .badge{font-size:14px;padding:3px 10px}
+body.wide .btn-in{font-size:16px;padding:11px 16px}
+/* 입고 화면 (큰 화면) */
+body.wide .in-layout{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:start}
+body.wide .in-panel{padding:22px}
+body.wide .in-title{font-size:21px}
+body.wide .in-row2{grid-template-columns:1fr 1fr}
+body.wide .in-submit-wrap{bottom:0}
+body.wide .in-loglist{max-height:60vh;overflow:auto}
+body.wide .in-pick-row .pn{font-size:19px}
+body.wide .in-pick-row .pm{font-size:14px}
+body.wide .in-pick-row .pq{font-size:17px}
+body.wide .in-picked .pn{font-size:23px}
+body.wide .in-label{font-size:15px}
+body.wide .in-panel input[type=text],body.wide .in-panel input[type=number]{font-size:18px;padding:12px 14px}
+body.wide .in-stepper input{font-size:32px;padding:0}
+body.wide .in-preview{font-size:19px}
+body.wide .in-log .ln{font-size:19px}
+body.wide .in-log .lm{font-size:14px}
+body.wide .in-log .lq{font-size:28px}
+body.wide .in-today b{font-size:34px}
+body.wide .in-submit{font-size:23px;min-height:66px}
+@media print{ .fs-ctl{display:none !important} }
+.in-log.out .lq{color:var(--brick)}
+.in-tag{font-size:12.5px;font-weight:800;background:var(--surface-2);color:var(--ink-soft);border-radius:8px;padding:3px 10px}
+.in-log.out .in-tag{background:var(--brick-tint);color:var(--brick)}
+body.wide .in-tag{font-size:14px}
+.in-opt{font-size:13px;font-weight:700;color:var(--ink-soft)}
+.in-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.in-fields label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:800;color:var(--ink-soft)}
+.in-fields input{border:2px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;color:var(--ink)}
+@media (max-width:520px){.in-fields{grid-template-columns:1fr}}
+body.wide .in-fields label{font-size:15px}
+</style>
 </head>
 <body>
 <!-- ===== CHEONAN APP NAV ===== -->
@@ -345,17 +498,20 @@
       <div class="logo-badge"><img src="data:image/png;base64,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" alt="본 정형외과 로고"></div>
       <div class="brand-sub">재고 관리</div>
     </div>
-    <div class="sync-pill" id="syncPill"><span class="sync-dot" id="syncDot"></span><span id="syncText">동기화됨</span></div>
+    <div class="v2-tools">
+      <div class="fs-ctl" role="group" aria-label="글씨 크기"><label>글씨 크기</label><button type="button" id="fsDown" aria-label="글씨 작게">A−</button><button type="button" id="fsUp" aria-label="글씨 크게">A+</button></div>
+      <div class="sync-pill" id="syncPill"><span class="sync-dot" id="syncDot"></span><span id="syncText">동기화됨</span></div>
+    </div>
   </div>
   <div class="dept-scroll" id="deptScroll"></div>
-</header>
-
-<main id="main"></main>
-
-<nav class="bottom-nav">
+  <nav class="bottom-nav">
   <div class="nav-btn" data-screen="dashboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
     <span>재고현황</span>
+  </div>
+  <div class="nav-btn" data-screen="stockin">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>
+    <span>입고</span>
   </div>
   <div class="nav-btn" data-screen="audit">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
@@ -369,7 +525,11 @@
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     <span>품목관리</span>
   </div>
-</nav>
+  </nav>
+</header>
+
+<main id="main"></main>
+
 
 <div class="toast" id="toast"></div>
 
@@ -398,6 +558,9 @@ let STATE = {
   reqDept: '전체',
   reqSel: {},
   reqQty: {},
+  onlyLow: false,
+  tx: [],
+  inItem: null, inQty: 1, inQ: '', inLast: null, inBusy: false, inVendor: '', inMemo: '',
 };
 
 // ---------- Apps Script API helpers ----------
@@ -445,6 +608,7 @@ async function loadAll(){
       if(!STATE.audits[nd] || date > STATE.audits[nd]) STATE.audits[nd] = date;
     });
     STATE.requests = (data.requests||[]).map(r=>({ id: r.id, date: r.date, dept: normalizeDept(r.dept), items: r.items||[] }));
+    STATE.tx = data.tx || [];
     STATE.loaded = true;
     setConnected(true, '연결됨');
   }catch(e){
@@ -573,6 +737,7 @@ function render(){
     return;
   }
   if(STATE.screen==='dashboard') return renderDashboard(main);
+  if(STATE.screen==='stockin') return renderStockIn(main);
   if(STATE.screen==='audit') return renderAudit(main);
   if(STATE.screen==='request') return renderRequest(main);
   if(STATE.screen==='manage') return renderManage(main);
@@ -581,10 +746,11 @@ function render(){
 // ================= DASHBOARD =================
 function dashboardListHtml(){
   const list = itemsForDept(STATE.dept).filter(i=> STATE.cat==='전체' || i.cat===STATE.cat)
+    .filter(i=> !STATE.onlyLow || isLow(i))
     .filter(i=> !STATE.search || i.name.includes(STATE.search) || i.spec.includes(STATE.search));
   return list.length===0 ? `<div class="empty-state"><div class="glyph">📦</div>조건에 맞는 품목이 없어요</div>` :
     list.map(i=>`
-    <div class="item-row">
+    <div class="item-row ${isLow(i)?'low':'ok'}">
       <div class="item-main">
         <div class="item-name">${esc(i.name)}</div>
         <div class="item-sub">
@@ -595,8 +761,9 @@ function dashboardListHtml(){
       </div>
       <div class="item-stock">
         <div class="n mono">${i.stock}<span style="font-size:11px;color:var(--ink-faint)"> / ${i.par}</span></div>
-        <div class="badge ${isLow(i)?'low':'ok'}">${isLow(i)?'부족':'정상'}</div>
+        <div class="badge ${isLow(i)?'low':'ok'}">${isLow(i)?'▲ 부족':'✓ 정상'}</div>
       </div>
+      <button type="button" class="btn-in" data-in-id="${esc(String(i.id))}">＋ 입고</button>
     </div>
   `).join('');
 }
@@ -610,8 +777,8 @@ function renderDashboard(main){
   const dash = circumference * pct/100;
 
   main.innerHTML = `
-    <div class="card">
-      <div class="ring-row">
+    <div class="kpis">
+      <div class="kpi donut">
         <div class="ring-wrap">
           <svg viewBox="0 0 84 84">
             <circle cx="42" cy="42" r="36" fill="none" stroke="#EEF2F0" stroke-width="9"/>
@@ -620,16 +787,16 @@ function renderDashboard(main){
           </svg>
           <div class="ring-center"><div class="num">${pct}%</div><div class="lbl">정상 비율</div></div>
         </div>
-        <div class="ring-stats">
-          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#2f6fb0"></span>전체 품목</span><span class="v">${scope.length}</span></div>
-          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#2C7A4B"></span>정상</span><span class="v" style="color:#2C7A4B">${okCount}</span></div>
-          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#B8402F"></span>재고부족</span><span class="v" style="color:#B8402F">${lowCount}</span></div>
-        </div>
+        <div class="donut-txt"><div class="lbl">정상 비율</div><div class="sub">정상 ${okCount} / 전체 ${scope.length}</div></div>
       </div>
+      <div class="kpi"><div class="lbl">전체 품목</div><div class="val">${scope.length}</div></div>
+      <div class="kpi ok"><div class="lbl">✓ 정상</div><div class="val">${okCount}</div></div>
+      <div class="kpi low"><div class="lbl">▲ 재고부족</div><div class="val">${lowCount}</div></div>
     </div>
 
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="품목명 또는 규격 검색" value="${esc(STATE.search)}">
+      <button type="button" class="toggle-low" id="onlyLowBtn" aria-pressed="${STATE.onlyLow}">▲ 부족만</button>
     </div>
     <div class="cat-filter" id="catFilter"></div>
 
@@ -644,6 +811,11 @@ function renderDashboard(main){
   });
   document.getElementById('searchInput').addEventListener('compositionend', e=>{
     STATE.search = e.target.value;
+    renderDashboardListOnly();
+  });
+  document.getElementById('onlyLowBtn').addEventListener('click', e=>{
+    STATE.onlyLow = !STATE.onlyLow;
+    e.currentTarget.setAttribute('aria-pressed', String(STATE.onlyLow));
     renderDashboardListOnly();
   });
   renderCatFilter();
@@ -1138,6 +1310,241 @@ function openItemModal(item){
     render();
   });
 }
+
+
+// ================= STOCK IN (입고) =================
+// 입고는 Apps Script 의 stockChange(type:'in') 로 처리합니다.
+//  - 서버가 시트의 현재재고에 수량을 더하므로 여러 명이 동시에 입력해도 서로 덮어쓰지 않습니다.
+//  - 기록은 구글시트 '입출고이력' 탭에 자동으로 남고, 이 화면의 내역은 그 시트에서 불러옵니다.
+function localDateStr(d){
+  d = d || new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function inItemById(id){ return STATE.items.find(x=>String(x.id)===String(id)) || null; }
+
+// 시트의 최신 재고·이력을 다시 받아옴
+async function refreshData(){
+  const data = await apiGet('getAll');
+  STATE.items = (data.items||[]).map(i=>({
+    id: i.id, dept: normalizeDept(i.dept), cat: i.cat, name: i.name,
+    spec: i.spec || '', par: Number(i.par)||0, stock: Number(i.stock)||0, memo: i.memo || ''
+  }));
+  STATE.tx = data.tx || [];
+}
+
+function stockInPick(){
+  const q = (STATE.inQ||'').trim().toLowerCase();
+  const list = itemsForDept(STATE.dept).filter(i=> !q || (i.name+' '+i.spec).toLowerCase().includes(q));
+  const merged = list.filter(isLow).concat(list.filter(i=>!isLow(i))); // 부족 품목 먼저
+  return { list: merged.slice(0,10), total: merged.length, q };
+}
+function inPickListHtml(){
+  const r = stockInPick();
+  if(!r.list.length) return `<div class="pick-hint">검색 결과가 없어요</div>`;
+  return `<div class="pick-hint">${r.q ? `검색 결과 ${r.total}개${r.total>10?' (상위 10개 표시)':''}` : '재고 부족 품목을 먼저 보여드려요'}</div>` +
+    r.list.map(i=>`
+      <button type="button" class="in-pick-row" data-pick-id="${esc(String(i.id))}">
+        <span><span class="pn">${esc(i.name)}</span><br><span class="pm">${esc(i.dept)} · ${esc(i.cat)}${i.spec?' · '+esc(i.spec):''}</span></span>
+        <span class="pq mono ${isLow(i)?'low':''}">${i.stock} / ${i.par}${isLow(i)?' ▲':''}</span>
+      </button>`).join('');
+}
+
+// 시트 '입출고이력' → 화면용 목록
+function txRows(){
+  return (STATE.tx||[]).map(r=>{
+    const when = new Date(r['일시']);
+    return {
+      when: isNaN(when.getTime()) ? null : when,
+      name: r['품목명'], dept: r['대분류'], cat: r['소분류'],
+      type: String(r['구분']||'').toLowerCase(),
+      qty: Number(r['수량'])||0, before: r['변경전'], after: r['변경후'],
+      vendor: String(r['입고처']||''), memo: String(r['메모']||'')
+    };
+  }).reverse(); // 최신순
+}
+function fmtWhen(d){
+  if(!d) return '-';
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function inLogHtml(){
+  const rows = txRows();
+  let html = '';
+  const l = STATE.inLast;
+  if(l){
+    html += `<div class="in-log fresh${l.undone?' undone':''}">
+      <div><div class="ln">${esc(l.name)}</div><div class="lm">${l.undone ? '방금 입고 (취소됨)' : '방금 입고했어요'}</div></div>
+      <div class="lq mono">+${l.qty}</div>
+      <div class="lu"><span class="lm mono">${l.before} → ${l.after}</span>
+        ${l.undone ? '' : `<button type="button" class="in-undo" id="inUndoLast">방금 입고 취소</button>`}</div>
+    </div>`;
+  }
+  if(!rows.length && !l) return `<div class="in-empty">아직 입고 내역이 없어요</div>`;
+  html += rows.slice(0,40).map(r=>{
+    const isIn = r.type==='in';
+    return `<div class="in-log${isIn?'':' out'}">
+      <div><div class="ln">${esc(r.name)}</div><div class="lm">${esc(r.dept)} · ${esc(fmtWhen(r.when))}${r.vendor?' · '+esc(r.vendor):''}${r.memo?' · '+esc(r.memo):''}</div></div>
+      <div class="lq mono">${isIn?'+':'−'}${r.qty}</div>
+      <div class="lu"><span class="lm mono">${esc(r.before)} → ${esc(r.after)}</span><span class="in-tag">${isIn?'입고':(r.type==='out'?'출고':esc(r.type))}</span></div>
+    </div>`;
+  }).join('');
+  return html;
+}
+function updateInPreview(){
+  const p = document.getElementById('inPreview'), btn = document.getElementById('inSubmit');
+  if(!p || !btn) return;
+  const it = STATE.inItem ? inItemById(STATE.inItem) : null;
+  if(!it){ p.className='in-preview idle'; p.textContent='품목을 먼저 선택하세요'; btn.disabled = true; return; }
+  const q = STATE.inQty;
+  if(!(q>=1)){ p.className='in-preview warn'; p.textContent='수량을 1 이상으로 입력하세요'; btn.disabled = true; return; }
+  const after = it.stock + Math.floor(q);
+  const stillLow = after < it.par;
+  p.className = 'in-preview' + (stillLow ? ' warn' : '');
+  p.textContent = `현재 ${it.stock} → 입고 후 ${after}  (기준 ${it.par})  ${stillLow ? '▲ 입고 후에도 부족' : '✓ 정상'}`;
+  btn.disabled = STATE.inBusy;
+}
+function renderStockIn(main){
+  const it = STATE.inItem ? inItemById(STATE.inItem) : null;
+  if(STATE.inItem && !it) STATE.inItem = null;
+  const today = localDateStr();
+  const todayRows = txRows().filter(r=> r.when && localDateStr(r.when)===today);
+  const inCnt = todayRows.filter(r=>r.type==='in').length;
+  const net = Math.max(0, todayRows.reduce((a,r)=> a + (r.type==='in' ? r.qty : r.type==='out' ? -r.qty : 0), 0));
+  main.innerHTML = `
+  <div class="in-layout">
+    <div class="in-panel">
+      <div class="in-title"><span class="step">1</span>입고할 품목 선택</div>
+      <div id="inPickArea">${ it
+        ? `<div class="in-picked"><div><div class="pn">${esc(it.name)}</div><div class="pm">${esc(it.dept)} · ${esc(it.cat)}${it.spec?' · '+esc(it.spec):''}</div></div><button type="button" id="inRepick">다른 품목 선택</button></div>`
+        : `<input type="text" id="inSearch" placeholder="품목명 또는 규격을 입력하세요" autocomplete="off" value="${esc(STATE.inQ)}"><div class="in-picklist" id="inPickList">${inPickListHtml()}</div>` }</div>
+
+      <div class="in-title next"><span class="step">2</span>입고 수량</div>
+      <div class="in-stepper">
+        <button type="button" class="sbtn" id="inMinus" aria-label="수량 줄이기">−</button>
+        <input type="number" id="inQty" inputmode="numeric" min="1" step="1" value="${STATE.inQty}" aria-label="입고 수량">
+        <button type="button" class="sbtn" id="inPlus" aria-label="수량 늘리기">＋</button>
+      </div>
+      <div class="in-quick"><button type="button" data-qadd="1">+1</button><button type="button" data-qadd="5">+5</button><button type="button" data-qadd="10">+10</button><button type="button" data-qadd="50">+50</button></div>
+      <div class="in-title next"><span class="step">3</span>입고 정보 <span class="in-opt">(선택)</span></div>
+      <div class="in-fields">
+        <label>입고처<input type="text" id="inVendor" maxlength="40" placeholder="예: OO메디칼" autocomplete="off" value="${esc(STATE.inVendor)}"></label>
+        <label>메모<input type="text" id="inMemo" maxlength="80" placeholder="예: 로트번호, 비고" autocomplete="off" value="${esc(STATE.inMemo)}"></label>
+      </div>
+      <div class="in-preview idle" id="inPreview">품목을 먼저 선택하세요</div>
+      <div class="in-submit-wrap"><button type="button" class="in-submit" id="inSubmit" disabled>📥 입고 등록</button></div>
+    </div>
+
+    <div class="in-panel">
+      <div class="in-title">입고 내역</div>
+      <div class="in-today"><div><b class="mono">${inCnt}</b><span>오늘 입고 건수</span></div><div><b class="mono">${net}</b><span>오늘 입고 수량 (취소 반영)</span></div></div>
+      <div class="in-loglist" id="inLogList">${inLogHtml()}</div>
+      <div class="in-note">※ 입고하면 구글시트 재고에 바로 더해지고 '입출고이력' 탭에 입고처·메모와 함께 기록돼요. 최근 60건까지 보여요. 이전 입고를 고치려면 재고파악에서 수량을 수정하세요.</div>
+    </div>
+  </div>`;
+
+  const $ = id => document.getElementById(id);
+  const search = $('inSearch');
+  if(search){
+    search.addEventListener('input', e=>{ STATE.inQ = e.target.value; $('inPickList').innerHTML = inPickListHtml(); });
+    if(document.body.classList.contains('wide')) setTimeout(()=>search.focus(), 0);
+  }
+  $('inPickArea').addEventListener('click', e=>{
+    const row = e.target.closest('[data-pick-id]');
+    if(row){ STATE.inItem = row.getAttribute('data-pick-id'); render(); return; }
+    if(e.target.closest('#inRepick')){ STATE.inItem = null; render(); }
+  });
+  $('inQty').addEventListener('input', e=>{ const v = parseInt(e.target.value,10); STATE.inQty = isNaN(v) ? 0 : v; updateInPreview(); });
+  $('inMinus').addEventListener('click', ()=>{ STATE.inQty = Math.max(1, (STATE.inQty>=1?Math.floor(STATE.inQty):1) - 1); $('inQty').value = STATE.inQty; updateInPreview(); });
+  $('inPlus').addEventListener('click', ()=>{ STATE.inQty = (STATE.inQty>=1?Math.floor(STATE.inQty):0) + 1; $('inQty').value = STATE.inQty; updateInPreview(); });
+  main.querySelectorAll('[data-qadd]').forEach(b=> b.addEventListener('click', ()=>{
+    STATE.inQty = (STATE.inQty>=1?Math.floor(STATE.inQty):0) + parseInt(b.getAttribute('data-qadd'),10);
+    $('inQty').value = STATE.inQty; updateInPreview();
+  }));
+  $('inVendor').addEventListener('input', e=>{ STATE.inVendor = e.target.value; });
+  $('inMemo').addEventListener('input', e=>{ STATE.inMemo = e.target.value; });
+  $('inSubmit').addEventListener('click', submitStockIn);
+  const undo = $('inUndoLast');
+  if(undo) undo.addEventListener('click', undoLastStockIn);
+  updateInPreview();
+}
+
+async function submitStockIn(){
+  if(STATE.inBusy) return;
+  const it = STATE.inItem ? inItemById(STATE.inItem) : null;
+  const q = Math.floor(STATE.inQty);
+  if(!it){ toast('품목을 먼저 선택하세요'); return; }
+  if(!(q>=1)){ toast('수량을 1 이상으로 입력하세요'); return; }
+  STATE.inBusy = true; setSyncing(true); updateInPreview();
+  let saved = false;
+  try{
+    const res = await apiPost({ action:'stockChange', id: it.id, name: it.name, dept: it.dept, cat: it.cat, type:'in', qty: q, vendor: (STATE.inVendor||'').trim(), memo: (STATE.inMemo||'').trim() });
+    const before = Number(res.before), after = Number(res.after);
+    saved = true;
+    STATE.inLast = { itemId: it.id, name: it.name, dept: it.dept, cat: it.cat, qty: q, before, after, undone: false };
+    const wasLow = before < it.par;
+    toast(`${it.name} +${q} 입고 완료 (${before} → ${after})${wasLow && after>=it.par ? ' · 부족 → 정상' : ''}`);
+    STATE.inItem = null; STATE.inQty = 1; STATE.inQ = ''; STATE.inMemo = '';
+    it.stock = after;
+    try{ await refreshData(); }catch(e){ console.error(e); } // 이력 갱신 (실패해도 입고는 이미 저장됨)
+  }catch(e){
+    console.error(e);
+    if(!saved) toast('입고 저장 실패 — 구글시트 연결을 확인해주세요 (재고는 바뀌지 않았어요)');
+  }
+  STATE.inBusy = false; setSyncing(false);
+  render();
+  window.scrollTo(0,0);
+}
+async function undoLastStockIn(){
+  const l = STATE.inLast;
+  if(STATE.inBusy || !l || l.undone) return;
+  STATE.inBusy = true; setSyncing(true);
+  try{
+    await refreshData();
+    const it = inItemById(l.itemId);
+    if(!it){ toast('품목을 찾을 수 없어 취소할 수 없어요'); }
+    else if(it.stock < l.qty){ toast('현재 재고가 입고 수량보다 적어 취소할 수 없어요'); }
+    else{
+      await apiPost({ action:'stockChange', id: it.id, name: it.name, dept: it.dept, cat: it.cat, type:'out', qty: l.qty });
+      l.undone = true;
+      toast(`입고를 취소했어요 (${l.name} −${l.qty}) · 출고로 기록돼요`);
+      try{ await refreshData(); }catch(e){ console.error(e); }
+    }
+  }catch(e){
+    console.error(e);
+    toast('취소 실패 — 구글시트 연결을 확인해주세요');
+  }
+  STATE.inBusy = false; setSyncing(false);
+  render();
+}
+// 재고현황 목록의 [＋ 입고] 버튼 → 입고 화면으로
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-in-id]');
+  if(!b) return;
+  STATE.inItem = b.getAttribute('data-in-id'); STATE.inQty = 1; STATE.inQ = '';
+  STATE.screen = 'stockin';
+  render(); window.scrollTo(0,0);
+});
+
+// ================= 글씨 크기 / 큰 화면 배율 =================
+(function(){
+  const FS = [0.9, 1, 1.15, 1.3, 1.5];
+  const KEY = 'bone_inv_fs';
+  let idx = 1;
+  try{ const s = parseInt(localStorage.getItem(KEY),10); if(s>=0 && s<FS.length) idx = s; }catch(e){}
+  function base(){ const w = window.innerWidth; return w>=1800 ? 1.45 : w>=1500 ? 1.3 : w>=1200 ? 1.2 : w>=900 ? 1.1 : 1; }
+  function apply(){
+    const z = base() * FS[idx];
+    document.body.style.zoom = z.toFixed(3);
+    document.body.classList.toggle('wide', window.innerWidth / z >= 900);
+    const dn = document.getElementById('fsDown'), up = document.getElementById('fsUp');
+    if(dn) dn.disabled = idx<=0;
+    if(up) up.disabled = idx>=FS.length-1;
+  }
+  function set(n){ idx = n; try{ localStorage.setItem(KEY, String(idx)); }catch(e){} apply(); }
+  document.getElementById('fsDown').addEventListener('click', ()=>{ if(idx>0) set(idx-1); });
+  document.getElementById('fsUp').addEventListener('click', ()=>{ if(idx<FS.length-1) set(idx+1); });
+  window.addEventListener('resize', apply);
+  apply();
+})();
 
 // ---------- init ----------
 loadAll();
