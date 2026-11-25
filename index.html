@@ -12,11 +12,11 @@
     --text:#221816;
     --text-soft:#726C66;
     --orange:#F59701;
-    --blue:#2B71B9;
+    --blue:#2f6fb0;
     --green:#8FB60A;
     --red:#E83344;
     --orange-tint:#FFF3E0;
-    --blue-tint:#E9F1FA;
+    --blue-tint:#e8f0f8;
     --green-tint:#F3F8E4;
     --red-tint:#FDECEE;
     --radius:16px;
@@ -111,7 +111,7 @@
   .btn.active{background:var(--red);color:#fff;border-color:var(--red);}
   .btn.active:hover{background:#CE2938;}
   .btn:focus-visible, .icon-btn:focus-visible, input:focus-visible, .count-btn:focus-visible{
-    outline:3px solid #2B71B9;outline-offset:2px;
+    outline:3px solid #2f6fb0;outline-offset:2px;
   }
 
   /* ---------- Toolbar ---------- */
@@ -313,6 +313,16 @@
 </style>
 </head>
 <body>
+<!-- ===== CHEONAN APP NAV (bar only) ===== -->
+<style>
+#cnav{position:relative;z-index:50;background:#1a3a5c;color:#fff;height:36px;display:flex;align-items:center;padding:0 10px;gap:5px;font-family:'Apple SD Gothic Neo','맑은 고딕',sans-serif;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,.4);box-sizing:border-box}
+#cnav .cn-brand{font-weight:700;color:#7ec8f8;font-size:11.5px;white-space:nowrap;margin-right:4px;flex-shrink:0}
+#cnav .cn-steps{display:flex;align-items:center;gap:1px;flex:1;overflow:hidden;min-width:0}
+#cnav .cn-step.active{background:#fff;color:#1a3a5c;font-weight:700;padding:3px 7px;border-radius:4px;font-size:11px;white-space:nowrap}
+@media print{#cnav{display:none!important}}
+</style>
+<div id="cnav"><span class="cn-brand">🏥 천안본정형외과</span><div class="cn-steps"><span class="cn-step active">처치실 보조기 카운트</span></div></div>
+
 <div class="app">
 
   <div class="topbar">
@@ -365,7 +375,7 @@
   var CATALOG = [["복대", [""]], ["팔걸이 (파랑)", [""]], ["팔걸이 (분홍)", [""]], ["깁스신발", ["S", "M", "L", "XL"]], ["M-splint (thumb)", ["좌 S", "좌 M", "좌 L", "우 S", "우 M", "우 L"]], ["M-splint (wrist)", ["좌 S", "좌 M", "좌 L", "좌 XL", "우 S", "우 M", "우 L", "우 XL"]], ["M-splint (finger)", ["S", "M", "L"]], ["M-splint Leg (ankle)", ["S", "M", "L", "XL", "XXL"]], ["M-splint (long leg)", ["M", "L", "XL"]], ["JS-Tap EB (elbow)", ["S", "M", "L", "XL"]], ["JS-Tap KB (knee)", ["S", "M", "L", "XL"]], ["Q-splint (Ulnar)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (wrist)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (thumb)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (long arm)", ["좌S", "좌M", "좌L", "우S", "우M", "우L"]], ["Q-splint (short leg)", ["소", "플러스 소", "중", "대"]], ["Q-splint (cylinder)", ["좌M", "좌L", "우M", "우L"]], ["Q-splint (long leg)", ["소", "플러스 소", "중", "대"]]];
   var ACCENTS = [
     {c:'#F59701', t:'#FFF3E0'},
-    {c:'#2B71B9', t:'#E9F1FA'},
+    {c:'#2f6fb0', t:'#e8f0f8'},
     {c:'#8FB60A', t:'#F3F8E4'},
     {c:'#E83344', t:'#FDECEE'}
   ];

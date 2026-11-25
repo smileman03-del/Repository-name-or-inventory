@@ -8,7 +8,7 @@
 <style>
   *{box-sizing:border-box;}
   body{margin:0;background:#F3F5F8;font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Pretendard','Malgun Gothic','Segoe UI',sans-serif;color:#1F2430;}
-  a{color:#3B6FA8;}
+  a{color:#2f6fb0;}
   a:hover{color:#2C577F;}
   button{font-family:inherit;}
   input,select{font-family:inherit;}
@@ -25,7 +25,7 @@
   .dsb-n{font-size:2rem;font-weight:900;color:#1e293b;line-height:1.1;}
   .dsb-l{font-size:0.95rem;color:#6B7280;font-weight:600;margin-top:3px;}
   .day-card-list{display:flex;flex-direction:column;gap:12px;}
-  .sc-card{background:#fff;border:1px solid #E3E7ED;border-radius:14px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow:hidden;border-left:6px solid #3B6FA8;}
+  .sc-card{background:#fff;border:1px solid #E3E7ED;border-radius:14px;box-shadow:0 1px 2px rgba(31,36,48,0.04),0 4px 14px rgba(31,36,48,0.06);overflow:hidden;border-left:6px solid #2f6fb0;}
   .sc-urgent{border-left-color:#E0384A;background:#FDECEE;}
   .sc-warn{border-left-color:#E08A2B;background:#FFF3E0;}
   .sc-cancel{border-left-color:#9CA3AF;background:#F1F2F4;color:#8A8F98;}
@@ -42,7 +42,7 @@
   .pm{font-size:1rem;color:#6B7280;}
   .bdgs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
   .bdg{font-size:0.9rem;font-weight:700;padding:4px 10px;border-radius:6px;white-space:nowrap;}
-  .bdg-an{background:#E8EFF6;color:#3B6FA8;}
+  .bdg-an{background:#e8f0f8;color:#2f6fb0;}
   .bdg-em{background:#FDECEE;color:#E0384A;}
   .bdg-ok{background:#E5EFEC;color:#1F5A4B;}
   .bdg-done{background:#E5EFEC;color:#1F5A4B;}
@@ -55,7 +55,7 @@
   .det-val{font-size:1rem;color:#374151;margin-top:2px;}
   .sc-acts{display:flex;align-items:center;gap:8px;padding:12px 18px;border-top:1px solid #E3E7ED;}
   .btn-e,.btn-d,.btn-r{border:none;border-radius:7px;font-size:1rem;font-weight:700;cursor:pointer;padding:9px 18px;}
-  .btn-e{background:#E8EFF6;color:#3B6FA8;}
+  .btn-e{background:#e8f0f8;color:#2f6fb0;}
   .btn-d{background:#FDECEE;color:#E0384A;}
   .btn-r{background:#E5EFEC;color:#1F5A4B;border:1px solid #2F7A67;}
   @media(max-width:600px){.sc-time{min-width:64px;padding:12px 8px;}.tv{font-size:1rem;}.det-cell{padding:4px 6px;}.dsb-item{padding:8px 12px;min-width:56px;}}
@@ -337,8 +337,8 @@ function renderChrome(){
   const usageSize = dataSize();
   const usageRatio = Math.min(usageSize / STORAGE_LIMIT_CHARS, 1);
   const usagePercent = Math.round(usageRatio * 100);
-  const usageColor = usageRatio >= 0.9 ? '#E0384A' : (usageRatio >= 0.7 ? '#E08A2B' : '#3B6FA8');
-  const usageBg = usageRatio >= 0.9 ? '#FDECEE' : (usageRatio >= 0.7 ? '#FFF3E0' : '#E8EFF6');
+  const usageColor = usageRatio >= 0.9 ? '#E0384A' : (usageRatio >= 0.7 ? '#E08A2B' : '#2f6fb0');
+  const usageBg = usageRatio >= 0.9 ? '#FDECEE' : (usageRatio >= 0.7 ? '#FFF3E0' : '#e8f0f8');
   const syncLabel = state.syncStatus === 'syncing' ? '동기화 중...' : (state.syncStatus === 'error' ? '동기화 실패' : (state.syncStatus === 'synced' ? '구글시트 동기화됨' : ''));
 
   const headerHtml = `
@@ -352,13 +352,13 @@ function renderChrome(){
           <span style="width:8px;height:8px;border-radius:50%;background:${usageColor};display:inline-block;"></span><span style="white-space:nowrap;">저장용량 ${usagePercent}%</span>
         </button>
         <span style="font-size:0.92rem;color:#6B7280;font-weight:700;">${esc(syncLabel)}</span>
-        <button id="btnStats" style="border:1px solid #6366f1;background:#6366f1;color:#fff;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">📊 통계</button>
+        <button id="btnStats" style="border:1px solid #2f6fb0;background:#2f6fb0;color:#fff;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">📊 통계</button>
         ${state.view === 'day' ? `
           <div style="flex-basis:100%;height:0;width:0;"></div>
           <div style="flex-basis:100%;height:0;width:0;"></div>
           <div style="flex-basis:100%;height:0;width:0;"></div>
           <button id="btnBackToMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">← 월별보기</button>
-          <button id="btnAddSurgery" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 수술 추가</button>
+          <button id="btnAddSurgery" style="border:1px solid #2f6fb0;background:#2f6fb0;color:#fff;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">＋ 수술 추가</button>
           <button id="btnPrintDay" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:12px 18px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">인쇄 / PDF</button>
         ` : ''}
       </div>
@@ -464,7 +464,7 @@ function renderBody(){
   if (state.isSheetLoading) {
     container.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:320px;gap:18px;color:#6B7280;">
       <div style="font-size:2.5rem;animation:spin 1.5s linear infinite;">⏳</div>
-      <div style="font-size:1.1rem;font-weight:700;color:#3B6FA8;">구글 시트에서 수술 데이터를 불러오는 중...</div>
+      <div style="font-size:1.1rem;font-weight:700;color:#2f6fb0;">구글 시트에서 수술 데이터를 불러오는 중...</div>
       <div style="font-size:0.9rem;color:#8A8F98;">잠시만 기다려 주세요</div>
     </div>`;
     attachBodyHandlers();
@@ -504,7 +504,7 @@ function renderMonthView(){
   const today = toISO(new Date());
   let monthTotalCount = 0, monthCancelledCount = 0, monthCompletedCount = 0;
 
-  const weekDaysHtml = WEEKDAY_LABELS.map((label,i) => `<div style="text-align:center;font-size:1rem;font-weight:800;color:${i===0?'#E0384A':(i===6?'#3B6FA8':'#6B7280')};padding:8px 0;">${label}</div>`).join('');
+  const weekDaysHtml = WEEKDAY_LABELS.map((label,i) => `<div style="text-align:center;font-size:1rem;font-weight:800;color:${i===0?'#E0384A':(i===6?'#2f6fb0':'#6B7280')};padding:8px 0;">${label}</div>`).join('');
 
   let cellsHtml = '';
   for (let i=0;i<42;i++){
@@ -518,19 +518,19 @@ function renderMonthView(){
     const isToday = dateStr === today;
     const isSunday = d.getDay() === 0;
     const isHoliday = KR_HOLIDAYS.has(dateStr);
-    const dateColor = isToday ? '#3B6FA8' : (isSunday || isHoliday) ? '#E0384A' : '#1F2430';
+    const dateColor = isToday ? '#2f6fb0' : (isSunday || isHoliday) ? '#E0384A' : '#1F2430';
     if (inMonth) { monthTotalCount += active.length; monthCancelledCount += cancelled.length; monthCompletedCount += recs.filter(r => r.status === '완료').length; }
     cellsHtml += `
-      <div class="dayCell" data-date="${dateStr}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:160px;border-radius:10px;padding:8px;overflow:hidden;box-sizing:border-box;background:${isToday?'#E8EFF6':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #3B6FA8':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
+      <div class="dayCell" data-date="${dateStr}" style="height:calc((100vh - 250px) / 6);min-height:80px;max-height:160px;border-radius:10px;padding:8px;overflow:hidden;box-sizing:border-box;background:${isToday?'#e8f0f8':(inMonth?'#FFFFFF':'#F7F8FA')};border:${isToday?'1px solid #2f6fb0':'1px solid #EDEFF2'};cursor:pointer;opacity:${inMonth?1:0.5};">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
           <div style="font-size:1.6rem;font-weight:${isToday?900:700};color:${dateColor};line-height:1.1;">${d.getDate()}</div>
-          ${active.length>0?`<div style="background:#E8EFF6;color:#3B6FA8;border-radius:6px;padding:1px 6px;font-size:0.8rem;font-weight:800;">${active.length}건</div>`:''}
+          ${active.length>0?`<div style="background:#e8f0f8;color:#2f6fb0;border-radius:6px;padding:1px 6px;font-size:0.8rem;font-weight:800;">${active.length}건</div>`:''}
           ${hasEmergency?`<div style="color:#E0384A;font-size:0.75rem;font-weight:800;">응급</div>`:''}
           ${cancelled.length>0?`<div style="color:#8A8F98;font-size:0.75rem;font-weight:700;">취소${cancelled.length}</div>`:''}
         </div>
         ${active.slice(0,3).map(r => {
           const st = r.status === '완료' ? '완료' : (r.status === '진행 중' ? '진행' : '예정');
-          const stColor = r.status === '완료' ? '#22A55B' : (r.status === '진행 중' ? '#E08A2B' : '#3B6FA8');
+          const stColor = r.status === '완료' ? '#22A55B' : (r.status === '진행 중' ? '#E08A2B' : '#2f6fb0');
           return `<div style="display:flex;gap:4px;align-items:center;margin-top:2px;font-size:0.74rem;line-height:1.25;white-space:nowrap;overflow:hidden;">
             <span style="font-weight:800;color:#1F2430;flex:0 0 auto;">${esc(r.name)||'-'}</span>
             <span style="color:#6B7280;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;min-width:0;">${esc(r.surgeryName)}</span>
@@ -549,7 +549,7 @@ function renderMonthView(){
         <button id="btnNextMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;width:42px;height:42px;border-radius:10px;font-size:1.2rem;font-weight:700;cursor:pointer;">›</button>
         <button id="btnTodayMonth" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#6B7280;padding:10px 16px;border-radius:10px;font-size:1rem;font-weight:700;cursor:pointer;white-space:nowrap;">오늘</button>
       </div>
-      <div style="background:#E8EFF6;border:1px solid #C9DAEA;border-radius:12px;padding:10px 18px;font-size:1rem;font-weight:700;color:#3B6FA8;">
+      <div style="background:#e8f0f8;border:1px solid #C9DAEA;border-radius:12px;padding:10px 18px;font-size:1rem;font-weight:700;color:#2f6fb0;">
         이달 수술 ${monthTotalCount}건&nbsp;&nbsp;·&nbsp;&nbsp;완료 ${monthCompletedCount}건&nbsp;&nbsp;·&nbsp;&nbsp;취소 ${monthCancelledCount}건
       </div>
     </div>
@@ -577,7 +577,7 @@ function renderDayView(){
 
   const summaryBar = `<div class="day-summary-bar">
     <div class="dsb-item"><span class="dsb-n">${total}</span><span class="dsb-l">전체</span></div>
-    <div class="dsb-item"><span class="dsb-n" style="color:#3B6FA8">${scheduled}</span><span class="dsb-l">예정</span></div>
+    <div class="dsb-item"><span class="dsb-n" style="color:#2f6fb0">${scheduled}</span><span class="dsb-l">예정</span></div>
     <div class="dsb-item"><span class="dsb-n" style="color:#E0384A">${emergency}</span><span class="dsb-l">응급</span></div>
     <div class="dsb-item"><span class="dsb-n" style="color:#E08A2B">${warnCnt}</span><span class="dsb-l">주의</span></div>
     <div class="dsb-item"><span class="dsb-n" style="color:#8A8F98">${cancelCnt}</span><span class="dsb-l">취소</span></div>
@@ -752,7 +752,7 @@ function renderModals(){
       return `<div style="display:flex;flex-direction:column;gap:6px;">
         <div style="display:flex;align-items:center;justify-content:space-between;">
           <label style="font-size:0.82rem;font-weight:700;color:#6B7280;">${f.label}</label>
-          ${f.surgery?`<button id="btnOpenSurgeryList" type="button" style="border:none;background:transparent;color:#3B6FA8;font-size:0.76rem;font-weight:700;cursor:pointer;padding:0;">목록 관리</button>`:''}
+          ${f.surgery?`<button id="btnOpenSurgeryList" type="button" style="border:none;background:transparent;color:#2f6fb0;font-size:0.76rem;font-weight:700;cursor:pointer;padding:0;">목록 관리</button>`:''}
         </div>
         ${input}
       </div>`;
@@ -766,7 +766,7 @@ function renderModals(){
           <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:22px;">
             ${state.editingId?`<button id="btnDeleteFromForm" style="border:1px solid #F6C9CE;background:#FDECEE;color:#E0384A;padding:10px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-right:auto;">삭제</button>`:''}
             <button id="btnCloseForm" style="border:1px solid #E3E7ED;background:#FFFFFF;color:#1F2430;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">취소</button>
-            <button id="btnSaveForm" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">저장</button>
+            <button id="btnSaveForm" style="border:1px solid #2f6fb0;background:#2f6fb0;color:#fff;padding:10px 18px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;">저장</button>
           </div>
         </div>
       </div>`;
@@ -785,7 +785,7 @@ function renderModals(){
           <p style="margin:0 0 14px;color:#6B7280;font-size:0.85rem;line-height:1.5;">여기서 추가/삭제한 항목은 수술명 입력 시 자동완성 목록에 반영됩니다.</p>
           <div style="display:flex;gap:8px;margin-bottom:14px;">
             <input id="newSurgeryNameInput" type="text" value="${esc(state.newSurgeryName)}" placeholder="예: TKRA · 무릎 인공관절수술" style="flex:1;padding:9px 10px;font-size:0.9rem;border-radius:9px;border:1px solid #E3E7ED;box-sizing:border-box;"/>
-            <button id="btnAddSurgeryItem" style="border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:9px 16px;border-radius:9px;font-size:0.88rem;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
+            <button id="btnAddSurgeryItem" style="border:1px solid #2f6fb0;background:#2f6fb0;color:#fff;padding:9px 16px;border-radius:9px;font-size:0.88rem;font-weight:700;cursor:pointer;white-space:nowrap;">추가</button>
           </div>
           <div style="border-top:1px solid #E3E7ED;padding-top:4px;max-height:360px;overflow-y:auto;">
             ${rows || `<div style="padding:16px 2px;color:#6B7280;font-size:0.86rem;">목록이 비어 있습니다.</div>`}
@@ -801,7 +801,7 @@ function renderModals(){
     const usageSize = dataSize();
     const usageRatio = Math.min(usageSize / STORAGE_LIMIT_CHARS, 1);
     const usagePercent = Math.round(usageRatio * 100);
-    const usageColor = usageRatio >= 0.9 ? '#E0384A' : (usageRatio >= 0.7 ? '#E08A2B' : '#3B6FA8');
+    const usageColor = usageRatio >= 0.9 ? '#E0384A' : (usageRatio >= 0.7 ? '#E08A2B' : '#2f6fb0');
     const backupRows = state.backups.map(b => `
       <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 2px;font-size:0.86rem;border-bottom:1px dashed #E3E7ED;">
         <div><div style="font-weight:700;">${esc(formatBackupTime(b.timestamp))}</div><div style="font-size:0.76rem;color:#8A8F98;">${b.size}자</div></div>
@@ -817,7 +817,7 @@ function renderModals(){
             <div style="height:8px;border-radius:5px;background:#E3E7ED;overflow:hidden;"><div style="width:${usagePercent}%;height:100%;background:${usageColor};border-radius:5px;"></div></div>
             <div style="margin-top:8px;font-size:0.8rem;color:#6B7280;">마지막 백업: ${state.lastBackupAt?esc(formatBackupTime(state.lastBackupAt)):'없음'}</div>
           </div>
-          <button id="btnManualBackup" style="width:100%;border:1px solid #3B6FA8;background:#3B6FA8;color:#fff;padding:11px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-bottom:16px;">${state.backupStatus==='backing-up'?'백업 중...':(state.backupStatus==='error'?'백업 실패 · 다시 시도':'지금 백업하기')}</button>
+          <button id="btnManualBackup" style="width:100%;border:1px solid #2f6fb0;background:#2f6fb0;color:#fff;padding:11px 16px;border-radius:10px;font-size:0.92rem;font-weight:700;cursor:pointer;margin-bottom:16px;">${state.backupStatus==='backing-up'?'백업 중...':(state.backupStatus==='error'?'백업 실패 · 다시 시도':'지금 백업하기')}</button>
           <div style="border-top:1px solid #E3E7ED;padding-top:10px;">
             ${backupRows || `<div style="padding:16px 2px;color:#6B7280;font-size:0.86rem;">${state.backupsLoading?'불러오는 중...':'아직 백업이 없습니다.'}</div>`}
           </div>
@@ -1024,8 +1024,8 @@ function openStatsModal() {
   const dowBars = dowOrder.map(d => {
     const v = byDow[d] || 0;
     return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
-      <span style="font-size:11px;font-weight:700;color:#6366f1;">${v > 0 ? v+'건' : ''}</span>
-      <div style="width:100%;background:${v > 0 ? '#6366f1' : '#e2e8f0'};border-radius:4px 4px 0 0;height:${Math.max(v/dowMax*64, v > 0 ? 8 : 3)}px;"></div>
+      <span style="font-size:11px;font-weight:700;color:#2f6fb0;">${v > 0 ? v+'건' : ''}</span>
+      <div style="width:100%;background:${v > 0 ? '#2f6fb0' : '#e2e8f0'};border-radius:4px 4px 0 0;height:${Math.max(v/dowMax*64, v > 0 ? 8 : 3)}px;"></div>
       <span style="font-size:13px;color:#374151;font-weight:700;">${d}</span>
     </div>`;
   }).join('');
@@ -1045,14 +1045,14 @@ function openStatsModal() {
 
         <!-- 요약 카드 4개 -->
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
-          ${statBox('총 수술', total+'건', '#6366f1', '🏥')}
+          ${statBox('총 수술', total+'건', '#2f6fb0', '🏥')}
           ${statBox('완료', completed+'건', '#22c55e', '✅')}
           ${statBox('예정', scheduled+'건', '#f59e0b', '📅')}
           ${statBox('취소', cancelled+'건', '#ef4444', '❌')}
         </div>
 
         <!-- 월별 현황 -->
-        ${card('📅 월별 수술 현황', barChart(Object.fromEntries(monthSorted), '#6366f1'))}
+        ${card('📅 월별 수술 현황', barChart(Object.fromEntries(monthSorted), '#2f6fb0'))}
 
         <!-- 수술 종류 & 마취 방법 -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
@@ -1073,7 +1073,7 @@ function openStatsModal() {
         <!-- PDF 내보내기 버튼 -->
         <div style="text-align:center;padding-top:8px;">
           <button onclick="printStatsAsPDF({total:${total},completed:${completed},scheduled:${scheduled},cancelled:${cancelled},byMonth:${JSON.stringify(Object.fromEntries(monthSorted))},byType:${JSON.stringify(byType)},byAnesthesia:${JSON.stringify(byAnesthesia)},byDow:${JSON.stringify(byDow)},byDoctor:${JSON.stringify(byDoctor)}})"
-            style="background:#6366f1;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(99,102,241,0.3);">
+            style="background:#2f6fb0;color:#fff;border:none;border-radius:10px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(99,102,241,0.3);">
             📄 PDF로 내보내기
           </button>
         </div>
@@ -1099,13 +1099,13 @@ function printStatsAsPDF(d) {
       <p style="margin:0 0 18px 0;font-size:13px;color:#64748b;">저장할 파일 이름을 입력하세요 <span style="color:#94a3b8;">(.pdf 자동 추가)</span></p>
       <input id="pdfFilenameInput" type="text" value="${defaultName}"
         style="width:100%;border:2px solid #e2e8f0;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;box-sizing:border-box;transition:border-color .15s;"
-        onfocus="this.style.borderColor='#6366f1'" onblur="this.style.borderColor='#e2e8f0'">
+        onfocus="this.style.borderColor='#2f6fb0'" onblur="this.style.borderColor='#e2e8f0'">
       <p style="margin:8px 0 0 2px;font-size:12px;color:#94a3b8;">💡 브라우저 인쇄창에서 "PDF로 저장"을 선택하면 입력한 파일명으로 저장됩니다.</p>
       <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
         <button onclick="document.getElementById('pdfFilenameDlg').remove()"
           style="padding:10px 22px;border:2px solid #e2e8f0;background:#fff;border-radius:10px;cursor:pointer;font-size:14px;font-weight:600;color:#64748b;">취소</button>
         <button id="pdfConfirmBtn"
-          style="padding:10px 28px;background:#6366f1;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 4px 12px rgba(99,102,241,0.3);">📄 저장</button>
+          style="padding:10px 28px;background:#2f6fb0;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:14px;font-weight:700;box-shadow:0 4px 12px rgba(99,102,241,0.3);">📄 저장</button>
       </div>
     </div>`;
   document.body.appendChild(dlg);
@@ -1134,7 +1134,7 @@ function _doPrintStatsPDF(d, filename, dateStr) {
   }
   function section(title, content) {
     return `<div style="margin-bottom:22px;">
-      <h3 style="font-size:14px;font-weight:800;color:#1e293b;margin:0 0 8px 0;padding-bottom:6px;border-bottom:2px solid #6366f1;">${title}</h3>
+      <h3 style="font-size:14px;font-weight:800;color:#1e293b;margin:0 0 8px 0;padding-bottom:6px;border-bottom:2px solid #2f6fb0;">${title}</h3>
       ${content}
     </div>`;
   }
@@ -1147,15 +1147,15 @@ function _doPrintStatsPDF(d, filename, dateStr) {
   printDiv.id = 'statsPrintArea';
   printDiv.innerHTML = `
     <div style="font-family:'Noto Sans KR',sans-serif;max-width:780px;margin:0 auto;padding:28px 32px;color:#1e293b;">
-      <div style="text-align:center;margin-bottom:28px;padding-bottom:20px;border-bottom:3px solid #6366f1;">
-        <div style="font-size:22px;font-weight:900;color:#6366f1;margin-bottom:4px;">📊 수술 통계 보고서</div>
+      <div style="text-align:center;margin-bottom:28px;padding-bottom:20px;border-bottom:3px solid #2f6fb0;">
+        <div style="font-size:22px;font-weight:900;color:#2f6fb0;margin-bottom:4px;">📊 수술 통계 보고서</div>
         <div style="font-size:12px;color:#64748b;">천안본정형외과 | ${dateStr} 기준</div>
       </div>
 
       ${section('📋 요약', `
         <table style="width:100%;border-collapse:collapse;">
           <tr>
-            <td style="padding:8px 12px;background:#f0f0ff;border-radius:8px;text-align:center;width:25%;"><div style="font-size:11px;color:#6366f1;font-weight:700;">총 수술</div><div style="font-size:22px;font-weight:900;color:#1e293b;">${d.total}건</div></td>
+            <td style="padding:8px 12px;background:#f0f0ff;border-radius:8px;text-align:center;width:25%;"><div style="font-size:11px;color:#2f6fb0;font-weight:700;">총 수술</div><div style="font-size:22px;font-weight:900;color:#1e293b;">${d.total}건</div></td>
             <td style="width:3%;"></td>
             <td style="padding:8px 12px;background:#f0fdf4;border-radius:8px;text-align:center;width:25%;"><div style="font-size:11px;color:#22c55e;font-weight:700;">완료</div><div style="font-size:22px;font-weight:900;color:#1e293b;">${d.completed}건</div></td>
             <td style="width:3%;"></td>

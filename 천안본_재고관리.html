@@ -17,9 +17,9 @@
     --ink:#1A2422;
     --ink-soft:#5C6B66;
     --ink-faint:#8B9791;
-    --teal:#0E5C56;
-    --teal-dark:#093F3B;
-    --teal-tint:#E4EFED;
+    --teal:#2f6fb0;
+    --teal-dark:#1a3a5c;
+    --teal-tint:#e8f0f8;
     --amber:#C97B24;
     --amber-tint:#FBEEDD;
     --brick:#B8402F;
@@ -300,6 +300,16 @@
 </style>
 </head>
 <body>
+<!-- ===== CHEONAN APP NAV (bar only) ===== -->
+<style>
+#cnav{position:relative;z-index:50;background:#1a3a5c;color:#fff;height:36px;display:flex;align-items:center;padding:0 10px;gap:5px;font-family:'Apple SD Gothic Neo','맑은 고딕',sans-serif;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,.4);box-sizing:border-box}
+#cnav .cn-brand{font-weight:700;color:#7ec8f8;font-size:11.5px;white-space:nowrap;margin-right:4px;flex-shrink:0}
+#cnav .cn-steps{display:flex;align-items:center;gap:1px;flex:1;overflow:hidden;min-width:0}
+#cnav .cn-step.active{background:#fff;color:#1a3a5c;font-weight:700;padding:3px 7px;border-radius:4px;font-size:11px;white-space:nowrap}
+@media print{#cnav{display:none!important}}
+</style>
+<div id="cnav"><span class="cn-brand">🏥 천안본정형외과</span><div class="cn-steps"><span class="cn-step active">재고관리</span></div></div>
+
 
 <header class="app-header">
   <div class="brand">
@@ -577,13 +587,13 @@ function renderDashboard(main){
         <div class="ring-wrap">
           <svg viewBox="0 0 84 84">
             <circle cx="42" cy="42" r="36" fill="none" stroke="#EEF2F0" stroke-width="9"/>
-            <circle cx="42" cy="42" r="36" fill="none" stroke="${lowCount>0 ? '#0E5C56' : '#2C7A4B'}" stroke-width="9"
+            <circle cx="42" cy="42" r="36" fill="none" stroke="${lowCount>0 ? '#2f6fb0' : '#2C7A4B'}" stroke-width="9"
               stroke-dasharray="${dash} ${circumference}" stroke-linecap="round"/>
           </svg>
           <div class="ring-center"><div class="num">${pct}%</div><div class="lbl">정상 비율</div></div>
         </div>
         <div class="ring-stats">
-          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#0E5C56"></span>전체 품목</span><span class="v">${scope.length}</span></div>
+          <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#2f6fb0"></span>전체 품목</span><span class="v">${scope.length}</span></div>
           <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#2C7A4B"></span>정상</span><span class="v" style="color:#2C7A4B">${okCount}</span></div>
           <div class="ring-stat-line"><span class="k"><span class="swatch" style="background:#B8402F"></span>재고부족</span><span class="v" style="color:#B8402F">${lowCount}</span></div>
         </div>
