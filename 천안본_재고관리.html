@@ -1530,11 +1530,11 @@ document.addEventListener('click', e=>{
   const KEY = 'bone_inv_fs';
   let idx = 1;
   try{ const s = parseInt(localStorage.getItem(KEY),10); if(s>=0 && s<FS.length) idx = s; }catch(e){}
-  function base(){ const w = window.innerWidth; return w>=1800 ? 1.45 : w>=1500 ? 1.3 : w>=1200 ? 1.2 : w>=900 ? 1.1 : 1; }
+  function base(){ const w = window.innerWidth; return w>=1800 ? 1.45 : w>=1500 ? 1.3 : w>=1200 ? 1.2 : w>=900 ? 1.15 : w>=700 ? 1.25 : 1; }
   function apply(){
     const z = base() * FS[idx];
     document.body.style.zoom = z.toFixed(3);
-    document.body.classList.toggle('wide', window.innerWidth / z >= 900);
+    document.body.classList.toggle('wide', window.innerWidth / z >= 860);
     const dn = document.getElementById('fsDown'), up = document.getElementById('fsUp');
     if(dn) dn.disabled = idx<=0;
     if(up) up.disabled = idx>=FS.length-1;
