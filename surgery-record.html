@@ -1933,32 +1933,44 @@ const DEFAULT_SPECIAL_OPTS = {
         return `<tr><td style="${labelStyle}">${esc(l1)}</td><td style="${valueStyle}">${esc(v1)}</td><td style="${labelStyle}">${esc(l2)}</td><td style="${valueStyle}">${esc(v2)}</td></tr>`;
       }
 
-      let matRows = '';
+      const matRowArr = [];
       if(data.rows && data.rows.length){
         data.rows.forEach(item=>{
-          matRows += `<tr>
+          matRowArr.push(`<tr>
             <td style="${cellBase}color:${C.inkSoft};">${esc(item.cat||'')}</td>
             <td style="${cellBase}color:${C.ink};">${esc(item.name||'')}</td>
             <td style="${cellBase}color:${C.ink};">${esc(item.spec||'')}</td>
             <td style="${cellBase}text-align:center;font-weight:700;color:${C.accentDark};">${esc(item.qty||0)}</td>
-          </tr>`;
+          </tr>`);
         });
       } else {
-        matRows = `<tr><td colspan="4" style="${cellBase}color:${C.inkSoft};font-style:italic;">(선택된 재료가 없습니다)</td></tr>`;
+        matRowArr.push(`<tr><td colspan="4" style="${cellBase}color:${C.inkSoft};font-style:italic;">(선택된 재료가 없습니다)</td></tr>`);
       }
+      // 페이지 나눔: 제목+첫 3행은 함께, 마지막 2행+합계는 함께 (표 행은 중간에서 자르지 않음)
+      const matN = matRowArr.length;
+      const matHead = matN <= 5 ? matRowArr.join('') : matRowArr.slice(0,3).join('');
+      const matMid  = matN <= 5 ? '' : matRowArr.slice(3, matN-2).join('');
+      const matTail = matN <= 5 ? '' : matRowArr.slice(matN-2).join('');
       const totalQty = (data.rows||[]).reduce((s,it)=>s+(it.qty||0),0);
+      const matTotalRow = `<tr>
+              <td style="${labelStyle}">합계</td>
+              <td style="${valueStyle}color:${C.inkSoft};">${(data.rows||[]).length}개 품목</td>
+              <td style="${valueStyle}"></td>
+              <td style="${cellBase}text-align:center;font-weight:700;color:${C.accentDark};">${totalQty}</td>
+            </tr>`;
 
       const html = `
         <div style="font-family:'Noto Sans KR',sans-serif;color:${C.ink};width:720px;padding:20px;background:#fff;">
+          <style>tr, .pbk, tbody.pbk, img { page-break-inside: avoid; break-inside: avoid; }</style>
           <div style="text-align:center;font-size:19px;font-weight:700;margin-bottom:4px;">천안본정형외과 · 수술재료기록지</div>
           <div style="text-align:center;font-size:10.5px;color:${C.inkSoft};margin-bottom:14px;">문서번호 ${esc(docId)} &nbsp;&nbsp; 출력일 ${esc(now.toLocaleDateString('ko-KR'))}</div>
-          <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+          <div class="pbk" style="padding-top:4px;background:#fff;page-break-inside:avoid;break-inside:avoid;"><table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
             ${sectionRow('■ 환자 정보')}
             ${fieldRow('차트번호', data.p_no, '환자명', data.p_name)}
             ${fieldRow('생년월일', data.p_dob, '성별', data.p_sex)}
             ${fieldRow('진료과', data.p_dept, '주치의', data.p_doctor)}
-          </table>
-          <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+          </table></div>
+          <div class="pbk" style="padding-top:4px;background:#fff;page-break-inside:avoid;break-inside:avoid;"><table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
             ${sectionRow('■ 수술 정보')}
             ${fieldRow('수술일자', data.s_date, '수술시간', (data.s_start||'') + ' ~ ' + (data.s_end||''))}
             ${fieldRow('수술명', data.s_name)}
@@ -1968,8 +1980,9 @@ const DEFAULT_SPECIAL_OPTS = {
             ${fieldRow('집도의', data.s_surgeon, 'PA', data.s_pa)}
             ${fieldRow('소독간호사', data.s_scrub_nurse, '순환간호사', data.s_circ_nurse)}
             ${fieldRow('수술방', data.s_room, '', '')}
-          </table>
+          </table></div>
           <table style="width:100%;border-collapse:collapse;margin-bottom:14px;">
+            <tbody class="pbk" style="page-break-inside:avoid;">
             ${sectionRow('■ 사용 재료 목록')}
             <tr>
               <td style="${labelStyle}text-align:left;">분류</td>
@@ -1977,15 +1990,12 @@ const DEFAULT_SPECIAL_OPTS = {
               <td style="${labelStyle}text-align:left;">규격</td>
               <td style="${labelStyle}text-align:center;">사용수량</td>
             </tr>
-            ${matRows}
-            <tr>
-              <td style="${labelStyle}">합계</td>
-              <td style="${valueStyle}color:${C.inkSoft};">${(data.rows||[]).length}개 품목</td>
-              <td style="${valueStyle}"></td>
-              <td style="${cellBase}text-align:center;font-weight:700;color:${C.accentDark};">${totalQty}</td>
-            </tr>
+            ${matHead}
+            ${matN <= 5 ? matTotalRow : ''}
+            </tbody>
+            ${matN > 5 ? `<tbody>${matMid}</tbody><tbody class="pbk" style="page-break-inside:avoid;">${matTail}${matTotalRow}</tbody>` : ''}
           </table>
-          <table style="width:100%;border-collapse:collapse;">
+          <div class="pbk" style="padding-top:4px;background:#fff;page-break-inside:avoid;break-inside:avoid;"><table style="width:100%;border-collapse:collapse;">
             ${sectionRow('■ 수술간호기록')}
             ${fieldRow('체위', n.position, 'Foley유무', n.foley)}
             ${fieldRow('체위고정기구', n.position_device)}
@@ -1998,7 +2008,7 @@ const DEFAULT_SPECIAL_OPTS = {
             ${fieldRow('낙상예방', n.fall_prevention ? '시행' : '미시행', '조직검사', n.biopsy)}
             ${fieldRow('조직검사 검체명', n.biopsy_name)}
             ${fieldRow('특이사항', n.note)}
-          </table>
+          </table></div>
           ${(()=>{
             const sp = data.special || {};
             const hasScrews = sp.screws && sp.screws.length;
@@ -2061,20 +2071,19 @@ const DEFAULT_SPECIAL_OPTS = {
             if(sp.memo){
               rows += fieldRow('특이사항', sp.memo);
             }
-            return `<table style="width:100%;border-collapse:collapse;margin-top:14px;">
+            return `<div class="pbk" style="padding-top:4px;background:#fff;page-break-inside:avoid;break-inside:avoid;"><table style="width:100%;border-collapse:collapse;margin-top:14px;">
               ${sectionRow('■ 05 특수 재료 기록')}
               ${rows}
-            </table>`;
+            </table></div>`;
           })()}
-          ${(data.special && data.special.photos && data.special.photos.length) ? `
-          <table style="width:100%;border-collapse:collapse;margin-top:14px;">
-            ${sectionRow('■ 수술 사진')}
-            <tr><td colspan="4" style="${cellBase}">
-              <div style="display:flex;flex-wrap:wrap;gap:12px;padding:8px;justify-content:center;align-items:center;">
-                ${data.special.photos.map(src => `<img src="${src}" style="width:500px;height:400px;object-fit:cover;border:1px solid ${C.border};border-radius:4px;" crossorigin="anonymous">`).join('')}
-              </div>
-            </td></tr>
-          </table>` : ''}
+          ${(data.special && data.special.photos && data.special.photos.length) ? (() => {
+            const ph = data.special.photos;
+            const tbl = inner => `<table style="width:100%;border-collapse:collapse;">${inner}</table>`;
+            const photoRow = src => `<tr><td colspan="4" style="${cellBase}text-align:center;padding:10px;"><img src="${src}" style="width:500px;height:400px;object-fit:cover;border:1px solid ${C.border};border-radius:4px;" crossorigin="anonymous"></td></tr>`;
+            // 사진마다 별도 블록(div)으로 두어 페이지 경계에서 잘리지 않게 함. 제목은 첫 사진과 함께.
+            return `<div class="pbk" style="margin-top:10px;padding-top:4px;background:#fff;page-break-inside:avoid;break-inside:avoid;">${tbl(sectionRow('■ 수술 사진') + photoRow(ph[0]))}</div>` +
+              ph.slice(1).map(src => `<div class="pbk" style="margin-top:-1px;padding-top:4px;background:#fff;page-break-inside:avoid;break-inside:avoid;">${tbl(photoRow(src))}</div>`).join('');
+          })() : ''}
         </div>`;
 
       holder = document.createElement('div');
