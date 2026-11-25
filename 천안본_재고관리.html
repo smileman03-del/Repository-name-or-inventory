@@ -301,15 +301,42 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/packages/pretendard/dist/web/static/pretendard.min.css">
 </head>
 <body>
-<!-- ===== CHEONAN APP NAV (bar only) ===== -->
+<!-- ===== CHEONAN APP NAV ===== -->
 <style>
 #cnav{position:relative;z-index:50;background:#1a3a5c;color:#fff;height:36px;display:flex;align-items:center;padding:0 10px;gap:5px;font-family:'Apple SD Gothic Neo','맑은 고딕',sans-serif;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,.4);box-sizing:border-box}
 #cnav .cn-brand{font-weight:700;color:#7ec8f8;font-size:11.5px;white-space:nowrap;margin-right:4px;flex-shrink:0}
-#cnav .cn-steps{display:flex;align-items:center;gap:1px;flex:1;overflow:hidden;min-width:0}
-#cnav .cn-step.active{background:#fff;color:#1a3a5c;font-weight:700;padding:3px 7px;border-radius:4px;font-size:11px;white-space:nowrap}
+#cnav .cn-steps{display:flex;align-items:center;gap:1px;flex:1;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;min-width:0}
+#cnav .cn-steps::-webkit-scrollbar{display:none}
+#cnav .cn-sep{color:rgba(255,255,255,.35);padding:0 1px;flex-shrink:0}
+#cnav .cn-step{cursor:pointer;padding:3px 7px;border-radius:4px;color:rgba(255,255,255,.72);font-size:11px;white-space:nowrap;flex-shrink:0;border:0;background:0}
+#cnav .cn-step:hover{background:rgba(255,255,255,.15);color:#fff}
+#cnav .cn-step.active{background:#fff;color:#1a3a5c;font-weight:700;cursor:default}
 @media print{#cnav{display:none!important}}
 </style>
-<div id="cnav"><span class="cn-brand">🏥 천안본정형외과</span><div class="cn-steps"><span class="cn-step active">재고관리</span></div></div>
+<div id="cnav"><span class="cn-brand">🏥 천안본정형외과</span><div class="cn-steps" id="cnavSteps"></div></div>
+<script>
+(function(){
+  var APPS=[
+    {n:'수술마취동의서',e:'📝',u:'수술마취동의서.html'},
+    {n:'비급여 계산',e:'💊',u:'비급여_계산.html'},
+    {n:'수술계획표',e:'📋',u:'surgery-plan.html'},
+    {n:'수술기록지',e:'🏥',u:'surgery-record.html'},
+    {n:'마취기록지',e:'💉',u:'anesthesia-record.html'},
+    {n:'처치실 보조기',e:'🩹',u:'index.html'},
+    {n:'재고파악',e:'📦',u:'천안본_재고관리.html'}
+  ];
+  var CUR=6;
+  window.__cnavGo=function(i){if(i!==CUR)window.location.href=APPS[i].u;};
+  var el=document.getElementById('cnavSteps');if(!el)return;
+  var html='';
+  for(var i=0;i<APPS.length;i++){
+    if(i>0)html+='<span class="cn-sep">›</span>';
+    html+='<span class="cn-step'+(i===CUR?' active':'')+'"'+(i===CUR?'':' onclick="__cnavGo('+i+')"')+'>'+APPS[i].e+' '+APPS[i].n+'</span>';
+  }
+  el.innerHTML=html;
+  var act=el.querySelector('.active');if(act){el.scrollLeft=Math.max(0,act.offsetLeft-el.offsetLeft-(el.clientWidth-act.offsetWidth)/2);}
+})();
+</script>
 
 
 <header class="app-header">
